@@ -1,0 +1,28 @@
+{
+  'folder':{
+     'table_name': 'dm_folder',
+     'versioning': false,
+     'fields': { 'title': 'text',
+                 'author': 'author',
+                 'summary': 'richtext',
+                 'published': 'datetime',
+                 'modified': 'datetime' }
+   },
+
+  'article':{
+      'table_name': 'dm_article',
+      'versioning': true,
+      'fields': { 'title': 'text',
+                  'summary': 'richtext',
+                  'body': 'richtext',
+                  'published': 'datetime',
+                  'modified': 'datetime'  }
+   },
+  'user':{
+      'table_name': 'dm_user',
+      'versioning': true,
+      'fields':{ 'login': 'text',
+                 'password': 'password',
+                 'firstname': 'text' },
+                 'lastname': 'text' } 
+}

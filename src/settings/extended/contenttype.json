@@ -1,0 +1,7 @@
+{
+   'user':{ 'mobile': 'text',
+            'company': 'text',
+            'birthdate': 'date'  }
+   'department': { 'table_name': 'ab_department',
+                   'extend_from': 'folder'  }
+}
