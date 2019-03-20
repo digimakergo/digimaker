@@ -15,4 +15,6 @@ Phrase 1
 Phrase 2
 ---------
 1) Extend 1) 2) above
-1) Implement Admin UI.
+2) Implement basic Admin UI.
+
+In this stage it may be used in a small project. And then we involve project together with product.
