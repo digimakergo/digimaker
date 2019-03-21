@@ -1,11 +1,14 @@
 Application scenarios
 ==============
-1. Website like CMS application, for enterprise mainly, which means for internet and intranet
+1. Website like CMS application, for enterprise mainly, which means for internet and intranet.
+- hightlights: for subscriber visit(eg. ft or ftchinese) - dynamic content
+               for mobile app which need login - dynamic content
+               for distributed use(2 systems in 2 coutries). - maybe better than cdn
+
 
 2. Application: for instance membership crm, trello, event snapchat for non-chating part 
 
 3. Micro application: as a content engine it runs independent, somthing like solr(so non-database can be supported) 
-
 
 Quality needs
 ==============
