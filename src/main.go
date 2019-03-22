@@ -22,6 +22,8 @@ func main() {
 		return
 	}
 
+	//content := new(base.Content)
+
 	count, err := orm.Locations().Count(context.Background(), db)
 
 	fmt.Printf("Count: %d \n", count)
