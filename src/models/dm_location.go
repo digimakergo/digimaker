@@ -22,8 +22,8 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// DMLocation is an object representing the database table.
-type DMLocation struct {
+// Location is an object representing the database table.
+type Location struct {
 	ID          int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ParentID    null.Int    `boil:"parent_id" json:"parent_id,omitempty" toml:"parent_id" yaml:"parent_id,omitempty"`
 	ContentType null.String `boil:"content_type" json:"content_type,omitempty" toml:"content_type" yaml:"content_type,omitempty"`
@@ -32,11 +32,11 @@ type DMLocation struct {
 	Section     null.String `boil:"section" json:"section,omitempty" toml:"section" yaml:"section,omitempty"`
 	RemoteID    null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
 
-	R *dmLocationR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L dmLocationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *locationR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L locationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var DMLocationColumns = struct {
+var LocationColumns = struct {
 	ID          string
 	ParentID    string
 	ContentType string
@@ -56,7 +56,7 @@ var DMLocationColumns = struct {
 
 // Generated where
 
-var DMLocationWhere = struct {
+var LocationWhere = struct {
 	ID          whereHelperint
 	ParentID    whereHelpernull_Int
 	ContentType whereHelpernull_String
@@ -74,52 +74,52 @@ var DMLocationWhere = struct {
 	RemoteID:    whereHelpernull_String{field: `remote_id`},
 }
 
-// DMLocationRels is where relationship names are stored.
-var DMLocationRels = struct {
+// LocationRels is where relationship names are stored.
+var LocationRels = struct {
 }{}
 
-// dmLocationR is where relationships are stored.
-type dmLocationR struct {
+// locationR is where relationships are stored.
+type locationR struct {
 }
 
 // NewStruct creates a new relationship struct
-func (*dmLocationR) NewStruct() *dmLocationR {
-	return &dmLocationR{}
+func (*locationR) NewStruct() *locationR {
+	return &locationR{}
 }
 
-// dmLocationL is where Load methods for each relationship are stored.
-type dmLocationL struct{}
+// locationL is where Load methods for each relationship are stored.
+type locationL struct{}
 
 var (
-	dmLocationColumns               = []string{"id", "parent_id", "content_type", "content_id", "name", "section", "remote_id"}
-	dmLocationColumnsWithoutDefault = []string{"parent_id", "content_type", "content_id", "name", "section", "remote_id"}
-	dmLocationColumnsWithDefault    = []string{"id"}
-	dmLocationPrimaryKeyColumns     = []string{"id"}
+	locationColumns               = []string{"id", "parent_id", "content_type", "content_id", "name", "section", "remote_id"}
+	locationColumnsWithoutDefault = []string{"parent_id", "content_type", "content_id", "name", "section", "remote_id"}
+	locationColumnsWithDefault    = []string{"id"}
+	locationPrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// DMLocationSlice is an alias for a slice of pointers to DMLocation.
-	// This should generally be used opposed to []DMLocation.
-	DMLocationSlice []*DMLocation
-	// DMLocationHook is the signature for custom DMLocation hook methods
-	DMLocationHook func(context.Context, boil.ContextExecutor, *DMLocation) error
+	// LocationSlice is an alias for a slice of pointers to Location.
+	// This should generally be used opposed to []Location.
+	LocationSlice []*Location
+	// LocationHook is the signature for custom Location hook methods
+	LocationHook func(context.Context, boil.ContextExecutor, *Location) error
 
-	dmLocationQuery struct {
+	locationQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	dmLocationType                 = reflect.TypeOf(&DMLocation{})
-	dmLocationMapping              = queries.MakeStructMapping(dmLocationType)
-	dmLocationPrimaryKeyMapping, _ = queries.BindMapping(dmLocationType, dmLocationMapping, dmLocationPrimaryKeyColumns)
-	dmLocationInsertCacheMut       sync.RWMutex
-	dmLocationInsertCache          = make(map[string]insertCache)
-	dmLocationUpdateCacheMut       sync.RWMutex
-	dmLocationUpdateCache          = make(map[string]updateCache)
-	dmLocationUpsertCacheMut       sync.RWMutex
-	dmLocationUpsertCache          = make(map[string]insertCache)
+	locationType                 = reflect.TypeOf(&Location{})
+	locationMapping              = queries.MakeStructMapping(locationType)
+	locationPrimaryKeyMapping, _ = queries.BindMapping(locationType, locationMapping, locationPrimaryKeyColumns)
+	locationInsertCacheMut       sync.RWMutex
+	locationInsertCache          = make(map[string]insertCache)
+	locationUpdateCacheMut       sync.RWMutex
+	locationUpdateCache          = make(map[string]updateCache)
+	locationUpsertCacheMut       sync.RWMutex
+	locationUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -130,24 +130,24 @@ var (
 	_ = qmhelper.Where
 )
 
-var dmLocationBeforeInsertHooks []DMLocationHook
-var dmLocationBeforeUpdateHooks []DMLocationHook
-var dmLocationBeforeDeleteHooks []DMLocationHook
-var dmLocationBeforeUpsertHooks []DMLocationHook
+var locationBeforeInsertHooks []LocationHook
+var locationBeforeUpdateHooks []LocationHook
+var locationBeforeDeleteHooks []LocationHook
+var locationBeforeUpsertHooks []LocationHook
 
-var dmLocationAfterInsertHooks []DMLocationHook
-var dmLocationAfterSelectHooks []DMLocationHook
-var dmLocationAfterUpdateHooks []DMLocationHook
-var dmLocationAfterDeleteHooks []DMLocationHook
-var dmLocationAfterUpsertHooks []DMLocationHook
+var locationAfterInsertHooks []LocationHook
+var locationAfterSelectHooks []LocationHook
+var locationAfterUpdateHooks []LocationHook
+var locationAfterDeleteHooks []LocationHook
+var locationAfterUpsertHooks []LocationHook
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *DMLocation) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationBeforeInsertHooks {
+	for _, hook := range locationBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -157,12 +157,12 @@ func (o *DMLocation) doBeforeInsertHooks(ctx context.Context, exec boil.ContextE
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *DMLocation) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationBeforeUpdateHooks {
+	for _, hook := range locationBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -172,12 +172,12 @@ func (o *DMLocation) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextE
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *DMLocation) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationBeforeDeleteHooks {
+	for _, hook := range locationBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -187,12 +187,12 @@ func (o *DMLocation) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextE
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *DMLocation) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationBeforeUpsertHooks {
+	for _, hook := range locationBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -202,12 +202,12 @@ func (o *DMLocation) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextE
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *DMLocation) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationAfterInsertHooks {
+	for _, hook := range locationAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -217,12 +217,12 @@ func (o *DMLocation) doAfterInsertHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *DMLocation) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationAfterSelectHooks {
+	for _, hook := range locationAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -232,12 +232,12 @@ func (o *DMLocation) doAfterSelectHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *DMLocation) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationAfterUpdateHooks {
+	for _, hook := range locationAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -247,12 +247,12 @@ func (o *DMLocation) doAfterUpdateHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *DMLocation) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationAfterDeleteHooks {
+	for _, hook := range locationAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -262,12 +262,12 @@ func (o *DMLocation) doAfterDeleteHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *DMLocation) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Location) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmLocationAfterUpsertHooks {
+	for _, hook := range locationAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -276,33 +276,33 @@ func (o *DMLocation) doAfterUpsertHooks(ctx context.Context, exec boil.ContextEx
 	return nil
 }
 
-// AddDMLocationHook registers your hook function for all future operations.
-func AddDMLocationHook(hookPoint boil.HookPoint, dmLocationHook DMLocationHook) {
+// AddLocationHook registers your hook function for all future operations.
+func AddLocationHook(hookPoint boil.HookPoint, locationHook LocationHook) {
 	switch hookPoint {
 	case boil.BeforeInsertHook:
-		dmLocationBeforeInsertHooks = append(dmLocationBeforeInsertHooks, dmLocationHook)
+		locationBeforeInsertHooks = append(locationBeforeInsertHooks, locationHook)
 	case boil.BeforeUpdateHook:
-		dmLocationBeforeUpdateHooks = append(dmLocationBeforeUpdateHooks, dmLocationHook)
+		locationBeforeUpdateHooks = append(locationBeforeUpdateHooks, locationHook)
 	case boil.BeforeDeleteHook:
-		dmLocationBeforeDeleteHooks = append(dmLocationBeforeDeleteHooks, dmLocationHook)
+		locationBeforeDeleteHooks = append(locationBeforeDeleteHooks, locationHook)
 	case boil.BeforeUpsertHook:
-		dmLocationBeforeUpsertHooks = append(dmLocationBeforeUpsertHooks, dmLocationHook)
+		locationBeforeUpsertHooks = append(locationBeforeUpsertHooks, locationHook)
 	case boil.AfterInsertHook:
-		dmLocationAfterInsertHooks = append(dmLocationAfterInsertHooks, dmLocationHook)
+		locationAfterInsertHooks = append(locationAfterInsertHooks, locationHook)
 	case boil.AfterSelectHook:
-		dmLocationAfterSelectHooks = append(dmLocationAfterSelectHooks, dmLocationHook)
+		locationAfterSelectHooks = append(locationAfterSelectHooks, locationHook)
 	case boil.AfterUpdateHook:
-		dmLocationAfterUpdateHooks = append(dmLocationAfterUpdateHooks, dmLocationHook)
+		locationAfterUpdateHooks = append(locationAfterUpdateHooks, locationHook)
 	case boil.AfterDeleteHook:
-		dmLocationAfterDeleteHooks = append(dmLocationAfterDeleteHooks, dmLocationHook)
+		locationAfterDeleteHooks = append(locationAfterDeleteHooks, locationHook)
 	case boil.AfterUpsertHook:
-		dmLocationAfterUpsertHooks = append(dmLocationAfterUpsertHooks, dmLocationHook)
+		locationAfterUpsertHooks = append(locationAfterUpsertHooks, locationHook)
 	}
 }
 
-// One returns a single dmLocation record from the query.
-func (q dmLocationQuery) One(ctx context.Context, exec boil.ContextExecutor) (*DMLocation, error) {
-	o := &DMLocation{}
+// One returns a single location record from the query.
+func (q locationQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Location, error) {
+	o := &Location{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -321,16 +321,16 @@ func (q dmLocationQuery) One(ctx context.Context, exec boil.ContextExecutor) (*D
 	return o, nil
 }
 
-// All returns all DMLocation records from the query.
-func (q dmLocationQuery) All(ctx context.Context, exec boil.ContextExecutor) (DMLocationSlice, error) {
-	var o []*DMLocation
+// All returns all Location records from the query.
+func (q locationQuery) All(ctx context.Context, exec boil.ContextExecutor) (LocationSlice, error) {
+	var o []*Location
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to DMLocation slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to Location slice")
 	}
 
-	if len(dmLocationAfterSelectHooks) != 0 {
+	if len(locationAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -341,8 +341,8 @@ func (q dmLocationQuery) All(ctx context.Context, exec boil.ContextExecutor) (DM
 	return o, nil
 }
 
-// Count returns the count of all DMLocation records in the query.
-func (q dmLocationQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all Location records in the query.
+func (q locationQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -357,7 +357,7 @@ func (q dmLocationQuery) Count(ctx context.Context, exec boil.ContextExecutor) (
 }
 
 // Exists checks if the row exists in the table.
-func (q dmLocationQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q locationQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -372,16 +372,16 @@ func (q dmLocationQuery) Exists(ctx context.Context, exec boil.ContextExecutor) 
 	return count > 0, nil
 }
 
-// DMLocations retrieves all the records using an executor.
-func DMLocations(mods ...qm.QueryMod) dmLocationQuery {
+// Locations retrieves all the records using an executor.
+func Locations(mods ...qm.QueryMod) locationQuery {
 	mods = append(mods, qm.From("`dm_location`"))
-	return dmLocationQuery{NewQuery(mods...)}
+	return locationQuery{NewQuery(mods...)}
 }
 
-// FindDMLocation retrieves a single record by ID with an executor.
+// FindLocation retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindDMLocation(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*DMLocation, error) {
-	dmLocationObj := &DMLocation{}
+func FindLocation(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Location, error) {
+	locationObj := &Location{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
@@ -393,7 +393,7 @@ func FindDMLocation(ctx context.Context, exec boil.ContextExecutor, iD int, sele
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, dmLocationObj)
+	err := q.Bind(ctx, exec, locationObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
@@ -401,12 +401,12 @@ func FindDMLocation(ctx context.Context, exec boil.ContextExecutor, iD int, sele
 		return nil, errors.Wrap(err, "models: unable to select from dm_location")
 	}
 
-	return dmLocationObj, nil
+	return locationObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *DMLocation) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Location) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no dm_location provided for insertion")
 	}
@@ -417,26 +417,26 @@ func (o *DMLocation) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(dmLocationColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(locationColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	dmLocationInsertCacheMut.RLock()
-	cache, cached := dmLocationInsertCache[key]
-	dmLocationInsertCacheMut.RUnlock()
+	locationInsertCacheMut.RLock()
+	cache, cached := locationInsertCache[key]
+	locationInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			dmLocationColumns,
-			dmLocationColumnsWithDefault,
-			dmLocationColumnsWithoutDefault,
+			locationColumns,
+			locationColumnsWithDefault,
+			locationColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(dmLocationType, dmLocationMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(locationType, locationMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(dmLocationType, dmLocationMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(locationType, locationMapping, returnColumns)
 		if err != nil {
 			return err
 		}
@@ -449,7 +449,7 @@ func (o *DMLocation) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_location` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, dmLocationPrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_location` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, locationPrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -482,7 +482,7 @@ func (o *DMLocation) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == dmLocationMapping["ID"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == locationMapping["ID"] {
 		goto CacheNoHooks
 	}
 
@@ -502,31 +502,31 @@ func (o *DMLocation) Insert(ctx context.Context, exec boil.ContextExecutor, colu
 
 CacheNoHooks:
 	if !cached {
-		dmLocationInsertCacheMut.Lock()
-		dmLocationInsertCache[key] = cache
-		dmLocationInsertCacheMut.Unlock()
+		locationInsertCacheMut.Lock()
+		locationInsertCache[key] = cache
+		locationInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// Update uses an executor to update the DMLocation.
+// Update uses an executor to update the Location.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *DMLocation) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Location) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	dmLocationUpdateCacheMut.RLock()
-	cache, cached := dmLocationUpdateCache[key]
-	dmLocationUpdateCacheMut.RUnlock()
+	locationUpdateCacheMut.RLock()
+	cache, cached := locationUpdateCache[key]
+	locationUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			dmLocationColumns,
-			dmLocationPrimaryKeyColumns,
+			locationColumns,
+			locationPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
@@ -538,9 +538,9 @@ func (o *DMLocation) Update(ctx context.Context, exec boil.ContextExecutor, colu
 
 		cache.query = fmt.Sprintf("UPDATE `dm_location` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, dmLocationPrimaryKeyColumns),
+			strmangle.WhereClause("`", "`", 0, locationPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(dmLocationType, dmLocationMapping, append(wl, dmLocationPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(locationType, locationMapping, append(wl, locationPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -565,16 +565,16 @@ func (o *DMLocation) Update(ctx context.Context, exec boil.ContextExecutor, colu
 	}
 
 	if !cached {
-		dmLocationUpdateCacheMut.Lock()
-		dmLocationUpdateCache[key] = cache
-		dmLocationUpdateCacheMut.Unlock()
+		locationUpdateCacheMut.Lock()
+		locationUpdateCache[key] = cache
+		locationUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q dmLocationQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q locationQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
@@ -591,7 +591,7 @@ func (q dmLocationQuery) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o DMLocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o LocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -613,13 +613,13 @@ func (o DMLocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmLocationPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), locationPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := fmt.Sprintf("UPDATE `dm_location` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmLocationPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, locationPrimaryKeyColumns, len(o)))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -628,23 +628,23 @@ func (o DMLocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecuto
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in dmLocation slice")
+		return 0, errors.Wrap(err, "models: unable to update all in location slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all dmLocation")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all location")
 	}
 	return rowsAff, nil
 }
 
-var mySQLDMLocationUniqueColumns = []string{
+var mySQLLocationUniqueColumns = []string{
 	"id",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *DMLocation) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
+func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no dm_location provided for upsert")
 	}
@@ -653,8 +653,8 @@ func (o *DMLocation) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(dmLocationColumnsWithDefault, o)
-	nzUniques := queries.NonZeroDefaultSet(mySQLDMLocationUniqueColumns, o)
+	nzDefaults := queries.NonZeroDefaultSet(locationColumnsWithDefault, o)
+	nzUniques := queries.NonZeroDefaultSet(mySQLLocationUniqueColumns, o)
 
 	if len(nzUniques) == 0 {
 		return errors.New("cannot upsert with a table that cannot conflict on a unique column")
@@ -682,22 +682,22 @@ func (o *DMLocation) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	dmLocationUpsertCacheMut.RLock()
-	cache, cached := dmLocationUpsertCache[key]
-	dmLocationUpsertCacheMut.RUnlock()
+	locationUpsertCacheMut.RLock()
+	cache, cached := locationUpsertCache[key]
+	locationUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			dmLocationColumns,
-			dmLocationColumnsWithDefault,
-			dmLocationColumnsWithoutDefault,
+			locationColumns,
+			locationColumnsWithDefault,
+			locationColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			dmLocationColumns,
-			dmLocationPrimaryKeyColumns,
+			locationColumns,
+			locationPrimaryKeyColumns,
 		)
 
 		if len(update) == 0 {
@@ -712,12 +712,12 @@ func (o *DMLocation) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
 
-		cache.valueMapping, err = queries.BindMapping(dmLocationType, dmLocationMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(locationType, locationMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(dmLocationType, dmLocationMapping, ret)
+			cache.retMapping, err = queries.BindMapping(locationType, locationMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -756,11 +756,11 @@ func (o *DMLocation) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == dmLocationMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == locationMapping["id"] {
 		goto CacheNoHooks
 	}
 
-	uniqueMap, err = queries.BindMapping(dmLocationType, dmLocationMapping, nzUniques)
+	uniqueMap, err = queries.BindMapping(locationType, locationMapping, nzUniques)
 	if err != nil {
 		return errors.Wrap(err, "models: unable to retrieve unique values for dm_location")
 	}
@@ -778,26 +778,26 @@ func (o *DMLocation) Upsert(ctx context.Context, exec boil.ContextExecutor, upda
 
 CacheNoHooks:
 	if !cached {
-		dmLocationUpsertCacheMut.Lock()
-		dmLocationUpsertCache[key] = cache
-		dmLocationUpsertCacheMut.Unlock()
+		locationUpsertCacheMut.Lock()
+		locationUpsertCache[key] = cache
+		locationUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single DMLocation record with an executor.
+// Delete deletes a single Location record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *DMLocation) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Location) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no DMLocation provided for delete")
+		return 0, errors.New("models: no Location provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), dmLocationPrimaryKeyMapping)
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), locationPrimaryKeyMapping)
 	sql := "DELETE FROM `dm_location` WHERE `id`=?"
 
 	if boil.DebugMode {
@@ -823,9 +823,9 @@ func (o *DMLocation) Delete(ctx context.Context, exec boil.ContextExecutor) (int
 }
 
 // DeleteAll deletes all matching rows.
-func (q dmLocationQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q locationQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no dmLocationQuery provided for delete all")
+		return 0, errors.New("models: no locationQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
@@ -844,16 +844,16 @@ func (q dmLocationQuery) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o DMLocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o LocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no DMLocation slice provided for delete all")
+		return 0, errors.New("models: no Location slice provided for delete all")
 	}
 
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(dmLocationBeforeDeleteHooks) != 0 {
+	if len(locationBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -863,12 +863,12 @@ func (o DMLocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmLocationPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), locationPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := "DELETE FROM `dm_location` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmLocationPrimaryKeyColumns, len(o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, locationPrimaryKeyColumns, len(o))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -877,7 +877,7 @@ func (o DMLocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from dmLocation slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from location slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
@@ -885,7 +885,7 @@ func (o DMLocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_location")
 	}
 
-	if len(dmLocationAfterDeleteHooks) != 0 {
+	if len(locationAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -898,8 +898,8 @@ func (o DMLocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecuto
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *DMLocation) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindDMLocation(ctx, exec, o.ID)
+func (o *Location) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindLocation(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -910,26 +910,26 @@ func (o *DMLocation) Reload(ctx context.Context, exec boil.ContextExecutor) erro
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *DMLocationSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *LocationSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := DMLocationSlice{}
+	slice := LocationSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmLocationPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), locationPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := "SELECT `dm_location`.* FROM `dm_location` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmLocationPrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, locationPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in DMLocationSlice")
+		return errors.Wrap(err, "models: unable to reload all in LocationSlice")
 	}
 
 	*o = slice
@@ -937,8 +937,8 @@ func (o *DMLocationSlice) ReloadAll(ctx context.Context, exec boil.ContextExecut
 	return nil
 }
 
-// DMLocationExists checks if the DMLocation row exists.
-func DMLocationExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+// LocationExists checks if the Location row exists.
+func LocationExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `dm_location` where `id`=? limit 1)"
 

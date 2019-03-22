@@ -22,8 +22,8 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// DMArticle is an object representing the database table.
-type DMArticle struct {
+// Article is an object representing the database table.
+type Article struct {
 	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Title     null.String `boil:"title" json:"title,omitempty" toml:"title" yaml:"title,omitempty"`
 	Body      null.String `boil:"body" json:"body,omitempty" toml:"body" yaml:"body,omitempty"`
@@ -31,11 +31,11 @@ type DMArticle struct {
 	Modified  null.Int    `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
 	RemoteID  null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
 
-	R *dmArticleR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L dmArticleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L articleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var DMArticleColumns = struct {
+var ArticleColumns = struct {
 	ID        string
 	Title     string
 	Body      string
@@ -108,7 +108,7 @@ func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-var DMArticleWhere = struct {
+var ArticleWhere = struct {
 	ID        whereHelperint
 	Title     whereHelpernull_String
 	Body      whereHelpernull_String
@@ -124,52 +124,52 @@ var DMArticleWhere = struct {
 	RemoteID:  whereHelpernull_String{field: `remote_id`},
 }
 
-// DMArticleRels is where relationship names are stored.
-var DMArticleRels = struct {
+// ArticleRels is where relationship names are stored.
+var ArticleRels = struct {
 }{}
 
-// dmArticleR is where relationships are stored.
-type dmArticleR struct {
+// articleR is where relationships are stored.
+type articleR struct {
 }
 
 // NewStruct creates a new relationship struct
-func (*dmArticleR) NewStruct() *dmArticleR {
-	return &dmArticleR{}
+func (*articleR) NewStruct() *articleR {
+	return &articleR{}
 }
 
-// dmArticleL is where Load methods for each relationship are stored.
-type dmArticleL struct{}
+// articleL is where Load methods for each relationship are stored.
+type articleL struct{}
 
 var (
-	dmArticleColumns               = []string{"id", "title", "body", "published", "modified", "remote_id"}
-	dmArticleColumnsWithoutDefault = []string{"title", "body", "published", "modified", "remote_id"}
-	dmArticleColumnsWithDefault    = []string{"id"}
-	dmArticlePrimaryKeyColumns     = []string{"id"}
+	articleColumns               = []string{"id", "title", "body", "published", "modified", "remote_id"}
+	articleColumnsWithoutDefault = []string{"title", "body", "published", "modified", "remote_id"}
+	articleColumnsWithDefault    = []string{"id"}
+	articlePrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// DMArticleSlice is an alias for a slice of pointers to DMArticle.
-	// This should generally be used opposed to []DMArticle.
-	DMArticleSlice []*DMArticle
-	// DMArticleHook is the signature for custom DMArticle hook methods
-	DMArticleHook func(context.Context, boil.ContextExecutor, *DMArticle) error
+	// ArticleSlice is an alias for a slice of pointers to Article.
+	// This should generally be used opposed to []Article.
+	ArticleSlice []*Article
+	// ArticleHook is the signature for custom Article hook methods
+	ArticleHook func(context.Context, boil.ContextExecutor, *Article) error
 
-	dmArticleQuery struct {
+	articleQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	dmArticleType                 = reflect.TypeOf(&DMArticle{})
-	dmArticleMapping              = queries.MakeStructMapping(dmArticleType)
-	dmArticlePrimaryKeyMapping, _ = queries.BindMapping(dmArticleType, dmArticleMapping, dmArticlePrimaryKeyColumns)
-	dmArticleInsertCacheMut       sync.RWMutex
-	dmArticleInsertCache          = make(map[string]insertCache)
-	dmArticleUpdateCacheMut       sync.RWMutex
-	dmArticleUpdateCache          = make(map[string]updateCache)
-	dmArticleUpsertCacheMut       sync.RWMutex
-	dmArticleUpsertCache          = make(map[string]insertCache)
+	articleType                 = reflect.TypeOf(&Article{})
+	articleMapping              = queries.MakeStructMapping(articleType)
+	articlePrimaryKeyMapping, _ = queries.BindMapping(articleType, articleMapping, articlePrimaryKeyColumns)
+	articleInsertCacheMut       sync.RWMutex
+	articleInsertCache          = make(map[string]insertCache)
+	articleUpdateCacheMut       sync.RWMutex
+	articleUpdateCache          = make(map[string]updateCache)
+	articleUpsertCacheMut       sync.RWMutex
+	articleUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -180,24 +180,24 @@ var (
 	_ = qmhelper.Where
 )
 
-var dmArticleBeforeInsertHooks []DMArticleHook
-var dmArticleBeforeUpdateHooks []DMArticleHook
-var dmArticleBeforeDeleteHooks []DMArticleHook
-var dmArticleBeforeUpsertHooks []DMArticleHook
+var articleBeforeInsertHooks []ArticleHook
+var articleBeforeUpdateHooks []ArticleHook
+var articleBeforeDeleteHooks []ArticleHook
+var articleBeforeUpsertHooks []ArticleHook
 
-var dmArticleAfterInsertHooks []DMArticleHook
-var dmArticleAfterSelectHooks []DMArticleHook
-var dmArticleAfterUpdateHooks []DMArticleHook
-var dmArticleAfterDeleteHooks []DMArticleHook
-var dmArticleAfterUpsertHooks []DMArticleHook
+var articleAfterInsertHooks []ArticleHook
+var articleAfterSelectHooks []ArticleHook
+var articleAfterUpdateHooks []ArticleHook
+var articleAfterDeleteHooks []ArticleHook
+var articleAfterUpsertHooks []ArticleHook
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *DMArticle) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleBeforeInsertHooks {
+	for _, hook := range articleBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -207,12 +207,12 @@ func (o *DMArticle) doBeforeInsertHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *DMArticle) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleBeforeUpdateHooks {
+	for _, hook := range articleBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -222,12 +222,12 @@ func (o *DMArticle) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *DMArticle) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleBeforeDeleteHooks {
+	for _, hook := range articleBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -237,12 +237,12 @@ func (o *DMArticle) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *DMArticle) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleBeforeUpsertHooks {
+	for _, hook := range articleBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -252,12 +252,12 @@ func (o *DMArticle) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextEx
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *DMArticle) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleAfterInsertHooks {
+	for _, hook := range articleAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -267,12 +267,12 @@ func (o *DMArticle) doAfterInsertHooks(ctx context.Context, exec boil.ContextExe
 }
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *DMArticle) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleAfterSelectHooks {
+	for _, hook := range articleAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -282,12 +282,12 @@ func (o *DMArticle) doAfterSelectHooks(ctx context.Context, exec boil.ContextExe
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *DMArticle) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleAfterUpdateHooks {
+	for _, hook := range articleAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -297,12 +297,12 @@ func (o *DMArticle) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExe
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *DMArticle) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleAfterDeleteHooks {
+	for _, hook := range articleAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -312,12 +312,12 @@ func (o *DMArticle) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExe
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *DMArticle) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *Article) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmArticleAfterUpsertHooks {
+	for _, hook := range articleAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -326,33 +326,33 @@ func (o *DMArticle) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExe
 	return nil
 }
 
-// AddDMArticleHook registers your hook function for all future operations.
-func AddDMArticleHook(hookPoint boil.HookPoint, dmArticleHook DMArticleHook) {
+// AddArticleHook registers your hook function for all future operations.
+func AddArticleHook(hookPoint boil.HookPoint, articleHook ArticleHook) {
 	switch hookPoint {
 	case boil.BeforeInsertHook:
-		dmArticleBeforeInsertHooks = append(dmArticleBeforeInsertHooks, dmArticleHook)
+		articleBeforeInsertHooks = append(articleBeforeInsertHooks, articleHook)
 	case boil.BeforeUpdateHook:
-		dmArticleBeforeUpdateHooks = append(dmArticleBeforeUpdateHooks, dmArticleHook)
+		articleBeforeUpdateHooks = append(articleBeforeUpdateHooks, articleHook)
 	case boil.BeforeDeleteHook:
-		dmArticleBeforeDeleteHooks = append(dmArticleBeforeDeleteHooks, dmArticleHook)
+		articleBeforeDeleteHooks = append(articleBeforeDeleteHooks, articleHook)
 	case boil.BeforeUpsertHook:
-		dmArticleBeforeUpsertHooks = append(dmArticleBeforeUpsertHooks, dmArticleHook)
+		articleBeforeUpsertHooks = append(articleBeforeUpsertHooks, articleHook)
 	case boil.AfterInsertHook:
-		dmArticleAfterInsertHooks = append(dmArticleAfterInsertHooks, dmArticleHook)
+		articleAfterInsertHooks = append(articleAfterInsertHooks, articleHook)
 	case boil.AfterSelectHook:
-		dmArticleAfterSelectHooks = append(dmArticleAfterSelectHooks, dmArticleHook)
+		articleAfterSelectHooks = append(articleAfterSelectHooks, articleHook)
 	case boil.AfterUpdateHook:
-		dmArticleAfterUpdateHooks = append(dmArticleAfterUpdateHooks, dmArticleHook)
+		articleAfterUpdateHooks = append(articleAfterUpdateHooks, articleHook)
 	case boil.AfterDeleteHook:
-		dmArticleAfterDeleteHooks = append(dmArticleAfterDeleteHooks, dmArticleHook)
+		articleAfterDeleteHooks = append(articleAfterDeleteHooks, articleHook)
 	case boil.AfterUpsertHook:
-		dmArticleAfterUpsertHooks = append(dmArticleAfterUpsertHooks, dmArticleHook)
+		articleAfterUpsertHooks = append(articleAfterUpsertHooks, articleHook)
 	}
 }
 
-// One returns a single dmArticle record from the query.
-func (q dmArticleQuery) One(ctx context.Context, exec boil.ContextExecutor) (*DMArticle, error) {
-	o := &DMArticle{}
+// One returns a single article record from the query.
+func (q articleQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Article, error) {
+	o := &Article{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -371,16 +371,16 @@ func (q dmArticleQuery) One(ctx context.Context, exec boil.ContextExecutor) (*DM
 	return o, nil
 }
 
-// All returns all DMArticle records from the query.
-func (q dmArticleQuery) All(ctx context.Context, exec boil.ContextExecutor) (DMArticleSlice, error) {
-	var o []*DMArticle
+// All returns all Article records from the query.
+func (q articleQuery) All(ctx context.Context, exec boil.ContextExecutor) (ArticleSlice, error) {
+	var o []*Article
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to DMArticle slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to Article slice")
 	}
 
-	if len(dmArticleAfterSelectHooks) != 0 {
+	if len(articleAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -391,8 +391,8 @@ func (q dmArticleQuery) All(ctx context.Context, exec boil.ContextExecutor) (DMA
 	return o, nil
 }
 
-// Count returns the count of all DMArticle records in the query.
-func (q dmArticleQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all Article records in the query.
+func (q articleQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -407,7 +407,7 @@ func (q dmArticleQuery) Count(ctx context.Context, exec boil.ContextExecutor) (i
 }
 
 // Exists checks if the row exists in the table.
-func (q dmArticleQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q articleQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -422,16 +422,16 @@ func (q dmArticleQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (
 	return count > 0, nil
 }
 
-// DMArticles retrieves all the records using an executor.
-func DMArticles(mods ...qm.QueryMod) dmArticleQuery {
+// Articles retrieves all the records using an executor.
+func Articles(mods ...qm.QueryMod) articleQuery {
 	mods = append(mods, qm.From("`dm_article`"))
-	return dmArticleQuery{NewQuery(mods...)}
+	return articleQuery{NewQuery(mods...)}
 }
 
-// FindDMArticle retrieves a single record by ID with an executor.
+// FindArticle retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindDMArticle(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*DMArticle, error) {
-	dmArticleObj := &DMArticle{}
+func FindArticle(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Article, error) {
+	articleObj := &Article{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
@@ -443,7 +443,7 @@ func FindDMArticle(ctx context.Context, exec boil.ContextExecutor, iD int, selec
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, dmArticleObj)
+	err := q.Bind(ctx, exec, articleObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
@@ -451,12 +451,12 @@ func FindDMArticle(ctx context.Context, exec boil.ContextExecutor, iD int, selec
 		return nil, errors.Wrap(err, "models: unable to select from dm_article")
 	}
 
-	return dmArticleObj, nil
+	return articleObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *DMArticle) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *Article) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no dm_article provided for insertion")
 	}
@@ -467,26 +467,26 @@ func (o *DMArticle) Insert(ctx context.Context, exec boil.ContextExecutor, colum
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(dmArticleColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(articleColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	dmArticleInsertCacheMut.RLock()
-	cache, cached := dmArticleInsertCache[key]
-	dmArticleInsertCacheMut.RUnlock()
+	articleInsertCacheMut.RLock()
+	cache, cached := articleInsertCache[key]
+	articleInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			dmArticleColumns,
-			dmArticleColumnsWithDefault,
-			dmArticleColumnsWithoutDefault,
+			articleColumns,
+			articleColumnsWithDefault,
+			articleColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(dmArticleType, dmArticleMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(articleType, articleMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(dmArticleType, dmArticleMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(articleType, articleMapping, returnColumns)
 		if err != nil {
 			return err
 		}
@@ -499,7 +499,7 @@ func (o *DMArticle) Insert(ctx context.Context, exec boil.ContextExecutor, colum
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_article` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, dmArticlePrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_article` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, articlePrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -532,7 +532,7 @@ func (o *DMArticle) Insert(ctx context.Context, exec boil.ContextExecutor, colum
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == dmArticleMapping["ID"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == articleMapping["ID"] {
 		goto CacheNoHooks
 	}
 
@@ -552,31 +552,31 @@ func (o *DMArticle) Insert(ctx context.Context, exec boil.ContextExecutor, colum
 
 CacheNoHooks:
 	if !cached {
-		dmArticleInsertCacheMut.Lock()
-		dmArticleInsertCache[key] = cache
-		dmArticleInsertCacheMut.Unlock()
+		articleInsertCacheMut.Lock()
+		articleInsertCache[key] = cache
+		articleInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// Update uses an executor to update the DMArticle.
+// Update uses an executor to update the Article.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *DMArticle) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *Article) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	dmArticleUpdateCacheMut.RLock()
-	cache, cached := dmArticleUpdateCache[key]
-	dmArticleUpdateCacheMut.RUnlock()
+	articleUpdateCacheMut.RLock()
+	cache, cached := articleUpdateCache[key]
+	articleUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			dmArticleColumns,
-			dmArticlePrimaryKeyColumns,
+			articleColumns,
+			articlePrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
@@ -588,9 +588,9 @@ func (o *DMArticle) Update(ctx context.Context, exec boil.ContextExecutor, colum
 
 		cache.query = fmt.Sprintf("UPDATE `dm_article` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, dmArticlePrimaryKeyColumns),
+			strmangle.WhereClause("`", "`", 0, articlePrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(dmArticleType, dmArticleMapping, append(wl, dmArticlePrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(articleType, articleMapping, append(wl, articlePrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -615,16 +615,16 @@ func (o *DMArticle) Update(ctx context.Context, exec boil.ContextExecutor, colum
 	}
 
 	if !cached {
-		dmArticleUpdateCacheMut.Lock()
-		dmArticleUpdateCache[key] = cache
-		dmArticleUpdateCacheMut.Unlock()
+		articleUpdateCacheMut.Lock()
+		articleUpdateCache[key] = cache
+		articleUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q dmArticleQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q articleQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
@@ -641,7 +641,7 @@ func (q dmArticleQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o DMArticleSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o ArticleSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -663,13 +663,13 @@ func (o DMArticleSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmArticlePrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), articlePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := fmt.Sprintf("UPDATE `dm_article` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmArticlePrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, articlePrimaryKeyColumns, len(o)))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -678,23 +678,23 @@ func (o DMArticleSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in dmArticle slice")
+		return 0, errors.Wrap(err, "models: unable to update all in article slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all dmArticle")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all article")
 	}
 	return rowsAff, nil
 }
 
-var mySQLDMArticleUniqueColumns = []string{
+var mySQLArticleUniqueColumns = []string{
 	"id",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *DMArticle) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
+func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no dm_article provided for upsert")
 	}
@@ -703,8 +703,8 @@ func (o *DMArticle) Upsert(ctx context.Context, exec boil.ContextExecutor, updat
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(dmArticleColumnsWithDefault, o)
-	nzUniques := queries.NonZeroDefaultSet(mySQLDMArticleUniqueColumns, o)
+	nzDefaults := queries.NonZeroDefaultSet(articleColumnsWithDefault, o)
+	nzUniques := queries.NonZeroDefaultSet(mySQLArticleUniqueColumns, o)
 
 	if len(nzUniques) == 0 {
 		return errors.New("cannot upsert with a table that cannot conflict on a unique column")
@@ -732,22 +732,22 @@ func (o *DMArticle) Upsert(ctx context.Context, exec boil.ContextExecutor, updat
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	dmArticleUpsertCacheMut.RLock()
-	cache, cached := dmArticleUpsertCache[key]
-	dmArticleUpsertCacheMut.RUnlock()
+	articleUpsertCacheMut.RLock()
+	cache, cached := articleUpsertCache[key]
+	articleUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			dmArticleColumns,
-			dmArticleColumnsWithDefault,
-			dmArticleColumnsWithoutDefault,
+			articleColumns,
+			articleColumnsWithDefault,
+			articleColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			dmArticleColumns,
-			dmArticlePrimaryKeyColumns,
+			articleColumns,
+			articlePrimaryKeyColumns,
 		)
 
 		if len(update) == 0 {
@@ -762,12 +762,12 @@ func (o *DMArticle) Upsert(ctx context.Context, exec boil.ContextExecutor, updat
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
 
-		cache.valueMapping, err = queries.BindMapping(dmArticleType, dmArticleMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(articleType, articleMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(dmArticleType, dmArticleMapping, ret)
+			cache.retMapping, err = queries.BindMapping(articleType, articleMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -806,11 +806,11 @@ func (o *DMArticle) Upsert(ctx context.Context, exec boil.ContextExecutor, updat
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == dmArticleMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == articleMapping["id"] {
 		goto CacheNoHooks
 	}
 
-	uniqueMap, err = queries.BindMapping(dmArticleType, dmArticleMapping, nzUniques)
+	uniqueMap, err = queries.BindMapping(articleType, articleMapping, nzUniques)
 	if err != nil {
 		return errors.Wrap(err, "models: unable to retrieve unique values for dm_article")
 	}
@@ -828,26 +828,26 @@ func (o *DMArticle) Upsert(ctx context.Context, exec boil.ContextExecutor, updat
 
 CacheNoHooks:
 	if !cached {
-		dmArticleUpsertCacheMut.Lock()
-		dmArticleUpsertCache[key] = cache
-		dmArticleUpsertCacheMut.Unlock()
+		articleUpsertCacheMut.Lock()
+		articleUpsertCache[key] = cache
+		articleUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single DMArticle record with an executor.
+// Delete deletes a single Article record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *DMArticle) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *Article) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no DMArticle provided for delete")
+		return 0, errors.New("models: no Article provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), dmArticlePrimaryKeyMapping)
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), articlePrimaryKeyMapping)
 	sql := "DELETE FROM `dm_article` WHERE `id`=?"
 
 	if boil.DebugMode {
@@ -873,9 +873,9 @@ func (o *DMArticle) Delete(ctx context.Context, exec boil.ContextExecutor) (int6
 }
 
 // DeleteAll deletes all matching rows.
-func (q dmArticleQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q articleQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no dmArticleQuery provided for delete all")
+		return 0, errors.New("models: no articleQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
@@ -894,16 +894,16 @@ func (q dmArticleQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o DMArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o ArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no DMArticle slice provided for delete all")
+		return 0, errors.New("models: no Article slice provided for delete all")
 	}
 
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(dmArticleBeforeDeleteHooks) != 0 {
+	if len(articleBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -913,12 +913,12 @@ func (o DMArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmArticlePrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), articlePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := "DELETE FROM `dm_article` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmArticlePrimaryKeyColumns, len(o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, articlePrimaryKeyColumns, len(o))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -927,7 +927,7 @@ func (o DMArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from dmArticle slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from article slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
@@ -935,7 +935,7 @@ func (o DMArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_article")
 	}
 
-	if len(dmArticleAfterDeleteHooks) != 0 {
+	if len(articleAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -948,8 +948,8 @@ func (o DMArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *DMArticle) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindDMArticle(ctx, exec, o.ID)
+func (o *Article) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindArticle(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -960,26 +960,26 @@ func (o *DMArticle) Reload(ctx context.Context, exec boil.ContextExecutor) error
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *DMArticleSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *ArticleSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := DMArticleSlice{}
+	slice := ArticleSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmArticlePrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), articlePrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := "SELECT `dm_article`.* FROM `dm_article` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmArticlePrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, articlePrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in DMArticleSlice")
+		return errors.Wrap(err, "models: unable to reload all in ArticleSlice")
 	}
 
 	*o = slice
@@ -987,8 +987,8 @@ func (o *DMArticleSlice) ReloadAll(ctx context.Context, exec boil.ContextExecuto
 	return nil
 }
 
-// DMArticleExists checks if the DMArticle row exists.
-func DMArticleExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+// ArticleExists checks if the Article row exists.
+func ArticleExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `dm_article` where `id`=? limit 1)"
 

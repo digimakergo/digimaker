@@ -8,8 +8,33 @@ dbname = "dev_emf"
 sslmode = "false"
 blacklist = ['dm_relation']
 
-#[aliases.tables.dm_location]
-#up_plural = "Locations"
-#up_singular = "Location"
-#down_plural = "locations"
-#down_singular = "location"
+[aliases.tables.dm_location]
+up_plural = "Locations"
+up_singular = "Location"
+down_plural = "locations"
+down_singular = "location"
+
+[aliases.tables.dm_folder]
+up_plural = "Folders"
+up_singular = "Folder"
+down_plural = "folders"
+down_singular = "folder"
+
+[aliases.tables.dm_article]
+up_plural = "Articles"
+up_singular = "Article"
+down_plural = "articles"
+down_singular = "article"
+
+[aliases.tables.dm_user]
+up_plural = "Users"
+up_singular = "User"
+down_plural = "users"
+down_singular = "user"
+
+
+[aliases.tables.dm_version]
+up_plural = "Versions"
+up_singular = "Version"
+down_plural = "versions"
+down_singular = "version"

@@ -22,8 +22,8 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// DMUser is an object representing the database table.
-type DMUser struct {
+// User is an object representing the database table.
+type User struct {
 	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Login     null.String `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
 	Firstname null.String `boil:"firstname" json:"firstname,omitempty" toml:"firstname" yaml:"firstname,omitempty"`
@@ -32,11 +32,11 @@ type DMUser struct {
 	Mobile    null.String `boil:"mobile" json:"mobile,omitempty" toml:"mobile" yaml:"mobile,omitempty"`
 	RemoteID  null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
 
-	R *dmUserR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L dmUserL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var DMUserColumns = struct {
+var UserColumns = struct {
 	ID        string
 	Login     string
 	Firstname string
@@ -56,7 +56,7 @@ var DMUserColumns = struct {
 
 // Generated where
 
-var DMUserWhere = struct {
+var UserWhere = struct {
 	ID        whereHelperint
 	Login     whereHelpernull_String
 	Firstname whereHelpernull_String
@@ -74,52 +74,52 @@ var DMUserWhere = struct {
 	RemoteID:  whereHelpernull_String{field: `remote_id`},
 }
 
-// DMUserRels is where relationship names are stored.
-var DMUserRels = struct {
+// UserRels is where relationship names are stored.
+var UserRels = struct {
 }{}
 
-// dmUserR is where relationships are stored.
-type dmUserR struct {
+// userR is where relationships are stored.
+type userR struct {
 }
 
 // NewStruct creates a new relationship struct
-func (*dmUserR) NewStruct() *dmUserR {
-	return &dmUserR{}
+func (*userR) NewStruct() *userR {
+	return &userR{}
 }
 
-// dmUserL is where Load methods for each relationship are stored.
-type dmUserL struct{}
+// userL is where Load methods for each relationship are stored.
+type userL struct{}
 
 var (
-	dmUserColumns               = []string{"id", "login", "firstname", "lastname", "password", "mobile", "remote_id"}
-	dmUserColumnsWithoutDefault = []string{"login", "firstname", "lastname", "password", "mobile", "remote_id"}
-	dmUserColumnsWithDefault    = []string{"id"}
-	dmUserPrimaryKeyColumns     = []string{"id"}
+	userColumns               = []string{"id", "login", "firstname", "lastname", "password", "mobile", "remote_id"}
+	userColumnsWithoutDefault = []string{"login", "firstname", "lastname", "password", "mobile", "remote_id"}
+	userColumnsWithDefault    = []string{"id"}
+	userPrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// DMUserSlice is an alias for a slice of pointers to DMUser.
-	// This should generally be used opposed to []DMUser.
-	DMUserSlice []*DMUser
-	// DMUserHook is the signature for custom DMUser hook methods
-	DMUserHook func(context.Context, boil.ContextExecutor, *DMUser) error
+	// UserSlice is an alias for a slice of pointers to User.
+	// This should generally be used opposed to []User.
+	UserSlice []*User
+	// UserHook is the signature for custom User hook methods
+	UserHook func(context.Context, boil.ContextExecutor, *User) error
 
-	dmUserQuery struct {
+	userQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	dmUserType                 = reflect.TypeOf(&DMUser{})
-	dmUserMapping              = queries.MakeStructMapping(dmUserType)
-	dmUserPrimaryKeyMapping, _ = queries.BindMapping(dmUserType, dmUserMapping, dmUserPrimaryKeyColumns)
-	dmUserInsertCacheMut       sync.RWMutex
-	dmUserInsertCache          = make(map[string]insertCache)
-	dmUserUpdateCacheMut       sync.RWMutex
-	dmUserUpdateCache          = make(map[string]updateCache)
-	dmUserUpsertCacheMut       sync.RWMutex
-	dmUserUpsertCache          = make(map[string]insertCache)
+	userType                 = reflect.TypeOf(&User{})
+	userMapping              = queries.MakeStructMapping(userType)
+	userPrimaryKeyMapping, _ = queries.BindMapping(userType, userMapping, userPrimaryKeyColumns)
+	userInsertCacheMut       sync.RWMutex
+	userInsertCache          = make(map[string]insertCache)
+	userUpdateCacheMut       sync.RWMutex
+	userUpdateCache          = make(map[string]updateCache)
+	userUpsertCacheMut       sync.RWMutex
+	userUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -130,24 +130,24 @@ var (
 	_ = qmhelper.Where
 )
 
-var dmUserBeforeInsertHooks []DMUserHook
-var dmUserBeforeUpdateHooks []DMUserHook
-var dmUserBeforeDeleteHooks []DMUserHook
-var dmUserBeforeUpsertHooks []DMUserHook
+var userBeforeInsertHooks []UserHook
+var userBeforeUpdateHooks []UserHook
+var userBeforeDeleteHooks []UserHook
+var userBeforeUpsertHooks []UserHook
 
-var dmUserAfterInsertHooks []DMUserHook
-var dmUserAfterSelectHooks []DMUserHook
-var dmUserAfterUpdateHooks []DMUserHook
-var dmUserAfterDeleteHooks []DMUserHook
-var dmUserAfterUpsertHooks []DMUserHook
+var userAfterInsertHooks []UserHook
+var userAfterSelectHooks []UserHook
+var userAfterUpdateHooks []UserHook
+var userAfterDeleteHooks []UserHook
+var userAfterUpsertHooks []UserHook
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *DMUser) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserBeforeInsertHooks {
+	for _, hook := range userBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -157,12 +157,12 @@ func (o *DMUser) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *DMUser) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserBeforeUpdateHooks {
+	for _, hook := range userBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -172,12 +172,12 @@ func (o *DMUser) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *DMUser) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserBeforeDeleteHooks {
+	for _, hook := range userBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -187,12 +187,12 @@ func (o *DMUser) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *DMUser) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserBeforeUpsertHooks {
+	for _, hook := range userBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -202,12 +202,12 @@ func (o *DMUser) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *DMUser) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserAfterInsertHooks {
+	for _, hook := range userAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -217,12 +217,12 @@ func (o *DMUser) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *DMUser) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserAfterSelectHooks {
+	for _, hook := range userAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -232,12 +232,12 @@ func (o *DMUser) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *DMUser) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserAfterUpdateHooks {
+	for _, hook := range userAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -247,12 +247,12 @@ func (o *DMUser) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *DMUser) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserAfterDeleteHooks {
+	for _, hook := range userAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -262,12 +262,12 @@ func (o *DMUser) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecut
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *DMUser) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *User) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range dmUserAfterUpsertHooks {
+	for _, hook := range userAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -276,33 +276,33 @@ func (o *DMUser) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecut
 	return nil
 }
 
-// AddDMUserHook registers your hook function for all future operations.
-func AddDMUserHook(hookPoint boil.HookPoint, dmUserHook DMUserHook) {
+// AddUserHook registers your hook function for all future operations.
+func AddUserHook(hookPoint boil.HookPoint, userHook UserHook) {
 	switch hookPoint {
 	case boil.BeforeInsertHook:
-		dmUserBeforeInsertHooks = append(dmUserBeforeInsertHooks, dmUserHook)
+		userBeforeInsertHooks = append(userBeforeInsertHooks, userHook)
 	case boil.BeforeUpdateHook:
-		dmUserBeforeUpdateHooks = append(dmUserBeforeUpdateHooks, dmUserHook)
+		userBeforeUpdateHooks = append(userBeforeUpdateHooks, userHook)
 	case boil.BeforeDeleteHook:
-		dmUserBeforeDeleteHooks = append(dmUserBeforeDeleteHooks, dmUserHook)
+		userBeforeDeleteHooks = append(userBeforeDeleteHooks, userHook)
 	case boil.BeforeUpsertHook:
-		dmUserBeforeUpsertHooks = append(dmUserBeforeUpsertHooks, dmUserHook)
+		userBeforeUpsertHooks = append(userBeforeUpsertHooks, userHook)
 	case boil.AfterInsertHook:
-		dmUserAfterInsertHooks = append(dmUserAfterInsertHooks, dmUserHook)
+		userAfterInsertHooks = append(userAfterInsertHooks, userHook)
 	case boil.AfterSelectHook:
-		dmUserAfterSelectHooks = append(dmUserAfterSelectHooks, dmUserHook)
+		userAfterSelectHooks = append(userAfterSelectHooks, userHook)
 	case boil.AfterUpdateHook:
-		dmUserAfterUpdateHooks = append(dmUserAfterUpdateHooks, dmUserHook)
+		userAfterUpdateHooks = append(userAfterUpdateHooks, userHook)
 	case boil.AfterDeleteHook:
-		dmUserAfterDeleteHooks = append(dmUserAfterDeleteHooks, dmUserHook)
+		userAfterDeleteHooks = append(userAfterDeleteHooks, userHook)
 	case boil.AfterUpsertHook:
-		dmUserAfterUpsertHooks = append(dmUserAfterUpsertHooks, dmUserHook)
+		userAfterUpsertHooks = append(userAfterUpsertHooks, userHook)
 	}
 }
 
-// One returns a single dmUser record from the query.
-func (q dmUserQuery) One(ctx context.Context, exec boil.ContextExecutor) (*DMUser, error) {
-	o := &DMUser{}
+// One returns a single user record from the query.
+func (q userQuery) One(ctx context.Context, exec boil.ContextExecutor) (*User, error) {
+	o := &User{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -321,16 +321,16 @@ func (q dmUserQuery) One(ctx context.Context, exec boil.ContextExecutor) (*DMUse
 	return o, nil
 }
 
-// All returns all DMUser records from the query.
-func (q dmUserQuery) All(ctx context.Context, exec boil.ContextExecutor) (DMUserSlice, error) {
-	var o []*DMUser
+// All returns all User records from the query.
+func (q userQuery) All(ctx context.Context, exec boil.ContextExecutor) (UserSlice, error) {
+	var o []*User
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to DMUser slice")
+		return nil, errors.Wrap(err, "models: failed to assign all query results to User slice")
 	}
 
-	if len(dmUserAfterSelectHooks) != 0 {
+	if len(userAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -341,8 +341,8 @@ func (q dmUserQuery) All(ctx context.Context, exec boil.ContextExecutor) (DMUser
 	return o, nil
 }
 
-// Count returns the count of all DMUser records in the query.
-func (q dmUserQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all User records in the query.
+func (q userQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -357,7 +357,7 @@ func (q dmUserQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int6
 }
 
 // Exists checks if the row exists in the table.
-func (q dmUserQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q userQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -372,16 +372,16 @@ func (q dmUserQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (boo
 	return count > 0, nil
 }
 
-// DMUsers retrieves all the records using an executor.
-func DMUsers(mods ...qm.QueryMod) dmUserQuery {
+// Users retrieves all the records using an executor.
+func Users(mods ...qm.QueryMod) userQuery {
 	mods = append(mods, qm.From("`dm_user`"))
-	return dmUserQuery{NewQuery(mods...)}
+	return userQuery{NewQuery(mods...)}
 }
 
-// FindDMUser retrieves a single record by ID with an executor.
+// FindUser retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindDMUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*DMUser, error) {
-	dmUserObj := &DMUser{}
+func FindUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*User, error) {
+	userObj := &User{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
@@ -393,7 +393,7 @@ func FindDMUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCo
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, dmUserObj)
+	err := q.Bind(ctx, exec, userObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
@@ -401,12 +401,12 @@ func FindDMUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCo
 		return nil, errors.Wrap(err, "models: unable to select from dm_user")
 	}
 
-	return dmUserObj, nil
+	return userObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *DMUser) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no dm_user provided for insertion")
 	}
@@ -417,26 +417,26 @@ func (o *DMUser) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(dmUserColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(userColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	dmUserInsertCacheMut.RLock()
-	cache, cached := dmUserInsertCache[key]
-	dmUserInsertCacheMut.RUnlock()
+	userInsertCacheMut.RLock()
+	cache, cached := userInsertCache[key]
+	userInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			dmUserColumns,
-			dmUserColumnsWithDefault,
-			dmUserColumnsWithoutDefault,
+			userColumns,
+			userColumnsWithDefault,
+			userColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(dmUserType, dmUserMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(userType, userMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(dmUserType, dmUserMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(userType, userMapping, returnColumns)
 		if err != nil {
 			return err
 		}
@@ -449,7 +449,7 @@ func (o *DMUser) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_user` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, dmUserPrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_user` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, userPrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -482,7 +482,7 @@ func (o *DMUser) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == dmUserMapping["ID"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == userMapping["ID"] {
 		goto CacheNoHooks
 	}
 
@@ -502,31 +502,31 @@ func (o *DMUser) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 
 CacheNoHooks:
 	if !cached {
-		dmUserInsertCacheMut.Lock()
-		dmUserInsertCache[key] = cache
-		dmUserInsertCacheMut.Unlock()
+		userInsertCacheMut.Lock()
+		userInsertCache[key] = cache
+		userInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// Update uses an executor to update the DMUser.
+// Update uses an executor to update the User.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *DMUser) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	dmUserUpdateCacheMut.RLock()
-	cache, cached := dmUserUpdateCache[key]
-	dmUserUpdateCacheMut.RUnlock()
+	userUpdateCacheMut.RLock()
+	cache, cached := userUpdateCache[key]
+	userUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			dmUserColumns,
-			dmUserPrimaryKeyColumns,
+			userColumns,
+			userPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
@@ -538,9 +538,9 @@ func (o *DMUser) Update(ctx context.Context, exec boil.ContextExecutor, columns 
 
 		cache.query = fmt.Sprintf("UPDATE `dm_user` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, dmUserPrimaryKeyColumns),
+			strmangle.WhereClause("`", "`", 0, userPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(dmUserType, dmUserMapping, append(wl, dmUserPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(userType, userMapping, append(wl, userPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -565,16 +565,16 @@ func (o *DMUser) Update(ctx context.Context, exec boil.ContextExecutor, columns 
 	}
 
 	if !cached {
-		dmUserUpdateCacheMut.Lock()
-		dmUserUpdateCache[key] = cache
-		dmUserUpdateCacheMut.Unlock()
+		userUpdateCacheMut.Lock()
+		userUpdateCache[key] = cache
+		userUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q dmUserQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q userQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
@@ -591,7 +591,7 @@ func (q dmUserQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, c
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o DMUserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o UserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -613,13 +613,13 @@ func (o DMUserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, c
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmUserPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := fmt.Sprintf("UPDATE `dm_user` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmUserPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, userPrimaryKeyColumns, len(o)))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -628,23 +628,23 @@ func (o DMUserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, c
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in dmUser slice")
+		return 0, errors.Wrap(err, "models: unable to update all in user slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all dmUser")
+		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all user")
 	}
 	return rowsAff, nil
 }
 
-var mySQLDMUserUniqueColumns = []string{
+var mySQLUserUniqueColumns = []string{
 	"id",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *DMUser) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
+func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("models: no dm_user provided for upsert")
 	}
@@ -653,8 +653,8 @@ func (o *DMUser) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(dmUserColumnsWithDefault, o)
-	nzUniques := queries.NonZeroDefaultSet(mySQLDMUserUniqueColumns, o)
+	nzDefaults := queries.NonZeroDefaultSet(userColumnsWithDefault, o)
+	nzUniques := queries.NonZeroDefaultSet(mySQLUserUniqueColumns, o)
 
 	if len(nzUniques) == 0 {
 		return errors.New("cannot upsert with a table that cannot conflict on a unique column")
@@ -682,22 +682,22 @@ func (o *DMUser) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	dmUserUpsertCacheMut.RLock()
-	cache, cached := dmUserUpsertCache[key]
-	dmUserUpsertCacheMut.RUnlock()
+	userUpsertCacheMut.RLock()
+	cache, cached := userUpsertCache[key]
+	userUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			dmUserColumns,
-			dmUserColumnsWithDefault,
-			dmUserColumnsWithoutDefault,
+			userColumns,
+			userColumnsWithDefault,
+			userColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			dmUserColumns,
-			dmUserPrimaryKeyColumns,
+			userColumns,
+			userPrimaryKeyColumns,
 		)
 
 		if len(update) == 0 {
@@ -712,12 +712,12 @@ func (o *DMUser) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
 
-		cache.valueMapping, err = queries.BindMapping(dmUserType, dmUserMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(userType, userMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(dmUserType, dmUserMapping, ret)
+			cache.retMapping, err = queries.BindMapping(userType, userMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -756,11 +756,11 @@ func (o *DMUser) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == dmUserMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == userMapping["id"] {
 		goto CacheNoHooks
 	}
 
-	uniqueMap, err = queries.BindMapping(dmUserType, dmUserMapping, nzUniques)
+	uniqueMap, err = queries.BindMapping(userType, userMapping, nzUniques)
 	if err != nil {
 		return errors.Wrap(err, "models: unable to retrieve unique values for dm_user")
 	}
@@ -778,26 +778,26 @@ func (o *DMUser) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 
 CacheNoHooks:
 	if !cached {
-		dmUserUpsertCacheMut.Lock()
-		dmUserUpsertCache[key] = cache
-		dmUserUpsertCacheMut.Unlock()
+		userUpsertCacheMut.Lock()
+		userUpsertCache[key] = cache
+		userUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single DMUser record with an executor.
+// Delete deletes a single User record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *DMUser) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *User) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no DMUser provided for delete")
+		return 0, errors.New("models: no User provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), dmUserPrimaryKeyMapping)
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), userPrimaryKeyMapping)
 	sql := "DELETE FROM `dm_user` WHERE `id`=?"
 
 	if boil.DebugMode {
@@ -823,9 +823,9 @@ func (o *DMUser) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, 
 }
 
 // DeleteAll deletes all matching rows.
-func (q dmUserQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q userQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no dmUserQuery provided for delete all")
+		return 0, errors.New("models: no userQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
@@ -844,16 +844,16 @@ func (q dmUserQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o DMUserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o UserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no DMUser slice provided for delete all")
+		return 0, errors.New("models: no User slice provided for delete all")
 	}
 
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(dmUserBeforeDeleteHooks) != 0 {
+	if len(userBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -863,12 +863,12 @@ func (o DMUserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmUserPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := "DELETE FROM `dm_user` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmUserPrimaryKeyColumns, len(o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, userPrimaryKeyColumns, len(o))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -877,7 +877,7 @@ func (o DMUserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from dmUser slice")
+		return 0, errors.Wrap(err, "models: unable to delete all from user slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
@@ -885,7 +885,7 @@ func (o DMUserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_user")
 	}
 
-	if len(dmUserAfterDeleteHooks) != 0 {
+	if len(userAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -898,8 +898,8 @@ func (o DMUserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *DMUser) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindDMUser(ctx, exec, o.ID)
+func (o *User) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindUser(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -910,26 +910,26 @@ func (o *DMUser) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *DMUserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *UserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := DMUserSlice{}
+	slice := UserSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmUserPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := "SELECT `dm_user`.* FROM `dm_user` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmUserPrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, userPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in DMUserSlice")
+		return errors.Wrap(err, "models: unable to reload all in UserSlice")
 	}
 
 	*o = slice
@@ -937,8 +937,8 @@ func (o *DMUserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) 
 	return nil
 }
 
-// DMUserExists checks if the DMUser row exists.
-func DMUserExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+// UserExists checks if the User row exists.
+func UserExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `dm_user` where `id`=? limit 1)"
 
