@@ -1,4 +1,4 @@
-package dm/content
+package content
 
 type Article struct{
   *Content

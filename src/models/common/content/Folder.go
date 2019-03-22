@@ -1,5 +1,5 @@
-package dm/content
+package content
 
-type Folder struct{
-  *Content
+type Folder struct {
+	*Content
 }

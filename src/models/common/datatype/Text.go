@@ -1,5 +1,5 @@
-package dm/content/datatype
+package datatype
 
-type Text struct{
-  *Datatype
+type Text struct {
+	*Datatype
 }

@@ -1,5 +1,5 @@
-package dm/content
+package content
 
-type User struct{
-  *Content
+type User struct {
+	*Content
 }

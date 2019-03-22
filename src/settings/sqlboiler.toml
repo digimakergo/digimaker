@@ -1,4 +1,5 @@
-output = "../models/orm"
+pkgname = "orm"
+output = "models/orm"
 no-tests = "true"
 
 [mysql]
