@@ -1,0 +1,15 @@
+no-tests = "true"
+
+[mysql]
+host = "185.35.187.91"
+user = "dev"
+pass = "D!g!m@ker"
+dbname = "dev_emf"
+sslmode = "false"
+blacklist = ['dm_relation']
+
+#[aliases.tables.dm_location]
+#up_plural = "Locations"
+#up_singular = "Location"
+#down_plural = "locations"
+#down_singular = "location"
