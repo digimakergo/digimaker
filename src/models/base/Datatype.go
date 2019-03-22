@@ -4,4 +4,21 @@ package base
 type Datatype struct {
 	identifier string
 	name       string
+	searchable bool
+}
+
+func loadDefinition() {
+
+}
+
+func Validate() {
+
+}
+
+func Save() {
+
+}
+
+func Create() {
+
 }

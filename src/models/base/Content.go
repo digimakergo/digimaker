@@ -12,3 +12,7 @@ type Content struct {
 	*orm.Location
 	fields map[string]Field //can we remove the fields and article.title directly?
 }
+
+func (content Content) CreateLocation() {
+
+}

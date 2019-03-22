@@ -1,5 +1,10 @@
 {
-   'text':{},
+   'text':{
+      'searchable': true,
+      'name': 'Text',
+      'translations': {'nor-no': 'Tekst',
+                        'chi-cn': '文本'  },
+      'struct': 'models/datattype/Text' },
    'richtext':{},
    'datetime':{}
    'author':{}

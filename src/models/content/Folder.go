@@ -1,5 +1,9 @@
 package content
 
+import (
+	base "models/base"
+)
+
 type Folder struct {
-	*Content
+	*base.Content
 }
