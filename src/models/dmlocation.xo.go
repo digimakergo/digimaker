@@ -22,6 +22,7 @@ type DmLocation struct {
 	ContentID sql.NullInt64 `json:"content_id"` // content_id
 	Name sql.NullString `json:"name"` // name
 	Section sql.NullString `json:"section"` // section
+	RemoteID sql.NullString `json:"remote_id"` // remote_id
 
 	// xo fields
 	_exists, _deleted bool
@@ -52,14 +53,14 @@ func (dl *DmLocation) Insert(db XODB) error {
 
 	// sql insert query, primary key provided by autoincrement
 	const sqlstr = `INSERT INTO dev_emf.dm_location (` +
-		`parent_id, content_type, content_id, name, section` +
+		`parent_id, content_type, content_id, name, section, remote_id` +
 		`) VALUES (` +
-		`?, ?, ?, ?, ?` +
+		`?, ?, ?, ?, ?, ?` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, dl.ParentID, dl.ContentType, dl.ContentID, dl.Name, dl.Section)
-	res, err := db.Exec(sqlstr, dl.ParentID, dl.ContentType, dl.ContentID, dl.Name, dl.Section)
+	XOLog(sqlstr, dl.ParentID, dl.ContentType, dl.ContentID, dl.Name, dl.Section, dl.RemoteID)
+	res, err := db.Exec(sqlstr, dl.ParentID, dl.ContentType, dl.ContentID, dl.Name, dl.Section, dl.RemoteID)
 	if err != nil {
 		return err
 	}
@@ -96,12 +97,12 @@ func (dl *DmLocation) Insert(db XODB) error {
 		
 			// sql query
 			const sqlstr = `UPDATE dev_emf.dm_location SET ` +
-				`parent_id = ?, content_type = ?, content_id = ?, name = ?, section = ?` +
+				`parent_id = ?, content_type = ?, content_id = ?, name = ?, section = ?, remote_id = ?` +
 				` WHERE id = ?`
 
 			// run query
-			XOLog(sqlstr, dl.ParentID, dl.ContentType, dl.ContentID, dl.Name, dl.Section, dl.ID)
-			_, err = db.Exec(sqlstr, dl.ParentID, dl.ContentType, dl.ContentID, dl.Name, dl.Section, dl.ID)
+			XOLog(sqlstr, dl.ParentID, dl.ContentType, dl.ContentID, dl.Name, dl.Section, dl.RemoteID, dl.ID)
+			_, err = db.Exec(sqlstr, dl.ParentID, dl.ContentType, dl.ContentID, dl.Name, dl.Section, dl.RemoteID, dl.ID)
 			return err
 	}
 
@@ -154,7 +155,7 @@ func DmLocationByID(db XODB, id int) (*DmLocation, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, parent_id, content_type, content_id, name, section ` +
+		`id, parent_id, content_type, content_id, name, section, remote_id ` +
 		`FROM dev_emf.dm_location ` +
 		`WHERE id = ?`
 
@@ -164,7 +165,7 @@ func DmLocationByID(db XODB, id int) (*DmLocation, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, id).Scan(&dl.ID, &dl.ParentID, &dl.ContentType, &dl.ContentID, &dl.Name, &dl.Section)
+	err = db.QueryRow(sqlstr, id).Scan(&dl.ID, &dl.ParentID, &dl.ContentType, &dl.ContentID, &dl.Name, &dl.Section, &dl.RemoteID)
 	if err != nil {
 		return nil, err
 	}

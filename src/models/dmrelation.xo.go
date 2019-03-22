@@ -22,6 +22,7 @@ type DmRelation struct {
 	Priority sql.NullInt64 `json:"priority"` // priority
 	Identifier sql.NullString `json:"identifier"` // identifier
 	Comment sql.NullString `json:"comment"` // comment
+	RemoteID sql.NullString `json:"remote_id"` // remote_id
 }
 
 

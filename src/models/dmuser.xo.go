@@ -22,6 +22,7 @@ type DmUser struct {
 	Lastname sql.NullString `json:"lastname"` // lastname
 	Password sql.NullString `json:"password"` // password
 	Mobile sql.NullString `json:"mobile"` // mobile
+	RemoteID sql.NullString `json:"remote_id"` // remote_id
 
 	// xo fields
 	_exists, _deleted bool
@@ -52,14 +53,14 @@ func (du *DmUser) Insert(db XODB) error {
 
 	// sql insert query, primary key provided by autoincrement
 	const sqlstr = `INSERT INTO dev_emf.dm_user (` +
-		`login, firstname, lastname, password, mobile` +
+		`login, firstname, lastname, password, mobile, remote_id` +
 		`) VALUES (` +
-		`?, ?, ?, ?, ?` +
+		`?, ?, ?, ?, ?, ?` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, du.Login, du.Firstname, du.Lastname, du.Password, du.Mobile)
-	res, err := db.Exec(sqlstr, du.Login, du.Firstname, du.Lastname, du.Password, du.Mobile)
+	XOLog(sqlstr, du.Login, du.Firstname, du.Lastname, du.Password, du.Mobile, du.RemoteID)
+	res, err := db.Exec(sqlstr, du.Login, du.Firstname, du.Lastname, du.Password, du.Mobile, du.RemoteID)
 	if err != nil {
 		return err
 	}
@@ -96,12 +97,12 @@ func (du *DmUser) Insert(db XODB) error {
 		
 			// sql query
 			const sqlstr = `UPDATE dev_emf.dm_user SET ` +
-				`login = ?, firstname = ?, lastname = ?, password = ?, mobile = ?` +
+				`login = ?, firstname = ?, lastname = ?, password = ?, mobile = ?, remote_id = ?` +
 				` WHERE id = ?`
 
 			// run query
-			XOLog(sqlstr, du.Login, du.Firstname, du.Lastname, du.Password, du.Mobile, du.ID)
-			_, err = db.Exec(sqlstr, du.Login, du.Firstname, du.Lastname, du.Password, du.Mobile, du.ID)
+			XOLog(sqlstr, du.Login, du.Firstname, du.Lastname, du.Password, du.Mobile, du.RemoteID, du.ID)
+			_, err = db.Exec(sqlstr, du.Login, du.Firstname, du.Lastname, du.Password, du.Mobile, du.RemoteID, du.ID)
 			return err
 	}
 
@@ -154,7 +155,7 @@ func DmUserByID(db XODB, id int) (*DmUser, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, login, firstname, lastname, password, mobile ` +
+		`id, login, firstname, lastname, password, mobile, remote_id ` +
 		`FROM dev_emf.dm_user ` +
 		`WHERE id = ?`
 
@@ -164,7 +165,7 @@ func DmUserByID(db XODB, id int) (*DmUser, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, id).Scan(&du.ID, &du.Login, &du.Firstname, &du.Lastname, &du.Password, &du.Mobile)
+	err = db.QueryRow(sqlstr, id).Scan(&du.ID, &du.Login, &du.Firstname, &du.Lastname, &du.Password, &du.Mobile, &du.RemoteID)
 	if err != nil {
 		return nil, err
 	}

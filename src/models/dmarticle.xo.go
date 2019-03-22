@@ -21,6 +21,7 @@ type DmArticle struct {
 	Body sql.NullString `json:"body"` // body
 	Published sql.NullInt64 `json:"published"` // published
 	Modified sql.NullInt64 `json:"modified"` // modified
+	RemoteID sql.NullString `json:"remote_id"` // remote_id
 
 	// xo fields
 	_exists, _deleted bool
@@ -51,14 +52,14 @@ func (da *DmArticle) Insert(db XODB) error {
 
 	// sql insert query, primary key provided by autoincrement
 	const sqlstr = `INSERT INTO dev_emf.dm_article (` +
-		`title, body, published, modified` +
+		`title, body, published, modified, remote_id` +
 		`) VALUES (` +
-		`?, ?, ?, ?` +
+		`?, ?, ?, ?, ?` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, da.Title, da.Body, da.Published, da.Modified)
-	res, err := db.Exec(sqlstr, da.Title, da.Body, da.Published, da.Modified)
+	XOLog(sqlstr, da.Title, da.Body, da.Published, da.Modified, da.RemoteID)
+	res, err := db.Exec(sqlstr, da.Title, da.Body, da.Published, da.Modified, da.RemoteID)
 	if err != nil {
 		return err
 	}
@@ -95,12 +96,12 @@ func (da *DmArticle) Insert(db XODB) error {
 		
 			// sql query
 			const sqlstr = `UPDATE dev_emf.dm_article SET ` +
-				`title = ?, body = ?, published = ?, modified = ?` +
+				`title = ?, body = ?, published = ?, modified = ?, remote_id = ?` +
 				` WHERE id = ?`
 
 			// run query
-			XOLog(sqlstr, da.Title, da.Body, da.Published, da.Modified, da.ID)
-			_, err = db.Exec(sqlstr, da.Title, da.Body, da.Published, da.Modified, da.ID)
+			XOLog(sqlstr, da.Title, da.Body, da.Published, da.Modified, da.RemoteID, da.ID)
+			_, err = db.Exec(sqlstr, da.Title, da.Body, da.Published, da.Modified, da.RemoteID, da.ID)
 			return err
 	}
 
@@ -153,7 +154,7 @@ func DmArticleByID(db XODB, id int) (*DmArticle, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, title, body, published, modified ` +
+		`id, title, body, published, modified, remote_id ` +
 		`FROM dev_emf.dm_article ` +
 		`WHERE id = ?`
 
@@ -163,7 +164,7 @@ func DmArticleByID(db XODB, id int) (*DmArticle, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, id).Scan(&da.ID, &da.Title, &da.Body, &da.Published, &da.Modified)
+	err = db.QueryRow(sqlstr, id).Scan(&da.ID, &da.Title, &da.Body, &da.Published, &da.Modified, &da.RemoteID)
 	if err != nil {
 		return nil, err
 	}

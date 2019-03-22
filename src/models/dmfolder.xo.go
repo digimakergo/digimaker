@@ -21,6 +21,7 @@ type DmFolder struct {
 	Summary sql.NullString `json:"summary"` // summary
 	Published sql.NullInt64 `json:"published"` // published
 	Modified sql.NullInt64 `json:"modified"` // modified
+	RemoteID sql.NullString `json:"remote_id"` // remote_id
 
 	// xo fields
 	_exists, _deleted bool
@@ -51,14 +52,14 @@ func (df *DmFolder) Insert(db XODB) error {
 
 	// sql insert query, primary key provided by autoincrement
 	const sqlstr = `INSERT INTO dev_emf.dm_folder (` +
-		`title, summary, published, modified` +
+		`title, summary, published, modified, remote_id` +
 		`) VALUES (` +
-		`?, ?, ?, ?` +
+		`?, ?, ?, ?, ?` +
 		`)`
 
 	// run query
-	XOLog(sqlstr, df.Title, df.Summary, df.Published, df.Modified)
-	res, err := db.Exec(sqlstr, df.Title, df.Summary, df.Published, df.Modified)
+	XOLog(sqlstr, df.Title, df.Summary, df.Published, df.Modified, df.RemoteID)
+	res, err := db.Exec(sqlstr, df.Title, df.Summary, df.Published, df.Modified, df.RemoteID)
 	if err != nil {
 		return err
 	}
@@ -95,12 +96,12 @@ func (df *DmFolder) Insert(db XODB) error {
 		
 			// sql query
 			const sqlstr = `UPDATE dev_emf.dm_folder SET ` +
-				`title = ?, summary = ?, published = ?, modified = ?` +
+				`title = ?, summary = ?, published = ?, modified = ?, remote_id = ?` +
 				` WHERE id = ?`
 
 			// run query
-			XOLog(sqlstr, df.Title, df.Summary, df.Published, df.Modified, df.ID)
-			_, err = db.Exec(sqlstr, df.Title, df.Summary, df.Published, df.Modified, df.ID)
+			XOLog(sqlstr, df.Title, df.Summary, df.Published, df.Modified, df.RemoteID, df.ID)
+			_, err = db.Exec(sqlstr, df.Title, df.Summary, df.Published, df.Modified, df.RemoteID, df.ID)
 			return err
 	}
 
@@ -153,7 +154,7 @@ func DmFolderByID(db XODB, id int) (*DmFolder, error) {
 
 	// sql query
 	const sqlstr = `SELECT ` +
-		`id, title, summary, published, modified ` +
+		`id, title, summary, published, modified, remote_id ` +
 		`FROM dev_emf.dm_folder ` +
 		`WHERE id = ?`
 
@@ -163,7 +164,7 @@ func DmFolderByID(db XODB, id int) (*DmFolder, error) {
 		_exists: true,
 	}
 
-	err = db.QueryRow(sqlstr, id).Scan(&df.ID, &df.Title, &df.Summary, &df.Published, &df.Modified)
+	err = db.QueryRow(sqlstr, id).Scan(&df.ID, &df.Title, &df.Summary, &df.Published, &df.Modified, &df.RemoteID)
 	if err != nil {
 		return nil, err
 	}
