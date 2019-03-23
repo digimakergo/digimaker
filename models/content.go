@@ -44,3 +44,7 @@ func (content Content) Store() error {
 	//Store Location
 	return nil
 }
+
+func (content Content) Publish() {
+
+}

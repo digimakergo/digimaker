@@ -1,8 +1,8 @@
 package content
 
 import (
-	base "models"
-	orm "models/orm"
+	base "dm/models"
+	orm "dm/models/orm"
 )
 
 type Article struct {

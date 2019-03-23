@@ -1,7 +1,7 @@
 package content
 
 import (
-	base "models"
+	base "dm/models"
 )
 
 type Folder struct {
