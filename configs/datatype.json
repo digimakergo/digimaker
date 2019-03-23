@@ -6,6 +6,7 @@
                         'chi-cn': '文本'  },
       'struct': 'models/datattype/Text' },
    'richtext':{},
-   'datetime':{}
-   'author':{}
+   'datetime':{},
+   'author':{},
+   'dmgooglemap':{  }
 }

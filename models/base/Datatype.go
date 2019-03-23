@@ -1,5 +1,11 @@
 package base
 
+type Datatyper interface {
+	Create()
+	Validate()
+	Store()
+}
+
 // Datatype is the base struct for all explect datatypes
 type Datatype struct {
 	identifier string
@@ -11,14 +17,10 @@ func loadDefinition() {
 
 }
 
-func Validate() {
+func (d Datatype) Create() {
 
 }
 
-func Save() {
-
-}
-
-func Create() {
-
+func (d Datatype) Store() error {
+	return nil
 }
