@@ -1,4 +1,4 @@
-package dmgooglemap
+package main
 
 import (
 	models "dm/models"
@@ -11,4 +11,8 @@ type DMGoogleMap struct {
 
 func (googlemap DMGoogleMap) Validate() {
 	googlemap.Datatype.Store()
+}
+
+func main() {
+
 }

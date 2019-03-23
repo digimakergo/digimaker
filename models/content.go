@@ -10,7 +10,7 @@ import (
 	"errors"
 )
 
-type Publisher interface {
+type Contenter interface {
 	Publish()
 
 	Create()
@@ -22,7 +22,7 @@ type Publisher interface {
 
 type Content struct {
 	*orm.Location
-	Fields map[string]Datatype //can we remove the fields and article.title directly?
+	Fields map[string]Field //can we remove the fields and article.title directly?
 }
 
 func (content Content) CreateLocation() {
@@ -33,7 +33,7 @@ func (content Content) Store() error {
 	//Store fields
 	fields := content.Fields
 	for identifier, field := range fields {
-		err := field.Store()
+		_, err := field.GetStoredData()
 		if err != nil {
 			//log it and return higher
 			utils.Log("Storing content error, break - id: "+string(content.ID)+", field: "+identifier, "error")
