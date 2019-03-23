@@ -1,3 +1,5 @@
+// {COPYRIGHT_HEADER}
+
 package models
 
 import "dm/utils"
@@ -19,6 +21,9 @@ type DatatypeSetting struct {
 var DMPath = "/Users/xc/go/caf-prototype/src/dm"
 
 //LoadDefinition Load all setting in file into memory.
+//
+// It will not load anything unless all json' format matches the struct definition.
+//
 func LoadDefinition() error {
 
 	//Load contenttype.json into ContentTypeDefinition
@@ -27,7 +32,6 @@ func LoadDefinition() error {
 	if err != nil {
 		return err
 	}
-	ContentTypeDefinition = contentDef
 
 	//Load datatype.json into DatatypeDefinition
 	var datatypeDef map[string]DatatypeSetting
@@ -35,10 +39,15 @@ func LoadDefinition() error {
 	if err != nil {
 		return err
 	}
+
+	ContentTypeDefinition = contentDef
 	DatatypeDefinition = datatypeDef
 
 	return nil
 }
 
+//ContentTypeDefinition Content types which defined in contenttype.json
 var ContentTypeDefinition map[string]ContentTypeSetting
+
+//DatatypeDefinition Datatypes which defined in datatype.json
 var DatatypeDefinition map[string]DatatypeSetting
