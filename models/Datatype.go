@@ -1,4 +1,4 @@
-package base
+package models
 
 type Datatyper interface {
 	Create()

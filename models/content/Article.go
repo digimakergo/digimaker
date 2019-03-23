@@ -1,7 +1,7 @@
 package content
 
 import (
-	base "models/base"
+	base "models"
 	orm "models/orm"
 )
 

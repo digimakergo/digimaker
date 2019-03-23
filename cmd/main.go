@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
-	orm "dmcaf/models/orm"
+	orm "dm/models/orm"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"

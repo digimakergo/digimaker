@@ -1,14 +1,14 @@
 package dmgooglemap
 
 import (
-	"dmcaf/models/base"
+	models "dm/models"
 )
 
 //DMGoogleMap datatype
 type DMGoogleMap struct {
-	*base.Datatype
+	*models.Datatype
 }
 
 func (googlemap DMGoogleMap) Validate() {
-	googlemap.Datatype.Save()
+	googlemap.Datatype.Store()
 }

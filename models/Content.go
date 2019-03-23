@@ -1,12 +1,12 @@
-package base
+package models
 
 /**
 This is a parent struct which consits of location and the content itself(eg. article).
 */
 
 import (
-	"dmcaf/models/orm"
-	utils "dmcaf/utils"
+	"dm/models/orm"
+	utils "dm/utils"
 	"errors"
 )
 
