@@ -1,7 +1,8 @@
-package datatype
+package field
 
 import "dm/models"
 
-type Text struct {
+//TextField is a field for normal text line. It implements Datatyper
+type TextField struct {
 	*models.Field
 }

@@ -2,6 +2,6 @@ package field
 
 import "dm/models"
 
-type RichText struct {
+type RichTextField struct {
 	*models.Field
 }
