@@ -1,3 +1,4 @@
+//Package utils provides general utils for the project
 package utils
 
 import (
