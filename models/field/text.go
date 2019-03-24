@@ -1,5 +1,7 @@
 package datatype
 
+import "dm/models"
+
 type Text struct {
-	*Datatype
+	*models.Field
 }
