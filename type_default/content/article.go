@@ -12,4 +12,6 @@ type Article struct {
 
 func (article Article) Publish() {
 	article.Content.Publish() //call parent
+
+	//Additional code for publishing article.
 }
