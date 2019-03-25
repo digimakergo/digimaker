@@ -1,17 +1,25 @@
 package dm
 
-import types "dm/types"
+import "dm/type_default"
 
-var typeLoaders = make(map[string]map[string]types.TypeLoader)
+//TypeLoader is a interface for plugin to register content type, data type, etc.
+//Basically one typerloader is one plugin.
+type TypeLoader interface {
+	Instance(extendedType string, identifier string) interface{}
+	FieldTypeList() []string
+	ContentTypeList() []string
+}
+
+var typeLoaders = make(map[string]map[string]TypeLoader)
 
 func RegisterTypeLoaders() {
 
 	//register default loaders
-	typeLoaders["contenttype"] = make(map[string]types.TypeLoader)
-	typeLoaders["datatype"] = make(map[string]types.TypeLoader)
+	typeLoaders["contenttype"] = make(map[string]TypeLoader)
+	typeLoaders["datatype"] = make(map[string]TypeLoader)
 
 	//Get loaders
-	defaultLoader := types.TypeLoaderDefault{}
+	defaultLoader := type_default.TypeLoaderDefault{}
 	contentTypeList := defaultLoader.ContentTypeList()
 	for _, identifier := range contentTypeList {
 		typeLoaders["contenttype"][identifier] = &defaultLoader
@@ -21,10 +29,10 @@ func RegisterTypeLoaders() {
 		typeLoaders["datatype"][identifer] = &defaultLoader
 	}
 
-	//todo: load plugins loaders
+	//todo: load plugins loaders via plugin mechanism, in additional to TyperLoaderDefault
 }
 
-func GetTypeLoaders() map[string]map[string]types.TypeLoader {
+func GetTypeLoaders() map[string]map[string]TypeLoader {
 	if typeLoaders == nil {
 		RegisterTypeLoaders()
 	}

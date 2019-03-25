@@ -1,4 +1,4 @@
-package types
+package type_default
 
 import (
 	content "dm/type_default/content"
