@@ -5,12 +5,6 @@ import (
 	field "dm/type_default/field"
 )
 
-type TypeLoader interface {
-	Instance(extendedType string, identifier string) interface{}
-	FieldTypeList() []string
-	ContentTypeList() []string
-}
-
 //TypeLoaderDefault implements FieldInstancer and ContentTypeInstancer
 type TypeLoaderDefault struct{}
 
