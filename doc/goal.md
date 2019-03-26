@@ -15,9 +15,9 @@ Content model
 1) [relate to performance]Should be able to move horizontal data to different partition or database.
 And the system should be able to load whole bunch of content data in another view(maybe a tab on top or tab under the node). If it's moved to a different database, it's possible to instance a new system with the part data.
 
-This needs everything can be horizontally chunked - content, content relation, images should be inside 1 chunk,
+ This needs everything can be horizontally chunked - content, content relation, images should be inside 1 chunk,
 
-2)[related to performance and migration]the images shouldn't be in a separated folder - they should be under the folder it belongs. But for ui, we can have a separate tab(library) for all images with structure. eg.
+2) [related to performance and migration]the images shouldn't be in a separated folder - they should be under the folder it belongs. But for ui, we can have a separate tab(library) for all images with structure. eg.
 
 ```
 news
@@ -42,8 +42,8 @@ NB: putting images&files into content structure can fundamentally make the paren
 
 
 3) [related to separation] Seldom the content images are used globally many times(maybe many times, but in similar location). The resource image(eg.logo) maybe used in many place. So
-- If you know it's not important to have update when image is updated, copy image to near images folder, instead of always using reference.
-- When migrate content partition, copy the shared content(typically share image which are outside of the partition)
+ - If you know it's not important to have update when image is updated, copy image to near images folder, instead of always using reference.
+ - When migrate content partition, copy the shared content(typically share image which are outside of the partition)
 
 4) [image]Image should have options to not version it - versioning take too much space.
 
@@ -68,7 +68,7 @@ complex one(like union): get name, id, created from article and files in recent 
 Should we support a query language(like Doctrine's DQL) or json like( { "select": "" } ). It all depends on application. Normally if it's not difficult query, url should be good enough.
 
 2. Local api
-========
+------------
 Should avoid to use sql directly(and we will support NOSQL), use query api(eg. where( "created", ">=32131321" )).
 
 
