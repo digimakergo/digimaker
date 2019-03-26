@@ -52,6 +52,26 @@ NB: putting images&files into content structure can fundamentally make the paren
 6) [images]images can be done completely using a cdn image api(with permission check locally).
 
 
+API
+========
+1. Rest api
+------------
+There should be a flexible&powerful query api that you can query once and get what you need.
+eg.
+simple ones:
+/content/<id> you get content
+/content/list/<location_id> you get list of contents
+
+complex one(like union): get name, id, created from article and files in recent one week
+/query/select/name,id,created/from/article,file/where/created>10
+
+Should we support a query language(like Doctrine's DQL) or json like( { "select": "" } ). It all depends on application. Normally if it's not difficult query, url should be good enough.
+
+2. Local api
+========
+Should avoid to use sql directly(and we will support NOSQL), use query api(eg. where( "created", ">=32131321" )).
+
+
 Quality needs
 ==============
 1) API should be minimal to use(write less code)
@@ -66,6 +86,6 @@ Future
 
 Performance
 -------------
-The system aims to have hundrends millsion/billion-intractive-level content, to achieve that, dm_location(which is the only table used by all other content) can be very big, so partition should be possible from start
+The system aims to have hundrends million/billion-intractive-level content, to achieve that, dm_location(which is the only table used by all other content) can be very big, so partition should be possible from start
 
 Partition for dm_location, based on section first
