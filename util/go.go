@@ -1,4 +1,4 @@
-package utils
+package util
 
 // This is utils for enhace go language.
 

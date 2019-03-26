@@ -1,7 +1,9 @@
 package models
 
 import (
+	"dm/models/orm"
 	"encoding/json"
+	"fmt"
 	"testing"
 )
 
@@ -16,5 +18,23 @@ func TestStore(t *testing.T) {
 	if content.Store() != nil {
 		t.Errorf("Can not publish content")
 	}
+}
 
+func TestCreate(t *testing.T) {
+	// data := `{"location":{"content_type": "folder", "name": "Test folder"}}`
+	var c Content
+	var l orm.Location
+	l.Name = "Test folder"
+	l.ContentType = "folder"
+	l.ContentID = 0
+	c.Location = &l
+	// json.Unmarshal([]byte(data), &c)
+	// if c.Location.Name.IsZero() {
+	// 	fmt.Printf("zero")
+	// }
+	// err := c.Create()
+	// if err != nil {
+	// 	t.Error(err)
+	// }
+	fmt.Printf("store data")
 }

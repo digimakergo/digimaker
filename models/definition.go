@@ -2,7 +2,7 @@
 
 package models
 
-import "dm/utils"
+import "dm/util"
 
 type ContentTypeSetting struct {
 	TableName  string            `json:"table_name"`
@@ -28,14 +28,14 @@ func LoadDefinition() error {
 
 	//Load contenttype.json into ContentTypeDefinition
 	var contentDef map[string]ContentTypeSetting
-	err := utils.UnmarshalData(DMPath+"/configs/"+"contenttype.json", &contentDef)
+	err := util.UnmarshalData(DMPath+"/configs/"+"contenttype.json", &contentDef)
 	if err != nil {
 		return err
 	}
 
 	//Load datatype.json into DatatypeDefinition
 	var datatypeDef map[string]DatatypeSetting
-	err = utils.UnmarshalData(DMPath+"/configs/"+"datatype.json", &datatypeDef)
+	err = util.UnmarshalData(DMPath+"/configs/"+"datatype.json", &datatypeDef)
 	if err != nil {
 		return err
 	}

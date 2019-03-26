@@ -1,5 +1,5 @@
 //Package utils provides general utils for the project
-package utils
+package util
 
 import (
 	"encoding/json"
@@ -40,7 +40,17 @@ func Log(message string, level string) {
 		log.SetOutput(file)
 		log.Printf(logMessage)
 	*/
+	//todo: log into files
+	//todo: for into client screen in debug mode.
 	fmt.Printf(message)
+}
+
+func GetConfig(section string, identifier string, filename ...string) (string, error) {
+	return "mysql", nil
+}
+
+func GetConfigSectin(section string) (map[string]string, error) {
+	return map[string]string{"type": "mysql", "host": "185.35.187.91", "database": "dev_emf", "username": "test", "password": "test", "protocal": "tcp"}, nil
 }
 
 //UnmarshalData Load json and unmall into variable

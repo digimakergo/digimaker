@@ -1,0 +1,7 @@
+[database]
+type=mysql
+host=
+username=
+password=
+database=
+encode=utf-8
