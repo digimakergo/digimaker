@@ -47,7 +47,7 @@ func (c *Content) Create() error {
 	//Save content
 
 	//Save location
-	err = c.Location.Insert(context.Background(), db, boil.Infer())
+	err = c.Location.Insert(context.Background(), db, boil.Infer()) //todo: use a generic way instead of sqlboil.
 	if err != nil {
 		return err
 	}
