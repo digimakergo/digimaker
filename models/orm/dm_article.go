@@ -361,7 +361,7 @@ func (q articleQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Arti
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for dm_article")
+		return nil, errors.Wrap(err, "orm: failed to execute a one query for dm_article")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -377,7 +377,7 @@ func (q articleQuery) All(ctx context.Context, exec boil.ContextExecutor) (Artic
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to Article slice")
+		return nil, errors.Wrap(err, "orm: failed to assign all query results to Article slice")
 	}
 
 	if len(articleAfterSelectHooks) != 0 {
@@ -400,7 +400,7 @@ func (q articleQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count dm_article rows")
+		return 0, errors.Wrap(err, "orm: failed to count dm_article rows")
 	}
 
 	return count, nil
@@ -416,7 +416,7 @@ func (q articleQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if dm_article exists")
+		return false, errors.Wrap(err, "orm: failed to check if dm_article exists")
 	}
 
 	return count > 0, nil
@@ -448,7 +448,7 @@ func FindArticle(ctx context.Context, exec boil.ContextExecutor, iD int, selectC
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from dm_article")
+		return nil, errors.Wrap(err, "orm: unable to select from dm_article")
 	}
 
 	return articleObj, nil
@@ -458,7 +458,7 @@ func FindArticle(ctx context.Context, exec boil.ContextExecutor, iD int, selectC
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
 func (o *Article) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no dm_article provided for insertion")
+		return errors.New("orm: no dm_article provided for insertion")
 	}
 
 	var err error
@@ -516,7 +516,7 @@ func (o *Article) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into dm_article")
+		return errors.Wrap(err, "orm: unable to insert into dm_article")
 	}
 
 	var lastID int64
@@ -547,7 +547,7 @@ func (o *Article) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 
 	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for dm_article")
+		return errors.Wrap(err, "orm: unable to populate default values for dm_article")
 	}
 
 CacheNoHooks:
@@ -583,7 +583,7 @@ func (o *Article) Update(ctx context.Context, exec boil.ContextExecutor, columns
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update dm_article, could not build whitelist")
+			return 0, errors.New("orm: unable to update dm_article, could not build whitelist")
 		}
 
 		cache.query = fmt.Sprintf("UPDATE `dm_article` SET %s WHERE %s",
@@ -606,12 +606,12 @@ func (o *Article) Update(ctx context.Context, exec boil.ContextExecutor, columns
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update dm_article row")
+		return 0, errors.Wrap(err, "orm: unable to update dm_article row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for dm_article")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by update for dm_article")
 	}
 
 	if !cached {
@@ -629,12 +629,12 @@ func (q articleQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for dm_article")
+		return 0, errors.Wrap(err, "orm: unable to update all for dm_article")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for dm_article")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected for dm_article")
 	}
 
 	return rowsAff, nil
@@ -648,7 +648,7 @@ func (o ArticleSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 	}
 
 	if len(cols) == 0 {
-		return 0, errors.New("models: update all requires at least one column argument")
+		return 0, errors.New("orm: update all requires at least one column argument")
 	}
 
 	colNames := make([]string, len(cols))
@@ -678,12 +678,12 @@ func (o ArticleSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in article slice")
+		return 0, errors.Wrap(err, "orm: unable to update all in article slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all article")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected all in update all article")
 	}
 	return rowsAff, nil
 }
@@ -696,7 +696,7 @@ var mySQLArticleUniqueColumns = []string{
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
 func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no dm_article provided for upsert")
+		return errors.New("orm: no dm_article provided for upsert")
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
@@ -751,7 +751,7 @@ func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 		)
 
 		if len(update) == 0 {
-			return errors.New("models: unable to upsert dm_article, could not build update column list")
+			return errors.New("orm: unable to upsert dm_article, could not build update column list")
 		}
 
 		ret = strmangle.SetComplement(ret, nzUniques)
@@ -789,7 +789,7 @@ func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert for dm_article")
+		return errors.Wrap(err, "orm: unable to upsert for dm_article")
 	}
 
 	var lastID int64
@@ -812,7 +812,7 @@ func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 
 	uniqueMap, err = queries.BindMapping(articleType, articleMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to retrieve unique values for dm_article")
+		return errors.Wrap(err, "orm: unable to retrieve unique values for dm_article")
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -823,7 +823,7 @@ func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for dm_article")
+		return errors.Wrap(err, "orm: unable to populate default values for dm_article")
 	}
 
 CacheNoHooks:
@@ -840,7 +840,7 @@ CacheNoHooks:
 // Delete will match against the primary key column to find the record to delete.
 func (o *Article) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no Article provided for delete")
+		return 0, errors.New("orm: no Article provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
@@ -857,12 +857,12 @@ func (o *Article) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from dm_article")
+		return 0, errors.Wrap(err, "orm: unable to delete from dm_article")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for dm_article")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by delete for dm_article")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -875,19 +875,19 @@ func (o *Article) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 // DeleteAll deletes all matching rows.
 func (q articleQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no articleQuery provided for delete all")
+		return 0, errors.New("orm: no articleQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from dm_article")
+		return 0, errors.Wrap(err, "orm: unable to delete all from dm_article")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_article")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for dm_article")
 	}
 
 	return rowsAff, nil
@@ -896,7 +896,7 @@ func (q articleQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o ArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no Article slice provided for delete all")
+		return 0, errors.New("orm: no Article slice provided for delete all")
 	}
 
 	if len(o) == 0 {
@@ -927,12 +927,12 @@ func (o ArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from article slice")
+		return 0, errors.Wrap(err, "orm: unable to delete all from article slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_article")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for dm_article")
 	}
 
 	if len(articleAfterDeleteHooks) != 0 {
@@ -979,7 +979,7 @@ func (o *ArticleSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in ArticleSlice")
+		return errors.Wrap(err, "orm: unable to reload all in ArticleSlice")
 	}
 
 	*o = slice
@@ -1001,7 +1001,7 @@ func ArticleExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if dm_article exists")
+		return false, errors.Wrap(err, "orm: unable to check if dm_article exists")
 	}
 
 	return exists, nil

@@ -31,6 +31,7 @@ type Location struct {
 	Name        null.String `boil:"name" json:"name,omitempty" toml:"name" yaml:"name,omitempty"`
 	Section     null.String `boil:"section" json:"section,omitempty" toml:"section" yaml:"section,omitempty"`
 	RemoteID    null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
+	P           null.String `boil:"p" json:"p,omitempty" toml:"p" yaml:"p,omitempty"`
 
 	R *locationR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L locationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -44,6 +45,7 @@ var LocationColumns = struct {
 	Name        string
 	Section     string
 	RemoteID    string
+	P           string
 }{
 	ID:          "id",
 	ParentID:    "parent_id",
@@ -52,6 +54,7 @@ var LocationColumns = struct {
 	Name:        "name",
 	Section:     "section",
 	RemoteID:    "remote_id",
+	P:           "p",
 }
 
 // Generated where
@@ -64,6 +67,7 @@ var LocationWhere = struct {
 	Name        whereHelpernull_String
 	Section     whereHelpernull_String
 	RemoteID    whereHelpernull_String
+	P           whereHelpernull_String
 }{
 	ID:          whereHelperint{field: `id`},
 	ParentID:    whereHelpernull_Int{field: `parent_id`},
@@ -72,6 +76,7 @@ var LocationWhere = struct {
 	Name:        whereHelpernull_String{field: `name`},
 	Section:     whereHelpernull_String{field: `section`},
 	RemoteID:    whereHelpernull_String{field: `remote_id`},
+	P:           whereHelpernull_String{field: `p`},
 }
 
 // LocationRels is where relationship names are stored.
@@ -91,8 +96,8 @@ func (*locationR) NewStruct() *locationR {
 type locationL struct{}
 
 var (
-	locationColumns               = []string{"id", "parent_id", "content_type", "content_id", "name", "section", "remote_id"}
-	locationColumnsWithoutDefault = []string{"parent_id", "content_type", "content_id", "name", "section", "remote_id"}
+	locationColumns               = []string{"id", "parent_id", "content_type", "content_id", "name", "section", "remote_id", "p"}
+	locationColumnsWithoutDefault = []string{"parent_id", "content_type", "content_id", "name", "section", "remote_id", "p"}
 	locationColumnsWithDefault    = []string{"id"}
 	locationPrimaryKeyColumns     = []string{"id"}
 )
@@ -311,7 +316,7 @@ func (q locationQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Loc
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for dm_location")
+		return nil, errors.Wrap(err, "orm: failed to execute a one query for dm_location")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -327,7 +332,7 @@ func (q locationQuery) All(ctx context.Context, exec boil.ContextExecutor) (Loca
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to Location slice")
+		return nil, errors.Wrap(err, "orm: failed to assign all query results to Location slice")
 	}
 
 	if len(locationAfterSelectHooks) != 0 {
@@ -350,7 +355,7 @@ func (q locationQuery) Count(ctx context.Context, exec boil.ContextExecutor) (in
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count dm_location rows")
+		return 0, errors.Wrap(err, "orm: failed to count dm_location rows")
 	}
 
 	return count, nil
@@ -366,7 +371,7 @@ func (q locationQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (b
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if dm_location exists")
+		return false, errors.Wrap(err, "orm: failed to check if dm_location exists")
 	}
 
 	return count > 0, nil
@@ -398,7 +403,7 @@ func FindLocation(ctx context.Context, exec boil.ContextExecutor, iD int, select
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from dm_location")
+		return nil, errors.Wrap(err, "orm: unable to select from dm_location")
 	}
 
 	return locationObj, nil
@@ -408,7 +413,7 @@ func FindLocation(ctx context.Context, exec boil.ContextExecutor, iD int, select
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
 func (o *Location) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no dm_location provided for insertion")
+		return errors.New("orm: no dm_location provided for insertion")
 	}
 
 	var err error
@@ -466,7 +471,7 @@ func (o *Location) Insert(ctx context.Context, exec boil.ContextExecutor, column
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into dm_location")
+		return errors.Wrap(err, "orm: unable to insert into dm_location")
 	}
 
 	var lastID int64
@@ -497,7 +502,7 @@ func (o *Location) Insert(ctx context.Context, exec boil.ContextExecutor, column
 
 	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for dm_location")
+		return errors.Wrap(err, "orm: unable to populate default values for dm_location")
 	}
 
 CacheNoHooks:
@@ -533,7 +538,7 @@ func (o *Location) Update(ctx context.Context, exec boil.ContextExecutor, column
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update dm_location, could not build whitelist")
+			return 0, errors.New("orm: unable to update dm_location, could not build whitelist")
 		}
 
 		cache.query = fmt.Sprintf("UPDATE `dm_location` SET %s WHERE %s",
@@ -556,12 +561,12 @@ func (o *Location) Update(ctx context.Context, exec boil.ContextExecutor, column
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update dm_location row")
+		return 0, errors.Wrap(err, "orm: unable to update dm_location row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for dm_location")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by update for dm_location")
 	}
 
 	if !cached {
@@ -579,12 +584,12 @@ func (q locationQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor,
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for dm_location")
+		return 0, errors.Wrap(err, "orm: unable to update all for dm_location")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for dm_location")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected for dm_location")
 	}
 
 	return rowsAff, nil
@@ -598,7 +603,7 @@ func (o LocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor,
 	}
 
 	if len(cols) == 0 {
-		return 0, errors.New("models: update all requires at least one column argument")
+		return 0, errors.New("orm: update all requires at least one column argument")
 	}
 
 	colNames := make([]string, len(cols))
@@ -628,12 +633,12 @@ func (o LocationSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor,
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in location slice")
+		return 0, errors.Wrap(err, "orm: unable to update all in location slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all location")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected all in update all location")
 	}
 	return rowsAff, nil
 }
@@ -646,7 +651,7 @@ var mySQLLocationUniqueColumns = []string{
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
 func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no dm_location provided for upsert")
+		return errors.New("orm: no dm_location provided for upsert")
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
@@ -701,7 +706,7 @@ func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, update
 		)
 
 		if len(update) == 0 {
-			return errors.New("models: unable to upsert dm_location, could not build update column list")
+			return errors.New("orm: unable to upsert dm_location, could not build update column list")
 		}
 
 		ret = strmangle.SetComplement(ret, nzUniques)
@@ -739,7 +744,7 @@ func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, update
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert for dm_location")
+		return errors.Wrap(err, "orm: unable to upsert for dm_location")
 	}
 
 	var lastID int64
@@ -762,7 +767,7 @@ func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, update
 
 	uniqueMap, err = queries.BindMapping(locationType, locationMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to retrieve unique values for dm_location")
+		return errors.Wrap(err, "orm: unable to retrieve unique values for dm_location")
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -773,7 +778,7 @@ func (o *Location) Upsert(ctx context.Context, exec boil.ContextExecutor, update
 
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for dm_location")
+		return errors.Wrap(err, "orm: unable to populate default values for dm_location")
 	}
 
 CacheNoHooks:
@@ -790,7 +795,7 @@ CacheNoHooks:
 // Delete will match against the primary key column to find the record to delete.
 func (o *Location) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no Location provided for delete")
+		return 0, errors.New("orm: no Location provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
@@ -807,12 +812,12 @@ func (o *Location) Delete(ctx context.Context, exec boil.ContextExecutor) (int64
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from dm_location")
+		return 0, errors.Wrap(err, "orm: unable to delete from dm_location")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for dm_location")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by delete for dm_location")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -825,19 +830,19 @@ func (o *Location) Delete(ctx context.Context, exec boil.ContextExecutor) (int64
 // DeleteAll deletes all matching rows.
 func (q locationQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no locationQuery provided for delete all")
+		return 0, errors.New("orm: no locationQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from dm_location")
+		return 0, errors.Wrap(err, "orm: unable to delete all from dm_location")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_location")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for dm_location")
 	}
 
 	return rowsAff, nil
@@ -846,7 +851,7 @@ func (q locationQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor)
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o LocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no Location slice provided for delete all")
+		return 0, errors.New("orm: no Location slice provided for delete all")
 	}
 
 	if len(o) == 0 {
@@ -877,12 +882,12 @@ func (o LocationSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor)
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from location slice")
+		return 0, errors.Wrap(err, "orm: unable to delete all from location slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_location")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for dm_location")
 	}
 
 	if len(locationAfterDeleteHooks) != 0 {
@@ -929,7 +934,7 @@ func (o *LocationSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in LocationSlice")
+		return errors.Wrap(err, "orm: unable to reload all in LocationSlice")
 	}
 
 	*o = slice
@@ -951,7 +956,7 @@ func LocationExists(ctx context.Context, exec boil.ContextExecutor, iD int) (boo
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if dm_location exists")
+		return false, errors.Wrap(err, "orm: unable to check if dm_location exists")
 	}
 
 	return exists, nil

@@ -311,7 +311,7 @@ func (q userQuery) One(ctx context.Context, exec boil.ContextExecutor) (*User, e
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: failed to execute a one query for dm_user")
+		return nil, errors.Wrap(err, "orm: failed to execute a one query for dm_user")
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -327,7 +327,7 @@ func (q userQuery) All(ctx context.Context, exec boil.ContextExecutor) (UserSlic
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "models: failed to assign all query results to User slice")
+		return nil, errors.Wrap(err, "orm: failed to assign all query results to User slice")
 	}
 
 	if len(userAfterSelectHooks) != 0 {
@@ -350,7 +350,7 @@ func (q userQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64,
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to count dm_user rows")
+		return 0, errors.Wrap(err, "orm: failed to count dm_user rows")
 	}
 
 	return count, nil
@@ -366,7 +366,7 @@ func (q userQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "models: failed to check if dm_user exists")
+		return false, errors.Wrap(err, "orm: failed to check if dm_user exists")
 	}
 
 	return count > 0, nil
@@ -398,7 +398,7 @@ func FindUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "models: unable to select from dm_user")
+		return nil, errors.Wrap(err, "orm: unable to select from dm_user")
 	}
 
 	return userObj, nil
@@ -408,7 +408,7 @@ func FindUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
 func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no dm_user provided for insertion")
+		return errors.New("orm: no dm_user provided for insertion")
 	}
 
 	var err error
@@ -466,7 +466,7 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to insert into dm_user")
+		return errors.Wrap(err, "orm: unable to insert into dm_user")
 	}
 
 	var lastID int64
@@ -497,7 +497,7 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 
 	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for dm_user")
+		return errors.Wrap(err, "orm: unable to populate default values for dm_user")
 	}
 
 CacheNoHooks:
@@ -533,7 +533,7 @@ func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 			wl = strmangle.SetComplement(wl, []string{"created_at"})
 		}
 		if len(wl) == 0 {
-			return 0, errors.New("models: unable to update dm_user, could not build whitelist")
+			return 0, errors.New("orm: unable to update dm_user, could not build whitelist")
 		}
 
 		cache.query = fmt.Sprintf("UPDATE `dm_user` SET %s WHERE %s",
@@ -556,12 +556,12 @@ func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns bo
 	var result sql.Result
 	result, err = exec.ExecContext(ctx, cache.query, values...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update dm_user row")
+		return 0, errors.Wrap(err, "orm: unable to update dm_user row")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by update for dm_user")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by update for dm_user")
 	}
 
 	if !cached {
@@ -579,12 +579,12 @@ func (q userQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all for dm_user")
+		return 0, errors.Wrap(err, "orm: unable to update all for dm_user")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected for dm_user")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected for dm_user")
 	}
 
 	return rowsAff, nil
@@ -598,7 +598,7 @@ func (o UserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 	}
 
 	if len(cols) == 0 {
-		return 0, errors.New("models: update all requires at least one column argument")
+		return 0, errors.New("orm: update all requires at least one column argument")
 	}
 
 	colNames := make([]string, len(cols))
@@ -628,12 +628,12 @@ func (o UserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, col
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to update all in user slice")
+		return 0, errors.Wrap(err, "orm: unable to update all in user slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to retrieve rows affected all in update all user")
+		return 0, errors.Wrap(err, "orm: unable to retrieve rows affected all in update all user")
 	}
 	return rowsAff, nil
 }
@@ -646,7 +646,7 @@ var mySQLUserUniqueColumns = []string{
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
 func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
-		return errors.New("models: no dm_user provided for upsert")
+		return errors.New("orm: no dm_user provided for upsert")
 	}
 
 	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
@@ -701,7 +701,7 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColu
 		)
 
 		if len(update) == 0 {
-			return errors.New("models: unable to upsert dm_user, could not build update column list")
+			return errors.New("orm: unable to upsert dm_user, could not build update column list")
 		}
 
 		ret = strmangle.SetComplement(ret, nzUniques)
@@ -739,7 +739,7 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColu
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "models: unable to upsert for dm_user")
+		return errors.Wrap(err, "orm: unable to upsert for dm_user")
 	}
 
 	var lastID int64
@@ -762,7 +762,7 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColu
 
 	uniqueMap, err = queries.BindMapping(userType, userMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to retrieve unique values for dm_user")
+		return errors.Wrap(err, "orm: unable to retrieve unique values for dm_user")
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -773,7 +773,7 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColu
 
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to populate default values for dm_user")
+		return errors.Wrap(err, "orm: unable to populate default values for dm_user")
 	}
 
 CacheNoHooks:
@@ -790,7 +790,7 @@ CacheNoHooks:
 // Delete will match against the primary key column to find the record to delete.
 func (o *User) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no User provided for delete")
+		return 0, errors.New("orm: no User provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
@@ -807,12 +807,12 @@ func (o *User) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete from dm_user")
+		return 0, errors.Wrap(err, "orm: unable to delete from dm_user")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by delete for dm_user")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by delete for dm_user")
 	}
 
 	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
@@ -825,19 +825,19 @@ func (o *User) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, er
 // DeleteAll deletes all matching rows.
 func (q userQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("models: no userQuery provided for delete all")
+		return 0, errors.New("orm: no userQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
 
 	result, err := q.Query.ExecContext(ctx, exec)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from dm_user")
+		return 0, errors.Wrap(err, "orm: unable to delete all from dm_user")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_user")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for dm_user")
 	}
 
 	return rowsAff, nil
@@ -846,7 +846,7 @@ func (q userQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 // DeleteAll deletes all rows in the slice, using an executor.
 func (o UserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("models: no User slice provided for delete all")
+		return 0, errors.New("orm: no User slice provided for delete all")
 	}
 
 	if len(o) == 0 {
@@ -877,12 +877,12 @@ func (o UserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "models: unable to delete all from user slice")
+		return 0, errors.Wrap(err, "orm: unable to delete all from user slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "models: failed to get rows affected by deleteall for dm_user")
+		return 0, errors.Wrap(err, "orm: failed to get rows affected by deleteall for dm_user")
 	}
 
 	if len(userAfterDeleteHooks) != 0 {
@@ -929,7 +929,7 @@ func (o *UserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "models: unable to reload all in UserSlice")
+		return errors.Wrap(err, "orm: unable to reload all in UserSlice")
 	}
 
 	*o = slice
@@ -951,7 +951,7 @@ func UserExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, e
 
 	err := row.Scan(&exists)
 	if err != nil {
-		return false, errors.Wrap(err, "models: unable to check if dm_user exists")
+		return false, errors.Wrap(err, "orm: unable to check if dm_user exists")
 	}
 
 	return exists, nil
