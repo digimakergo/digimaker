@@ -58,12 +58,13 @@ API
 ------------
 There should be a flexible&powerful query api that you can query once and get what you need.
 eg.
-simple ones:
-/content/<id> you get content
-/content/list/<location_id> you get list of contents
+
+Simple ones:
+  /content/<id> you get content
+  /content/list/<location_id> you get list of contents
 
 complex one(like union): get name, id, created from article and files in recent one week
-/query/select/name,id,created/from/article,file/where/created>10
+  /query/select/name,id,created/from/article,file/where/created>10
 
 Should we support a query language(like Doctrine's DQL) or json like( { "select": "" } ). It all depends on application. Normally if it's not difficult query, url should be good enough.
 
