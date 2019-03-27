@@ -10,6 +10,32 @@ Application scenarios
 
 3. Micro application: as a content engine it runs independent, somthing like solr(so non-database can be supported)
 
+Architecture
+---------------
+Some principles:
+1. DO NOT try to do something which looks nice, but against the principle for long term. Some nice-try feature is actually blocking some good principles(but can try for short term). For instance,
+  - try to change table structure online -  this is possible, but what if it failed - we don't have rollback mechanism/backup online. Database change is better done by database console directly. We can generate sql so the executor can preview what's inside and do related action.
+  - try to do distributed system with too much data transferring by yourself. Distributed system need to be thought from whole projects perspective with more thoughts(with tools) for load balance, table design, database partition, etc. However, this framework can try to have content partition based on time for example, which can be used by database partition. Distributed system based on service is possible. But if we use load balance, all the services under load balance should be the same.
+```
+  - service 1
+      - load balancer
+         - service 1 implementation with same data(if data is too much, create partition data or move partition data with a new instance service3)
+         - service 1 implementation with same data
+         ...         
+  - service 2
+```
+NOT THIS(this is why mysql master-slave or other sync is not a good solution because data1 and data2 below sync can be desaster, specally when traffic is high, you have no control of data sync).
+```
+  - load balancer
+     - service 1 implementation with data1
+     - service 1 implementation with data1
+     - service 1 implementation with data2 which sync with data1
+     ...         
+     - service 2
+     ...
+```
+
+
 Content model
 =================
 1) [relate to performance]Should be able to move horizontal data to different partition or database.
