@@ -37,7 +37,7 @@ NOT THIS(this is why mysql master-slave or other sync is not a good solution bec
 
 
 Content model
-=================
+--------------
 1) [relate to performance]Should be able to move horizontal data to different partition or database.
 And the system should be able to load whole bunch of content data in another view(maybe a tab on top or tab under the node). If it's moved to a different database, it's possible to instance a new system with the part data.
 
@@ -79,9 +79,9 @@ NB: putting images&files into content structure can fundamentally make the paren
 
 
 API
-========
-1. Rest api
-------------
+---------
+### 1. Rest api
+
 There should be a flexible&powerful query api that you can query once and get what you need.
 eg.
 
@@ -97,13 +97,13 @@ complex one(like union): get name, id, created from article and files in recent 
 
 Should we support a query language(like Doctrine's DQL) or json like( { "select": "" } ). It all depends on application. Normally if it's not difficult query, url should be good enough.
 
-2. Local api
-------------
+### 2. Local api
+
 Should avoid to use sql directly(and we will support NOSQL), use query api(eg. where( "created", ">=32131321" )).
 
 
 Quality needs
-==============
+-------------
 1) API should be minimal to use(write less code)
 
 2) Database needs to be natual to application(not difficult database stucture that it's hard to extend in database level, like join).
@@ -112,10 +112,8 @@ Quality needs
 
 
 Future
-===============
-
-Performance
 -------------
+### Performance
 The system aims to have hundrends million/billion-intractive-level content, to achieve that, dm_location(which is the only table used by all other content) can be very big, so partition should be possible from start
 
 Partition for dm_location, based on section first
