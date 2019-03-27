@@ -1,5 +1,5 @@
 Application scenarios
-==============
+---------------------
 1. Website like CMS application, for enterprise mainly, which means for internet and intranet.
 - hightlights: for subscriber visit(eg. ft or ftchinese) - dynamic content
                for mobile app which need login - dynamic content
