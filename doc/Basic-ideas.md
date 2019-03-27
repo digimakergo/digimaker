@@ -24,7 +24,7 @@ Some principles:
          ...         
   - service 2
 ```
-NOT THIS(this is why mysql master-slave or other sync is not a good solution because data1 and data2 below sync can be desaster, specally when traffic is high, you have no control of data sync). The principle for sync is that: service should not be available while it's data is syncing.
+NOT THIS(this is why mysql master-slave or other sync is not a good solution because data1 and data2 below sync can be desaster, specally when traffic is high, __you have no control of process of data sync when it comes to this level__). The principle for sync is that: service should not be available while it's data is syncing.
 ```
   - load balancer
      - service 1 implementation with data1
