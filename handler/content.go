@@ -7,7 +7,7 @@ This is a parent struct which consits of location and the content itself(eg. art
 import (
 	"context"
 	"dm/db"
-	"dm/models/orm"
+	"dm/model/entity"
 	util "dm/util"
 	"errors"
 
@@ -25,7 +25,7 @@ type Contenter interface {
 }
 
 type ContentHandler struct {
-	Content *orm.Article
+	Content *entity.Article
 }
 
 //Create draft of a content. parent_id will be -1 in this case

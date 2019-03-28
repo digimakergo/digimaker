@@ -3,7 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
-	orm "dm/models/orm"
+	orm "dm/model/entity"
 	"fmt"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -24,7 +24,7 @@ func main() {
 
 	//content := new(base.Content)
 
-	count, err := orm.Locations().Count(context.Background(), db)
+	count, err := entity.Locations().Count(context.Background(), db)
 
 	fmt.Printf("Count: %d \n", count)
 }

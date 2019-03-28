@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"dm/models/orm"
+	"dm/model/entity"
 	"encoding/json"
 	"testing"
 )
@@ -22,13 +22,13 @@ func TestStore(t *testing.T) {
 func TestCreate(t *testing.T) {
 	// data := `{"location":{"content_type": "folder", "name": "Test folder"}}`
 	var c Content
-	var l orm.Location
+	var l entity.Location
 	l.Name = "Test folder"
 	l.ContentType = "folder"
 	l.ContentID = 0
 	c.Location = &l
 
-	var article = orm.Article{}
+	var article = entity.Article{}
 	article.
 		// json.Unmarshal([]byte(data), &c)
 		// if c.Location.Name.IsZero() {
