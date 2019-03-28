@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dm/type_default/field"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -24,26 +25,51 @@ import (
 
 // Article is an object representing the database table.
 type Article struct {
-	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title     null.String `boil:"title" json:"title,omitempty" toml:"title" yaml:"title,omitempty"`
-	Body      null.String `boil:"body" json:"body,omitempty" toml:"body" yaml:"body,omitempty"`
-	Published null.Int    `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified  null.Int    `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
-	RemoteID  null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
+	DataID    int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Title     field.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Body      field.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
+	Published null.Int            `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
+	Modified  null.Int            `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	RemoteID  null.String         `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
 
 	R *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L articleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	*Location
+}
+
+func (c *Article) Fields() map[string]Article {
+	return nil
+}
+
+func (c *Article) Field(name string) interface{} {
+	var result = nil
+	switch name {
+	case "id", "DataID":
+		result = c.DataID
+	case "title", "Title":
+		result = c.Title
+	case "body", "Body":
+		result = c.Body
+	case "published", "Published":
+		result = c.Published
+	case "modified", "Modified":
+		result = c.Modified
+	case "remote_id", "RemoteID":
+		result = c.RemoteID
+	default:
+	}
+	return result
 }
 
 var ArticleColumns = struct {
-	ID        string
+	DataID    string
 	Title     string
 	Body      string
 	Published string
 	Modified  string
 	RemoteID  string
 }{
-	ID:        "id",
+	DataID:    "id",
 	Title:     "title",
 	Body:      "body",
 	Published: "published",
@@ -62,26 +88,45 @@ func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, 
 func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
 func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
-type whereHelpernull_String struct{ field string }
+type whereHelperfield_TextField struct{ field string }
 
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
+func (w whereHelperfield_TextField) EQ(x field.TextField) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
 }
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
+func (w whereHelperfield_TextField) NEQ(x field.TextField) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
 }
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+func (w whereHelperfield_TextField) LT(x field.TextField) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LT, x)
 }
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+func (w whereHelperfield_TextField) LTE(x field.TextField) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.LTE, x)
 }
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+func (w whereHelperfield_TextField) GT(x field.TextField) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GT, x)
 }
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+func (w whereHelperfield_TextField) GTE(x field.TextField) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
+type whereHelperfield_RichTextField struct{ field string }
+
+func (w whereHelperfield_RichTextField) EQ(x field.RichTextField) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.EQ, x)
+}
+func (w whereHelperfield_RichTextField) NEQ(x field.RichTextField) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.NEQ, x)
+}
+func (w whereHelperfield_RichTextField) LT(x field.RichTextField) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelperfield_RichTextField) LTE(x field.RichTextField) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelperfield_RichTextField) GT(x field.RichTextField) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelperfield_RichTextField) GTE(x field.RichTextField) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
@@ -108,17 +153,40 @@ func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
+
 var ArticleWhere = struct {
-	ID        whereHelperint
-	Title     whereHelpernull_String
-	Body      whereHelpernull_String
+	DataID    whereHelperint
+	Title     whereHelperfield_TextField
+	Body      whereHelperfield_RichTextField
 	Published whereHelpernull_Int
 	Modified  whereHelpernull_Int
 	RemoteID  whereHelpernull_String
 }{
-	ID:        whereHelperint{field: `id`},
-	Title:     whereHelpernull_String{field: `title`},
-	Body:      whereHelpernull_String{field: `body`},
+	DataID:    whereHelperint{field: `id`},
+	Title:     whereHelperfield_TextField{field: `title`},
+	Body:      whereHelperfield_RichTextField{field: `body`},
 	Published: whereHelpernull_Int{field: `published`},
 	Modified:  whereHelpernull_Int{field: `modified`},
 	RemoteID:  whereHelpernull_String{field: `remote_id`},
@@ -430,7 +498,7 @@ func Articles(mods ...qm.QueryMod) articleQuery {
 
 // FindArticle retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindArticle(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Article, error) {
+func FindArticle(ctx context.Context, exec boil.ContextExecutor, dataID int, selectCols ...string) (*Article, error) {
 	articleObj := &Article{}
 
 	sel := "*"
@@ -441,7 +509,7 @@ func FindArticle(ctx context.Context, exec boil.ContextExecutor, iD int, selectC
 		"select %s from `dm_article` where `id`=?", sel,
 	)
 
-	q := queries.Raw(query, iD)
+	q := queries.Raw(query, dataID)
 
 	err := q.Bind(ctx, exec, articleObj)
 	if err != nil {
@@ -537,7 +605,7 @@ func (o *Article) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	identifierCols = []interface{}{
-		o.ID,
+		o.DataID,
 	}
 
 	if boil.DebugMode {
@@ -805,7 +873,7 @@ func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 		return ErrSyncFail
 	}
 
-	o.ID = int(lastID)
+	o.DataID = int(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == articleMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -949,7 +1017,7 @@ func (o ArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *Article) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindArticle(ctx, exec, o.ID)
+	ret, err := FindArticle(ctx, exec, o.DataID)
 	if err != nil {
 		return err
 	}
@@ -988,16 +1056,16 @@ func (o *ArticleSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 }
 
 // ArticleExists checks if the Article row exists.
-func ArticleExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+func ArticleExists(ctx context.Context, exec boil.ContextExecutor, dataID int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `dm_article` where `id`=? limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, iD)
+		fmt.Fprintln(boil.DebugWriter, dataID)
 	}
 
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRowContext(ctx, sql, dataID)
 
 	err := row.Scan(&exists)
 	if err != nil {

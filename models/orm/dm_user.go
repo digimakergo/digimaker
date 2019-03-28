@@ -24,7 +24,7 @@ import (
 
 // User is an object representing the database table.
 type User struct {
-	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	DataID    int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Login     null.String `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
 	Firstname null.String `boil:"firstname" json:"firstname,omitempty" toml:"firstname" yaml:"firstname,omitempty"`
 	Lastname  null.String `boil:"lastname" json:"lastname,omitempty" toml:"lastname" yaml:"lastname,omitempty"`
@@ -34,10 +34,37 @@ type User struct {
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	*Location
+}
+
+func (c *User) Fields() map[string]User {
+	return nil
+}
+
+func (c *User) Field(name string) interface{} {
+	var result = nil
+	switch name {
+	case "id", "DataID":
+		result = c.DataID
+	case "login", "Login":
+		result = c.Login
+	case "firstname", "Firstname":
+		result = c.Firstname
+	case "lastname", "Lastname":
+		result = c.Lastname
+	case "password", "Password":
+		result = c.Password
+	case "mobile", "Mobile":
+		result = c.Mobile
+	case "remote_id", "RemoteID":
+		result = c.RemoteID
+	default:
+	}
+	return result
 }
 
 var UserColumns = struct {
-	ID        string
+	DataID    string
 	Login     string
 	Firstname string
 	Lastname  string
@@ -45,7 +72,7 @@ var UserColumns = struct {
 	Mobile    string
 	RemoteID  string
 }{
-	ID:        "id",
+	DataID:    "id",
 	Login:     "login",
 	Firstname: "firstname",
 	Lastname:  "lastname",
@@ -57,7 +84,7 @@ var UserColumns = struct {
 // Generated where
 
 var UserWhere = struct {
-	ID        whereHelperint
+	DataID    whereHelperint
 	Login     whereHelpernull_String
 	Firstname whereHelpernull_String
 	Lastname  whereHelpernull_String
@@ -65,7 +92,7 @@ var UserWhere = struct {
 	Mobile    whereHelpernull_String
 	RemoteID  whereHelpernull_String
 }{
-	ID:        whereHelperint{field: `id`},
+	DataID:    whereHelperint{field: `id`},
 	Login:     whereHelpernull_String{field: `login`},
 	Firstname: whereHelpernull_String{field: `firstname`},
 	Lastname:  whereHelpernull_String{field: `lastname`},
@@ -380,7 +407,7 @@ func Users(mods ...qm.QueryMod) userQuery {
 
 // FindUser retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*User, error) {
+func FindUser(ctx context.Context, exec boil.ContextExecutor, dataID int, selectCols ...string) (*User, error) {
 	userObj := &User{}
 
 	sel := "*"
@@ -391,7 +418,7 @@ func FindUser(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols
 		"select %s from `dm_user` where `id`=?", sel,
 	)
 
-	q := queries.Raw(query, iD)
+	q := queries.Raw(query, dataID)
 
 	err := q.Bind(ctx, exec, userObj)
 	if err != nil {
@@ -487,7 +514,7 @@ func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns bo
 	}
 
 	identifierCols = []interface{}{
-		o.ID,
+		o.DataID,
 	}
 
 	if boil.DebugMode {
@@ -755,7 +782,7 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColu
 		return ErrSyncFail
 	}
 
-	o.ID = int(lastID)
+	o.DataID = int(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == userMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -899,7 +926,7 @@ func (o UserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (in
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *User) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindUser(ctx, exec, o.ID)
+	ret, err := FindUser(ctx, exec, o.DataID)
 	if err != nil {
 		return err
 	}
@@ -938,16 +965,16 @@ func (o *UserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) er
 }
 
 // UserExists checks if the User row exists.
-func UserExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+func UserExists(ctx context.Context, exec boil.ContextExecutor, dataID int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `dm_user` where `id`=? limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, iD)
+		fmt.Fprintln(boil.DebugWriter, dataID)
 	}
 
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRowContext(ctx, sql, dataID)
 
 	err := row.Scan(&exists)
 	if err != nil {

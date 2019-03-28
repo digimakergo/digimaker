@@ -24,7 +24,7 @@ import (
 
 // Folder is an object representing the database table.
 type Folder struct {
-	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	DataID    int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Title     null.String `boil:"title" json:"title,omitempty" toml:"title" yaml:"title,omitempty"`
 	Summary   null.String `boil:"summary" json:"summary,omitempty" toml:"summary" yaml:"summary,omitempty"`
 	Published null.Int    `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
@@ -33,17 +33,42 @@ type Folder struct {
 
 	R *folderR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L folderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	*Location
+}
+
+func (c *Folder) Fields() map[string]Folder {
+	return nil
+}
+
+func (c *Folder) Field(name string) interface{} {
+	var result = nil
+	switch name {
+	case "id", "DataID":
+		result = c.DataID
+	case "title", "Title":
+		result = c.Title
+	case "summary", "Summary":
+		result = c.Summary
+	case "published", "Published":
+		result = c.Published
+	case "modified", "Modified":
+		result = c.Modified
+	case "remote_id", "RemoteID":
+		result = c.RemoteID
+	default:
+	}
+	return result
 }
 
 var FolderColumns = struct {
-	ID        string
+	DataID    string
 	Title     string
 	Summary   string
 	Published string
 	Modified  string
 	RemoteID  string
 }{
-	ID:        "id",
+	DataID:    "id",
 	Title:     "title",
 	Summary:   "summary",
 	Published: "published",
@@ -54,14 +79,14 @@ var FolderColumns = struct {
 // Generated where
 
 var FolderWhere = struct {
-	ID        whereHelperint
+	DataID    whereHelperint
 	Title     whereHelpernull_String
 	Summary   whereHelpernull_String
 	Published whereHelpernull_Int
 	Modified  whereHelpernull_Int
 	RemoteID  whereHelpernull_String
 }{
-	ID:        whereHelperint{field: `id`},
+	DataID:    whereHelperint{field: `id`},
 	Title:     whereHelpernull_String{field: `title`},
 	Summary:   whereHelpernull_String{field: `summary`},
 	Published: whereHelpernull_Int{field: `published`},
@@ -375,7 +400,7 @@ func Folders(mods ...qm.QueryMod) folderQuery {
 
 // FindFolder retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindFolder(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Folder, error) {
+func FindFolder(ctx context.Context, exec boil.ContextExecutor, dataID int, selectCols ...string) (*Folder, error) {
 	folderObj := &Folder{}
 
 	sel := "*"
@@ -386,7 +411,7 @@ func FindFolder(ctx context.Context, exec boil.ContextExecutor, iD int, selectCo
 		"select %s from `dm_folder` where `id`=?", sel,
 	)
 
-	q := queries.Raw(query, iD)
+	q := queries.Raw(query, dataID)
 
 	err := q.Bind(ctx, exec, folderObj)
 	if err != nil {
@@ -482,7 +507,7 @@ func (o *Folder) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 	}
 
 	identifierCols = []interface{}{
-		o.ID,
+		o.DataID,
 	}
 
 	if boil.DebugMode {
@@ -750,7 +775,7 @@ func (o *Folder) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 		return ErrSyncFail
 	}
 
-	o.ID = int(lastID)
+	o.DataID = int(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == folderMapping["id"] {
 		goto CacheNoHooks
 	}
@@ -894,7 +919,7 @@ func (o FolderSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 // Reload refetches the object from the database
 // using the primary keys with an executor.
 func (o *Folder) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindFolder(ctx, exec, o.ID)
+	ret, err := FindFolder(ctx, exec, o.DataID)
 	if err != nil {
 		return err
 	}
@@ -933,16 +958,16 @@ func (o *FolderSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) 
 }
 
 // FolderExists checks if the Folder row exists.
-func FolderExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+func FolderExists(ctx context.Context, exec boil.ContextExecutor, dataID int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `dm_folder` where `id`=? limit 1)"
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, iD)
+		fmt.Fprintln(boil.DebugWriter, dataID)
 	}
 
-	row := exec.QueryRowContext(ctx, sql, iD)
+	row := exec.QueryRowContext(ctx, sql, dataID)
 
 	err := row.Scan(&exists)
 	if err != nil {

@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dm/type_default/field"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -23,17 +24,45 @@ import (
 
 // Location is an object representing the database table.
 type Location struct {
-	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	ParentID    int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
-	ContentType string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
-	ContentID   int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
-	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
-	Section     string `boil:"section" json:"section" toml:"section" yaml:"section"`
-	RemoteID    string `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
-	P           string `boil:"p" json:"p" toml:"p" yaml:"p"`
+	ID          int             `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ParentID    int             `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
+	ContentType field.TextField `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
+	ContentID   int             `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
+	Name        field.TextField `boil:"name" json:"name" toml:"name" yaml:"name"`
+	Section     field.TextField `boil:"section" json:"section" toml:"section" yaml:"section"`
+	RemoteID    field.TextField `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
+	P           field.TextField `boil:"p" json:"p" toml:"p" yaml:"p"`
 
 	R *locationR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L locationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+}
+
+func (c *Location) Fields() map[string]Location {
+	return nil
+}
+
+func (c *Location) Field(name string) interface{} {
+	var result = nil
+	switch name {
+	case "id", "ID":
+		result = c.ID
+	case "parent_id", "ParentID":
+		result = c.ParentID
+	case "content_type", "ContentType":
+		result = c.ContentType
+	case "content_id", "ContentID":
+		result = c.ContentID
+	case "name", "Name":
+		result = c.Name
+	case "section", "Section":
+		result = c.Section
+	case "remote_id", "RemoteID":
+		result = c.RemoteID
+	case "p", "P":
+		result = c.P
+	default:
+	}
+	return result
 }
 
 var LocationColumns = struct {
@@ -58,33 +87,24 @@ var LocationColumns = struct {
 
 // Generated where
 
-type whereHelperstring struct{ field string }
-
-func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
-func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
-func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
-func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
-func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
-func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
-
 var LocationWhere = struct {
 	ID          whereHelperint
 	ParentID    whereHelperint
-	ContentType whereHelperstring
+	ContentType whereHelperfield_TextField
 	ContentID   whereHelperint
-	Name        whereHelperstring
-	Section     whereHelperstring
-	RemoteID    whereHelperstring
-	P           whereHelperstring
+	Name        whereHelperfield_TextField
+	Section     whereHelperfield_TextField
+	RemoteID    whereHelperfield_TextField
+	P           whereHelperfield_TextField
 }{
 	ID:          whereHelperint{field: `id`},
 	ParentID:    whereHelperint{field: `parent_id`},
-	ContentType: whereHelperstring{field: `content_type`},
+	ContentType: whereHelperfield_TextField{field: `content_type`},
 	ContentID:   whereHelperint{field: `content_id`},
-	Name:        whereHelperstring{field: `name`},
-	Section:     whereHelperstring{field: `section`},
-	RemoteID:    whereHelperstring{field: `remote_id`},
-	P:           whereHelperstring{field: `p`},
+	Name:        whereHelperfield_TextField{field: `name`},
+	Section:     whereHelperfield_TextField{field: `section`},
+	RemoteID:    whereHelperfield_TextField{field: `remote_id`},
+	P:           whereHelperfield_TextField{field: `p`},
 }
 
 // LocationRels is where relationship names are stored.

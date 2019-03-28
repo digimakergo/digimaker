@@ -3,6 +3,7 @@ package models
 import "errors"
 
 type Fielder interface {
+	Val()
 	Create()
 	Validate(Contenter)
 	SetStoreData()
@@ -14,12 +15,16 @@ type Fielder interface {
 //
 type Field struct {
 	FieldType  string //do not use DataType because this is better to do instance with json.
-	InputData  string
+	ViewData   string
 	StoredData string
 }
 
-func (f Field) GetStoredData() (string, error) {
+func (f *Field) GetStoredData() (string, error) {
 	return "", nil
+}
+
+func (f *Field) Val() string {
+	return f.ViewData
 }
 
 //SetStoreData converts InputData to StoredData with validation.

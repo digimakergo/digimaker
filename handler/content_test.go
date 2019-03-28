@@ -1,9 +1,8 @@
-package models
+package handler
 
 import (
 	"dm/models/orm"
 	"encoding/json"
-	"fmt"
 	"testing"
 )
 
@@ -28,13 +27,16 @@ func TestCreate(t *testing.T) {
 	l.ContentType = "folder"
 	l.ContentID = 0
 	c.Location = &l
-	// json.Unmarshal([]byte(data), &c)
-	// if c.Location.Name.IsZero() {
-	// 	fmt.Printf("zero")
-	// }
-	// err := c.Create()
-	// if err != nil {
-	// 	t.Error(err)
-	// }
-	fmt.Printf("store data")
+
+	var article = orm.Article{}
+	article.
+		// json.Unmarshal([]byte(data), &c)
+		// if c.Location.Name.IsZero() {
+		// 	fmt.Printf("zero")
+		// }
+		// err := c.Create()
+		// if err != nil {
+		// 	t.Error(err)
+		// }
+		fmt.Printf("store data")
 }

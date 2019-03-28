@@ -32,6 +32,29 @@ type Version struct {
 
 	R *versionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L versionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	*Location
+}
+
+func (c *Version) Fields() map[string]Version {
+	return nil
+}
+
+func (c *Version) Field(name string) interface{} {
+	var result = nil
+	switch name {
+	case "id", "ID":
+		result = c.ID
+	case "type", "Type":
+		result = c.Type
+	case "content_id", "ContentID":
+		result = c.ContentID
+	case "version", "Version":
+		result = c.Version
+	case "data", "Data":
+		result = c.Data
+	default:
+	}
+	return result
 }
 
 var VersionColumns = struct {

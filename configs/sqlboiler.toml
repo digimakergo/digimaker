@@ -1,6 +1,10 @@
 pkgname = "orm"
 output = "models/orm"
 no-tests = "true"
+templates = [
+  "/Users/xc/go/caf-prototype/src/github.com/volatiletech/sqlboiler/templates",
+  "/Users/xc/go/caf-prototype/src/dm/sqlboiler/templates"
+]
 
 [mysql]
 host = "185.35.187.91"
@@ -9,6 +13,32 @@ pass = "D!g!m@ker"
 dbname = "dev_emf"
 sslmode = "false"
 blacklist = ['dm_relation']
+
+#Text
+[[types]]
+[types.match]
+db_type = "varchar"
+
+[types.replace]
+type = "field.TextField"
+
+[types.imports]
+third_party = ['"dm/type_default/field"']
+
+
+# Richtext
+[[types]]
+[types.match]
+db_type = "text"
+
+
+[types.replace]
+type = "field.RichTextField"
+
+[types.imports]
+third_party = ['"dm/type_default/field"']
+
+
 
 [aliases.tables.dm_location]
 up_plural = "Locations"
@@ -22,11 +52,17 @@ up_singular = "Folder"
 down_plural = "folders"
 down_singular = "folder"
 
+[aliases.tables.dm_folder.columns]
+id = "DataID"
+
 [aliases.tables.dm_article]
 up_plural = "Articles"
 up_singular = "Article"
 down_plural = "articles"
 down_singular = "article"
+
+[aliases.tables.dm_article.columns]
+id = "DataID"
 
 [aliases.tables.dm_user]
 up_plural = "Users"
@@ -34,6 +70,8 @@ up_singular = "User"
 down_plural = "users"
 down_singular = "user"
 
+[aliases.tables.dm_user.columns]
+id = "DataID"
 
 [aliases.tables.dm_version]
 up_plural = "Versions"
