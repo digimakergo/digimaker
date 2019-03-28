@@ -23,6 +23,7 @@ import (
 )
 
 // User is an object representing the database table.
+// Implement dm.model.ContentTyper interface
 type User struct {
 	DataID    int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Login     null.String `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
@@ -63,6 +64,22 @@ func (c *User) Field(name string) interface{} {
 	return result
 }
 
+func (c *User) DataID() int {
+	return c.DataID
+}
+
+func (c *User) Title() string {
+	return c.Title
+}
+
+func (c *User) Published() int {
+	return c.Published
+}
+
+func (c *User) Modified() int {
+	return c.Modified
+}
+
 var UserColumns = struct {
 	DataID    string
 	Login     string
@@ -82,6 +99,29 @@ var UserColumns = struct {
 }
 
 // Generated where
+
+type whereHelpernull_String struct{ field string }
+
+func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 var UserWhere = struct {
 	DataID    whereHelperint

@@ -5,7 +5,7 @@ import "errors"
 type Fielder interface {
 	Val()
 	Create()
-	Validate(Contenter)
+	Validate()
 	SetStoreData()
 }
 
@@ -28,7 +28,7 @@ func (f *Field) Val() string {
 }
 
 //SetStoreData converts InputData to StoredData with validation.
-func (f *Field) SetStoreData(c *Content, identifer string) error {
+func (f *Field) SetStoreData(c *ContentTyper, identifer string) error {
 	err := f.Validate(c, identifer)
 	if err != nil {
 		return errors.New("Validation error. " + err.Error())
@@ -39,6 +39,6 @@ func (f *Field) SetStoreData(c *Content, identifer string) error {
 	return nil
 }
 
-func (f *Field) Validate(c *Content, identifer string) error {
+func (f *Field) Validate(c *ContentTyper, identifer string) error {
 	return nil
 }

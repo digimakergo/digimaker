@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"dm/type_default/field"
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -23,13 +23,15 @@ import (
 )
 
 // Folder is an object representing the database table.
+// Implement dm.model.ContentTyper interface
 type Folder struct {
-	DataID    int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Title     null.String `boil:"title" json:"title,omitempty" toml:"title" yaml:"title,omitempty"`
-	Summary   null.String `boil:"summary" json:"summary,omitempty" toml:"summary" yaml:"summary,omitempty"`
-	Published null.Int    `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified  null.Int    `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
-	RemoteID  null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
+	DataID     int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	FolderType string              `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
+	Title      field.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Summary    field.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+	Published  int                 `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
+	Modified   int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	RemoteID   string              `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
 	R *folderR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L folderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -45,6 +47,8 @@ func (c *Folder) Field(name string) interface{} {
 	switch name {
 	case "id", "DataID":
 		result = c.DataID
+	case "folder_type", "FolderType":
+		result = c.FolderType
 	case "title", "Title":
 		result = c.Title
 	case "summary", "Summary":
@@ -60,38 +64,58 @@ func (c *Folder) Field(name string) interface{} {
 	return result
 }
 
+func (c *Folder) DataID() int {
+	return c.DataID
+}
+
+func (c *Folder) Title() string {
+	return c.Title
+}
+
+func (c *Folder) Published() int {
+	return c.Published
+}
+
+func (c *Folder) Modified() int {
+	return c.Modified
+}
+
 var FolderColumns = struct {
-	DataID    string
-	Title     string
-	Summary   string
-	Published string
-	Modified  string
-	RemoteID  string
+	DataID     string
+	FolderType string
+	Title      string
+	Summary    string
+	Published  string
+	Modified   string
+	RemoteID   string
 }{
-	DataID:    "id",
-	Title:     "title",
-	Summary:   "summary",
-	Published: "published",
-	Modified:  "modified",
-	RemoteID:  "remote_id",
+	DataID:     "id",
+	FolderType: "folder_type",
+	Title:      "title",
+	Summary:    "summary",
+	Published:  "published",
+	Modified:   "modified",
+	RemoteID:   "remote_id",
 }
 
 // Generated where
 
 var FolderWhere = struct {
-	DataID    whereHelperint
-	Title     whereHelpernull_String
-	Summary   whereHelpernull_String
-	Published whereHelpernull_Int
-	Modified  whereHelpernull_Int
-	RemoteID  whereHelpernull_String
+	DataID     whereHelperint
+	FolderType whereHelperstring
+	Title      whereHelperfield_TextField
+	Summary    whereHelperfield_RichTextField
+	Published  whereHelperint
+	Modified   whereHelperint
+	RemoteID   whereHelperstring
 }{
-	DataID:    whereHelperint{field: `id`},
-	Title:     whereHelpernull_String{field: `title`},
-	Summary:   whereHelpernull_String{field: `summary`},
-	Published: whereHelpernull_Int{field: `published`},
-	Modified:  whereHelpernull_Int{field: `modified`},
-	RemoteID:  whereHelpernull_String{field: `remote_id`},
+	DataID:     whereHelperint{field: `id`},
+	FolderType: whereHelperstring{field: `folder_type`},
+	Title:      whereHelperfield_TextField{field: `title`},
+	Summary:    whereHelperfield_RichTextField{field: `summary`},
+	Published:  whereHelperint{field: `published`},
+	Modified:   whereHelperint{field: `modified`},
+	RemoteID:   whereHelperstring{field: `remote_id`},
 }
 
 // FolderRels is where relationship names are stored.
@@ -111,8 +135,8 @@ func (*folderR) NewStruct() *folderR {
 type folderL struct{}
 
 var (
-	folderColumns               = []string{"id", "title", "summary", "published", "modified", "remote_id"}
-	folderColumnsWithoutDefault = []string{"title", "summary", "published", "modified", "remote_id"}
+	folderColumns               = []string{"id", "folder_type", "title", "summary", "published", "modified", "remote_id"}
+	folderColumnsWithoutDefault = []string{"folder_type", "title", "summary", "published", "modified", "remote_id"}
 	folderColumnsWithDefault    = []string{"id"}
 	folderPrimaryKeyColumns     = []string{"id"}
 )

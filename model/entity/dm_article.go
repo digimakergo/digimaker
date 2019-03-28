@@ -15,7 +15,6 @@ import (
 
 	"dm/type_default/field"
 	"github.com/pkg/errors"
-	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qm"
@@ -24,13 +23,14 @@ import (
 )
 
 // Article is an object representing the database table.
+// Implement dm.model.ContentTyper interface
 type Article struct {
 	DataID    int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Title     field.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Body      field.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
-	Published null.Int            `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified  null.Int            `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
-	RemoteID  null.String         `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
+	Published int                 `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
+	Modified  int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	RemoteID  string              `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
 	R *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L articleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -59,6 +59,22 @@ func (c *Article) Field(name string) interface{} {
 	default:
 	}
 	return result
+}
+
+func (c *Article) DataID() int {
+	return c.DataID
+}
+
+func (c *Article) Title() string {
+	return c.Title
+}
+
+func (c *Article) Published() int {
+	return c.Published
+}
+
+func (c *Article) Modified() int {
+	return c.Modified
 }
 
 var ArticleColumns = struct {
@@ -130,66 +146,29 @@ func (w whereHelperfield_RichTextField) GTE(x field.RichTextField) qm.QueryMod {
 	return qmhelper.Where(w.field, qmhelper.GTE, x)
 }
 
-type whereHelpernull_Int struct{ field string }
+type whereHelperstring struct{ field string }
 
-func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var ArticleWhere = struct {
 	DataID    whereHelperint
 	Title     whereHelperfield_TextField
 	Body      whereHelperfield_RichTextField
-	Published whereHelpernull_Int
-	Modified  whereHelpernull_Int
-	RemoteID  whereHelpernull_String
+	Published whereHelperint
+	Modified  whereHelperint
+	RemoteID  whereHelperstring
 }{
 	DataID:    whereHelperint{field: `id`},
 	Title:     whereHelperfield_TextField{field: `title`},
 	Body:      whereHelperfield_RichTextField{field: `body`},
-	Published: whereHelpernull_Int{field: `published`},
-	Modified:  whereHelpernull_Int{field: `modified`},
-	RemoteID:  whereHelpernull_String{field: `remote_id`},
+	Published: whereHelperint{field: `published`},
+	Modified:  whereHelperint{field: `modified`},
+	RemoteID:  whereHelperstring{field: `remote_id`},
 }
 
 // ArticleRels is where relationship names are stored.

@@ -1,3 +1,7 @@
+##
+##Generate models for content types. eg. article, folder
+##
+
 pkgname = "entity"
 output = "model/entity"
 no-tests = "true"
@@ -12,8 +16,16 @@ user = "dev"
 pass = "D!g!m@ker"
 dbname = "dev_emf"
 sslmode = "false"
-blacklist = ['dm_relation']
+blacklist = ['dm_relation','dm_location']
 
+##TODO: use a better mechanism to diffenticate fields between:
+##1) preserved: eg. id, published.
+##2) actual field: eg. title
+##3) extended database field(should not convert to dmField): eg. magazine_id int
+##
+## ways can be:
+## - generate sqlboilder.toml from our json/toml which defineds content type
+## - do more in template(no recommanded)
 #Text
 [[types]]
 [types.match]
@@ -38,6 +50,38 @@ type = "field.RichTextField"
 [types.imports]
 third_party = ['"dm/type_default/field"']
 
+
+##Execlude below types replacement
+
+[[types]]
+[types.match]
+name = "folder_type"
+
+[types.replace]
+type = "string"
+
+[[types]]
+[types.match]
+name = "remote_id"
+
+[types.replace]
+type = "string"
+
+[[types]]
+[types.match]
+name = "published"
+nullable = true
+
+[types.replace]
+type = "int"
+
+[[types]]
+[types.match]
+name = "modified"
+nullable = true
+
+[types.replace]
+type = "int"
 
 
 [aliases.tables.dm_location]

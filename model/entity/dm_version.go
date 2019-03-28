@@ -23,6 +23,7 @@ import (
 )
 
 // Version is an object representing the database table.
+// Implement dm.model.ContentTyper interface
 type Version struct {
 	ID        int         `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Type      null.String `boil:"type" json:"type,omitempty" toml:"type" yaml:"type,omitempty"`
@@ -57,6 +58,22 @@ func (c *Version) Field(name string) interface{} {
 	return result
 }
 
+func (c *Version) DataID() int {
+	return c.DataID
+}
+
+func (c *Version) Title() string {
+	return c.Title
+}
+
+func (c *Version) Published() int {
+	return c.Published
+}
+
+func (c *Version) Modified() int {
+	return c.Modified
+}
+
 var VersionColumns = struct {
 	ID        string
 	Type      string
@@ -72,6 +89,29 @@ var VersionColumns = struct {
 }
 
 // Generated where
+
+type whereHelpernull_Int struct{ field string }
+
+func (w whereHelpernull_Int) EQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, false, x)
+}
+func (w whereHelpernull_Int) NEQ(x null.Int) qm.QueryMod {
+	return qmhelper.WhereNullEQ(w.field, true, x)
+}
+func (w whereHelpernull_Int) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
+func (w whereHelpernull_Int) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
+func (w whereHelpernull_Int) LT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LT, x)
+}
+func (w whereHelpernull_Int) LTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.LTE, x)
+}
+func (w whereHelpernull_Int) GT(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GT, x)
+}
+func (w whereHelpernull_Int) GTE(x null.Int) qm.QueryMod {
+	return qmhelper.Where(w.field, qmhelper.GTE, x)
+}
 
 var VersionWhere = struct {
 	ID        whereHelperint

@@ -1,6 +1,7 @@
 {{- $alias := .Aliases.Table .Table.Name -}}
 
 // {{$alias.UpSingular}} is an object representing the database table.
+// Implement dm.model.ContentTyper interface
 type {{$alias.UpSingular}} struct {
 	{{- range $column := .Table.Columns -}}
 	{{- $colAlias := $alias.Column $column.Name -}}
@@ -36,6 +37,23 @@ func ( c *{{$alias.UpSingular}} ) Field( name string ) interface{}{
 			    default:
 		}
 		return result
+}
+
+
+func ( c *{{$alias.UpSingular}} ) DataID() int{
+	 return c.DataID
+}
+
+func ( c *{{$alias.UpSingular}} ) Title() string{
+	 return c.Title
+}
+
+func ( c *{{$alias.UpSingular}} ) Published() int{
+	 return c.Published
+}
+
+func ( c *{{$alias.UpSingular}} ) Modified() int{
+	 return c.Modified
 }
 
 var {{$alias.UpSingular}}Columns = struct {
