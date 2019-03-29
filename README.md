@@ -1,6 +1,6 @@
 Doc
 --------
-See [a relative doc](doc) for ideas detail and evolving.
+See [doc](doc) for ideas detail and evolving.
 
 
 Progress
