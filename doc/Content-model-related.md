@@ -16,13 +16,13 @@ In terms of query, it's important to have right content model. There are 2 types
 Model1(
 ```
 Table attribute_data:
-identifier, type, content
+identifier, type, value
 ....................
 'title', 'folder', 'Home'
 'title', 'frontpage', 'Front page'
-'left_menu', 'frontpage', 223
+'left_menu', 'frontpage', '223'
 'title', 'frontpage_sub', 'Oslo club front page'
-'frontpage_sub', 'club_logo', 2255
+'frontpage_sub', 'club_logo', '2255'
 ```
 
 This helps to query multiple type because you can
