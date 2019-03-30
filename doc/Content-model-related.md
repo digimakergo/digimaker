@@ -51,7 +51,7 @@ club_logo
 2255
 
 ```
-Model2 has its advantage when it's comes to muliti-type query. It is following the rational database principle, but it will have big problem when it has many type query at the same time(you have to use many unions and we should minimize sort and limit after union).
+Model2 following the rational database and normal data principle, but it will have big problem when it has many type query at the same time(you have to use many unions and we should minimize sort and limit after union).
 
 A complex site(which can have 100 sub sites even) can have types like:
 folder
