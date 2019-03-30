@@ -2,21 +2,14 @@ package models
 
 import "errors"
 
-type Fielder interface {
-	Val()
-	Create()
-	Validate()
-	SetStoreData()
-}
-
 //Field is a general type for field. It needs to implement Fielder.
 //
 //A typical new field type(eg. isbn) needs implement Fielder, Datatyper(but not necessary both in a struct).
 //
 type Field struct {
 	FieldType  string //do not use DataType because this is better to do instance with json.
-	ViewData   string
-	StoredData string
+	Data       string
+	storedData string
 }
 
 func (f *Field) GetStoredData() (string, error) {
@@ -24,7 +17,7 @@ func (f *Field) GetStoredData() (string, error) {
 }
 
 func (f *Field) Val() string {
-	return f.ViewData
+	return f.Data
 }
 
 //SetStoreData converts InputData to StoredData with validation.
@@ -34,7 +27,7 @@ func (f *Field) SetStoreData(c *ContentTyper, identifer string) error {
 		return errors.New("Validation error. " + err.Error())
 	}
 
-	f.StoredData = f.InputData //todo: use specific field to convert. By default it store what's given.
+	f.storedData = f.Data //todo: use specific field to convert. By default it store what's given.
 
 	return nil
 }

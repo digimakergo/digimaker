@@ -27,6 +27,7 @@ type Location struct {
 	ParentID    int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
 	ContentType string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID   int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
+	Language    string `boil:"language" json:"language" toml:"language" yaml:"language"`
 	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Section     string `boil:"section" json:"section" toml:"section" yaml:"section"`
 	RemoteID    string `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
@@ -41,6 +42,7 @@ var LocationColumns = struct {
 	ParentID    string
 	ContentType string
 	ContentID   string
+	Language    string
 	Name        string
 	Section     string
 	RemoteID    string
@@ -50,6 +52,7 @@ var LocationColumns = struct {
 	ParentID:    "parent_id",
 	ContentType: "content_type",
 	ContentID:   "content_id",
+	Language:    "language",
 	Name:        "name",
 	Section:     "section",
 	RemoteID:    "remote_id",
@@ -81,6 +84,7 @@ var LocationWhere = struct {
 	ParentID    whereHelperint
 	ContentType whereHelperstring
 	ContentID   whereHelperint
+	Language    whereHelperstring
 	Name        whereHelperstring
 	Section     whereHelperstring
 	RemoteID    whereHelperstring
@@ -90,6 +94,7 @@ var LocationWhere = struct {
 	ParentID:    whereHelperint{field: `parent_id`},
 	ContentType: whereHelperstring{field: `content_type`},
 	ContentID:   whereHelperint{field: `content_id`},
+	Language:    whereHelperstring{field: `language`},
 	Name:        whereHelperstring{field: `name`},
 	Section:     whereHelperstring{field: `section`},
 	RemoteID:    whereHelperstring{field: `remote_id`},
@@ -113,8 +118,8 @@ func (*locationR) NewStruct() *locationR {
 type locationL struct{}
 
 var (
-	locationColumns               = []string{"id", "parent_id", "content_type", "content_id", "name", "section", "remote_id", "p"}
-	locationColumnsWithoutDefault = []string{"content_type", "content_id", "name", "section", "remote_id"}
+	locationColumns               = []string{"id", "parent_id", "content_type", "content_id", "language", "name", "section", "remote_id", "p"}
+	locationColumnsWithoutDefault = []string{"content_type", "content_id", "language", "name", "section", "remote_id"}
 	locationColumnsWithDefault    = []string{"id", "parent_id", "p"}
 	locationPrimaryKeyColumns     = []string{"id"}
 )
