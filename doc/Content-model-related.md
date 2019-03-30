@@ -13,11 +13,12 @@ Sorting should be by type first, it's not needed to mix types eg. by published.
 
 
 In terms of query, it's important to have right content model. There are 2 types of model for query(take folder, frontpage, frontpage_sub as example ):
-Model1(
+
+___Model1___:
 ```
 Table attribute_data:
 identifier, type, value
-....................
+----------------------
 'title', 'folder', 'Home'
 'title', 'frontpage', 'Front page'
 'left_menu', 'frontpage', '223'
@@ -31,11 +32,11 @@ This helps to query multiple type because you can
 SELECT * FROM attribute_data WHERE type IN ('folder', 'fontpage', 'fontpage_sub') AND ...
 ```
 
-Model2
+___Model2___
 ```
 Table folder:
 title, summary
-....................
+--------------
 'Home', ''
 
 Table frontpage:
