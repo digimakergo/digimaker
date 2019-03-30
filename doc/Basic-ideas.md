@@ -14,9 +14,9 @@ Architecture
 ---------------
 Some principles:
 1. Make it as less special treatment as possible, the less special case it has, the more flexiable it is for use&extending.
-Eg1. language is better to be treated as an attribute in location, similar to modify, author. If we treat it as part of article data, we need id&language to identify an article data, then query, visit, permission setting all need this special treatment. If it's an attribute in location, in permission there is no difference with setting to an attribute(eg. section, content_type).
+ - Eg1. language is better to be treated as an attribute in location, similar to modify, author. If we treat it as part of article data, we need id&language to identify an article data, then query, visit, permission setting all need this special treatment. If it's an attribute in location, in permission there is no difference with setting to an attribute(eg. section, content_type).
 
-Eg2. If we use less special concept content model, form can be easy as content creating, otherwise you need a special list view and detail for form-collected-information, which can be just content(like article). And we can use all the field validation, extending in the form.
+ - Eg2. If we use less special concept content model, form can be easy as content creating, otherwise you need a special list view and detail for form-collected-information, which can be just content(like article). And we can use all the field validation, extending in the form.
 
 2. DO NOT try to do something which looks nice, but against the principle for long term. Some nice-try feature is actually blocking some good principles(but can try for short term). For instance,
   - try to change table structure online -  this is possible, but what if it failed, or timeout - we don't have rollback mechanism/backup online. Database change is better done by database console directly - part of the DBA role and there is a routine for backup. We can generate sql so the executor can preview what's inside and do related action.
