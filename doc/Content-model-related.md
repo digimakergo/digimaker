@@ -41,13 +41,13 @@ title, summary
 
 Table frontpage:
 left_menu
-....................
+---------
 223
 
 
-Table frontpage_sub
+Table frontpage_sub:
 club_logo
-....................
+---------
 2255
 
 ```
