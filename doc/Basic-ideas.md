@@ -83,6 +83,11 @@ NB: putting images&files into content structure can fundamentally make the paren
 6) [images]images can be done completely using a cdn image api(with permission check locally).
 
 
+Template
+--------
+It's very important that the template language needs to be fast, beautiful and extendable. Template is aiming to generate html so it will be read&changed much because it's about view. A beautiful templating code and clear structure & override make everything easy & nice.
+
+
 API
 ---------
 ### 1. Rest api
