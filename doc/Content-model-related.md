@@ -2,6 +2,26 @@ Content field:
 -----------
 Content name field should be 'title' as identifier(also fieldname in db).
 
+
+ContentType generating
+----------
+Code generating is a good way, but we need to validate the performance and auto deployment. In some cases it will need a lightweight way to do everything from web(for instance, design form online which reused field types, the form design is done/modified by editor sometimes). So.
+
+```
+type Article struct{
+  Title TextField
+  Body RichTextField
+}
+```
+can be a generic(so you just generate json for the definition, not .go)
+```
+type ContentType struct{
+  Fields map[string]Fielder
+}
+```
+
+
+
 Queries
 ---------
 Typical content select query condition include:
