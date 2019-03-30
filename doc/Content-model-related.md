@@ -14,7 +14,7 @@ Sorting should be by type first, it's not needed to mix types eg. by published.
 
 In terms of query, it's important to have right content model. There are 2 types of model for query(take folder, frontpage, frontpage_sub as example ):
 
-___Model1___:
+**Model1**:
 ```
 Table attribute_data:
 identifier, type, value
@@ -32,7 +32,7 @@ This helps to query multiple type because you can
 SELECT * FROM attribute_data WHERE type IN ('folder', 'fontpage', 'fontpage_sub') AND ...
 ```
 
-___Model2___
+**Model2**
 ```
 Table folder:
 title, summary
