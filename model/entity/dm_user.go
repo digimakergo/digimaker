@@ -32,6 +32,8 @@ type User struct {
 	Password  null.String `boil:"password" json:"password,omitempty" toml:"password" yaml:"password,omitempty"`
 	Mobile    null.String `boil:"mobile" json:"mobile,omitempty" toml:"mobile" yaml:"mobile,omitempty"`
 	RemoteID  null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
+	Published int         `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
+	Modified  int         `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -43,7 +45,7 @@ func (c *User) Fields() map[string]User {
 }
 
 func (c *User) Field(name string) interface{} {
-	var result = nil
+	var result interface{}
 	switch name {
 	case "id", "DataID":
 		result = c.DataID
@@ -59,24 +61,28 @@ func (c *User) Field(name string) interface{} {
 		result = c.Mobile
 	case "remote_id", "RemoteID":
 		result = c.RemoteID
+	case "published", "Published":
+		result = c.Published
+	case "modified", "Modified":
+		result = c.Modified
 	default:
 	}
 	return result
 }
 
-func (c *User) DataID() int {
+func (c *User) FDataID() int {
 	return c.DataID
 }
 
-func (c *User) Title() string {
-	return c.Title
+func (c *User) FName() string {
+	return c.Name
 }
 
-func (c *User) Published() int {
+func (c *User) FPublished() int {
 	return c.Published
 }
 
-func (c *User) Modified() int {
+func (c *User) FModified() int {
 	return c.Modified
 }
 
@@ -88,6 +94,8 @@ var UserColumns = struct {
 	Password  string
 	Mobile    string
 	RemoteID  string
+	Published string
+	Modified  string
 }{
 	DataID:    "id",
 	Login:     "login",
@@ -96,6 +104,8 @@ var UserColumns = struct {
 	Password:  "password",
 	Mobile:    "mobile",
 	RemoteID:  "remote_id",
+	Published: "published",
+	Modified:  "modified",
 }
 
 // Generated where
@@ -131,6 +141,8 @@ var UserWhere = struct {
 	Password  whereHelpernull_String
 	Mobile    whereHelpernull_String
 	RemoteID  whereHelpernull_String
+	Published whereHelperint
+	Modified  whereHelperint
 }{
 	DataID:    whereHelperint{field: `id`},
 	Login:     whereHelpernull_String{field: `login`},
@@ -139,6 +151,8 @@ var UserWhere = struct {
 	Password:  whereHelpernull_String{field: `password`},
 	Mobile:    whereHelpernull_String{field: `mobile`},
 	RemoteID:  whereHelpernull_String{field: `remote_id`},
+	Published: whereHelperint{field: `published`},
+	Modified:  whereHelperint{field: `modified`},
 }
 
 // UserRels is where relationship names are stored.
@@ -158,8 +172,8 @@ func (*userR) NewStruct() *userR {
 type userL struct{}
 
 var (
-	userColumns               = []string{"id", "login", "firstname", "lastname", "password", "mobile", "remote_id"}
-	userColumnsWithoutDefault = []string{"login", "firstname", "lastname", "password", "mobile", "remote_id"}
+	userColumns               = []string{"id", "login", "firstname", "lastname", "password", "mobile", "remote_id", "published", "modified"}
+	userColumnsWithoutDefault = []string{"login", "firstname", "lastname", "password", "mobile", "remote_id", "published", "modified"}
 	userColumnsWithDefault    = []string{"id"}
 	userPrimaryKeyColumns     = []string{"id"}
 )

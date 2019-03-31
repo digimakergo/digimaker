@@ -43,7 +43,7 @@ func (c *Folder) Fields() map[string]Folder {
 }
 
 func (c *Folder) Field(name string) interface{} {
-	var result = nil
+	var result interface{}
 	switch name {
 	case "id", "DataID":
 		result = c.DataID
@@ -64,19 +64,19 @@ func (c *Folder) Field(name string) interface{} {
 	return result
 }
 
-func (c *Folder) DataID() int {
+func (c *Folder) FDataID() int {
 	return c.DataID
 }
 
-func (c *Folder) Title() string {
-	return c.Title
+func (c *Folder) FName() string {
+	return c.Name
 }
 
-func (c *Folder) Published() int {
+func (c *Folder) FPublished() int {
 	return c.Published
 }
 
-func (c *Folder) Modified() int {
+func (c *Folder) FModified() int {
 	return c.Modified
 }
 

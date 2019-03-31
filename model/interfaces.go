@@ -1,4 +1,4 @@
-package models
+package model
 
 //All the content type(eg. article, folder) will implement this interface.
 type ContentTyper interface {

@@ -1,6 +1,6 @@
 // {COPYRIGHT_HEADER}
 
-package models
+package model
 
 import "dm/util"
 

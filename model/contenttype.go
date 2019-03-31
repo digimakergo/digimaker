@@ -1,4 +1,4 @@
-package models
+package model
 
 type ContentType struct {
 	DataID    int

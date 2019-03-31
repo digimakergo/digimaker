@@ -27,7 +27,7 @@ func ( c *{{$alias.UpSingular}} ) Fields() map[string]{{$alias.UpSingular}}{
 }
 
 func ( c *{{$alias.UpSingular}} ) Field( name string ) interface{}{
-	  var result = nil
+	  var result interface{}
 		switch name {
 			    {{range $column := .Table.Columns -}}
 			    {{- $colAlias := $alias.Column $column.Name -}}
@@ -40,19 +40,19 @@ func ( c *{{$alias.UpSingular}} ) Field( name string ) interface{}{
 }
 
 
-func ( c *{{$alias.UpSingular}} ) DataID() int{
+func ( c *{{$alias.UpSingular}} ) FDataID() int{
 	 return c.DataID
 }
 
-func ( c *{{$alias.UpSingular}} ) Title() string{
-	 return c.Title
+func ( c *{{$alias.UpSingular}} ) FName() string{
+	 return c.Name
 }
 
-func ( c *{{$alias.UpSingular}} ) Published() int{
+func ( c *{{$alias.UpSingular}} ) FPublished() int{
 	 return c.Published
 }
 
-func ( c *{{$alias.UpSingular}} ) Modified() int{
+func ( c *{{$alias.UpSingular}} ) FModified() int{
 	 return c.Modified
 }
 

@@ -1,4 +1,4 @@
-package models
+package model
 
 // Datatype is the base struct for all explect datatypes
 type Datatype struct {

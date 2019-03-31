@@ -1,0 +1,38 @@
+<html>
+<head>
+
+  <style>
+    body{
+      font-family: Verdana;
+      line-height: 1.5;
+    }
+
+    body, table{
+            font-size: 12px;
+    }
+  </style>
+</head>
+
+<body>
+  Hello world!
+  <h2>Locations</h2>
+  <div>
+    <table>
+    <tr>
+      <td>ID</td>
+      <td>Type</td>
+      <td>Name</td>
+      <td>Parent</td>
+    </tr>
+    {{range .}}
+    <tr>
+      <td>{{.ID}}</td>
+      <td>{{.ContentType}}</td>
+      <td>{{.Name}}</td>
+      <td> {{.ParentID}}</td>
+    </tr>
+    {{end}}
+    </table>
+  </div>
+</body>
+</html>

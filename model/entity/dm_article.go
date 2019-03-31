@@ -42,7 +42,7 @@ func (c *Article) Fields() map[string]Article {
 }
 
 func (c *Article) Field(name string) interface{} {
-	var result = nil
+	var result interface{}
 	switch name {
 	case "id", "DataID":
 		result = c.DataID
@@ -61,19 +61,19 @@ func (c *Article) Field(name string) interface{} {
 	return result
 }
 
-func (c *Article) DataID() int {
+func (c *Article) FDataID() int {
 	return c.DataID
 }
 
-func (c *Article) Title() string {
-	return c.Title
+func (c *Article) FName() string {
+	return c.Name
 }
 
-func (c *Article) Published() int {
+func (c *Article) FPublished() int {
 	return c.Published
 }
 
-func (c *Article) Modified() int {
+func (c *Article) FModified() int {
 	return c.Modified
 }
 
