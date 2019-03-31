@@ -198,8 +198,6 @@ type (
 	// ArticleSlice is an alias for a slice of pointers to Article.
 	// This should generally be used opposed to []Article.
 	ArticleSlice []*Article
-	// ArticleHook is the signature for custom Article hook methods
-	ArticleHook func(context.Context, boil.ContextExecutor, *Article) error
 
 	articleQuery struct {
 		*queries.Query
@@ -227,176 +225,6 @@ var (
 	_ = qmhelper.Where
 )
 
-var articleBeforeInsertHooks []ArticleHook
-var articleBeforeUpdateHooks []ArticleHook
-var articleBeforeDeleteHooks []ArticleHook
-var articleBeforeUpsertHooks []ArticleHook
-
-var articleAfterInsertHooks []ArticleHook
-var articleAfterSelectHooks []ArticleHook
-var articleAfterUpdateHooks []ArticleHook
-var articleAfterDeleteHooks []ArticleHook
-var articleAfterUpsertHooks []ArticleHook
-
-// doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Article) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleBeforeInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Article) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleBeforeUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Article) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleBeforeDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Article) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleBeforeUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Article) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleAfterInsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// doAfterSelectHooks executes all "after Select" hooks.
-func (o *Article) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleAfterSelectHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Article) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleAfterUpdateHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Article) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleAfterDeleteHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Article) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
-	if boil.HooksAreSkipped(ctx) {
-		return nil
-	}
-
-	for _, hook := range articleAfterUpsertHooks {
-		if err := hook(ctx, exec, o); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// AddArticleHook registers your hook function for all future operations.
-func AddArticleHook(hookPoint boil.HookPoint, articleHook ArticleHook) {
-	switch hookPoint {
-	case boil.BeforeInsertHook:
-		articleBeforeInsertHooks = append(articleBeforeInsertHooks, articleHook)
-	case boil.BeforeUpdateHook:
-		articleBeforeUpdateHooks = append(articleBeforeUpdateHooks, articleHook)
-	case boil.BeforeDeleteHook:
-		articleBeforeDeleteHooks = append(articleBeforeDeleteHooks, articleHook)
-	case boil.BeforeUpsertHook:
-		articleBeforeUpsertHooks = append(articleBeforeUpsertHooks, articleHook)
-	case boil.AfterInsertHook:
-		articleAfterInsertHooks = append(articleAfterInsertHooks, articleHook)
-	case boil.AfterSelectHook:
-		articleAfterSelectHooks = append(articleAfterSelectHooks, articleHook)
-	case boil.AfterUpdateHook:
-		articleAfterUpdateHooks = append(articleAfterUpdateHooks, articleHook)
-	case boil.AfterDeleteHook:
-		articleAfterDeleteHooks = append(articleAfterDeleteHooks, articleHook)
-	case boil.AfterUpsertHook:
-		articleAfterUpsertHooks = append(articleAfterUpsertHooks, articleHook)
-	}
-}
-
 // One returns a single article record from the query.
 func (q articleQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Article, error) {
 	o := &Article{}
@@ -411,10 +239,6 @@ func (q articleQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Arti
 		return nil, errors.Wrap(err, "entity: failed to execute a one query for dm_article")
 	}
 
-	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
-		return o, err
-	}
-
 	return o, nil
 }
 
@@ -425,14 +249,6 @@ func (q articleQuery) All(ctx context.Context, exec boil.ContextExecutor) (Artic
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
 		return nil, errors.Wrap(err, "entity: failed to assign all query results to Article slice")
-	}
-
-	if len(articleAfterSelectHooks) != 0 {
-		for _, obj := range o {
-			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
-				return o, err
-			}
-		}
 	}
 
 	return o, nil
@@ -509,10 +325,6 @@ func (o *Article) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	var err error
-
-	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
-		return err
-	}
 
 	nzDefaults := queries.NonZeroDefaultSet(articleColumnsWithDefault, o)
 
@@ -604,7 +416,7 @@ CacheNoHooks:
 		articleInsertCacheMut.Unlock()
 	}
 
-	return o.doAfterInsertHooks(ctx, exec)
+	return nil
 }
 
 // Update uses an executor to update the Article.
@@ -612,9 +424,6 @@ CacheNoHooks:
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Article) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
-	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
-		return 0, err
-	}
 	key := makeCacheKey(columns, nil)
 	articleUpdateCacheMut.RLock()
 	cache, cached := articleUpdateCache[key]
@@ -667,7 +476,7 @@ func (o *Article) Update(ctx context.Context, exec boil.ContextExecutor, columns
 		articleUpdateCacheMut.Unlock()
 	}
 
-	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
+	return rowsAff, nil
 }
 
 // UpdateAll updates all rows with the specified column values.
@@ -744,10 +553,6 @@ var mySQLArticleUniqueColumns = []string{
 func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("entity: no dm_article provided for upsert")
-	}
-
-	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
-		return err
 	}
 
 	nzDefaults := queries.NonZeroDefaultSet(articleColumnsWithDefault, o)
@@ -880,7 +685,7 @@ CacheNoHooks:
 		articleUpsertCacheMut.Unlock()
 	}
 
-	return o.doAfterUpsertHooks(ctx, exec)
+	return nil
 }
 
 // Delete deletes a single Article record with an executor.
@@ -888,10 +693,6 @@ CacheNoHooks:
 func (o *Article) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
 		return 0, errors.New("entity: no Article provided for delete")
-	}
-
-	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
-		return 0, err
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), articlePrimaryKeyMapping)
@@ -910,10 +711,6 @@ func (o *Article) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
 		return 0, errors.Wrap(err, "entity: failed to get rows affected by delete for dm_article")
-	}
-
-	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
-		return 0, err
 	}
 
 	return rowsAff, nil
@@ -950,14 +747,6 @@ func (o ArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 		return 0, nil
 	}
 
-	if len(articleBeforeDeleteHooks) != 0 {
-		for _, obj := range o {
-			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
-				return 0, err
-			}
-		}
-	}
-
 	var args []interface{}
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), articlePrimaryKeyMapping)
@@ -980,14 +769,6 @@ func (o ArticleSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
 		return 0, errors.Wrap(err, "entity: failed to get rows affected by deleteall for dm_article")
-	}
-
-	if len(articleAfterDeleteHooks) != 0 {
-		for _, obj := range o {
-			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
-				return 0, err
-			}
-		}
 	}
 
 	return rowsAff, nil
