@@ -8,10 +8,9 @@ import (
 	"dm/util"
 	"errors"
 	"fmt"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
-	. "github.com/volatiletech/sqlboiler/queries/qm"
+	"github.com/volatiletech/sqlboiler/queries"
 )
 
 //Open opens db
@@ -45,13 +44,16 @@ func (*RMDB) GetByID(contentType string, id int) model.ContentTyper {
 		panic("Error: " + err.Error())
 	}
 
-	location, err := entity.Locations(Where("id=?", strconv.Itoa(id))).One(context.Background(), db)
+	var location entity.Location
+	queries.Raw(`select * from dm_location where id=?`, id).Bind(context.Background(), db, &location)
 
-	article, err := entity.Articles(Where("id=?", strconv.Itoa(location.ContentID))).One(context.Background(), db)
-	article.Location = location
+	var article entity.Article
+	queries.Raw(`select * from dm_article where id=?`, location.ContentID).Bind(context.Background(), db, &article)
+
+	article.Location = &location
 
 	if err != nil {
 		panic("Error 2: " + err.Error())
 	}
-	return article
+	return &article
 }
