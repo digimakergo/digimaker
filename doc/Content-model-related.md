@@ -104,6 +104,8 @@ Conclusion: language can be an attribute to the object(article), but it shouldn'
 
 It's not needed to create a translation site where its content is from main site. If it's needed, we can provide a feature to "copy sub content with translation" which do the copy and build translation relation.
 
+Question: if there are 2 translations for 1 folder, and there are multi languages under the folder, how to cope this case? Should all the other translation be under a new location?
+
 Trash
 -------
 We can reuse p field in location instead of create a table, since we alway have p when we do query. In this context, trash is a logical partition - similar to archive. We can use 'trash' in p. When me move a folder to trash, we mark all the subtree's p as trash, it will be quick.

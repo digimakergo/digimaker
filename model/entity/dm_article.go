@@ -13,7 +13,9 @@ import (
 	"sync"
 	"time"
 
+	"dm/model"
 	"dm/type_default/field"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -37,7 +39,7 @@ type Article struct {
 	*Location
 }
 
-func (c *Article) Fields() map[string]Article {
+func (c *Article) Fields() map[string]model.Fielder {
 	return nil
 }
 

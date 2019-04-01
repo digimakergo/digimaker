@@ -1,17 +1,21 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"dm/model"
-	util "dm/util"
+	"dm/model/entity"
+	"dm/util"
 	"errors"
 	"fmt"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
+	. "github.com/volatiletech/sqlboiler/queries/qm"
 )
 
 //Open opens db
-func Open() (*sql.DB, error) {
+func Open1() (*sql.DB, error) {
 	dbConfig, _ := util.GetConfigSectin("database")
 	connString := dbConfig["username"] + ":" + dbConfig["password"] +
 		"@" + dbConfig["protocal"] + "(" + dbConfig["host"] + ")/" + dbConfig["database"]
@@ -31,13 +35,23 @@ func Open() (*sql.DB, error) {
 	return db, nil
 }
 
-type DBer interface {
-	Open() (*sql.DB, error)
-	Query(q string)
-	All(q string)
-	Execute(q string)
+// Implement DBEntitier
+type RMDB struct {
 }
 
-type DBEntitier interface {
-	GetByID(contentType string, id int) model.ContentTyper
+func (*RMDB) GetByID(contentType string, id int) model.ContentTyper {
+	db, err := Open1()
+	if err != nil {
+		panic("Error: " + err.Error())
+	}
+
+	location, err := entity.Locations(Where("id=?", strconv.Itoa(id))).One(context.Background(), db)
+
+	article, err := entity.Articles(Where("id=?", strconv.Itoa(location.ContentID))).One(context.Background(), db)
+	article.Location = location
+
+	if err != nil {
+		panic("Error 2: " + err.Error())
+	}
+	return article
 }

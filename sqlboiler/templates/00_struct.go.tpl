@@ -22,7 +22,7 @@ type {{$alias.UpSingular}} struct {
 
 }
 
-func ( c *{{$alias.UpSingular}} ) Fields() map[string]{{$alias.UpSingular}}{
+func ( c *{{$alias.UpSingular}} ) Fields() map[string]model.Fielder{
 	 return nil
 }
 

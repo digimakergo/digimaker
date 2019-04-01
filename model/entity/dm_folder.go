@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dm/model"
 	"dm/type_default/field"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -38,7 +39,7 @@ type Folder struct {
 	*Location
 }
 
-func (c *Folder) Fields() map[string]Folder {
+func (c *Folder) Fields() map[string]model.Fielder {
 	return nil
 }
 

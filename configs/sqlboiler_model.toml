@@ -18,6 +18,9 @@ dbname = "dev_emf"
 sslmode = "false"
 blacklist = ['dm_relation','dm_location', 'dm_version']
 
+#[imports.all]
+#third_party = ['"dm/model"']
+
 ##TODO: use a better mechanism to diffenticate fields between:
 ##1) preserved: eg. id, published.
 ##2) actual field: eg. title
@@ -35,7 +38,7 @@ db_type = "varchar"
 type = "field.TextField"
 
 [types.imports]
-third_party = ['"dm/type_default/field"']
+third_party = ['"dm/type_default/field"', '"dm/model"']
 
 
 # Richtext

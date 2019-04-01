@@ -16,9 +16,11 @@ func (f *Field) GetStoredData() (string, error) {
 	return "", nil
 }
 
-func (f *Field) Val() string {
+/*
+func (f *Field) Value() string {
 	return f.Data
 }
+*/
 
 //SetStoreData converts InputData to StoredData with validation.
 func (f *Field) SetStoreData(c *ContentTyper, identifer string) error {

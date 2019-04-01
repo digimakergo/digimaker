@@ -13,6 +13,8 @@ import (
 	"sync"
 	"time"
 
+	"dm/model"
+	"dm/type_default/field"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -25,22 +27,22 @@ import (
 // User is an object representing the database table.
 // Implement dm.model.ContentTyper interface
 type User struct {
-	DataID    int         `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Login     null.String `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
-	Firstname null.String `boil:"firstname" json:"firstname,omitempty" toml:"firstname" yaml:"firstname,omitempty"`
-	Lastname  null.String `boil:"lastname" json:"lastname,omitempty" toml:"lastname" yaml:"lastname,omitempty"`
-	Password  null.String `boil:"password" json:"password,omitempty" toml:"password" yaml:"password,omitempty"`
-	Mobile    null.String `boil:"mobile" json:"mobile,omitempty" toml:"mobile" yaml:"mobile,omitempty"`
-	RemoteID  null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
-	Published int         `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified  int         `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	DataID    int             `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Login     null.String     `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
+	Firstname field.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
+	Lastname  null.String     `boil:"lastname" json:"lastname,omitempty" toml:"lastname" yaml:"lastname,omitempty"`
+	Password  null.String     `boil:"password" json:"password,omitempty" toml:"password" yaml:"password,omitempty"`
+	Mobile    null.String     `boil:"mobile" json:"mobile,omitempty" toml:"mobile" yaml:"mobile,omitempty"`
+	RemoteID  null.String     `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
+	Published int             `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
+	Modified  int             `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
 
 	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 	*Location
 }
 
-func (c *User) Fields() map[string]User {
+func (c *User) Fields() map[string]model.Fielder {
 	return nil
 }
 
@@ -136,7 +138,7 @@ func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
 var UserWhere = struct {
 	DataID    whereHelperint
 	Login     whereHelpernull_String
-	Firstname whereHelpernull_String
+	Firstname whereHelperfield_TextField
 	Lastname  whereHelpernull_String
 	Password  whereHelpernull_String
 	Mobile    whereHelpernull_String
@@ -146,7 +148,7 @@ var UserWhere = struct {
 }{
 	DataID:    whereHelperint{field: `id`},
 	Login:     whereHelpernull_String{field: `login`},
-	Firstname: whereHelpernull_String{field: `firstname`},
+	Firstname: whereHelperfield_TextField{field: `firstname`},
 	Lastname:  whereHelpernull_String{field: `lastname`},
 	Password:  whereHelpernull_String{field: `password`},
 	Mobile:    whereHelpernull_String{field: `mobile`},
