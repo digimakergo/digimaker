@@ -30,6 +30,9 @@ func main() {
 		Display(w)
 	})
 
+        http.HandleFunc( "/robots.txt", func( w http.ResponseWriter, r *http.Request  ){
+            fmt.Fprintf(w, "User-agent: * \nDisallow /" );
+	})
 	http.ListenAndServe(":8089", nil)
 }
 
