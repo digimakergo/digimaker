@@ -7,7 +7,7 @@ output = "model/entity"
 no-tests = "true"
 templates = [
   "/Users/xc/go/caf-prototype/src/github.com/volatiletech/sqlboiler/templates",
-  "/Users/xc/go/caf-prototype/src/dm/sqlboiler/templates"
+  "/Users/xc/go/caf-prototype/src/dm/codegen/templates"
 ]
 
 [mysql]

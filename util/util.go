@@ -45,15 +45,15 @@ func Log(message string, level string) {
 	*/
 	//todo: log into files
 	//todo: for into client screen in debug mode.
-	fmt.Printf(message)
+	fmt.Printf(message + "\n")
 }
 
 func GetConfig(section string, identifier string, filename ...string) (string, error) {
 	return "mysql", nil
 }
 
-func GetConfigSectin(section string) (map[string]string, error) {
-	return map[string]string{"type": "mysql", "host": "185.35.187.91", "database": "dev_emf", "username": "test", "password": "test", "protocal": "tcp"}, nil
+func GetConfigSection(section string) (map[string]string, error) {
+	return map[string]string{"type": "mysql", "host": "185.35.187.91", "database": "dev_emf", "username": "test", "password": "test123", "protocal": "tcp"}, nil
 }
 
 //UnmarshalData Load json and unmall into variable
