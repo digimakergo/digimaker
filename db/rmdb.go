@@ -1,3 +1,5 @@
+//Author xc, Created on 2019-04-01 22:00
+//{COPYRIGHTS}
 package db
 
 import (

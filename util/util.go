@@ -1,3 +1,6 @@
+//Author xc, Created on 2019-03-27 20:00
+//{COPYRIGHTS}
+
 //Package utils provides general utils for the project
 package util
 

@@ -1,3 +1,6 @@
+//Author xc, Created on 2019-03-28 20:10
+//{COPYRIGHTS}
+
 package model
 
 // Datatype is the base struct for all explect datatypes

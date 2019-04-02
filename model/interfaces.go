@@ -1,3 +1,6 @@
+//Author xc, Created on 2019-04-01 22:00
+//{COPYRIGHTS}
+
 package model
 
 //All the content type(eg. article, folder) will implement this interface.

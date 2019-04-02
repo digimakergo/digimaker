@@ -25,6 +25,7 @@ import (
 type Location struct {
 	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ParentID    int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
+	MainID      int    `boil:"main_id" json:"main_id" toml:"main_id" yaml:"main_id"`
 	ContentType string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID   int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	Language    string `boil:"language" json:"language" toml:"language" yaml:"language"`
@@ -40,6 +41,7 @@ type Location struct {
 var LocationColumns = struct {
 	ID          string
 	ParentID    string
+	MainID      string
 	ContentType string
 	ContentID   string
 	Language    string
@@ -50,6 +52,7 @@ var LocationColumns = struct {
 }{
 	ID:          "id",
 	ParentID:    "parent_id",
+	MainID:      "main_id",
 	ContentType: "content_type",
 	ContentID:   "content_id",
 	Language:    "language",
@@ -61,9 +64,28 @@ var LocationColumns = struct {
 
 // Generated where
 
+type whereHelperint struct{ field string }
+
+func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
 var LocationWhere = struct {
 	ID          whereHelperint
 	ParentID    whereHelperint
+	MainID      whereHelperint
 	ContentType whereHelperstring
 	ContentID   whereHelperint
 	Language    whereHelperstring
@@ -74,6 +96,7 @@ var LocationWhere = struct {
 }{
 	ID:          whereHelperint{field: `id`},
 	ParentID:    whereHelperint{field: `parent_id`},
+	MainID:      whereHelperint{field: `main_id`},
 	ContentType: whereHelperstring{field: `content_type`},
 	ContentID:   whereHelperint{field: `content_id`},
 	Language:    whereHelperstring{field: `language`},
@@ -100,8 +123,8 @@ func (*locationR) NewStruct() *locationR {
 type locationL struct{}
 
 var (
-	locationColumns               = []string{"id", "parent_id", "content_type", "content_id", "language", "name", "section", "remote_id", "p"}
-	locationColumnsWithoutDefault = []string{"content_type", "content_id", "language", "name", "section", "remote_id"}
+	locationColumns               = []string{"id", "parent_id", "main_id", "content_type", "content_id", "language", "name", "section", "remote_id", "p"}
+	locationColumnsWithoutDefault = []string{"main_id", "content_type", "content_id", "language", "name", "section", "remote_id"}
 	locationColumnsWithDefault    = []string{"id", "parent_id", "p"}
 	locationPrimaryKeyColumns     = []string{"id"}
 )
