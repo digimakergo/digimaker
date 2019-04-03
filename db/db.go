@@ -6,8 +6,6 @@ package db
 import (
 	"database/sql"
 	"dm/model"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
 type DBer interface {

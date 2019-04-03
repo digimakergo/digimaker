@@ -18,7 +18,7 @@ type SQL struct{}
 
 //Open opens db with verification
 func (m *SQL) Open() (*sql.DB, error) {
-	dbConfig, _ := util.GetConfigSection("database")
+	dbConfig := util.GetConfigSection("database")
 	connString := dbConfig["username"] + ":" + dbConfig["password"] +
 		"@" + dbConfig["protocal"] +
 		"(" + dbConfig["host"] + ")/" +
@@ -27,12 +27,12 @@ func (m *SQL) Open() (*sql.DB, error) {
 	db, err := sql.Open(dbConfig["type"], connString)
 	if err != nil {
 		errorMessage := "Can not open. error: " + err.Error() + " Conneciton string: " + connString
-		util.LogError(errorMessage)
+		util.ErrorerrorMessage)
 		return nil, errors.New(errorMessage)
 	}
 
 	if db.Ping() != nil {
-		util.LogError("Can not connect with connection string: " + connString)
+		util.Error"Can not connect with connection string: " + connString)
 		return nil, err
 	}
 

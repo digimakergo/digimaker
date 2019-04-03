@@ -1,0 +1,6 @@
+database:
+   type: mysql
+   host: 185.35.187.91
+   username: test
+   password: test123
+   database: dev_emf
