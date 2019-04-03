@@ -1,3 +1,6 @@
+//Author xc, Created on 2019-04-03 21:00
+//{COPYRIGHTS}
+
 package util
 
 //DefaultSettingsType and DefaultSettings set all the default,

@@ -50,13 +50,17 @@ func Log(level string, message ...interface{}) {
 	fmt.Println("["+level+"]", fmt.Sprint(message...))
 }
 
-func GetConfig(section string, identifier string, filename ...string) (string, error) {
-	return "mysql", nil
+//Get config based on section and identifer
+func GetConfig(section string, identifier string, config ...string) string {
+	configList := GetConfigSection(section, config...)
+	result := configList[section]
+	return result
 }
 
-func GetConfigSection(section string, configName ...string) map[string]string {
+//Get sections with string values
+func GetConfigSection(section string, config ...string) map[string]string {
 	result := make(map[string]string)
-	list := GetConfigSectionI(section, configName...)
+	list := GetConfigSectionI(section, config...)
 	for identifier, value := range list {
 		result[identifier] = value.(string)
 	}
@@ -64,18 +68,19 @@ func GetConfigSection(section string, configName ...string) map[string]string {
 }
 
 //Get section of the config,
-// config: config file, eg. content(will look for content.yaml or content.json with overriding)
-func GetConfigSectionI(section string, configName ...string) map[string]interface{} {
+//config: config file, eg. content(will look for content.yaml or content.json with overriding)
+func GetConfigSectionI(section string, config ...string) map[string]interface{} {
 	var filename string
-	if configName == nil {
+	if config == nil {
 		filename = DefaultSettings.ConfigFile
 	} else {
-		filename = configName[0]
+		filename = config[0]
 	}
 
 	viper.SetConfigName(filename)
 	viper.AddConfigPath(DefaultSettings.ConfigFolder)
 	//todo: support override in section&setting level with order.
+	//todo: did viper cached all? need to verify.
 
 	err := viper.ReadInConfig()
 	if err != nil {
