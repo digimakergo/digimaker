@@ -27,12 +27,12 @@ func (m *SQL) Open() (*sql.DB, error) {
 	db, err := sql.Open(dbConfig["type"], connString)
 	if err != nil {
 		errorMessage := "Can not open. error: " + err.Error() + " Conneciton string: " + connString
-		util.ErrorerrorMessage)
+		util.Error(errorMessage)
 		return nil, errors.New(errorMessage)
 	}
 
 	if db.Ping() != nil {
-		util.Error"Can not connect with connection string: " + connString)
+		util.Error("Can not connect with connection string: " + connString)
 		return nil, err
 	}
 
