@@ -2,7 +2,7 @@ Doc
 --------
 See [doc](doc) for ideas detail and evolving.
 
-See [doc/9.Progress.md](Progress) for progresses.
+See [Progress](doc/9.Progress.md) for progresses.
 
 
 Progress
