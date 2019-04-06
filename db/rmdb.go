@@ -8,7 +8,6 @@ import (
 	"dm/model"
 	"dm/util"
 	"errors"
-	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -42,9 +41,17 @@ func (m *SQLDriver) Open() (*sql.DB, error) {
 // Implement DBEntitier
 type RMDB struct{}
 
-//Query to fill in contentTyper. Use reference in content parameter
+//Query by ID
+func (rmdb *RMDB) GetByID(contentType string, id int, content model.ContentTyper) error {
+	return rmdb.GetByFields(contentType, map[string]interface{}{"id": id}, content)
+}
+
+//Query to fill in contentTyper. Use reference in content parameter.
 //It fill in with nil if nothing found(no error returned in this case)
-func (*RMDB) GetByID(contentType string, id int, content model.ContentTyper) error {
+//  var content model.Article
+//  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, content)
+//
+func (*RMDB) GetByFields(contentType string, fields interface{}, content model.ContentTyper) error {
 	db, err := new(SQLDriver).Open()
 	if err != nil {
 		return errors.New("Error when connecting db: " + err.Error())
@@ -52,16 +59,30 @@ func (*RMDB) GetByID(contentType string, id int, content model.ContentTyper) err
 
 	contentTypeDef := model.ContentTypeDefinition[contentType]
 	tableName := contentTypeDef.TableName
+
+	//get condition string for fields
+	fieldStr := ""
+	var values []interface{}
+	for name, value := range fields.(map[string]interface{}) {
+		_, inLocationField := model.LocationFields[name]
+		nameWithTable := "c." + name
+		if inLocationField {
+			nameWithTable = "l." + name
+		}
+		fieldStr += "AND " + nameWithTable + "=?"
+		values = append(values, value)
+	}
+
 	sql := `SELECT * FROM dm_location l, ` + tableName + ` c
 					WHERE l.content_id=c.id
-								AND l.content_type= ` + contentType + `
-							  AND l.id=?`
+								AND l.content_type= '` + contentType + `'
+							  ` + fieldStr
 
 	util.Debug("db", sql)
-	err = queries.Raw(sql, id).Bind(context.Background(), db, content)
+	err = queries.Raw(sql, values...).Bind(context.Background(), db, content)
 
 	if err != nil {
-		return errors.New("Error when query table: " + tableName + " id: " + strconv.Itoa(id) + " " + err.Error())
+		return errors.New("Error when query table: " + tableName + " " + err.Error())
 	}
 	return nil
 }

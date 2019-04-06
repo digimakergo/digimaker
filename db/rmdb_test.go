@@ -13,13 +13,15 @@ func TestQuery(t *testing.T) {
 
 	rmdb := new(RMDB)
 	var article entity.Article
-	rmdb.GetByID("article", 1, &article)
+	err := rmdb.GetByID("article", 2, &article)
 
 	text := article.Field("Title").(field.TextField)
-
 	fmt.Printf("title: " + text.Value() + "\n")
-	fmt.Println(article)
-	fmt.Println(article.Section)
-	t.Logf(text.Value())
+	fmt.Println(err == nil)
 
+	t.Logf(text.Value())
+	var article2 entity.Article
+	err = rmdb.GetByFields("article", map[string]interface{}{"content_id": 1}, &article2)
+	fmt.Println(article2)
+	fmt.Println(err == nil)
 }
