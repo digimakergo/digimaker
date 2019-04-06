@@ -6,18 +6,18 @@ import (
 	"context"
 	"database/sql"
 	"dm/model"
-	"dm/model/entity"
 	"dm/util"
 	"errors"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/volatiletech/sqlboiler/queries"
 )
 
-type SQL struct{}
+type SQLDriver struct{}
 
 //Open opens db with verification
-func (m *SQL) Open() (*sql.DB, error) {
+func (m *SQLDriver) Open() (*sql.DB, error) {
 	dbConfig := util.GetConfigSection("database")
 	connString := dbConfig["username"] + ":" + dbConfig["password"] +
 		"@" + dbConfig["protocal"] +
@@ -42,23 +42,25 @@ func (m *SQL) Open() (*sql.DB, error) {
 // Implement DBEntitier
 type RMDB struct{}
 
-func (*RMDB) GetByID(contentType string, id int) model.ContentTyper {
-	db, err := new(SQL).Open()
+//Query to fill in contentTyper. Use reference in content parameter
+//It fill in with nil if nothing found(no error returned in this case)
+func (*RMDB) GetByID(contentType string, id int, content model.ContentTyper) error {
+	db, err := new(SQLDriver).Open()
 	if err != nil {
-		panic("Error: " + err.Error())
+		return errors.New("Error when connecting db: " + err.Error())
 	}
 
-	//todo: make it generic
-	var location entity.Location
-	queries.Raw(`SELECT * FROM dm_location WHERE id=?`, id).Bind(context.Background(), db, &location)
+	contentTypeDef := model.ContentTypeDefinition[contentType]
+	tableName := contentTypeDef.TableName
 
-	var article entity.Article
-	queries.Raw(`SELECT * FROM dm_article WHERE id=?`, location.ContentID).Bind(context.Background(), db, &article)
+	sql := `SELECT * FROM dm_location, ` + tableName + ` t
+								WHERE dm_location.content_id=t.id
+										  AND dm_location.id=?`
 
-	article.Location = &location
+	err = queries.Raw(sql, id).Bind(context.Background(), db, content)
 
 	if err != nil {
-		panic("Error 2: " + err.Error())
+		return errors.New("Error when query table: " + tableName + " id: " + strconv.Itoa(id) + " " + err.Error())
 	}
-	return &article
+	return nil
 }
