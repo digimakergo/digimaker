@@ -25,6 +25,10 @@ func Notice(message ...interface{}) {
 	Log("notice", message...)
 }
 
+func Debug(category string, message ...interface{}) {
+	Log("debug,"+category, message...)
+}
+
 /*
 Log message
 */
@@ -47,6 +51,7 @@ func Log(level string, message ...interface{}) {
 	*/
 	//todo: log into files
 	//todo: for into client screen in debug mode.
+	//todo: include cagetory as parameter
 	fmt.Println("["+level+"]", fmt.Sprint(message...))
 }
 
@@ -95,6 +100,13 @@ func GetConfigSectionI(section string, config ...string) map[string]interface{} 
 		result = value.(map[string]interface{})
 	}
 	return result
+}
+
+//Add time point for calcuate how much time takes for operations.
+//Typical type include: database, operation, template
+//Typical identifier include: layout.tpl when comes to template, add when it comes to operation
+func AddTimePoint(category string, identifier string) {
+
 }
 
 //UnmarshalData Load json and unmall into variable

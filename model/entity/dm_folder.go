@@ -34,9 +34,9 @@ type Folder struct {
 	Modified   int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
 	RemoteID   string              `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
-	R *folderR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L folderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
-	*Location
+	R        *folderR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L        folderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	Location `boil:"dm_location,bind"`
 }
 
 func (c *Folder) Fields() map[string]model.Fielder {

@@ -15,7 +15,6 @@ import (
 
 	"dm/model"
 	"dm/type_default/field"
-
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -34,9 +33,9 @@ type Article struct {
 	Modified  int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
 	RemoteID  string              `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
-	R *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L articleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
-	*Location
+	R        *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L        articleL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	Location `boil:"dm_location,bind"`
 }
 
 func (c *Article) Fields() map[string]model.Fielder {

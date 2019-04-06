@@ -17,7 +17,7 @@ type {{$alias.UpSingular}} struct {
 	L {{$alias.DownSingular}}L `{{generateIgnoreTags $.Tags}}boil:"-" json:"-" toml:"-" yaml:"-"`
 	{{end -}}
 	{{- if not ( eq $alias.UpSingular "Location" ) -}}
-		{{"*Location"}}
+		{{"Location"}} `boil:"dm_location,bind"`
 	{{end -}}
 
 }

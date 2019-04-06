@@ -37,9 +37,9 @@ type User struct {
 	Published int             `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
 	Modified  int             `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
 
-	R *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
-	*Location
+	R        *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L        userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	Location `boil:"dm_location,bind"`
 }
 
 func (c *User) Fields() map[string]model.Fielder {

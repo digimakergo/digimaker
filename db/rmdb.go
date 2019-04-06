@@ -52,11 +52,12 @@ func (*RMDB) GetByID(contentType string, id int, content model.ContentTyper) err
 
 	contentTypeDef := model.ContentTypeDefinition[contentType]
 	tableName := contentTypeDef.TableName
+	sql := `SELECT * FROM dm_location l, ` + tableName + ` c
+					WHERE l.content_id=c.id
+								AND l.content_type= ` + contentType + `
+							  AND l.id=?`
 
-	sql := `SELECT * FROM dm_location, ` + tableName + ` t
-								WHERE dm_location.content_id=t.id
-										  AND dm_location.id=?`
-
+	util.Debug("db", sql)
 	err = queries.Raw(sql, id).Bind(context.Background(), db, content)
 
 	if err != nil {
