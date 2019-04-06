@@ -64,9 +64,9 @@ func (*RMDB) GetByFields(contentType string, fields interface{}, content model.C
 	fieldStr := ""
 	var values []interface{}
 	for name, value := range fields.(map[string]interface{}) {
-		_, inLocationField := model.LocationFields[name]
+		_, isLocationField := model.LocationFields[name]
 		nameWithTable := "c." + name
-		if inLocationField {
+		if isLocationField {
 			nameWithTable = "l." + name
 		}
 		fieldStr += "AND " + nameWithTable + "=?"
