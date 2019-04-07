@@ -81,7 +81,9 @@ func (*RMDB) Update(entity model.Entitier) error {
 		return err
 	}
 	util.Debug("db", sql)
-	_, err = db.ExecContext(context.Background(), sql, valueParameters...)
+	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
+	resultRows, _ := result.RowsAffected()
+	util.Debug("db", "Affected rows:"+strconv.FormatInt(resultRows, 10))
 	if err != nil {
 		return err //todo: use new error type
 	}

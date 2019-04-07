@@ -33,11 +33,11 @@ func TestUpdate(t *testing.T) {
 	var article entity.Article
 	rmdb.GetByFields("article", map[string]interface{}{"content_id": 1}, &article)
 	//Update remote id of the article
-	article.RemoteID = "3"
+	article.RemoteID = "4"
 	//rmdb.Update(article)
 	err := rmdb.Update(article)
 	assert.Nil(t, err)
 	var article2 entity.Article
 	rmdb.GetByFields("article", map[string]interface{}{"content_id": 1}, &article2)
-	assert.Equal(t, article2.RemoteID, "3")
+	assert.Equal(t, article2.RemoteID, "4")
 }
