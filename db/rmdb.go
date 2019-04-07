@@ -49,9 +49,9 @@ func (*RMDB) GetByFields(contentType string, fields interface{}, content model.C
 	}
 
 	sql := `SELECT * FROM dm_location l, ` + tableName + ` c
-		 		 	WHERE l.content_id=c.id
-								AND l.content_type= '` + contentType + `'
-							  ` + fieldStr
+                   WHERE l.content_id=c.id
+                         AND l.content_type= '` + contentType + `'
+                         ` + fieldStr
 
 	util.Debug("db", sql)
 	err = queries.Raw(sql, values...).Bind(context.Background(), db, content)
