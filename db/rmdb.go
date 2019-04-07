@@ -9,7 +9,7 @@ import (
 	"dm/util"
 	"errors"
 
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 )

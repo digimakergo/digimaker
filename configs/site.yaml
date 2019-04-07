@@ -4,3 +4,9 @@ database:
    username: test
    password: test123
    database: dev_emf
+
+debug:
+  enabled: true #false will disable all below
+  timespent: true
+  category: db, action, template
+  levels: error, warning, info
