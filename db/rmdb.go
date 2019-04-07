@@ -5,12 +5,11 @@ package db
 import (
 	"context"
 	"dm/model"
-	"dm/model/entity"
 	"dm/util"
 	"errors"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
-	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 )
 
@@ -63,11 +62,28 @@ func (*RMDB) GetByFields(contentType string, fields interface{}, content model.C
 	return nil
 }
 
-func (*RMDB) Update(article entity.Article) error {
-	db, _ := DB()
-	_, err := article.Update(context.Background(), db, boil.Infer())
+//Generic update an entity
+func (*RMDB) Update(entity model.Entitier) error {
+	sql := "UPDATE " + entity.TableName() + " SET "
+	values := entity.Values()
+	id := values["id"].(int)
+	var valueParameters []interface{}
+	for name, value := range values {
+		if name != "id" {
+			sql += name + "=?,"
+			valueParameters = append(valueParameters, value)
+		}
+	}
+	sql = sql[:len(sql)-1]
+	sql += " WHERE id=" + strconv.Itoa(id)
+	db, err := DB()
 	if err != nil {
-		return nil
+		return err
+	}
+	util.Debug("db", sql)
+	_, err = db.ExecContext(context.Background(), sql, valueParameters...)
+	if err != nil {
+		return err //todo: use new error type
 	}
 	return nil
 }

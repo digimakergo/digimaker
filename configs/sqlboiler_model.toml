@@ -16,7 +16,7 @@ user = "dev"
 pass = "D!g!m@ker"
 dbname = "dev_emf"
 sslmode = "false"
-blacklist = ['dm_relation','dm_location', 'dm_version']
+blacklist = ['dm_relation','dm_location']
 
 #[imports.all]
 #third_party = ['"dm/model"']

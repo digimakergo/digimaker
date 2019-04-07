@@ -26,6 +26,14 @@ func ( c *{{$alias.UpSingular}} ) Fields() map[string]model.Fielder{
 	 return nil
 }
 
+func ( c *{{$alias.UpSingular}} ) Values() map[string]interface{}{
+	 return nil
+}
+
+func ( c *{{$alias.UpSingular}} ) TableName() string{
+	 return "{{.Table.Name}}"
+}
+
 func ( c *{{$alias.UpSingular}} ) Field( name string ) interface{}{
 	  var result interface{}
 		switch name {

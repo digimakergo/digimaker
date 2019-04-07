@@ -35,3 +35,8 @@ type Fielder interface {
 	//Validate()
 	//SetStoreData()
 }
+
+type Entitier interface {
+	TableName() string
+	Values() map[string]interface{}
+}
