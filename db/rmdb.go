@@ -62,6 +62,11 @@ func (*RMDB) GetByFields(contentType string, fields interface{}, content model.C
 	return nil
 }
 
+//Fetch multiple enities
+func (*RMDB) GetEntities() {
+
+}
+
 //Generic update an entity
 func (*RMDB) Update(entity model.Entitier) error {
 	sql := "UPDATE " + entity.TableName() + " SET "
@@ -81,6 +86,7 @@ func (*RMDB) Update(entity model.Entitier) error {
 		return err
 	}
 	util.Debug("db", sql)
+	//todo: use transaction
 	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
 	resultRows, _ := result.RowsAffected()
 	util.Debug("db", "Affected rows:"+strconv.FormatInt(resultRows, 10))
@@ -90,6 +96,23 @@ func (*RMDB) Update(entity model.Entitier) error {
 	return nil
 }
 
-func (*RMDB) GetEntities() {
+//Update multiple enities
+//todo: make a generic condition format/struct
+// type Condition struct{}
+//
+// Cond( "id",GT, 10 )
+// Cond( AND( "id",GT, 10, "modified", GT, 12012 ) )
+//
+func (*RMDB) UpdateAll(name string, condition interface{}) {
+
+}
+
+//Delete a entity
+func (*RMDB) Delete(entity model.Entitier) {
+
+}
+
+//Delete based on condition
+func (*RMDB) DeleteAll(name string, condition interface{}) {
 
 }
