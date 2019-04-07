@@ -6,7 +6,38 @@ package db
 import (
 	"database/sql"
 	"dm/model"
+	"dm/util"
+	"errors"
 )
+
+var db *sql.DB
+
+//Get DB connection cached globally
+//Note: when using it, the related driver should be imported already
+func DB() (*sql.DB, error) {
+	if db != nil {
+		return db, nil
+	} else {
+		dbConfig := util.GetConfigSection("database")
+		connString := dbConfig["username"] + ":" + dbConfig["password"] +
+			"@" + dbConfig["protocal"] +
+			"(" + dbConfig["host"] + ")/" +
+			dbConfig["database"] //todo: fix what if there is @ or / in the password?
+
+		db, err := sql.Open(dbConfig["type"], connString)
+		if err != nil {
+			errorMessage := "Can not open. error: " + err.Error() + " Conneciton string: " + connString
+			util.Error(errorMessage)
+			return nil, errors.New(errorMessage)
+		}
+
+		if db.Ping() != nil {
+			util.Error("Can not connect with connection string: " + connString)
+			return nil, err
+		}
+		return db, nil
+	}
+}
 
 type DBer interface {
 	Open() (*sql.DB, error)

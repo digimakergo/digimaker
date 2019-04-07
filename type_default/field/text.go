@@ -4,6 +4,7 @@
 package field
 
 import (
+	"database/sql/driver"
 	"dm/model"
 	"errors"
 )
@@ -14,8 +15,9 @@ type TextField struct {
 	data string
 }
 
-func (t *TextField) Value() string {
-	return t.data
+//When update db.
+func (t TextField) Value() (driver.Value, error) {
+	return t.data, nil
 }
 
 func (t *TextField) Scan(src interface{}) error {

@@ -4,39 +4,15 @@ package db
 
 import (
 	"context"
-	"database/sql"
 	"dm/model"
+	"dm/model/entity"
 	"dm/util"
 	"errors"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 )
-
-type SQLDriver struct{}
-
-//Open opens db with verification
-func (m *SQLDriver) Open() (*sql.DB, error) {
-	dbConfig := util.GetConfigSection("database")
-	connString := dbConfig["username"] + ":" + dbConfig["password"] +
-		"@" + dbConfig["protocal"] +
-		"(" + dbConfig["host"] + ")/" +
-		dbConfig["database"] //todo: fix what if there is @ or / in the password?
-
-	db, err := sql.Open(dbConfig["type"], connString)
-	if err != nil {
-		errorMessage := "Can not open. error: " + err.Error() + " Conneciton string: " + connString
-		util.Error(errorMessage)
-		return nil, errors.New(errorMessage)
-	}
-
-	if db.Ping() != nil {
-		util.Error("Can not connect with connection string: " + connString)
-		return nil, err
-	}
-
-	return db, nil
-}
 
 // Implement DBEntitier
 type RMDB struct{}
@@ -52,7 +28,7 @@ func (rmdb *RMDB) GetByID(contentType string, id int, content model.ContentTyper
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, content)
 //
 func (*RMDB) GetByFields(contentType string, fields interface{}, content model.ContentTyper) error {
-	db, err := new(SQLDriver).Open()
+	db, err := DB()
 	if err != nil {
 		return errors.New("Error when connecting db: " + err.Error())
 	}
@@ -74,7 +50,7 @@ func (*RMDB) GetByFields(contentType string, fields interface{}, content model.C
 	}
 
 	sql := `SELECT * FROM dm_location l, ` + tableName + ` c
-					WHERE l.content_id=c.id
+		 		 	WHERE l.content_id=c.id
 								AND l.content_type= '` + contentType + `'
 							  ` + fieldStr
 
@@ -85,4 +61,17 @@ func (*RMDB) GetByFields(contentType string, fields interface{}, content model.C
 		return errors.New("Error when query table: " + tableName + " " + err.Error())
 	}
 	return nil
+}
+
+func (*RMDB) Update(article entity.Article) error {
+	db, _ := DB()
+	_, err := article.Update(context.Background(), db, boil.Infer())
+	if err != nil {
+		return nil
+	}
+	return nil
+}
+
+func (*RMDB) GetEntities() {
+
 }
