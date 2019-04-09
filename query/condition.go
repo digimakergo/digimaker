@@ -20,7 +20,8 @@ type Condition struct {
 }
 
 func (c Condition) Cond(fieldString string, value interface{}) Condition {
-	return c.And(Cond(fieldString, value))
+	cond := Cond(fieldString, value)
+	return c.And(cond)
 }
 
 //And accept <cond>.And( <cond1>, <cond2> ),
@@ -59,7 +60,7 @@ func (c Condition) Or(input interface{}, more ...interface{}) Condition {
 }
 
 func combineExpression(operator string, input1 Condition, input2 Condition, more ...Condition) Condition {
-	condition := new(Condition)
+	condition := Condition{}
 	condition.Logic = operator
 	var arr []Condition
 	conditionArr := append(arr, input1, input2)
@@ -67,7 +68,7 @@ func combineExpression(operator string, input1 Condition, input2 Condition, more
 		conditionArr = append(conditionArr, more...)
 	}
 	condition.Children = conditionArr
-	return *condition
+	return condition
 }
 
 func Cond(fieldString string, value interface{}) Condition {
