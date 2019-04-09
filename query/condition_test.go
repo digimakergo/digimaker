@@ -26,3 +26,12 @@ func TestCond(t *testing.T) {
 	assert.Equal(t, var1.Children.(Expression).Field, "published")
 	fmt.Println(orCond)
 }
+
+func TestContinueCond(t *testing.T) {
+	cond := Cond("id>", 111111).Or(Cond("modified<", 22222)).Cond("section=", "c")
+	fmt.Println(cond)
+	assert.Equal(t, cond.Logic, "and")
+	cond1 := Cond("id<", 11111).Or("id>", 222).And("section", "c")
+	fmt.Println(cond1)
+	assert.Equal(t, cond1.Children.([]Condition)[1].Children.(Expression).Field, "section")
+}

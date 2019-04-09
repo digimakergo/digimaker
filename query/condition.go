@@ -2,7 +2,9 @@
 //{COPYRIGHTS}
 package query
 
-import "strings"
+import (
+	"strings"
+)
 
 var Operators = []string{">", ">=", "<", "<=", "=", "in"} //todo: make it extendable in loading
 
@@ -17,20 +19,43 @@ type Condition struct {
 	Children interface{} //can be []Condition or Expression(when it's the leaf) (eg. and( and( A, B ), C )
 }
 
-func Cond(fieldStr string, value interface{}) Condition {
-	condition := new(Condition)
-	condition.Logic = ""
-	fieldArr := separateFieldStr(fieldStr)
-	condition.Children = Expression{Field: fieldArr[0], Operator: fieldArr[1], Value: value}
-	return *condition
+func (c Condition) Cond(fieldString string, value interface{}) Condition {
+	return c.And(Cond(fieldString, value))
 }
 
-func (c Condition) And(input Condition, more ...Condition) Condition {
-	return combineExpression("and", c, input, more...)
+//And accept <cond>.And( <cond1>, <cond2> ),
+//also <cond>.And( "id<", 2200 ) (same as <cond>.And( Cond( "id<", 2200 ) ))
+func (c Condition) And(input interface{}, more ...interface{}) Condition {
+	var result Condition
+	switch input.(type) {
+	case Condition:
+		var arr []Condition
+		for _, item := range more {
+			arr = append(arr, item.(Condition))
+		}
+		result = combineExpression("and", c, input.(Condition), arr...)
+	case string:
+		value := more[0]
+		result = c.And(Cond(input.(string), value)) //invoke myself with Condition type
+	}
+	return result
 }
 
-func (c Condition) Or(input Condition, more ...Condition) Condition {
-	return combineExpression("or", c, input, more...)
+//Similar to And, Or accepts <cond>.Or( <cond1>, <cond2> ), also <cond>.Or( "id=", 2 )
+func (c Condition) Or(input interface{}, more ...interface{}) Condition {
+	var result Condition
+	switch input.(type) {
+	case Condition:
+		var arr []Condition
+		for _, item := range more {
+			arr = append(arr, item.(Condition))
+		}
+		result = combineExpression("or", c, input.(Condition), arr...)
+	case string:
+		value := more[0]
+		result = c.Or(Cond(input.(string), value)) //invoke myself with Condition type
+	}
+	return result
 }
 
 func combineExpression(operator string, input1 Condition, input2 Condition, more ...Condition) Condition {
@@ -42,6 +67,14 @@ func combineExpression(operator string, input1 Condition, input2 Condition, more
 		conditionArr = append(conditionArr, more...)
 	}
 	condition.Children = conditionArr
+	return *condition
+}
+
+func Cond(fieldString string, value interface{}) Condition {
+	condition := new(Condition)
+	condition.Logic = ""
+	fieldArr := separateFieldString(fieldString, value)
+	condition.Children = Expression{Field: fieldArr[0], Operator: fieldArr[1], Value: value}
 	return *condition
 }
 
@@ -60,7 +93,7 @@ func Par(input ...Condition) *[]Condition {
 	return &input
 }
 
-func separateFieldStr(input string) [2]string {
+func separateFieldString(input string, value interface{}) [2]string {
 	input = strings.TrimSpace(input)
 	var result [2]string
 	for _, operator := range Operators {
@@ -70,5 +103,17 @@ func separateFieldStr(input string) [2]string {
 			break
 		}
 	}
+	//if operator is empty, it can be = if value is string/int, in if value is array
+	if result[1] == "" {
+		switch value.(type) {
+		case string, int:
+			result[0] = input
+			result[1] = "="
+		case []string, []int:
+			result[0] = input
+			result[1] = "in"
+		}
+	}
+
 	return result
 }
