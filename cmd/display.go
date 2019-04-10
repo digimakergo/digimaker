@@ -37,7 +37,7 @@ func main() {
 }
 
 func GetDB() *sql.DB {
-	db, err := sql.Open("mysql", "test:test@tcp(185.35.187.91)/dev_emf")
+	db, err := sql.Open("mysql", "test:test123@tcp(185.35.187.91)/dev_emf")
 
 	if err != nil {
 		fmt.Printf(err.Error())
