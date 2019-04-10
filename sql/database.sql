@@ -39,7 +39,7 @@ CREATE TABLE `dm_article` (
 
 LOCK TABLES `dm_article` WRITE;
 /*!40000 ALTER TABLE `dm_article` DISABLE KEYS */;
-INSERT INTO `dm_article` VALUES (1,'Welcome','Welcome to our place',NULL,NULL,''),(2,'DM EMF is released','News....!',NULL,NULL,'');
+INSERT INTO `dm_article` VALUES (1,'Welcome','good2',111111,12313,'bin3hvli6ekgsag0fnj0'),(2,'DM EMF is released','News....!',1213131,12313,'');
 /*!40000 ALTER TABLE `dm_article` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -82,14 +82,20 @@ DROP TABLE IF EXISTS `dm_location`;
 CREATE TABLE `dm_location` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) NOT NULL DEFAULT '-1',
+  `main_id` int(11) NOT NULL,
+  `hierarchy` varchar(255) NOT NULL DEFAULT '',
   `content_type` varchar(50) NOT NULL DEFAULT '',
   `content_id` int(11) NOT NULL,
+  `language` varchar(20) NOT NULL DEFAULT '',
   `name` varchar(50) NOT NULL DEFAULT '',
+  `is_hidden` tinyint(1) NOT NULL DEFAULT '0',
+  `is_invisible` tinyint(1) NOT NULL DEFAULT '0',
+  `priority` int(11) NOT NULL DEFAULT '0',
   `section` varchar(50) NOT NULL DEFAULT '',
-  `remote_id` varchar(50) NOT NULL DEFAULT '',
+  `unique_id` varchar(50) NOT NULL DEFAULT '',
   `p` varchar(30) NOT NULL DEFAULT 'c',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,7 +104,7 @@ CREATE TABLE `dm_location` (
 
 LOCK TABLES `dm_location` WRITE;
 /*!40000 ALTER TABLE `dm_location` DISABLE KEYS */;
-INSERT INTO `dm_location` VALUES (1,0,'folder',1,'Home','cotnent','','c'),(2,1,'article',1,'Welcome','content','','c'),(3,1,'folder',2,'Blog','content','','c'),(4,1,'folder',3,'News','content','','recent'),(5,1,'folder',4,'Contact Us','content','','archive'),(6,4,'article',2,'EM EMF is released','content','','c'),(7,0,'folder',5,'Users','user','','c'),(8,7,'user',1,'Chen Xiongjie','user','','c'),(9,0,'folder',9,'Shared Contents','','',''),(10,0,'folder',9,'Test folder','','',''),(11,-1,'folder',0,'Test folder','','','c'),(12,-1,'folder',0,'Test folder','','','c');
+INSERT INTO `dm_location` VALUES (1,0,1,'1','folder',1,'eng-gb','Home',0,0,0,'content','','c'),(2,1,2,'1/2','article',1,'eng-gb','Welcome',0,0,0,'content','bin1oj5i6ekglgsliq4g','c'),(3,1,3,'1/3','folder',2,'eng-gb','Blog',0,0,0,'content','','c'),(4,1,4,'1/4','folder',3,'eng-gb','News',0,0,0,'content','','recent'),(5,1,5,'1/5','folder',4,'eng-gb','Contact Us',0,0,0,'content','','archive'),(6,4,6,'1/4/6','article',2,'eng-gb','EM EMF is released',0,0,0,'content','','c'),(7,0,7,'7','folder',5,'eng-gb','Users',0,0,0,'user','','c'),(8,7,8,'7/8','user',1,'eng-gb','Chen Xiongjie',0,0,0,'user','','c'),(9,0,9,'9','folder',9,'eng-gb','Shared Contents',0,0,0,'','',''),(10,0,10,'','folder',9,'eng-gb','Test folder',0,0,0,'','',''),(11,-1,11,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c'),(12,-1,12,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c');
 /*!40000 ALTER TABLE `dm_location` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -140,11 +146,13 @@ DROP TABLE IF EXISTS `dm_user`;
 CREATE TABLE `dm_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `login` varchar(50) DEFAULT NULL,
-  `firstname` varchar(50) DEFAULT NULL,
+  `firstname` varchar(50) NOT NULL,
   `lastname` varchar(50) DEFAULT NULL,
   `password` varchar(50) DEFAULT NULL,
   `mobile` varchar(50) DEFAULT NULL,
   `remote_id` varchar(30) DEFAULT '',
+  `published` int(11) DEFAULT NULL,
+  `modified` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -155,7 +163,7 @@ CREATE TABLE `dm_user` (
 
 LOCK TABLES `dm_user` WRITE;
 /*!40000 ALTER TABLE `dm_user` DISABLE KEYS */;
-INSERT INTO `dm_user` VALUES (1,'chen','Chen','Xiongjie','fdsafasfiifhsdf23131','+4796888261','');
+INSERT INTO `dm_user` VALUES (1,'chen','Chen','Xiongjie','fdsafasfiifhsdf23131','+4796888261','',NULL,NULL);
 /*!40000 ALTER TABLE `dm_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -168,12 +176,12 @@ DROP TABLE IF EXISTS `dm_version`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_version` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `type` varchar(50) DEFAULT NULL,
-  `content_id` int(11) DEFAULT NULL,
-  `version` int(11) DEFAULT NULL,
-  `data` longtext,
+  `type` varchar(50) NOT NULL,
+  `content_id` int(11) NOT NULL,
+  `version` int(11) NOT NULL,
+  `data` longtext NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -182,6 +190,7 @@ CREATE TABLE `dm_version` (
 
 LOCK TABLES `dm_version` WRITE;
 /*!40000 ALTER TABLE `dm_version` DISABLE KEYS */;
+INSERT INTO `dm_version` VALUES (1,'article',1,1,'');
 /*!40000 ALTER TABLE `dm_version` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -194,4 +203,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-03-28 23:59:20
+-- Dump completed on 2019-04-10 21:15:53
