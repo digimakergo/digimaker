@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -13,4 +14,6 @@ func TestReadConfig(t *testing.T) {
 
 	t.Log(database["host"], database["database"], database["username"])
 
+	id := GenerateUID()
+	fmt.Println(id)
 }

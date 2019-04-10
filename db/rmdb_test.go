@@ -4,6 +4,7 @@ import (
 	"dm/model"
 	"dm/model/entity"
 	"dm/query"
+	"dm/util"
 	"fmt"
 	"testing"
 
@@ -36,12 +37,13 @@ func TestUpdate(t *testing.T) {
 	rmdb.GetByFields("article", query.Cond("content_id", 1), &article)
 	//Update remote id of the article
 	fmt.Println(article)
-	article.RemoteID = "5"
+	uid := util.GenerateUID()
+	article.RemoteID = uid
 
 	err := rmdb.Update(article)
 	assert.Nil(t, err)
 	var article2 entity.Article
 	rmdb.GetByFields("article", query.Cond("content_id", 1), &article2)
-	assert.Equal(t, article2.RemoteID, "5")
+	assert.Equal(t, article2.RemoteID, uid)
 
 }

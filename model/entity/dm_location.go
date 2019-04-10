@@ -31,7 +31,7 @@ type Location struct {
 	Language    string `boil:"language" json:"language" toml:"language" yaml:"language"`
 	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Section     string `boil:"section" json:"section" toml:"section" yaml:"section"`
-	RemoteID    string `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
+	UniqueID    string `boil:"unique_id" json:"unique_id" toml:"unique_id" yaml:"unique_id"`
 	P           string `boil:"p" json:"p" toml:"p" yaml:"p"`
 
 	R *locationR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -47,7 +47,7 @@ var LocationColumns = struct {
 	Language    string
 	Name        string
 	Section     string
-	RemoteID    string
+	UniqueID    string
 	P           string
 }{
 	ID:          "id",
@@ -58,11 +58,9 @@ var LocationColumns = struct {
 	Language:    "language",
 	Name:        "name",
 	Section:     "section",
-	RemoteID:    "remote_id",
+	UniqueID:    "unique_id",
 	P:           "p",
 }
-
-// Generated where
 
 var LocationWhere = struct {
 	ID          whereHelperint
@@ -73,7 +71,7 @@ var LocationWhere = struct {
 	Language    whereHelperstring
 	Name        whereHelperstring
 	Section     whereHelperstring
-	RemoteID    whereHelperstring
+	UniqueID    whereHelperstring
 	P           whereHelperstring
 }{
 	ID:          whereHelperint{field: `id`},
@@ -84,7 +82,7 @@ var LocationWhere = struct {
 	Language:    whereHelperstring{field: `language`},
 	Name:        whereHelperstring{field: `name`},
 	Section:     whereHelperstring{field: `section`},
-	RemoteID:    whereHelperstring{field: `remote_id`},
+	UniqueID:    whereHelperstring{field: `unique_id`},
 	P:           whereHelperstring{field: `p`},
 }
 
@@ -105,8 +103,8 @@ func (*locationR) NewStruct() *locationR {
 type locationL struct{}
 
 var (
-	locationColumns               = []string{"id", "parent_id", "main_id", "content_type", "content_id", "language", "name", "section", "remote_id", "p"}
-	locationColumnsWithoutDefault = []string{"main_id", "content_type", "content_id", "language", "name", "section", "remote_id"}
+	locationColumns               = []string{"id", "parent_id", "main_id", "content_type", "content_id", "language", "name", "section", "unique_id", "p"}
+	locationColumnsWithoutDefault = []string{"main_id", "content_type", "content_id", "language", "name", "section", "unique_id"}
 	locationColumnsWithDefault    = []string{"id", "parent_id", "p"}
 	locationPrimaryKeyColumns     = []string{"id"}
 )

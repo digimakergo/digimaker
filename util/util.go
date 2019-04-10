@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"github.com/rs/xid"
 	"github.com/spf13/viper"
 )
 
@@ -126,4 +127,11 @@ func UnmarshalData(filepath string, v interface{}) error {
 
 	defer file.Close()
 	return nil
+}
+
+//Generate unique id. It should be cluster safe.
+func GenerateUID() string {
+	guid := xid.New()
+	guidStr := guid.String()
+	return guidStr
 }
