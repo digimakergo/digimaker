@@ -91,8 +91,8 @@ CREATE TABLE `dm_location` (
   `is_hidden` tinyint(1) NOT NULL DEFAULT '0',
   `is_invisible` tinyint(1) NOT NULL DEFAULT '0',
   `priority` int(11) NOT NULL DEFAULT '0',
+  `uid` varchar(50) NOT NULL DEFAULT '',
   `section` varchar(50) NOT NULL DEFAULT '',
-  `unique_id` varchar(50) NOT NULL DEFAULT '',
   `p` varchar(30) NOT NULL DEFAULT 'c',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
@@ -104,7 +104,7 @@ CREATE TABLE `dm_location` (
 
 LOCK TABLES `dm_location` WRITE;
 /*!40000 ALTER TABLE `dm_location` DISABLE KEYS */;
-INSERT INTO `dm_location` VALUES (1,0,1,'1','folder',1,'eng-gb','Home',0,0,0,'content','','c'),(2,1,2,'1/2','article',1,'eng-gb','Welcome',0,0,0,'content','bin1oj5i6ekglgsliq4g','c'),(3,1,3,'1/3','folder',2,'eng-gb','Blog',0,0,0,'content','','c'),(4,1,4,'1/4','folder',3,'eng-gb','News',0,0,0,'content','','recent'),(5,1,5,'1/5','folder',4,'eng-gb','Contact Us',0,0,0,'content','','archive'),(6,4,6,'1/4/6','article',2,'eng-gb','EM EMF is released',0,0,0,'content','','c'),(7,0,7,'7','folder',5,'eng-gb','Users',0,0,0,'user','','c'),(8,7,8,'7/8','user',1,'eng-gb','Chen Xiongjie',0,0,0,'user','','c'),(9,0,9,'9','folder',9,'eng-gb','Shared Contents',0,0,0,'','',''),(10,0,10,'','folder',9,'eng-gb','Test folder',0,0,0,'','',''),(11,-1,11,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c'),(12,-1,12,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c');
+INSERT INTO `dm_location` VALUES (1,0,1,'1','folder',1,'eng-gb','Home',0,0,0,'','content','c'),(2,1,2,'1/2','article',1,'eng-gb','Welcome',0,0,0,'bin1oj5i6ekglgsliq4g','content','c'),(3,1,3,'1/3','folder',2,'eng-gb','Blog',0,0,0,'','content','c'),(4,1,4,'1/4','folder',3,'eng-gb','News',0,0,0,'','content','recent'),(5,1,5,'1/5','folder',4,'eng-gb','Contact Us',0,0,0,'','content','archive'),(6,4,6,'1/4/6','article',2,'eng-gb','EM EMF is released',0,0,0,'','content','c'),(7,0,7,'7','folder',5,'eng-gb','Users',0,0,0,'','user','c'),(8,7,8,'7/8','user',1,'eng-gb','Chen Xiongjie',0,0,0,'','user','c'),(9,0,9,'9','folder',9,'eng-gb','Shared Contents',0,0,0,'','',''),(10,0,10,'','folder',9,'eng-gb','Test folder',0,0,0,'','',''),(11,-1,11,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c'),(12,-1,12,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c');
 /*!40000 ALTER TABLE `dm_location` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -203,4 +203,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-10 21:15:53
+-- Dump completed on 2019-04-10 21:24:50
