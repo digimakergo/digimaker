@@ -1,3 +1,6 @@
+//Author xc, Created on 2019-03-28 21:00
+//{COPYRIGHTS}
+
 package model
 
 import (

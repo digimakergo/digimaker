@@ -1,31 +1,51 @@
+//Author xc, Created on 2019-03-27 21:00
+//{COPYRIGHTS}
+
 package db
 
 import (
 	"database/sql"
-	util "dm/util"
+	"dm/model"
+	"dm/util"
 	"errors"
-	"fmt"
-
-	_ "github.com/go-sql-driver/mysql"
 )
 
-//Open opens db
-func Open() (*sql.DB, error) {
-	dbConfig, _ := util.GetConfigSectin("database")
-	connString := dbConfig["username"] + ":" + dbConfig["password"] +
-		"@" + dbConfig["protocal"] + "(" + dbConfig["host"] + ")/" + dbConfig["database"]
+var db *sql.DB
 
-	db, err := sql.Open(dbConfig["type"], connString)
-	if err != nil {
-		errorMessage := "Can not connect. error" + err.Error() + " Conneciton string: " + connString
-		util.LogError(errorMessage)
-		return nil, errors.New(errorMessage)
+//Get DB connection cached globally
+//Note: when using it, the related driver should be imported already
+func DB() (*sql.DB, error) {
+	if db != nil {
+		return db, nil
+	} else {
+		dbConfig := util.GetConfigSection("database")
+		connString := dbConfig["username"] + ":" + dbConfig["password"] +
+			"@" + dbConfig["protocal"] +
+			"(" + dbConfig["host"] + ")/" +
+			dbConfig["database"] //todo: fix what if there is @ or / in the password?
+
+		db, err := sql.Open(dbConfig["type"], connString)
+		if err != nil {
+			errorMessage := "Can not open. error: " + err.Error() + " Conneciton string: " + connString
+			util.Error(errorMessage)
+			return nil, errors.New(errorMessage)
+		}
+
+		if db.Ping() != nil {
+			util.Error("Can not connect with connection string: " + connString)
+			return nil, err
+		}
+		return db, nil
 	}
+}
 
-	if db.Ping() != nil {
-		fmt.Printf("can not ping")
-		return nil, err
-	}
+type DBer interface {
+	Open() (*sql.DB, error)
+	Query(q string)
+	All(q string)
+	Execute(q string)
+}
 
-	return db, nil
+type DBEntitier interface {
+	GetByID(contentType string, id int) model.ContentTyper
 }

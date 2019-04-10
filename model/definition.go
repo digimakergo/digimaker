@@ -1,4 +1,5 @@
-// {COPYRIGHT_HEADER}
+//Author xc, Created on 2019-03-28 20:00
+//{COPYRIGHTS}
 
 package model
 
@@ -51,3 +52,15 @@ var ContentTypeDefinition map[string]ContentTypeSetting
 
 //DatatypeDefinition Datatypes which defined in datatype.json
 var DatatypeDefinition map[string]DatatypeSetting
+
+//this is predefined, internal use
+var LocationFields = map[string]string{"id": "int",
+	"parent_id":    "int",
+	"main_id":      "int",
+	"content_type": "string",
+	"content_id":   "int",
+	"language":     "string",
+	"name":         "string",
+	"section":      "string",
+	"remote_id":    "string",
+	"p":            "string"}

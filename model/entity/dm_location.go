@@ -25,12 +25,13 @@ import (
 type Location struct {
 	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ParentID    int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
+	MainID      int    `boil:"main_id" json:"main_id" toml:"main_id" yaml:"main_id"`
 	ContentType string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID   int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	Language    string `boil:"language" json:"language" toml:"language" yaml:"language"`
 	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
 	Section     string `boil:"section" json:"section" toml:"section" yaml:"section"`
-	RemoteID    string `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
+	UniqueID    string `boil:"unique_id" json:"unique_id" toml:"unique_id" yaml:"unique_id"`
 	P           string `boil:"p" json:"p" toml:"p" yaml:"p"`
 
 	R *locationR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -40,46 +41,48 @@ type Location struct {
 var LocationColumns = struct {
 	ID          string
 	ParentID    string
+	MainID      string
 	ContentType string
 	ContentID   string
 	Language    string
 	Name        string
 	Section     string
-	RemoteID    string
+	UniqueID    string
 	P           string
 }{
 	ID:          "id",
 	ParentID:    "parent_id",
+	MainID:      "main_id",
 	ContentType: "content_type",
 	ContentID:   "content_id",
 	Language:    "language",
 	Name:        "name",
 	Section:     "section",
-	RemoteID:    "remote_id",
+	UniqueID:    "unique_id",
 	P:           "p",
 }
-
-// Generated where
 
 var LocationWhere = struct {
 	ID          whereHelperint
 	ParentID    whereHelperint
+	MainID      whereHelperint
 	ContentType whereHelperstring
 	ContentID   whereHelperint
 	Language    whereHelperstring
 	Name        whereHelperstring
 	Section     whereHelperstring
-	RemoteID    whereHelperstring
+	UniqueID    whereHelperstring
 	P           whereHelperstring
 }{
 	ID:          whereHelperint{field: `id`},
 	ParentID:    whereHelperint{field: `parent_id`},
+	MainID:      whereHelperint{field: `main_id`},
 	ContentType: whereHelperstring{field: `content_type`},
 	ContentID:   whereHelperint{field: `content_id`},
 	Language:    whereHelperstring{field: `language`},
 	Name:        whereHelperstring{field: `name`},
 	Section:     whereHelperstring{field: `section`},
-	RemoteID:    whereHelperstring{field: `remote_id`},
+	UniqueID:    whereHelperstring{field: `unique_id`},
 	P:           whereHelperstring{field: `p`},
 }
 
@@ -100,8 +103,8 @@ func (*locationR) NewStruct() *locationR {
 type locationL struct{}
 
 var (
-	locationColumns               = []string{"id", "parent_id", "content_type", "content_id", "language", "name", "section", "remote_id", "p"}
-	locationColumnsWithoutDefault = []string{"content_type", "content_id", "language", "name", "section", "remote_id"}
+	locationColumns               = []string{"id", "parent_id", "main_id", "content_type", "content_id", "language", "name", "section", "unique_id", "p"}
+	locationColumnsWithoutDefault = []string{"main_id", "content_type", "content_id", "language", "name", "section", "unique_id"}
 	locationColumnsWithDefault    = []string{"id", "parent_id", "p"}
 	locationPrimaryKeyColumns     = []string{"id"}
 )

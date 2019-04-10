@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dm/model"
 	"dm/type_default/field"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -33,13 +34,21 @@ type Folder struct {
 	Modified   int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
 	RemoteID   string              `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
-	R *folderR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L folderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
-	*Location
+	R        *folderR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L        folderL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	Location `boil:"dm_location,bind"`
 }
 
-func (c *Folder) Fields() map[string]Folder {
+func (c *Folder) Fields() map[string]model.Fielder {
 	return nil
+}
+
+func (c *Folder) Values() map[string]interface{} {
+	return nil
+}
+
+func (c *Folder) TableName() string {
+	return "dm_folder"
 }
 
 func (c *Folder) Field(name string) interface{} {
@@ -145,6 +154,8 @@ type (
 	// FolderSlice is an alias for a slice of pointers to Folder.
 	// This should generally be used opposed to []Folder.
 	FolderSlice []*Folder
+	// FolderHook is the signature for custom Folder hook methods
+	FolderHook func(context.Context, boil.ContextExecutor, *Folder) error
 
 	folderQuery struct {
 		*queries.Query
@@ -172,6 +183,176 @@ var (
 	_ = qmhelper.Where
 )
 
+var folderBeforeInsertHooks []FolderHook
+var folderBeforeUpdateHooks []FolderHook
+var folderBeforeDeleteHooks []FolderHook
+var folderBeforeUpsertHooks []FolderHook
+
+var folderAfterInsertHooks []FolderHook
+var folderAfterSelectHooks []FolderHook
+var folderAfterUpdateHooks []FolderHook
+var folderAfterDeleteHooks []FolderHook
+var folderAfterUpsertHooks []FolderHook
+
+// doBeforeInsertHooks executes all "before insert" hooks.
+func (o *Folder) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderBeforeInsertHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// doBeforeUpdateHooks executes all "before Update" hooks.
+func (o *Folder) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderBeforeUpdateHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// doBeforeDeleteHooks executes all "before Delete" hooks.
+func (o *Folder) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderBeforeDeleteHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// doBeforeUpsertHooks executes all "before Upsert" hooks.
+func (o *Folder) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderBeforeUpsertHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// doAfterInsertHooks executes all "after Insert" hooks.
+func (o *Folder) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderAfterInsertHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// doAfterSelectHooks executes all "after Select" hooks.
+func (o *Folder) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderAfterSelectHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// doAfterUpdateHooks executes all "after Update" hooks.
+func (o *Folder) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderAfterUpdateHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// doAfterDeleteHooks executes all "after Delete" hooks.
+func (o *Folder) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderAfterDeleteHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// doAfterUpsertHooks executes all "after Upsert" hooks.
+func (o *Folder) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+	if boil.HooksAreSkipped(ctx) {
+		return nil
+	}
+
+	for _, hook := range folderAfterUpsertHooks {
+		if err := hook(ctx, exec, o); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// AddFolderHook registers your hook function for all future operations.
+func AddFolderHook(hookPoint boil.HookPoint, folderHook FolderHook) {
+	switch hookPoint {
+	case boil.BeforeInsertHook:
+		folderBeforeInsertHooks = append(folderBeforeInsertHooks, folderHook)
+	case boil.BeforeUpdateHook:
+		folderBeforeUpdateHooks = append(folderBeforeUpdateHooks, folderHook)
+	case boil.BeforeDeleteHook:
+		folderBeforeDeleteHooks = append(folderBeforeDeleteHooks, folderHook)
+	case boil.BeforeUpsertHook:
+		folderBeforeUpsertHooks = append(folderBeforeUpsertHooks, folderHook)
+	case boil.AfterInsertHook:
+		folderAfterInsertHooks = append(folderAfterInsertHooks, folderHook)
+	case boil.AfterSelectHook:
+		folderAfterSelectHooks = append(folderAfterSelectHooks, folderHook)
+	case boil.AfterUpdateHook:
+		folderAfterUpdateHooks = append(folderAfterUpdateHooks, folderHook)
+	case boil.AfterDeleteHook:
+		folderAfterDeleteHooks = append(folderAfterDeleteHooks, folderHook)
+	case boil.AfterUpsertHook:
+		folderAfterUpsertHooks = append(folderAfterUpsertHooks, folderHook)
+	}
+}
+
 // One returns a single folder record from the query.
 func (q folderQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Folder, error) {
 	o := &Folder{}
@@ -186,6 +367,10 @@ func (q folderQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Folde
 		return nil, errors.Wrap(err, "entity: failed to execute a one query for dm_folder")
 	}
 
+	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
+		return o, err
+	}
+
 	return o, nil
 }
 
@@ -196,6 +381,14 @@ func (q folderQuery) All(ctx context.Context, exec boil.ContextExecutor) (Folder
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
 		return nil, errors.Wrap(err, "entity: failed to assign all query results to Folder slice")
+	}
+
+	if len(folderAfterSelectHooks) != 0 {
+		for _, obj := range o {
+			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
+				return o, err
+			}
+		}
 	}
 
 	return o, nil
@@ -272,6 +465,10 @@ func (o *Folder) Insert(ctx context.Context, exec boil.ContextExecutor, columns 
 	}
 
 	var err error
+
+	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
+		return err
+	}
 
 	nzDefaults := queries.NonZeroDefaultSet(folderColumnsWithDefault, o)
 
@@ -363,7 +560,7 @@ CacheNoHooks:
 		folderInsertCacheMut.Unlock()
 	}
 
-	return nil
+	return o.doAfterInsertHooks(ctx, exec)
 }
 
 // Update uses an executor to update the Folder.
@@ -371,6 +568,9 @@ CacheNoHooks:
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
 func (o *Folder) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
+	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
+		return 0, err
+	}
 	key := makeCacheKey(columns, nil)
 	folderUpdateCacheMut.RLock()
 	cache, cached := folderUpdateCache[key]
@@ -423,7 +623,7 @@ func (o *Folder) Update(ctx context.Context, exec boil.ContextExecutor, columns 
 		folderUpdateCacheMut.Unlock()
 	}
 
-	return rowsAff, nil
+	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
@@ -500,6 +700,10 @@ var mySQLFolderUniqueColumns = []string{
 func (o *Folder) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("entity: no dm_folder provided for upsert")
+	}
+
+	if err := o.doBeforeUpsertHooks(ctx, exec); err != nil {
+		return err
 	}
 
 	nzDefaults := queries.NonZeroDefaultSet(folderColumnsWithDefault, o)
@@ -632,7 +836,7 @@ CacheNoHooks:
 		folderUpsertCacheMut.Unlock()
 	}
 
-	return nil
+	return o.doAfterUpsertHooks(ctx, exec)
 }
 
 // Delete deletes a single Folder record with an executor.
@@ -640,6 +844,10 @@ CacheNoHooks:
 func (o *Folder) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
 		return 0, errors.New("entity: no Folder provided for delete")
+	}
+
+	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
+		return 0, err
 	}
 
 	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), folderPrimaryKeyMapping)
@@ -658,6 +866,10 @@ func (o *Folder) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
 		return 0, errors.Wrap(err, "entity: failed to get rows affected by delete for dm_folder")
+	}
+
+	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
+		return 0, err
 	}
 
 	return rowsAff, nil
@@ -694,6 +906,14 @@ func (o FolderSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 		return 0, nil
 	}
 
+	if len(folderBeforeDeleteHooks) != 0 {
+		for _, obj := range o {
+			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
+				return 0, err
+			}
+		}
+	}
+
 	var args []interface{}
 	for _, obj := range o {
 		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), folderPrimaryKeyMapping)
@@ -716,6 +936,14 @@ func (o FolderSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
 		return 0, errors.Wrap(err, "entity: failed to get rows affected by deleteall for dm_folder")
+	}
+
+	if len(folderAfterDeleteHooks) != 0 {
+		for _, obj := range o {
+			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
+				return 0, err
+			}
+		}
 	}
 
 	return rowsAff, nil

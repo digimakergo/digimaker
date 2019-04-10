@@ -17,13 +17,21 @@ type {{$alias.UpSingular}} struct {
 	L {{$alias.DownSingular}}L `{{generateIgnoreTags $.Tags}}boil:"-" json:"-" toml:"-" yaml:"-"`
 	{{end -}}
 	{{- if not ( eq $alias.UpSingular "Location" ) -}}
-		{{"*Location"}}
+		{{"Location"}} `boil:"dm_location,bind"`
 	{{end -}}
 
 }
 
-func ( c *{{$alias.UpSingular}} ) Fields() map[string]{{$alias.UpSingular}}{
+func ( c *{{$alias.UpSingular}} ) Fields() map[string]model.Fielder{
 	 return nil
+}
+
+func ( c *{{$alias.UpSingular}} ) Values() map[string]interface{}{
+	 return nil
+}
+
+func ( c *{{$alias.UpSingular}} ) TableName() string{
+	 return "{{.Table.Name}}"
 }
 
 func ( c *{{$alias.UpSingular}} ) Field( name string ) interface{}{
