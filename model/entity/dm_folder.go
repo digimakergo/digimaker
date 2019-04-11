@@ -15,6 +15,7 @@ import (
 
 	"dm/db"
 	"dm/model"
+	. "dm/query"
 	"dm/type_default/field"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -75,7 +76,7 @@ func (c *Folder) Field(name string) interface{} {
 }
 
 func (c Folder) Store() error {
-	return db.DBHanlder().Update(c.TableName(), c.Values())
+	return db.DBHanlder().Update(c.TableName(), c.Values(), Cond("id", c.DataID))
 }
 
 func (c *Folder) FDataID() int {

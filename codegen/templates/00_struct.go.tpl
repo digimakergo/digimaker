@@ -48,7 +48,7 @@ func ( c *{{$alias.UpSingular}} ) Field( name string ) interface{}{
 }
 
 func (c {{$alias.UpSingular}}) Store() error {
-	return db.DBHanlder().Update(c.TableName(), c.Values())
+    return db.DBHanlder().Update(c.TableName(), c.Values(), Cond("id", c.DataID))
 }
 
 

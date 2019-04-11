@@ -96,32 +96,30 @@ func (RMDB) Insert(tablename string, values map[string]interface{}) (int, error)
 }
 
 //Generic update an entity
-func (RMDB) Update(tablename string, values map[string]interface{}) error {
+func (RMDB) Update(tablename string, values map[string]interface{}, condition query.Condition) error {
 	sql := "UPDATE " + tablename + " SET "
-	if id, ok := values["id"].(int); ok {
-		var valueParameters []interface{}
-		for name, value := range values {
-			if name != "id" {
-				sql += name + "=?,"
-				valueParameters = append(valueParameters, value)
-			}
+	var valueParameters []interface{}
+	for name, value := range values {
+		if name != "id" {
+			sql += name + "=?,"
+			valueParameters = append(valueParameters, value)
 		}
-		sql = sql[:len(sql)-1]
-		sql += " WHERE id=" + strconv.Itoa(id)
-		db, err := DB()
-		if err != nil {
-			return err
-		}
-		util.Debug("db", sql)
-		//todo: use transaction
-		result, err := db.ExecContext(context.Background(), sql, valueParameters...)
-		resultRows, _ := result.RowsAffected()
-		util.Debug("db", "Affected rows:"+strconv.FormatInt(resultRows, 10))
-		if err != nil {
-			return err //todo: use new error type
-		}
-	} else {
-		return errors.New("There is no id")
+	}
+	sql = sql[:len(sql)-1]
+	conditionString, conditionValues := BuildCondition(condition)
+	valueParameters = append(valueParameters, conditionValues...)
+	sql += " WHERE " + conditionString
+	db, err := DB()
+	if err != nil {
+		return err
+	}
+	util.Debug("db", sql)
+	//todo: use transaction
+	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
+	resultRows, _ := result.RowsAffected()
+	util.Debug("db", "Affected rows:"+strconv.FormatInt(resultRows, 10))
+	if err != nil {
+		return err //todo: use new error type
 	}
 	return nil
 }

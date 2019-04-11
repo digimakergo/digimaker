@@ -38,7 +38,7 @@ db_type = "varchar"
 type = "field.TextField"
 
 [types.imports]
-third_party = ['"dm/type_default/field"', '"dm/model"']
+third_party = ['"dm/type_default/field"', '"dm/model"', '. "dm/query"']
 
 
 # Richtext

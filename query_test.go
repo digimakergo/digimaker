@@ -4,10 +4,11 @@ import (
 	"dm/db"
 	"dm/model"
 	"dm/model/entity"
-	"dm/query"
+	. "dm/query"
 	"dm/util"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -35,7 +36,7 @@ func TestUpdate(t *testing.T) {
 	rmdb := new(db.RMDB)
 
 	var article entity.Article
-	rmdb.GetByFields("article", query.Cond("content_id", 1), &article)
+	rmdb.GetByFields("article", Cond("content_id", 1), &article)
 	//Update remote id of the article
 	fmt.Println(article)
 	uid := util.GenerateUID()
@@ -51,10 +52,10 @@ func TestUpdate(t *testing.T) {
 		}
 	*/
 
-	err := rmdb.Update(article)
+	err = rmdb.Update(article.TableName(), map[string]interface{}{"body": "test" + time.Now().String()}, Cond("id", 1))
 	assert.Nil(t, err)
 	var article2 entity.Article
-	rmdb.GetByFields("article", query.Cond("content_id", 1), &article2)
+	rmdb.GetByFields("article", Cond("content_id", 1), &article2)
 	assert.Equal(t, article2.RemoteID, uid)
 
 }

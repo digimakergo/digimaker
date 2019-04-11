@@ -15,6 +15,7 @@ import (
 
 	"dm/db"
 	"dm/model"
+	. "dm/query"
 	"dm/type_default/field"
 
 	"github.com/pkg/errors"
@@ -78,7 +79,7 @@ func (c *Article) Field(name string) interface{} {
 }
 
 func (c Article) Store() error {
-	return db.DBHanlder().Update(c.TableName(), c.Values())
+	return db.DBHanlder().Update(c.TableName(), c.Values(), Cond("id", c.DataID))
 }
 
 func (c *Article) FDataID() int {
