@@ -43,11 +43,18 @@ func TestUpdate(t *testing.T) {
 	article.RemoteID = uid
 	err := article.Store()
 	fmt.Println(err)
+
 	/*
-		err := rmdb.Update(article)
-		assert.Nil(t, err)
-		var article2 entity.Article
-		rmdb.GetByFields("article", query.Cond("content_id", 1), &article2)
-		assert.Equal(t, article2.RemoteID, uid)*/
+		id, error := rmdb.Insert("dm_article", map[string]interface{}{"modified": 231213})
+		if error != nil {
+			fmt.Println(id, error.Error())
+		}
+	*/
+
+	err := rmdb.Update(article)
+	assert.Nil(t, err)
+	var article2 entity.Article
+	rmdb.GetByFields("article", query.Cond("content_id", 1), &article2)
+	assert.Equal(t, article2.RemoteID, uid)
 
 }

@@ -59,6 +59,42 @@ func (*RMDB) GetEntities() {
 
 }
 
+func (RMDB) Insert(tablename string, values map[string]interface{}) (int, error) {
+	sql := "INSERT INTO " + tablename + " ("
+	valuesString := "VALUES("
+	var valueParameters []interface{}
+	if len(values) > 0 {
+		for name, value := range values {
+			if name != "id" {
+				sql += name + ","
+				valuesString += "?,"
+				valueParameters = append(valueParameters, value)
+			}
+		}
+		sql = sql[:len(sql)-1]
+		valuesString = valuesString[:len(valuesString)-1]
+	}
+	sql += ")"
+	valuesString += ")"
+	sql = sql + " " + valuesString
+	util.Debug("db", sql)
+	db, err := DB()
+	if err != nil {
+		return 0, err //todo: use new error type
+	}
+	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
+	if err != nil {
+		return 0, err //todo: use new error type
+	}
+	id, err := result.LastInsertId()
+	if err != nil {
+		return 0, err //todo: use new error type
+	}
+	util.Debug("db", "Insert results in id: "+strconv.FormatInt(id, 10))
+
+	return int(id), err
+}
+
 //Generic update an entity
 func (RMDB) Update(tablename string, values map[string]interface{}) error {
 	sql := "UPDATE " + tablename + " SET "
