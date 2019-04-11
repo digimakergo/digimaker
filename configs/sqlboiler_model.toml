@@ -51,7 +51,7 @@ db_type = "text"
 type = "field.RichTextField"
 
 [types.imports]
-third_party = ['"dm/type_default/field"']
+third_party = ['"dm/type_default/field"', '"dm/db"']
 
 
 ##Execlude below types replacement

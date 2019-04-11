@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dm/db"
 	"dm/model"
 	"dm/type_default/field"
 
@@ -43,7 +44,7 @@ func (c *Article) Fields() map[string]model.Fielder {
 	return nil
 }
 
-func (c Article) Values() map[string]interface{} {
+func (c *Article) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.DataID
 	result["title"] = c.Title
@@ -52,7 +53,7 @@ func (c Article) Values() map[string]interface{} {
 	return result
 }
 
-func (c Article) TableName() string {
+func (c *Article) TableName() string {
 	return "dm_article"
 }
 
@@ -74,6 +75,10 @@ func (c *Article) Field(name string) interface{} {
 	default:
 	}
 	return result
+}
+
+func (c Article) Store() error {
+	return db.DBHanlder().Update(c.TableName(), c.Values())
 }
 
 func (c *Article) FDataID() int {

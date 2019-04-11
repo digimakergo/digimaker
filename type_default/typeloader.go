@@ -4,7 +4,7 @@
 package type_default
 
 import (
-	content "dm/type_default/content"
+	//content "dm/type_default/content"
 	field "dm/type_default/field"
 )
 
@@ -24,7 +24,7 @@ func (TypeLoaderDefault) Instance(extendedType string, identifier string) interf
 	} else if extendedType == "contenttype" {
 		switch identifier {
 		case "article":
-			result = content.Article{}
+			//result = content.Article{}
 		default:
 		}
 	}

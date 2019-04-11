@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"dm/db"
 	"dm/model"
 	"dm/type_default/field"
 	"github.com/pkg/errors"
@@ -71,6 +72,10 @@ func (c *Folder) Field(name string) interface{} {
 	default:
 	}
 	return result
+}
+
+func (c Folder) Store() error {
+	return db.DBHanlder().Update(c.TableName(), c.Values())
 }
 
 func (c *Folder) FDataID() int {

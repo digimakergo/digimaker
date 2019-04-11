@@ -10,7 +10,7 @@ type DefaultSettingsType struct {
 	ConfigFolder string
 }
 
-var DefaultSettings = DefaultSettingsType{"site", "../configs"}
+var DefaultSettings = DefaultSettingsType{"site", "/Users/xc/go/caf-prototype/src/dm/configs"}
 
 func InitSettings(settings ...string) {
 	if settings == nil {

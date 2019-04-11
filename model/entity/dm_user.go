@@ -13,8 +13,10 @@ import (
 	"sync"
 	"time"
 
+	"dm/db"
 	"dm/model"
 	"dm/type_default/field"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -78,6 +80,10 @@ func (c *User) Field(name string) interface{} {
 	default:
 	}
 	return result
+}
+
+func (c User) Store() error {
+	return db.DBHanlder().Update(c.TableName(), c.Values())
 }
 
 func (c *User) FDataID() int {

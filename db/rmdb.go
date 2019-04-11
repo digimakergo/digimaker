@@ -60,30 +60,32 @@ func (*RMDB) GetEntities() {
 }
 
 //Generic update an entity
-func (*RMDB) Update(entity model.Entitier) error {
-	sql := "UPDATE " + entity.TableName() + " SET "
-	values := entity.Values()
-	id := values["id"].(int)
-	var valueParameters []interface{}
-	for name, value := range values {
-		if name != "id" {
-			sql += name + "=?,"
-			valueParameters = append(valueParameters, value)
+func (RMDB) Update(tablename string, values map[string]interface{}) error {
+	sql := "UPDATE " + tablename + " SET "
+	if id, ok := values["id"].(int); ok {
+		var valueParameters []interface{}
+		for name, value := range values {
+			if name != "id" {
+				sql += name + "=?,"
+				valueParameters = append(valueParameters, value)
+			}
 		}
-	}
-	sql = sql[:len(sql)-1]
-	sql += " WHERE id=" + strconv.Itoa(id)
-	db, err := DB()
-	if err != nil {
-		return err
-	}
-	util.Debug("db", sql)
-	//todo: use transaction
-	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
-	resultRows, _ := result.RowsAffected()
-	util.Debug("db", "Affected rows:"+strconv.FormatInt(resultRows, 10))
-	if err != nil {
-		return err //todo: use new error type
+		sql = sql[:len(sql)-1]
+		sql += " WHERE id=" + strconv.Itoa(id)
+		db, err := DB()
+		if err != nil {
+			return err
+		}
+		util.Debug("db", sql)
+		//todo: use transaction
+		result, err := db.ExecContext(context.Background(), sql, valueParameters...)
+		resultRows, _ := result.RowsAffected()
+		util.Debug("db", "Affected rows:"+strconv.FormatInt(resultRows, 10))
+		if err != nil {
+			return err //todo: use new error type
+		}
+	} else {
+		return errors.New("There is no id")
 	}
 	return nil
 }
@@ -107,4 +109,10 @@ func (*RMDB) Delete(entity model.Entitier) {
 //Delete based on condition
 func (*RMDB) DeleteAll(name string, condition interface{}) {
 
+}
+
+var dbObject = RMDB{}
+
+func DBHanlder() RMDB {
+	return dbObject
 }
