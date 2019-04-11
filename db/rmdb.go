@@ -124,24 +124,8 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition qu
 	return nil
 }
 
-//Update multiple enities
-//todo: make a generic condition format/struct
-// type Condition struct{}
-//
-// Cond( "id",GT, 10 )
-// Cond( AND( "id",GT, 10, "modified", GT, 12012 ) )
-//
-func (*RMDB) UpdateAll(name string, condition interface{}) {
-
-}
-
-//Delete a entity
-func (*RMDB) Delete(entity model.Entitier) {
-
-}
-
 //Delete based on condition
-func (*RMDB) DeleteAll(name string, condition interface{}) {
+func (*RMDB) Delete(name string, condition interface{}) {
 
 }
 

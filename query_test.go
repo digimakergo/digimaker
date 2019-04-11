@@ -58,4 +58,8 @@ func TestUpdate(t *testing.T) {
 	rmdb.GetByFields("article", Cond("content_id", 1), &article2)
 	assert.Equal(t, article2.RemoteID, uid)
 
+	//insert
+	// article3 := new(entity.Article)
+	// article3.RemoteID = "5555555"
+	// article3.Store()
 }
