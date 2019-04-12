@@ -6,6 +6,9 @@ package entity
 import (
 	"context"
 	"database/sql"
+	"dm/db"
+	"dm/model"
+	. "dm/query"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -22,29 +25,64 @@ import (
 )
 
 // DMVersion is an object representing the database table.
+// Implement dm.model.ContentTyper interface
 type DMVersion struct {
 	ID        int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Type      string `boil:"type" json:"type" toml:"type" yaml:"type"`
 	ContentID int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	Version   int    `boil:"version" json:"version" toml:"version" yaml:"version"`
 	Data      string `boil:"data" json:"data" toml:"data" yaml:"data"`
-
-	R *dmVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L dmVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-var DMVersionColumns = struct {
-	ID        string
-	Type      string
-	ContentID string
-	Version   string
-	Data      string
-}{
-	ID:        "id",
-	Type:      "type",
-	ContentID: "content_id",
-	Version:   "version",
-	Data:      "data",
+func (c *DMVersion) Fields() map[string]model.Fielder {
+	return nil
+}
+
+func (c *DMVersion) Values() map[string]interface{} {
+	result := make(map[string]interface{})
+	result["id"] = c.ID
+	result["type"] = c.Type
+	result["content_id"] = c.ContentID
+	result["version"] = c.Version
+	result["data"] = c.Data
+	return result
+}
+
+func (c *DMVersion) TableName() string {
+	return "dm_version"
+}
+
+func (c *DMVersion) Field(name string) interface{} {
+	var result interface{}
+	switch name {
+	case "id", "ID":
+		result = c.ID
+	case "type", "Type":
+		result = c.Type
+	case "content_id", "ContentID":
+		result = c.ContentID
+	case "version", "Version":
+		result = c.Version
+	case "data", "Data":
+		result = c.Data
+	default:
+	}
+	return result
+}
+
+func (c DMVersion) Store() error {
+	handler := db.DBHanlder()
+	if c.ID == 0 {
+		id, err := handler.Insert(c.TableName(), c.Values())
+		c.ID = id
+		if err != nil {
+			return err
+		}
+	} else {
+		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.ID))
+		return err
+	}
+	return nil
 }
 
 // Generated where

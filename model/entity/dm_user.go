@@ -29,7 +29,7 @@ import (
 // User is an object representing the database table.
 // Implement dm.model.ContentTyper interface
 type User struct {
-	DataID    int             `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CID       int             `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Login     null.String     `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
 	Firstname field.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
 	Lastname  null.String     `boil:"lastname" json:"lastname,omitempty" toml:"lastname" yaml:"lastname,omitempty"`
@@ -50,7 +50,7 @@ func (c *User) Fields() map[string]model.Fielder {
 
 func (c *User) Values() map[string]interface{} {
 	result := make(map[string]interface{})
-	result["id"] = c.DataID
+	result["id"] = c.CID
 	result["login"] = c.Login
 	result["firstname"] = c.Firstname
 	result["lastname"] = c.Lastname
@@ -69,8 +69,8 @@ func (c *User) TableName() string {
 func (c *User) Field(name string) interface{} {
 	var result interface{}
 	switch name {
-	case "id", "DataID":
-		result = c.DataID
+	case "id", "CID":
+		result = c.CID
 	case "login", "Login":
 		result = c.Login
 	case "firstname", "Firstname":
@@ -94,21 +94,21 @@ func (c *User) Field(name string) interface{} {
 
 func (c User) Store() error {
 	handler := db.DBHanlder()
-	if c.DataID == 0 {
+	if c.CID == 0 {
 		id, err := handler.Insert(c.TableName(), c.Values())
-		c.DataID = id
+		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.DataID))
+		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.CID))
 		return err
 	}
 	return nil
 }
 
 var UserColumns = struct {
-	DataID    string
+	CID       string
 	Login     string
 	Firstname string
 	Lastname  string
@@ -118,7 +118,7 @@ var UserColumns = struct {
 	Published string
 	Modified  string
 }{
-	DataID:    "id",
+	CID:       "id",
 	Login:     "login",
 	Firstname: "firstname",
 	Lastname:  "lastname",
@@ -544,7 +544,7 @@ func (o *User) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColu
 		return ErrSyncFail
 	}
 
-	o.DataID = int(lastID)
+	o.CID = int(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == userMapping["id"] {
 		goto CacheNoHooks
 	}

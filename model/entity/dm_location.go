@@ -6,6 +6,9 @@ package entity
 import (
 	"context"
 	"database/sql"
+	"dm/db"
+	"dm/model"
+	. "dm/query"
 	"fmt"
 	"reflect"
 	"strconv"
@@ -22,6 +25,7 @@ import (
 )
 
 // Location is an object representing the database table.
+// Implement dm.model.ContentTyper interface
 type Location struct {
 	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ParentID    int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
@@ -37,9 +41,84 @@ type Location struct {
 	UID         string `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
 	Section     string `boil:"section" json:"section" toml:"section" yaml:"section"`
 	P           string `boil:"p" json:"p" toml:"p" yaml:"p"`
+}
 
-	R *locationR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L locationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+func (c *Location) Fields() map[string]model.Fielder {
+	return nil
+}
+
+func (c *Location) Values() map[string]interface{} {
+	result := make(map[string]interface{})
+	result["id"] = c.ID
+	result["parent_id"] = c.ParentID
+	result["main_id"] = c.MainID
+	result["hierarchy"] = c.Hierarchy
+	result["content_type"] = c.ContentType
+	result["content_id"] = c.ContentID
+	result["language"] = c.Language
+	result["name"] = c.Name
+	result["is_hidden"] = c.IsHidden
+	result["is_invisible"] = c.IsInvisible
+	result["priority"] = c.Priority
+	result["uid"] = c.UID
+	result["section"] = c.Section
+	result["p"] = c.P
+	return result
+}
+
+func (c *Location) TableName() string {
+	return "dm_location"
+}
+
+func (c *Location) Field(name string) interface{} {
+	var result interface{}
+	switch name {
+	case "id", "ID":
+		result = c.ID
+	case "parent_id", "ParentID":
+		result = c.ParentID
+	case "main_id", "MainID":
+		result = c.MainID
+	case "hierarchy", "Hierarchy":
+		result = c.Hierarchy
+	case "content_type", "ContentType":
+		result = c.ContentType
+	case "content_id", "ContentID":
+		result = c.ContentID
+	case "language", "Language":
+		result = c.Language
+	case "name", "Name":
+		result = c.Name
+	case "is_hidden", "IsHidden":
+		result = c.IsHidden
+	case "is_invisible", "IsInvisible":
+		result = c.IsInvisible
+	case "priority", "Priority":
+		result = c.Priority
+	case "uid", "UID":
+		result = c.UID
+	case "section", "Section":
+		result = c.Section
+	case "p", "P":
+		result = c.P
+	default:
+	}
+	return result
+}
+
+func (c Location) Store() error {
+	handler := db.DBHanlder()
+	if c.ID == 0 {
+		id, err := handler.Insert(c.TableName(), c.Values())
+		c.ID = id
+		if err != nil {
+			return err
+		}
+	} else {
+		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.ID))
+		return err
+	}
+	return nil
 }
 
 var LocationColumns = struct {

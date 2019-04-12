@@ -28,7 +28,7 @@ import (
 // Article is an object representing the database table.
 // Implement dm.model.ContentTyper interface
 type Article struct {
-	DataID    int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CID       int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Title     field.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Body      field.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
 	Published int                 `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
@@ -46,7 +46,7 @@ func (c *Article) Fields() map[string]model.Fielder {
 
 func (c *Article) Values() map[string]interface{} {
 	result := make(map[string]interface{})
-	result["id"] = c.DataID
+	result["id"] = c.CID
 	result["title"] = c.Title
 	result["body"] = c.Body
 	result["published"] = c.Published
@@ -62,8 +62,8 @@ func (c *Article) TableName() string {
 func (c *Article) Field(name string) interface{} {
 	var result interface{}
 	switch name {
-	case "id", "DataID":
-		result = c.DataID
+	case "id", "CID":
+		result = c.CID
 	case "title", "Title":
 		result = c.Title
 	case "body", "Body":
@@ -81,28 +81,28 @@ func (c *Article) Field(name string) interface{} {
 
 func (c Article) Store() error {
 	handler := db.DBHanlder()
-	if c.DataID == 0 {
+	if c.CID == 0 {
 		id, err := handler.Insert(c.TableName(), c.Values())
-		c.DataID = id
+		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.DataID))
+		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.CID))
 		return err
 	}
 	return nil
 }
 
 var ArticleColumns = struct {
-	DataID    string
+	CID       string
 	Title     string
 	Body      string
 	Published string
 	Modified  string
 	RemoteID  string
 }{
-	DataID:    "id",
+	CID:       "id",
 	Title:     "title",
 	Body:      "body",
 	Published: "published",
@@ -525,7 +525,7 @@ func (o *Article) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 		return ErrSyncFail
 	}
 
-	o.DataID = int(lastID)
+	o.CID = int(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == articleMapping["id"] {
 		goto CacheNoHooks
 	}

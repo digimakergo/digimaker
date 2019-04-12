@@ -56,6 +56,7 @@ func TestUpdate(t *testing.T) {
 	assert.Nil(t, err)
 	var article2 entity.Article
 	rmdb.GetByFields("article", Cond("content_id", 1), &article2)
+
 	assert.Equal(t, article2.RemoteID, uid)
 
 	//insert

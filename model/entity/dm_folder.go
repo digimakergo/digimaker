@@ -28,7 +28,7 @@ import (
 // Folder is an object representing the database table.
 // Implement dm.model.ContentTyper interface
 type Folder struct {
-	DataID     int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CID        int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	FolderType string              `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
 	Title      field.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Summary    field.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
@@ -47,7 +47,7 @@ func (c *Folder) Fields() map[string]model.Fielder {
 
 func (c *Folder) Values() map[string]interface{} {
 	result := make(map[string]interface{})
-	result["id"] = c.DataID
+	result["id"] = c.CID
 	result["folder_type"] = c.FolderType
 	result["title"] = c.Title
 	result["summary"] = c.Summary
@@ -64,8 +64,8 @@ func (c *Folder) TableName() string {
 func (c *Folder) Field(name string) interface{} {
 	var result interface{}
 	switch name {
-	case "id", "DataID":
-		result = c.DataID
+	case "id", "CID":
+		result = c.CID
 	case "folder_type", "FolderType":
 		result = c.FolderType
 	case "title", "Title":
@@ -85,21 +85,21 @@ func (c *Folder) Field(name string) interface{} {
 
 func (c Folder) Store() error {
 	handler := db.DBHanlder()
-	if c.DataID == 0 {
+	if c.CID == 0 {
 		id, err := handler.Insert(c.TableName(), c.Values())
-		c.DataID = id
+		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.DataID))
+		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.CID))
 		return err
 	}
 	return nil
 }
 
 var FolderColumns = struct {
-	DataID     string
+	CID        string
 	FolderType string
 	Title      string
 	Summary    string
@@ -107,7 +107,7 @@ var FolderColumns = struct {
 	Modified   string
 	RemoteID   string
 }{
-	DataID:     "id",
+	CID:        "id",
 	FolderType: "folder_type",
 	Title:      "title",
 	Summary:    "summary",
@@ -531,7 +531,7 @@ func (o *Folder) Upsert(ctx context.Context, exec boil.ContextExecutor, updateCo
 		return ErrSyncFail
 	}
 
-	o.DataID = int(lastID)
+	o.CID = int(lastID)
 	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == folderMapping["id"] {
 		goto CacheNoHooks
 	}
