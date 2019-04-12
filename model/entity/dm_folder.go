@@ -17,10 +17,10 @@ import (
 	"dm/model"
 	. "dm/query"
 	"dm/type_default/field"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
-	"github.com/volatiletech/sqlboiler/queries/qm"
 	"github.com/volatiletech/sqlboiler/queries/qmhelper"
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
@@ -46,7 +46,15 @@ func (c *Folder) Fields() map[string]model.Fielder {
 }
 
 func (c *Folder) Values() map[string]interface{} {
-	return nil
+	result := make(map[string]interface{})
+	result["id"] = c.DataID
+	result["folder_type"] = c.FolderType
+	result["title"] = c.Title
+	result["summary"] = c.Summary
+	result["published"] = c.Published
+	result["modified"] = c.Modified
+	result["remote_id"] = c.RemoteID
+	return result
 }
 
 func (c *Folder) TableName() string {
@@ -76,23 +84,18 @@ func (c *Folder) Field(name string) interface{} {
 }
 
 func (c Folder) Store() error {
-	return db.DBHanlder().Update(c.TableName(), c.Values(), Cond("id", c.DataID))
-}
-
-func (c *Folder) FDataID() int {
-	return c.DataID
-}
-
-func (c *Folder) FName() string {
-	return c.Name
-}
-
-func (c *Folder) FPublished() int {
-	return c.Published
-}
-
-func (c *Folder) FModified() int {
-	return c.Modified
+	handler := db.DBHanlder()
+	if c.DataID == 0 {
+		id, err := handler.Insert(c.TableName(), c.Values())
+		c.DataID = id
+		if err != nil {
+			return err
+		}
+	} else {
+		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.DataID))
+		return err
+	}
+	return nil
 }
 
 var FolderColumns = struct {
@@ -111,26 +114,6 @@ var FolderColumns = struct {
 	Published:  "published",
 	Modified:   "modified",
 	RemoteID:   "remote_id",
-}
-
-// Generated where
-
-var FolderWhere = struct {
-	DataID     whereHelperint
-	FolderType whereHelperstring
-	Title      whereHelperfield_TextField
-	Summary    whereHelperfield_RichTextField
-	Published  whereHelperint
-	Modified   whereHelperint
-	RemoteID   whereHelperstring
-}{
-	DataID:     whereHelperint{field: `id`},
-	FolderType: whereHelperstring{field: `folder_type`},
-	Title:      whereHelperfield_TextField{field: `title`},
-	Summary:    whereHelperfield_RichTextField{field: `summary`},
-	Published:  whereHelperint{field: `published`},
-	Modified:   whereHelperint{field: `modified`},
-	RemoteID:   whereHelperstring{field: `remote_id`},
 }
 
 // FolderRels is where relationship names are stored.
@@ -431,272 +414,6 @@ func (q folderQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (boo
 	return count > 0, nil
 }
 
-// Folders retrieves all the records using an executor.
-func Folders(mods ...qm.QueryMod) folderQuery {
-	mods = append(mods, qm.From("`dm_folder`"))
-	return folderQuery{NewQuery(mods...)}
-}
-
-// FindFolder retrieves a single record by ID with an executor.
-// If selectCols is empty Find will return all columns.
-func FindFolder(ctx context.Context, exec boil.ContextExecutor, dataID int, selectCols ...string) (*Folder, error) {
-	folderObj := &Folder{}
-
-	sel := "*"
-	if len(selectCols) > 0 {
-		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
-	}
-	query := fmt.Sprintf(
-		"select %s from `dm_folder` where `id`=?", sel,
-	)
-
-	q := queries.Raw(query, dataID)
-
-	err := q.Bind(ctx, exec, folderObj)
-	if err != nil {
-		if errors.Cause(err) == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
-		}
-		return nil, errors.Wrap(err, "entity: unable to select from dm_folder")
-	}
-
-	return folderObj, nil
-}
-
-// Insert a single record using an executor.
-// See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Folder) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
-	if o == nil {
-		return errors.New("entity: no dm_folder provided for insertion")
-	}
-
-	var err error
-
-	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
-		return err
-	}
-
-	nzDefaults := queries.NonZeroDefaultSet(folderColumnsWithDefault, o)
-
-	key := makeCacheKey(columns, nzDefaults)
-	folderInsertCacheMut.RLock()
-	cache, cached := folderInsertCache[key]
-	folderInsertCacheMut.RUnlock()
-
-	if !cached {
-		wl, returnColumns := columns.InsertColumnSet(
-			folderColumns,
-			folderColumnsWithDefault,
-			folderColumnsWithoutDefault,
-			nzDefaults,
-		)
-
-		cache.valueMapping, err = queries.BindMapping(folderType, folderMapping, wl)
-		if err != nil {
-			return err
-		}
-		cache.retMapping, err = queries.BindMapping(folderType, folderMapping, returnColumns)
-		if err != nil {
-			return err
-		}
-		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO `dm_folder` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
-		} else {
-			cache.query = "INSERT INTO `dm_folder` () VALUES ()%s%s"
-		}
-
-		var queryOutput, queryReturning string
-
-		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_folder` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, folderPrimaryKeyColumns))
-		}
-
-		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
-	}
-
-	value := reflect.Indirect(reflect.ValueOf(o))
-	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, cache.query)
-		fmt.Fprintln(boil.DebugWriter, vals)
-	}
-
-	result, err := exec.ExecContext(ctx, cache.query, vals...)
-
-	if err != nil {
-		return errors.Wrap(err, "entity: unable to insert into dm_folder")
-	}
-
-	var lastID int64
-	var identifierCols []interface{}
-
-	if len(cache.retMapping) == 0 {
-		goto CacheNoHooks
-	}
-
-	lastID, err = result.LastInsertId()
-	if err != nil {
-		return ErrSyncFail
-	}
-
-	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == folderMapping["ID"] {
-		goto CacheNoHooks
-	}
-
-	identifierCols = []interface{}{
-		o.DataID,
-	}
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, cache.retQuery)
-		fmt.Fprintln(boil.DebugWriter, identifierCols...)
-	}
-
-	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
-	if err != nil {
-		return errors.Wrap(err, "entity: unable to populate default values for dm_folder")
-	}
-
-CacheNoHooks:
-	if !cached {
-		folderInsertCacheMut.Lock()
-		folderInsertCache[key] = cache
-		folderInsertCacheMut.Unlock()
-	}
-
-	return o.doAfterInsertHooks(ctx, exec)
-}
-
-// Update uses an executor to update the Folder.
-// See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
-// Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Folder) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
-	var err error
-	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
-		return 0, err
-	}
-	key := makeCacheKey(columns, nil)
-	folderUpdateCacheMut.RLock()
-	cache, cached := folderUpdateCache[key]
-	folderUpdateCacheMut.RUnlock()
-
-	if !cached {
-		wl := columns.UpdateColumnSet(
-			folderColumns,
-			folderPrimaryKeyColumns,
-		)
-
-		if !columns.IsWhitelist() {
-			wl = strmangle.SetComplement(wl, []string{"created_at"})
-		}
-		if len(wl) == 0 {
-			return 0, errors.New("entity: unable to update dm_folder, could not build whitelist")
-		}
-
-		cache.query = fmt.Sprintf("UPDATE `dm_folder` SET %s WHERE %s",
-			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, folderPrimaryKeyColumns),
-		)
-		cache.valueMapping, err = queries.BindMapping(folderType, folderMapping, append(wl, folderPrimaryKeyColumns...))
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	values := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), cache.valueMapping)
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, cache.query)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-
-	var result sql.Result
-	result, err = exec.ExecContext(ctx, cache.query, values...)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to update dm_folder row")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: failed to get rows affected by update for dm_folder")
-	}
-
-	if !cached {
-		folderUpdateCacheMut.Lock()
-		folderUpdateCache[key] = cache
-		folderUpdateCacheMut.Unlock()
-	}
-
-	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
-}
-
-// UpdateAll updates all rows with the specified column values.
-func (q folderQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
-	queries.SetUpdate(q.Query, cols)
-
-	result, err := q.Query.ExecContext(ctx, exec)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to update all for dm_folder")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to retrieve rows affected for dm_folder")
-	}
-
-	return rowsAff, nil
-}
-
-// UpdateAll updates all rows with the specified column values, using an executor.
-func (o FolderSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
-	ln := int64(len(o))
-	if ln == 0 {
-		return 0, nil
-	}
-
-	if len(cols) == 0 {
-		return 0, errors.New("entity: update all requires at least one column argument")
-	}
-
-	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
-
-	i := 0
-	for name, value := range cols {
-		colNames[i] = name
-		args[i] = value
-		i++
-	}
-
-	// Append all of the primary key values for each column
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), folderPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
-	}
-
-	sql := fmt.Sprintf("UPDATE `dm_folder` SET %s WHERE %s",
-		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, folderPrimaryKeyColumns, len(o)))
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, args...)
-	}
-
-	result, err := exec.ExecContext(ctx, sql, args...)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to update all in folder slice")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to retrieve rows affected all in update all folder")
-	}
-	return rowsAff, nil
-}
-
 var mySQLFolderUniqueColumns = []string{
 	"id",
 }
@@ -843,175 +560,4 @@ CacheNoHooks:
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
-}
-
-// Delete deletes a single Folder record with an executor.
-// Delete will match against the primary key column to find the record to delete.
-func (o *Folder) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("entity: no Folder provided for delete")
-	}
-
-	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
-		return 0, err
-	}
-
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), folderPrimaryKeyMapping)
-	sql := "DELETE FROM `dm_folder` WHERE `id`=?"
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, args...)
-	}
-
-	result, err := exec.ExecContext(ctx, sql, args...)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to delete from dm_folder")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: failed to get rows affected by delete for dm_folder")
-	}
-
-	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
-		return 0, err
-	}
-
-	return rowsAff, nil
-}
-
-// DeleteAll deletes all matching rows.
-func (q folderQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if q.Query == nil {
-		return 0, errors.New("entity: no folderQuery provided for delete all")
-	}
-
-	queries.SetDelete(q.Query)
-
-	result, err := q.Query.ExecContext(ctx, exec)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to delete all from dm_folder")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: failed to get rows affected by deleteall for dm_folder")
-	}
-
-	return rowsAff, nil
-}
-
-// DeleteAll deletes all rows in the slice, using an executor.
-func (o FolderSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("entity: no Folder slice provided for delete all")
-	}
-
-	if len(o) == 0 {
-		return 0, nil
-	}
-
-	if len(folderBeforeDeleteHooks) != 0 {
-		for _, obj := range o {
-			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
-				return 0, err
-			}
-		}
-	}
-
-	var args []interface{}
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), folderPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
-	}
-
-	sql := "DELETE FROM `dm_folder` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, folderPrimaryKeyColumns, len(o))
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, args)
-	}
-
-	result, err := exec.ExecContext(ctx, sql, args...)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to delete all from folder slice")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: failed to get rows affected by deleteall for dm_folder")
-	}
-
-	if len(folderAfterDeleteHooks) != 0 {
-		for _, obj := range o {
-			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
-				return 0, err
-			}
-		}
-	}
-
-	return rowsAff, nil
-}
-
-// Reload refetches the object from the database
-// using the primary keys with an executor.
-func (o *Folder) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindFolder(ctx, exec, o.DataID)
-	if err != nil {
-		return err
-	}
-
-	*o = *ret
-	return nil
-}
-
-// ReloadAll refetches every row with matching primary key column values
-// and overwrites the original object slice with the newly updated slice.
-func (o *FolderSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
-	if o == nil || len(*o) == 0 {
-		return nil
-	}
-
-	slice := FolderSlice{}
-	var args []interface{}
-	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), folderPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
-	}
-
-	sql := "SELECT `dm_folder`.* FROM `dm_folder` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, folderPrimaryKeyColumns, len(*o))
-
-	q := queries.Raw(sql, args...)
-
-	err := q.Bind(ctx, exec, &slice)
-	if err != nil {
-		return errors.Wrap(err, "entity: unable to reload all in FolderSlice")
-	}
-
-	*o = slice
-
-	return nil
-}
-
-// FolderExists checks if the Folder row exists.
-func FolderExists(ctx context.Context, exec boil.ContextExecutor, dataID int) (bool, error) {
-	var exists bool
-	sql := "select exists(select 1 from `dm_folder` where `id`=? limit 1)"
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, dataID)
-	}
-
-	row := exec.QueryRowContext(ctx, sql, dataID)
-
-	err := row.Scan(&exists)
-	if err != nil {
-		return false, errors.Wrap(err, "entity: unable to check if dm_folder exists")
-	}
-
-	return exists, nil
 }

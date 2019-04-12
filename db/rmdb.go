@@ -117,7 +117,7 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition qu
 	//todo: use transaction
 	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
 	resultRows, _ := result.RowsAffected()
-	util.Debug("db", "Affected rows:"+strconv.FormatInt(resultRows, 10))
+	util.Debug("db", "Updated rows:"+strconv.FormatInt(resultRows, 10))
 	if err != nil {
 		return err //todo: use new error type
 	}

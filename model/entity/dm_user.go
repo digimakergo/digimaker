@@ -22,7 +22,6 @@ import (
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
-	"github.com/volatiletech/sqlboiler/queries/qm"
 	"github.com/volatiletech/sqlboiler/queries/qmhelper"
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
@@ -50,7 +49,17 @@ func (c *User) Fields() map[string]model.Fielder {
 }
 
 func (c *User) Values() map[string]interface{} {
-	return nil
+	result := make(map[string]interface{})
+	result["id"] = c.DataID
+	result["login"] = c.Login
+	result["firstname"] = c.Firstname
+	result["lastname"] = c.Lastname
+	result["password"] = c.Password
+	result["mobile"] = c.Mobile
+	result["remote_id"] = c.RemoteID
+	result["published"] = c.Published
+	result["modified"] = c.Modified
+	return result
 }
 
 func (c *User) TableName() string {
@@ -84,23 +93,18 @@ func (c *User) Field(name string) interface{} {
 }
 
 func (c User) Store() error {
-	return db.DBHanlder().Update(c.TableName(), c.Values(), Cond("id", c.DataID))
-}
-
-func (c *User) FDataID() int {
-	return c.DataID
-}
-
-func (c *User) FName() string {
-	return c.Name
-}
-
-func (c *User) FPublished() int {
-	return c.Published
-}
-
-func (c *User) FModified() int {
-	return c.Modified
+	handler := db.DBHanlder()
+	if c.DataID == 0 {
+		id, err := handler.Insert(c.TableName(), c.Values())
+		c.DataID = id
+		if err != nil {
+			return err
+		}
+	} else {
+		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.DataID))
+		return err
+	}
+	return nil
 }
 
 var UserColumns = struct {
@@ -123,53 +127,6 @@ var UserColumns = struct {
 	RemoteID:  "remote_id",
 	Published: "published",
 	Modified:  "modified",
-}
-
-// Generated where
-
-type whereHelpernull_String struct{ field string }
-
-func (w whereHelpernull_String) EQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, false, x)
-}
-func (w whereHelpernull_String) NEQ(x null.String) qm.QueryMod {
-	return qmhelper.WhereNullEQ(w.field, true, x)
-}
-func (w whereHelpernull_String) IsNull() qm.QueryMod    { return qmhelper.WhereIsNull(w.field) }
-func (w whereHelpernull_String) IsNotNull() qm.QueryMod { return qmhelper.WhereIsNotNull(w.field) }
-func (w whereHelpernull_String) LT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LT, x)
-}
-func (w whereHelpernull_String) LTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.LTE, x)
-}
-func (w whereHelpernull_String) GT(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GT, x)
-}
-func (w whereHelpernull_String) GTE(x null.String) qm.QueryMod {
-	return qmhelper.Where(w.field, qmhelper.GTE, x)
-}
-
-var UserWhere = struct {
-	DataID    whereHelperint
-	Login     whereHelpernull_String
-	Firstname whereHelperfield_TextField
-	Lastname  whereHelpernull_String
-	Password  whereHelpernull_String
-	Mobile    whereHelpernull_String
-	RemoteID  whereHelpernull_String
-	Published whereHelperint
-	Modified  whereHelperint
-}{
-	DataID:    whereHelperint{field: `id`},
-	Login:     whereHelpernull_String{field: `login`},
-	Firstname: whereHelperfield_TextField{field: `firstname`},
-	Lastname:  whereHelpernull_String{field: `lastname`},
-	Password:  whereHelpernull_String{field: `password`},
-	Mobile:    whereHelpernull_String{field: `mobile`},
-	RemoteID:  whereHelpernull_String{field: `remote_id`},
-	Published: whereHelperint{field: `published`},
-	Modified:  whereHelperint{field: `modified`},
 }
 
 // UserRels is where relationship names are stored.
@@ -470,272 +427,6 @@ func (q userQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool,
 	return count > 0, nil
 }
 
-// Users retrieves all the records using an executor.
-func Users(mods ...qm.QueryMod) userQuery {
-	mods = append(mods, qm.From("`dm_user`"))
-	return userQuery{NewQuery(mods...)}
-}
-
-// FindUser retrieves a single record by ID with an executor.
-// If selectCols is empty Find will return all columns.
-func FindUser(ctx context.Context, exec boil.ContextExecutor, dataID int, selectCols ...string) (*User, error) {
-	userObj := &User{}
-
-	sel := "*"
-	if len(selectCols) > 0 {
-		sel = strings.Join(strmangle.IdentQuoteSlice(dialect.LQ, dialect.RQ, selectCols), ",")
-	}
-	query := fmt.Sprintf(
-		"select %s from `dm_user` where `id`=?", sel,
-	)
-
-	q := queries.Raw(query, dataID)
-
-	err := q.Bind(ctx, exec, userObj)
-	if err != nil {
-		if errors.Cause(err) == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
-		}
-		return nil, errors.Wrap(err, "entity: unable to select from dm_user")
-	}
-
-	return userObj, nil
-}
-
-// Insert a single record using an executor.
-// See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *User) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
-	if o == nil {
-		return errors.New("entity: no dm_user provided for insertion")
-	}
-
-	var err error
-
-	if err := o.doBeforeInsertHooks(ctx, exec); err != nil {
-		return err
-	}
-
-	nzDefaults := queries.NonZeroDefaultSet(userColumnsWithDefault, o)
-
-	key := makeCacheKey(columns, nzDefaults)
-	userInsertCacheMut.RLock()
-	cache, cached := userInsertCache[key]
-	userInsertCacheMut.RUnlock()
-
-	if !cached {
-		wl, returnColumns := columns.InsertColumnSet(
-			userColumns,
-			userColumnsWithDefault,
-			userColumnsWithoutDefault,
-			nzDefaults,
-		)
-
-		cache.valueMapping, err = queries.BindMapping(userType, userMapping, wl)
-		if err != nil {
-			return err
-		}
-		cache.retMapping, err = queries.BindMapping(userType, userMapping, returnColumns)
-		if err != nil {
-			return err
-		}
-		if len(wl) != 0 {
-			cache.query = fmt.Sprintf("INSERT INTO `dm_user` (`%s`) %%sVALUES (%s)%%s", strings.Join(wl, "`,`"), strmangle.Placeholders(dialect.UseIndexPlaceholders, len(wl), 1, 1))
-		} else {
-			cache.query = "INSERT INTO `dm_user` () VALUES ()%s%s"
-		}
-
-		var queryOutput, queryReturning string
-
-		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_user` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, userPrimaryKeyColumns))
-		}
-
-		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
-	}
-
-	value := reflect.Indirect(reflect.ValueOf(o))
-	vals := queries.ValuesFromMapping(value, cache.valueMapping)
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, cache.query)
-		fmt.Fprintln(boil.DebugWriter, vals)
-	}
-
-	result, err := exec.ExecContext(ctx, cache.query, vals...)
-
-	if err != nil {
-		return errors.Wrap(err, "entity: unable to insert into dm_user")
-	}
-
-	var lastID int64
-	var identifierCols []interface{}
-
-	if len(cache.retMapping) == 0 {
-		goto CacheNoHooks
-	}
-
-	lastID, err = result.LastInsertId()
-	if err != nil {
-		return ErrSyncFail
-	}
-
-	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == userMapping["ID"] {
-		goto CacheNoHooks
-	}
-
-	identifierCols = []interface{}{
-		o.DataID,
-	}
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, cache.retQuery)
-		fmt.Fprintln(boil.DebugWriter, identifierCols...)
-	}
-
-	err = exec.QueryRowContext(ctx, cache.retQuery, identifierCols...).Scan(queries.PtrsFromMapping(value, cache.retMapping)...)
-	if err != nil {
-		return errors.Wrap(err, "entity: unable to populate default values for dm_user")
-	}
-
-CacheNoHooks:
-	if !cached {
-		userInsertCacheMut.Lock()
-		userInsertCache[key] = cache
-		userInsertCacheMut.Unlock()
-	}
-
-	return o.doAfterInsertHooks(ctx, exec)
-}
-
-// Update uses an executor to update the User.
-// See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
-// Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *User) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
-	var err error
-	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
-		return 0, err
-	}
-	key := makeCacheKey(columns, nil)
-	userUpdateCacheMut.RLock()
-	cache, cached := userUpdateCache[key]
-	userUpdateCacheMut.RUnlock()
-
-	if !cached {
-		wl := columns.UpdateColumnSet(
-			userColumns,
-			userPrimaryKeyColumns,
-		)
-
-		if !columns.IsWhitelist() {
-			wl = strmangle.SetComplement(wl, []string{"created_at"})
-		}
-		if len(wl) == 0 {
-			return 0, errors.New("entity: unable to update dm_user, could not build whitelist")
-		}
-
-		cache.query = fmt.Sprintf("UPDATE `dm_user` SET %s WHERE %s",
-			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, userPrimaryKeyColumns),
-		)
-		cache.valueMapping, err = queries.BindMapping(userType, userMapping, append(wl, userPrimaryKeyColumns...))
-		if err != nil {
-			return 0, err
-		}
-	}
-
-	values := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), cache.valueMapping)
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, cache.query)
-		fmt.Fprintln(boil.DebugWriter, values)
-	}
-
-	var result sql.Result
-	result, err = exec.ExecContext(ctx, cache.query, values...)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to update dm_user row")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: failed to get rows affected by update for dm_user")
-	}
-
-	if !cached {
-		userUpdateCacheMut.Lock()
-		userUpdateCache[key] = cache
-		userUpdateCacheMut.Unlock()
-	}
-
-	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
-}
-
-// UpdateAll updates all rows with the specified column values.
-func (q userQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
-	queries.SetUpdate(q.Query, cols)
-
-	result, err := q.Query.ExecContext(ctx, exec)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to update all for dm_user")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to retrieve rows affected for dm_user")
-	}
-
-	return rowsAff, nil
-}
-
-// UpdateAll updates all rows with the specified column values, using an executor.
-func (o UserSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
-	ln := int64(len(o))
-	if ln == 0 {
-		return 0, nil
-	}
-
-	if len(cols) == 0 {
-		return 0, errors.New("entity: update all requires at least one column argument")
-	}
-
-	colNames := make([]string, len(cols))
-	args := make([]interface{}, len(cols))
-
-	i := 0
-	for name, value := range cols {
-		colNames[i] = name
-		args[i] = value
-		i++
-	}
-
-	// Append all of the primary key values for each column
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
-	}
-
-	sql := fmt.Sprintf("UPDATE `dm_user` SET %s WHERE %s",
-		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, userPrimaryKeyColumns, len(o)))
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, args...)
-	}
-
-	result, err := exec.ExecContext(ctx, sql, args...)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to update all in user slice")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to retrieve rows affected all in update all user")
-	}
-	return rowsAff, nil
-}
-
 var mySQLUserUniqueColumns = []string{
 	"id",
 }
@@ -882,175 +573,4 @@ CacheNoHooks:
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
-}
-
-// Delete deletes a single User record with an executor.
-// Delete will match against the primary key column to find the record to delete.
-func (o *User) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("entity: no User provided for delete")
-	}
-
-	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
-		return 0, err
-	}
-
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), userPrimaryKeyMapping)
-	sql := "DELETE FROM `dm_user` WHERE `id`=?"
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, args...)
-	}
-
-	result, err := exec.ExecContext(ctx, sql, args...)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to delete from dm_user")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: failed to get rows affected by delete for dm_user")
-	}
-
-	if err := o.doAfterDeleteHooks(ctx, exec); err != nil {
-		return 0, err
-	}
-
-	return rowsAff, nil
-}
-
-// DeleteAll deletes all matching rows.
-func (q userQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if q.Query == nil {
-		return 0, errors.New("entity: no userQuery provided for delete all")
-	}
-
-	queries.SetDelete(q.Query)
-
-	result, err := q.Query.ExecContext(ctx, exec)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to delete all from dm_user")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: failed to get rows affected by deleteall for dm_user")
-	}
-
-	return rowsAff, nil
-}
-
-// DeleteAll deletes all rows in the slice, using an executor.
-func (o UserSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
-	if o == nil {
-		return 0, errors.New("entity: no User slice provided for delete all")
-	}
-
-	if len(o) == 0 {
-		return 0, nil
-	}
-
-	if len(userBeforeDeleteHooks) != 0 {
-		for _, obj := range o {
-			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
-				return 0, err
-			}
-		}
-	}
-
-	var args []interface{}
-	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
-	}
-
-	sql := "DELETE FROM `dm_user` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, userPrimaryKeyColumns, len(o))
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, args)
-	}
-
-	result, err := exec.ExecContext(ctx, sql, args...)
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to delete all from user slice")
-	}
-
-	rowsAff, err := result.RowsAffected()
-	if err != nil {
-		return 0, errors.Wrap(err, "entity: failed to get rows affected by deleteall for dm_user")
-	}
-
-	if len(userAfterDeleteHooks) != 0 {
-		for _, obj := range o {
-			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
-				return 0, err
-			}
-		}
-	}
-
-	return rowsAff, nil
-}
-
-// Reload refetches the object from the database
-// using the primary keys with an executor.
-func (o *User) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindUser(ctx, exec, o.DataID)
-	if err != nil {
-		return err
-	}
-
-	*o = *ret
-	return nil
-}
-
-// ReloadAll refetches every row with matching primary key column values
-// and overwrites the original object slice with the newly updated slice.
-func (o *UserSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
-	if o == nil || len(*o) == 0 {
-		return nil
-	}
-
-	slice := UserSlice{}
-	var args []interface{}
-	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), userPrimaryKeyMapping)
-		args = append(args, pkeyArgs...)
-	}
-
-	sql := "SELECT `dm_user`.* FROM `dm_user` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, userPrimaryKeyColumns, len(*o))
-
-	q := queries.Raw(sql, args...)
-
-	err := q.Bind(ctx, exec, &slice)
-	if err != nil {
-		return errors.Wrap(err, "entity: unable to reload all in UserSlice")
-	}
-
-	*o = slice
-
-	return nil
-}
-
-// UserExists checks if the User row exists.
-func UserExists(ctx context.Context, exec boil.ContextExecutor, dataID int) (bool, error) {
-	var exists bool
-	sql := "select exists(select 1 from `dm_user` where `id`=? limit 1)"
-
-	if boil.DebugMode {
-		fmt.Fprintln(boil.DebugWriter, sql)
-		fmt.Fprintln(boil.DebugWriter, dataID)
-	}
-
-	row := exec.QueryRowContext(ctx, sql, dataID)
-
-	err := row.Scan(&exists)
-	if err != nil {
-		return false, errors.Wrap(err, "entity: unable to check if dm_user exists")
-	}
-
-	return exists, nil
 }

@@ -13,9 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"dm/model"
-	"dm/type_default/field"
-
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -24,51 +21,19 @@ import (
 	"github.com/volatiletech/sqlboiler/strmangle"
 )
 
-// Version is an object representing the database table.
-// Implement dm.model.ContentTyper interface
-type Version struct {
-	ID        int             `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Type      field.TextField `boil:"type" json:"type" toml:"type" yaml:"type"`
-	ContentID int             `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
-	Version   int             `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Data      string          `boil:"data" json:"data" toml:"data" yaml:"data"`
+// DMVersion is an object representing the database table.
+type DMVersion struct {
+	ID        int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Type      string `boil:"type" json:"type" toml:"type" yaml:"type"`
+	ContentID int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
+	Version   int    `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Data      string `boil:"data" json:"data" toml:"data" yaml:"data"`
 
-	R        *versionR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L        versionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
-	Location `boil:"dm_location,bind"`
+	R *dmVersionR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L dmVersionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
-func (c *Version) Fields() map[string]model.Fielder {
-	return nil
-}
-
-func (c *Version) Values() map[string]interface{} {
-	return nil
-}
-
-func (c *Version) TableName() string {
-	return "dm_version"
-}
-
-func (c *Version) Field(name string) interface{} {
-	var result interface{}
-	switch name {
-	case "id", "ID":
-		result = c.ID
-	case "type", "Type":
-		result = c.Type
-	case "content_id", "ContentID":
-		result = c.ContentID
-	case "version", "Version":
-		result = c.Version
-	case "data", "Data":
-		result = c.Data
-	default:
-	}
-	return result
-}
-
-var VersionColumns = struct {
+var DMVersionColumns = struct {
 	ID        string
 	Type      string
 	ContentID string
@@ -84,66 +49,66 @@ var VersionColumns = struct {
 
 // Generated where
 
-var VersionWhere = struct {
+var DMVersionWhere = struct {
 	ID        whereHelperint
-	Type      whereHelperfield_TextField
+	Type      whereHelperstring
 	ContentID whereHelperint
 	Version   whereHelperint
 	Data      whereHelperstring
 }{
 	ID:        whereHelperint{field: `id`},
-	Type:      whereHelperfield_TextField{field: `type`},
+	Type:      whereHelperstring{field: `type`},
 	ContentID: whereHelperint{field: `content_id`},
 	Version:   whereHelperint{field: `version`},
 	Data:      whereHelperstring{field: `data`},
 }
 
-// VersionRels is where relationship names are stored.
-var VersionRels = struct {
+// DMVersionRels is where relationship names are stored.
+var DMVersionRels = struct {
 }{}
 
-// versionR is where relationships are stored.
-type versionR struct {
+// dmVersionR is where relationships are stored.
+type dmVersionR struct {
 }
 
 // NewStruct creates a new relationship struct
-func (*versionR) NewStruct() *versionR {
-	return &versionR{}
+func (*dmVersionR) NewStruct() *dmVersionR {
+	return &dmVersionR{}
 }
 
-// versionL is where Load methods for each relationship are stored.
-type versionL struct{}
+// dmVersionL is where Load methods for each relationship are stored.
+type dmVersionL struct{}
 
 var (
-	versionColumns               = []string{"id", "type", "content_id", "version", "data"}
-	versionColumnsWithoutDefault = []string{"type", "content_id", "version", "data"}
-	versionColumnsWithDefault    = []string{"id"}
-	versionPrimaryKeyColumns     = []string{"id"}
+	dmVersionColumns               = []string{"id", "type", "content_id", "version", "data"}
+	dmVersionColumnsWithoutDefault = []string{"type", "content_id", "version", "data"}
+	dmVersionColumnsWithDefault    = []string{"id"}
+	dmVersionPrimaryKeyColumns     = []string{"id"}
 )
 
 type (
-	// VersionSlice is an alias for a slice of pointers to Version.
-	// This should generally be used opposed to []Version.
-	VersionSlice []*Version
-	// VersionHook is the signature for custom Version hook methods
-	VersionHook func(context.Context, boil.ContextExecutor, *Version) error
+	// DMVersionSlice is an alias for a slice of pointers to DMVersion.
+	// This should generally be used opposed to []DMVersion.
+	DMVersionSlice []*DMVersion
+	// DMVersionHook is the signature for custom DMVersion hook methods
+	DMVersionHook func(context.Context, boil.ContextExecutor, *DMVersion) error
 
-	versionQuery struct {
+	dmVersionQuery struct {
 		*queries.Query
 	}
 )
 
 // Cache for insert, update and upsert
 var (
-	versionType                 = reflect.TypeOf(&Version{})
-	versionMapping              = queries.MakeStructMapping(versionType)
-	versionPrimaryKeyMapping, _ = queries.BindMapping(versionType, versionMapping, versionPrimaryKeyColumns)
-	versionInsertCacheMut       sync.RWMutex
-	versionInsertCache          = make(map[string]insertCache)
-	versionUpdateCacheMut       sync.RWMutex
-	versionUpdateCache          = make(map[string]updateCache)
-	versionUpsertCacheMut       sync.RWMutex
-	versionUpsertCache          = make(map[string]insertCache)
+	dmVersionType                 = reflect.TypeOf(&DMVersion{})
+	dmVersionMapping              = queries.MakeStructMapping(dmVersionType)
+	dmVersionPrimaryKeyMapping, _ = queries.BindMapping(dmVersionType, dmVersionMapping, dmVersionPrimaryKeyColumns)
+	dmVersionInsertCacheMut       sync.RWMutex
+	dmVersionInsertCache          = make(map[string]insertCache)
+	dmVersionUpdateCacheMut       sync.RWMutex
+	dmVersionUpdateCache          = make(map[string]updateCache)
+	dmVersionUpsertCacheMut       sync.RWMutex
+	dmVersionUpsertCache          = make(map[string]insertCache)
 )
 
 var (
@@ -154,24 +119,24 @@ var (
 	_ = qmhelper.Where
 )
 
-var versionBeforeInsertHooks []VersionHook
-var versionBeforeUpdateHooks []VersionHook
-var versionBeforeDeleteHooks []VersionHook
-var versionBeforeUpsertHooks []VersionHook
+var dmVersionBeforeInsertHooks []DMVersionHook
+var dmVersionBeforeUpdateHooks []DMVersionHook
+var dmVersionBeforeDeleteHooks []DMVersionHook
+var dmVersionBeforeUpsertHooks []DMVersionHook
 
-var versionAfterInsertHooks []VersionHook
-var versionAfterSelectHooks []VersionHook
-var versionAfterUpdateHooks []VersionHook
-var versionAfterDeleteHooks []VersionHook
-var versionAfterUpsertHooks []VersionHook
+var dmVersionAfterInsertHooks []DMVersionHook
+var dmVersionAfterSelectHooks []DMVersionHook
+var dmVersionAfterUpdateHooks []DMVersionHook
+var dmVersionAfterDeleteHooks []DMVersionHook
+var dmVersionAfterUpsertHooks []DMVersionHook
 
 // doBeforeInsertHooks executes all "before insert" hooks.
-func (o *Version) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionBeforeInsertHooks {
+	for _, hook := range dmVersionBeforeInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -181,12 +146,12 @@ func (o *Version) doBeforeInsertHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doBeforeUpdateHooks executes all "before Update" hooks.
-func (o *Version) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionBeforeUpdateHooks {
+	for _, hook := range dmVersionBeforeUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -196,12 +161,12 @@ func (o *Version) doBeforeUpdateHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doBeforeDeleteHooks executes all "before Delete" hooks.
-func (o *Version) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionBeforeDeleteHooks {
+	for _, hook := range dmVersionBeforeDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -211,12 +176,12 @@ func (o *Version) doBeforeDeleteHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doBeforeUpsertHooks executes all "before Upsert" hooks.
-func (o *Version) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionBeforeUpsertHooks {
+	for _, hook := range dmVersionBeforeUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -226,12 +191,12 @@ func (o *Version) doBeforeUpsertHooks(ctx context.Context, exec boil.ContextExec
 }
 
 // doAfterInsertHooks executes all "after Insert" hooks.
-func (o *Version) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionAfterInsertHooks {
+	for _, hook := range dmVersionAfterInsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -241,12 +206,12 @@ func (o *Version) doAfterInsertHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doAfterSelectHooks executes all "after Select" hooks.
-func (o *Version) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionAfterSelectHooks {
+	for _, hook := range dmVersionAfterSelectHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -256,12 +221,12 @@ func (o *Version) doAfterSelectHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doAfterUpdateHooks executes all "after Update" hooks.
-func (o *Version) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionAfterUpdateHooks {
+	for _, hook := range dmVersionAfterUpdateHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -271,12 +236,12 @@ func (o *Version) doAfterUpdateHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doAfterDeleteHooks executes all "after Delete" hooks.
-func (o *Version) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionAfterDeleteHooks {
+	for _, hook := range dmVersionAfterDeleteHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -286,12 +251,12 @@ func (o *Version) doAfterDeleteHooks(ctx context.Context, exec boil.ContextExecu
 }
 
 // doAfterUpsertHooks executes all "after Upsert" hooks.
-func (o *Version) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
+func (o *DMVersion) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecutor) (err error) {
 	if boil.HooksAreSkipped(ctx) {
 		return nil
 	}
 
-	for _, hook := range versionAfterUpsertHooks {
+	for _, hook := range dmVersionAfterUpsertHooks {
 		if err := hook(ctx, exec, o); err != nil {
 			return err
 		}
@@ -300,33 +265,33 @@ func (o *Version) doAfterUpsertHooks(ctx context.Context, exec boil.ContextExecu
 	return nil
 }
 
-// AddVersionHook registers your hook function for all future operations.
-func AddVersionHook(hookPoint boil.HookPoint, versionHook VersionHook) {
+// AddDMVersionHook registers your hook function for all future operations.
+func AddDMVersionHook(hookPoint boil.HookPoint, dmVersionHook DMVersionHook) {
 	switch hookPoint {
 	case boil.BeforeInsertHook:
-		versionBeforeInsertHooks = append(versionBeforeInsertHooks, versionHook)
+		dmVersionBeforeInsertHooks = append(dmVersionBeforeInsertHooks, dmVersionHook)
 	case boil.BeforeUpdateHook:
-		versionBeforeUpdateHooks = append(versionBeforeUpdateHooks, versionHook)
+		dmVersionBeforeUpdateHooks = append(dmVersionBeforeUpdateHooks, dmVersionHook)
 	case boil.BeforeDeleteHook:
-		versionBeforeDeleteHooks = append(versionBeforeDeleteHooks, versionHook)
+		dmVersionBeforeDeleteHooks = append(dmVersionBeforeDeleteHooks, dmVersionHook)
 	case boil.BeforeUpsertHook:
-		versionBeforeUpsertHooks = append(versionBeforeUpsertHooks, versionHook)
+		dmVersionBeforeUpsertHooks = append(dmVersionBeforeUpsertHooks, dmVersionHook)
 	case boil.AfterInsertHook:
-		versionAfterInsertHooks = append(versionAfterInsertHooks, versionHook)
+		dmVersionAfterInsertHooks = append(dmVersionAfterInsertHooks, dmVersionHook)
 	case boil.AfterSelectHook:
-		versionAfterSelectHooks = append(versionAfterSelectHooks, versionHook)
+		dmVersionAfterSelectHooks = append(dmVersionAfterSelectHooks, dmVersionHook)
 	case boil.AfterUpdateHook:
-		versionAfterUpdateHooks = append(versionAfterUpdateHooks, versionHook)
+		dmVersionAfterUpdateHooks = append(dmVersionAfterUpdateHooks, dmVersionHook)
 	case boil.AfterDeleteHook:
-		versionAfterDeleteHooks = append(versionAfterDeleteHooks, versionHook)
+		dmVersionAfterDeleteHooks = append(dmVersionAfterDeleteHooks, dmVersionHook)
 	case boil.AfterUpsertHook:
-		versionAfterUpsertHooks = append(versionAfterUpsertHooks, versionHook)
+		dmVersionAfterUpsertHooks = append(dmVersionAfterUpsertHooks, dmVersionHook)
 	}
 }
 
-// One returns a single version record from the query.
-func (q versionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Version, error) {
-	o := &Version{}
+// One returns a single dmVersion record from the query.
+func (q dmVersionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*DMVersion, error) {
+	o := &DMVersion{}
 
 	queries.SetLimit(q.Query, 1)
 
@@ -345,16 +310,16 @@ func (q versionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Vers
 	return o, nil
 }
 
-// All returns all Version records from the query.
-func (q versionQuery) All(ctx context.Context, exec boil.ContextExecutor) (VersionSlice, error) {
-	var o []*Version
+// All returns all DMVersion records from the query.
+func (q dmVersionQuery) All(ctx context.Context, exec boil.ContextExecutor) (DMVersionSlice, error) {
+	var o []*DMVersion
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "entity: failed to assign all query results to Version slice")
+		return nil, errors.Wrap(err, "entity: failed to assign all query results to DMVersion slice")
 	}
 
-	if len(versionAfterSelectHooks) != 0 {
+	if len(dmVersionAfterSelectHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterSelectHooks(ctx, exec); err != nil {
 				return o, err
@@ -365,8 +330,8 @@ func (q versionQuery) All(ctx context.Context, exec boil.ContextExecutor) (Versi
 	return o, nil
 }
 
-// Count returns the count of all Version records in the query.
-func (q versionQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+// Count returns the count of all DMVersion records in the query.
+func (q dmVersionQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -381,7 +346,7 @@ func (q versionQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int
 }
 
 // Exists checks if the row exists in the table.
-func (q versionQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
+func (q dmVersionQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bool, error) {
 	var count int64
 
 	queries.SetSelect(q.Query, nil)
@@ -396,16 +361,16 @@ func (q versionQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 	return count > 0, nil
 }
 
-// Versions retrieves all the records using an executor.
-func Versions(mods ...qm.QueryMod) versionQuery {
+// DMVersions retrieves all the records using an executor.
+func DMVersions(mods ...qm.QueryMod) dmVersionQuery {
 	mods = append(mods, qm.From("`dm_version`"))
-	return versionQuery{NewQuery(mods...)}
+	return dmVersionQuery{NewQuery(mods...)}
 }
 
-// FindVersion retrieves a single record by ID with an executor.
+// FindDMVersion retrieves a single record by ID with an executor.
 // If selectCols is empty Find will return all columns.
-func FindVersion(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*Version, error) {
-	versionObj := &Version{}
+func FindDMVersion(ctx context.Context, exec boil.ContextExecutor, iD int, selectCols ...string) (*DMVersion, error) {
+	dmVersionObj := &DMVersion{}
 
 	sel := "*"
 	if len(selectCols) > 0 {
@@ -417,7 +382,7 @@ func FindVersion(ctx context.Context, exec boil.ContextExecutor, iD int, selectC
 
 	q := queries.Raw(query, iD)
 
-	err := q.Bind(ctx, exec, versionObj)
+	err := q.Bind(ctx, exec, dmVersionObj)
 	if err != nil {
 		if errors.Cause(err) == sql.ErrNoRows {
 			return nil, sql.ErrNoRows
@@ -425,12 +390,12 @@ func FindVersion(ctx context.Context, exec boil.ContextExecutor, iD int, selectC
 		return nil, errors.Wrap(err, "entity: unable to select from dm_version")
 	}
 
-	return versionObj, nil
+	return dmVersionObj, nil
 }
 
 // Insert a single record using an executor.
 // See boil.Columns.InsertColumnSet documentation to understand column list inference for inserts.
-func (o *Version) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
+func (o *DMVersion) Insert(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) error {
 	if o == nil {
 		return errors.New("entity: no dm_version provided for insertion")
 	}
@@ -441,26 +406,26 @@ func (o *Version) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(versionColumnsWithDefault, o)
+	nzDefaults := queries.NonZeroDefaultSet(dmVersionColumnsWithDefault, o)
 
 	key := makeCacheKey(columns, nzDefaults)
-	versionInsertCacheMut.RLock()
-	cache, cached := versionInsertCache[key]
-	versionInsertCacheMut.RUnlock()
+	dmVersionInsertCacheMut.RLock()
+	cache, cached := dmVersionInsertCache[key]
+	dmVersionInsertCacheMut.RUnlock()
 
 	if !cached {
 		wl, returnColumns := columns.InsertColumnSet(
-			versionColumns,
-			versionColumnsWithDefault,
-			versionColumnsWithoutDefault,
+			dmVersionColumns,
+			dmVersionColumnsWithDefault,
+			dmVersionColumnsWithoutDefault,
 			nzDefaults,
 		)
 
-		cache.valueMapping, err = queries.BindMapping(versionType, versionMapping, wl)
+		cache.valueMapping, err = queries.BindMapping(dmVersionType, dmVersionMapping, wl)
 		if err != nil {
 			return err
 		}
-		cache.retMapping, err = queries.BindMapping(versionType, versionMapping, returnColumns)
+		cache.retMapping, err = queries.BindMapping(dmVersionType, dmVersionMapping, returnColumns)
 		if err != nil {
 			return err
 		}
@@ -473,7 +438,7 @@ func (o *Version) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 		var queryOutput, queryReturning string
 
 		if len(cache.retMapping) != 0 {
-			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_version` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, versionPrimaryKeyColumns))
+			cache.retQuery = fmt.Sprintf("SELECT `%s` FROM `dm_version` WHERE %s", strings.Join(returnColumns, "`,`"), strmangle.WhereClause("`", "`", 0, dmVersionPrimaryKeyColumns))
 		}
 
 		cache.query = fmt.Sprintf(cache.query, queryOutput, queryReturning)
@@ -506,7 +471,7 @@ func (o *Version) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == versionMapping["ID"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == dmVersionMapping["ID"] {
 		goto CacheNoHooks
 	}
 
@@ -526,31 +491,31 @@ func (o *Version) Insert(ctx context.Context, exec boil.ContextExecutor, columns
 
 CacheNoHooks:
 	if !cached {
-		versionInsertCacheMut.Lock()
-		versionInsertCache[key] = cache
-		versionInsertCacheMut.Unlock()
+		dmVersionInsertCacheMut.Lock()
+		dmVersionInsertCache[key] = cache
+		dmVersionInsertCacheMut.Unlock()
 	}
 
 	return o.doAfterInsertHooks(ctx, exec)
 }
 
-// Update uses an executor to update the Version.
+// Update uses an executor to update the DMVersion.
 // See boil.Columns.UpdateColumnSet documentation to understand column list inference for updates.
 // Update does not automatically update the record in case of default values. Use .Reload() to refresh the records.
-func (o *Version) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
+func (o *DMVersion) Update(ctx context.Context, exec boil.ContextExecutor, columns boil.Columns) (int64, error) {
 	var err error
 	if err = o.doBeforeUpdateHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 	key := makeCacheKey(columns, nil)
-	versionUpdateCacheMut.RLock()
-	cache, cached := versionUpdateCache[key]
-	versionUpdateCacheMut.RUnlock()
+	dmVersionUpdateCacheMut.RLock()
+	cache, cached := dmVersionUpdateCache[key]
+	dmVersionUpdateCacheMut.RUnlock()
 
 	if !cached {
 		wl := columns.UpdateColumnSet(
-			versionColumns,
-			versionPrimaryKeyColumns,
+			dmVersionColumns,
+			dmVersionPrimaryKeyColumns,
 		)
 
 		if !columns.IsWhitelist() {
@@ -562,9 +527,9 @@ func (o *Version) Update(ctx context.Context, exec boil.ContextExecutor, columns
 
 		cache.query = fmt.Sprintf("UPDATE `dm_version` SET %s WHERE %s",
 			strmangle.SetParamNames("`", "`", 0, wl),
-			strmangle.WhereClause("`", "`", 0, versionPrimaryKeyColumns),
+			strmangle.WhereClause("`", "`", 0, dmVersionPrimaryKeyColumns),
 		)
-		cache.valueMapping, err = queries.BindMapping(versionType, versionMapping, append(wl, versionPrimaryKeyColumns...))
+		cache.valueMapping, err = queries.BindMapping(dmVersionType, dmVersionMapping, append(wl, dmVersionPrimaryKeyColumns...))
 		if err != nil {
 			return 0, err
 		}
@@ -589,16 +554,16 @@ func (o *Version) Update(ctx context.Context, exec boil.ContextExecutor, columns
 	}
 
 	if !cached {
-		versionUpdateCacheMut.Lock()
-		versionUpdateCache[key] = cache
-		versionUpdateCacheMut.Unlock()
+		dmVersionUpdateCacheMut.Lock()
+		dmVersionUpdateCache[key] = cache
+		dmVersionUpdateCacheMut.Unlock()
 	}
 
 	return rowsAff, o.doAfterUpdateHooks(ctx, exec)
 }
 
 // UpdateAll updates all rows with the specified column values.
-func (q versionQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (q dmVersionQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	queries.SetUpdate(q.Query, cols)
 
 	result, err := q.Query.ExecContext(ctx, exec)
@@ -615,7 +580,7 @@ func (q versionQuery) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 }
 
 // UpdateAll updates all rows with the specified column values, using an executor.
-func (o VersionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
+func (o DMVersionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, cols M) (int64, error) {
 	ln := int64(len(o))
 	if ln == 0 {
 		return 0, nil
@@ -637,13 +602,13 @@ func (o VersionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 
 	// Append all of the primary key values for each column
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), versionPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmVersionPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := fmt.Sprintf("UPDATE `dm_version` SET %s WHERE %s",
 		strmangle.SetParamNames("`", "`", 0, colNames),
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, versionPrimaryKeyColumns, len(o)))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmVersionPrimaryKeyColumns, len(o)))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -652,23 +617,23 @@ func (o VersionSlice) UpdateAll(ctx context.Context, exec boil.ContextExecutor, 
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to update all in version slice")
+		return 0, errors.Wrap(err, "entity: unable to update all in dmVersion slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
 	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to retrieve rows affected all in update all version")
+		return 0, errors.Wrap(err, "entity: unable to retrieve rows affected all in update all dmVersion")
 	}
 	return rowsAff, nil
 }
 
-var mySQLVersionUniqueColumns = []string{
+var mySQLDMVersionUniqueColumns = []string{
 	"id",
 }
 
 // Upsert attempts an insert using an executor, and does an update or ignore on conflict.
 // See boil.Columns documentation for how to properly use updateColumns and insertColumns.
-func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
+func (o *DMVersion) Upsert(ctx context.Context, exec boil.ContextExecutor, updateColumns, insertColumns boil.Columns) error {
 	if o == nil {
 		return errors.New("entity: no dm_version provided for upsert")
 	}
@@ -677,8 +642,8 @@ func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 		return err
 	}
 
-	nzDefaults := queries.NonZeroDefaultSet(versionColumnsWithDefault, o)
-	nzUniques := queries.NonZeroDefaultSet(mySQLVersionUniqueColumns, o)
+	nzDefaults := queries.NonZeroDefaultSet(dmVersionColumnsWithDefault, o)
+	nzUniques := queries.NonZeroDefaultSet(mySQLDMVersionUniqueColumns, o)
 
 	if len(nzUniques) == 0 {
 		return errors.New("cannot upsert with a table that cannot conflict on a unique column")
@@ -706,22 +671,22 @@ func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 	key := buf.String()
 	strmangle.PutBuffer(buf)
 
-	versionUpsertCacheMut.RLock()
-	cache, cached := versionUpsertCache[key]
-	versionUpsertCacheMut.RUnlock()
+	dmVersionUpsertCacheMut.RLock()
+	cache, cached := dmVersionUpsertCache[key]
+	dmVersionUpsertCacheMut.RUnlock()
 
 	var err error
 
 	if !cached {
 		insert, ret := insertColumns.InsertColumnSet(
-			versionColumns,
-			versionColumnsWithDefault,
-			versionColumnsWithoutDefault,
+			dmVersionColumns,
+			dmVersionColumnsWithDefault,
+			dmVersionColumnsWithoutDefault,
 			nzDefaults,
 		)
 		update := updateColumns.UpdateColumnSet(
-			versionColumns,
-			versionPrimaryKeyColumns,
+			dmVersionColumns,
+			dmVersionPrimaryKeyColumns,
 		)
 
 		if len(update) == 0 {
@@ -736,12 +701,12 @@ func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 			strmangle.WhereClause("`", "`", 0, nzUniques),
 		)
 
-		cache.valueMapping, err = queries.BindMapping(versionType, versionMapping, insert)
+		cache.valueMapping, err = queries.BindMapping(dmVersionType, dmVersionMapping, insert)
 		if err != nil {
 			return err
 		}
 		if len(ret) != 0 {
-			cache.retMapping, err = queries.BindMapping(versionType, versionMapping, ret)
+			cache.retMapping, err = queries.BindMapping(dmVersionType, dmVersionMapping, ret)
 			if err != nil {
 				return err
 			}
@@ -780,11 +745,11 @@ func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 	}
 
 	o.ID = int(lastID)
-	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == versionMapping["id"] {
+	if lastID != 0 && len(cache.retMapping) == 1 && cache.retMapping[0] == dmVersionMapping["id"] {
 		goto CacheNoHooks
 	}
 
-	uniqueMap, err = queries.BindMapping(versionType, versionMapping, nzUniques)
+	uniqueMap, err = queries.BindMapping(dmVersionType, dmVersionMapping, nzUniques)
 	if err != nil {
 		return errors.Wrap(err, "entity: unable to retrieve unique values for dm_version")
 	}
@@ -802,26 +767,26 @@ func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 
 CacheNoHooks:
 	if !cached {
-		versionUpsertCacheMut.Lock()
-		versionUpsertCache[key] = cache
-		versionUpsertCacheMut.Unlock()
+		dmVersionUpsertCacheMut.Lock()
+		dmVersionUpsertCache[key] = cache
+		dmVersionUpsertCacheMut.Unlock()
 	}
 
 	return o.doAfterUpsertHooks(ctx, exec)
 }
 
-// Delete deletes a single Version record with an executor.
+// Delete deletes a single DMVersion record with an executor.
 // Delete will match against the primary key column to find the record to delete.
-func (o *Version) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o *DMVersion) Delete(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("entity: no Version provided for delete")
+		return 0, errors.New("entity: no DMVersion provided for delete")
 	}
 
 	if err := o.doBeforeDeleteHooks(ctx, exec); err != nil {
 		return 0, err
 	}
 
-	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), versionPrimaryKeyMapping)
+	args := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), dmVersionPrimaryKeyMapping)
 	sql := "DELETE FROM `dm_version` WHERE `id`=?"
 
 	if boil.DebugMode {
@@ -847,9 +812,9 @@ func (o *Version) Delete(ctx context.Context, exec boil.ContextExecutor) (int64,
 }
 
 // DeleteAll deletes all matching rows.
-func (q versionQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (q dmVersionQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if q.Query == nil {
-		return 0, errors.New("entity: no versionQuery provided for delete all")
+		return 0, errors.New("entity: no dmVersionQuery provided for delete all")
 	}
 
 	queries.SetDelete(q.Query)
@@ -868,16 +833,16 @@ func (q versionQuery) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 }
 
 // DeleteAll deletes all rows in the slice, using an executor.
-func (o VersionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
+func (o DMVersionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) (int64, error) {
 	if o == nil {
-		return 0, errors.New("entity: no Version slice provided for delete all")
+		return 0, errors.New("entity: no DMVersion slice provided for delete all")
 	}
 
 	if len(o) == 0 {
 		return 0, nil
 	}
 
-	if len(versionBeforeDeleteHooks) != 0 {
+	if len(dmVersionBeforeDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doBeforeDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -887,12 +852,12 @@ func (o VersionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 
 	var args []interface{}
 	for _, obj := range o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), versionPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmVersionPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := "DELETE FROM `dm_version` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, versionPrimaryKeyColumns, len(o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmVersionPrimaryKeyColumns, len(o))
 
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, sql)
@@ -901,7 +866,7 @@ func (o VersionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 
 	result, err := exec.ExecContext(ctx, sql, args...)
 	if err != nil {
-		return 0, errors.Wrap(err, "entity: unable to delete all from version slice")
+		return 0, errors.Wrap(err, "entity: unable to delete all from dmVersion slice")
 	}
 
 	rowsAff, err := result.RowsAffected()
@@ -909,7 +874,7 @@ func (o VersionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 		return 0, errors.Wrap(err, "entity: failed to get rows affected by deleteall for dm_version")
 	}
 
-	if len(versionAfterDeleteHooks) != 0 {
+	if len(dmVersionAfterDeleteHooks) != 0 {
 		for _, obj := range o {
 			if err := obj.doAfterDeleteHooks(ctx, exec); err != nil {
 				return 0, err
@@ -922,8 +887,8 @@ func (o VersionSlice) DeleteAll(ctx context.Context, exec boil.ContextExecutor) 
 
 // Reload refetches the object from the database
 // using the primary keys with an executor.
-func (o *Version) Reload(ctx context.Context, exec boil.ContextExecutor) error {
-	ret, err := FindVersion(ctx, exec, o.ID)
+func (o *DMVersion) Reload(ctx context.Context, exec boil.ContextExecutor) error {
+	ret, err := FindDMVersion(ctx, exec, o.ID)
 	if err != nil {
 		return err
 	}
@@ -934,26 +899,26 @@ func (o *Version) Reload(ctx context.Context, exec boil.ContextExecutor) error {
 
 // ReloadAll refetches every row with matching primary key column values
 // and overwrites the original object slice with the newly updated slice.
-func (o *VersionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
+func (o *DMVersionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor) error {
 	if o == nil || len(*o) == 0 {
 		return nil
 	}
 
-	slice := VersionSlice{}
+	slice := DMVersionSlice{}
 	var args []interface{}
 	for _, obj := range *o {
-		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), versionPrimaryKeyMapping)
+		pkeyArgs := queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(obj)), dmVersionPrimaryKeyMapping)
 		args = append(args, pkeyArgs...)
 	}
 
 	sql := "SELECT `dm_version`.* FROM `dm_version` WHERE " +
-		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, versionPrimaryKeyColumns, len(*o))
+		strmangle.WhereClauseRepeated(string(dialect.LQ), string(dialect.RQ), 0, dmVersionPrimaryKeyColumns, len(*o))
 
 	q := queries.Raw(sql, args...)
 
 	err := q.Bind(ctx, exec, &slice)
 	if err != nil {
-		return errors.Wrap(err, "entity: unable to reload all in VersionSlice")
+		return errors.Wrap(err, "entity: unable to reload all in DMVersionSlice")
 	}
 
 	*o = slice
@@ -961,8 +926,8 @@ func (o *VersionSlice) ReloadAll(ctx context.Context, exec boil.ContextExecutor)
 	return nil
 }
 
-// VersionExists checks if the Version row exists.
-func VersionExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
+// DMVersionExists checks if the DMVersion row exists.
+func DMVersionExists(ctx context.Context, exec boil.ContextExecutor, iD int) (bool, error) {
 	var exists bool
 	sql := "select exists(select 1 from `dm_version` where `id`=? limit 1)"
 

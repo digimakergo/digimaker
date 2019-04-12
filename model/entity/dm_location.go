@@ -26,12 +26,16 @@ type Location struct {
 	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ParentID    int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
 	MainID      int    `boil:"main_id" json:"main_id" toml:"main_id" yaml:"main_id"`
+	Hierarchy   string `boil:"hierarchy" json:"hierarchy" toml:"hierarchy" yaml:"hierarchy"`
 	ContentType string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID   int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	Language    string `boil:"language" json:"language" toml:"language" yaml:"language"`
 	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	IsHidden    bool   `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
+	IsInvisible bool   `boil:"is_invisible" json:"is_invisible" toml:"is_invisible" yaml:"is_invisible"`
+	Priority    int    `boil:"priority" json:"priority" toml:"priority" yaml:"priority"`
+	UID         string `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
 	Section     string `boil:"section" json:"section" toml:"section" yaml:"section"`
-	UniqueID    string `boil:"unique_id" json:"unique_id" toml:"unique_id" yaml:"unique_id"`
 	P           string `boil:"p" json:"p" toml:"p" yaml:"p"`
 
 	R *locationR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,47 +46,92 @@ var LocationColumns = struct {
 	ID          string
 	ParentID    string
 	MainID      string
+	Hierarchy   string
 	ContentType string
 	ContentID   string
 	Language    string
 	Name        string
+	IsHidden    string
+	IsInvisible string
+	Priority    string
+	UID         string
 	Section     string
-	UniqueID    string
 	P           string
 }{
 	ID:          "id",
 	ParentID:    "parent_id",
 	MainID:      "main_id",
+	Hierarchy:   "hierarchy",
 	ContentType: "content_type",
 	ContentID:   "content_id",
 	Language:    "language",
 	Name:        "name",
+	IsHidden:    "is_hidden",
+	IsInvisible: "is_invisible",
+	Priority:    "priority",
+	UID:         "uid",
 	Section:     "section",
-	UniqueID:    "unique_id",
 	P:           "p",
 }
+
+// Generated where
+
+type whereHelperint struct{ field string }
+
+func (w whereHelperint) EQ(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperint) NEQ(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperint) LT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperint) LTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperint) GT(x int) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperint) GTE(x int) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
+type whereHelperstring struct{ field string }
+
+func (w whereHelperstring) EQ(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperstring) NEQ(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperstring) LT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperstring) LTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperstring) GT(x string) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperstring) GTE(x string) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
+
+type whereHelperbool struct{ field string }
+
+func (w whereHelperbool) EQ(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.EQ, x) }
+func (w whereHelperbool) NEQ(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.NEQ, x) }
+func (w whereHelperbool) LT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.LT, x) }
+func (w whereHelperbool) LTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.LTE, x) }
+func (w whereHelperbool) GT(x bool) qm.QueryMod  { return qmhelper.Where(w.field, qmhelper.GT, x) }
+func (w whereHelperbool) GTE(x bool) qm.QueryMod { return qmhelper.Where(w.field, qmhelper.GTE, x) }
 
 var LocationWhere = struct {
 	ID          whereHelperint
 	ParentID    whereHelperint
 	MainID      whereHelperint
+	Hierarchy   whereHelperstring
 	ContentType whereHelperstring
 	ContentID   whereHelperint
 	Language    whereHelperstring
 	Name        whereHelperstring
+	IsHidden    whereHelperbool
+	IsInvisible whereHelperbool
+	Priority    whereHelperint
+	UID         whereHelperstring
 	Section     whereHelperstring
-	UniqueID    whereHelperstring
 	P           whereHelperstring
 }{
 	ID:          whereHelperint{field: `id`},
 	ParentID:    whereHelperint{field: `parent_id`},
 	MainID:      whereHelperint{field: `main_id`},
+	Hierarchy:   whereHelperstring{field: `hierarchy`},
 	ContentType: whereHelperstring{field: `content_type`},
 	ContentID:   whereHelperint{field: `content_id`},
 	Language:    whereHelperstring{field: `language`},
 	Name:        whereHelperstring{field: `name`},
+	IsHidden:    whereHelperbool{field: `is_hidden`},
+	IsInvisible: whereHelperbool{field: `is_invisible`},
+	Priority:    whereHelperint{field: `priority`},
+	UID:         whereHelperstring{field: `uid`},
 	Section:     whereHelperstring{field: `section`},
-	UniqueID:    whereHelperstring{field: `unique_id`},
 	P:           whereHelperstring{field: `p`},
 }
 
@@ -103,9 +152,9 @@ func (*locationR) NewStruct() *locationR {
 type locationL struct{}
 
 var (
-	locationColumns               = []string{"id", "parent_id", "main_id", "content_type", "content_id", "language", "name", "section", "unique_id", "p"}
-	locationColumnsWithoutDefault = []string{"main_id", "content_type", "content_id", "language", "name", "section", "unique_id"}
-	locationColumnsWithDefault    = []string{"id", "parent_id", "p"}
+	locationColumns               = []string{"id", "parent_id", "main_id", "hierarchy", "content_type", "content_id", "language", "name", "is_hidden", "is_invisible", "priority", "uid", "section", "p"}
+	locationColumnsWithoutDefault = []string{"main_id", "hierarchy", "content_type", "content_id", "language", "name", "uid", "section"}
+	locationColumnsWithDefault    = []string{"id", "parent_id", "is_hidden", "is_invisible", "priority", "p"}
 	locationPrimaryKeyColumns     = []string{"id"}
 )
 
