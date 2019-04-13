@@ -40,7 +40,7 @@ type Folder struct {
 	Location `boil:"dm_location,bind"`
 }
 
-func (c *Folder) Fields() map[string]model.Fielder {
+func (c Folder) Fields() map[string]model.Fielder {
 	return nil
 }
 
@@ -60,7 +60,7 @@ func (c *Folder) TableName() string {
 	return "dm_folder"
 }
 
-func (c *Folder) Field(name string) interface{} {
+func (c Folder) Field(name string) interface{} {
 	var result interface{}
 	switch name {
 	case "id", "CID":

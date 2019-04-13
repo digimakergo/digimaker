@@ -43,7 +43,7 @@ type User struct {
 	Location `boil:"dm_location,bind"`
 }
 
-func (c *User) Fields() map[string]model.Fielder {
+func (c User) Fields() map[string]model.Fielder {
 	return nil
 }
 
@@ -65,7 +65,7 @@ func (c *User) TableName() string {
 	return "dm_user"
 }
 
-func (c *User) Field(name string) interface{} {
+func (c User) Field(name string) interface{} {
 	var result interface{}
 	switch name {
 	case "id", "CID":

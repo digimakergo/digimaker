@@ -8,13 +8,9 @@ This is a parent struct which consits of location and the content itself(eg. art
 */
 
 import (
-	"context"
-	"dm/db"
 	"dm/model/entity"
-	util "dm/util"
-	"errors"
-
-	"github.com/volatiletech/sqlboiler/boil"
+	"dm/util"
+	"time"
 )
 
 type Contenter interface {
@@ -31,52 +27,50 @@ type ContentHandler struct {
 	Content *entity.Article
 }
 
+func (content ContentHandler) CreateLocation(parentID int) {
+	location := entity.Location{ParentID: parentID}
+	location.Store()
+}
+
 //Create draft of a content. parent_id will be -1 in this case
-func (handler *ContentHandler) Create() error {
-	db, err := db.Open()
-	if err != nil {
-		return nil
-	}
-
-	//Convert data
-	for identifier := range handler.Content.Fields() {
-		field = handler.Content.Field(identifier)
-		err := field.SetStoreData(c, identifier)
-		if err != nil {
-			return errors.New("Store data error. Did not store any. Field: " + identifier + ". Detail: " + err.Error())
-		}
-	}
-
+func (handler *ContentHandler) Create(title string, parentID int) error {
 	//Save content
+	now := int(time.Now().Unix())
+	article := entity.Article{Author: 1, Published: now, Modified: now}
+	article.Store()
 
 	//Save location
-	err = c.Location.Insert(context.Background(), db, boil.Infer()) //todo: use a generic way instead of sqlboil.
+	location := entity.Location{ParentID: parentID, ContentID: article.CID, UID: util.GenerateUID()}
+	err := location.Store()
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (content ContentHandler) CreateLocation() {
-
-}
-
 func (content ContentHandler) Store() error {
-	//Store fields
-	fields := content.Fields
-	for identifier, field := range fields {
-		_, err := field.GetStoredData()
-		if err != nil {
-			//log it and return higher
-			util.Log("Storing content error, break - id: "+string(content.ID)+", field: "+identifier, "error")
-			return errors.New("Can not store content")
-		}
-	}
-
 	//Store Location
 	return nil
 }
 
-func (content Content) Publish() {
+func (content ContentHandler) Draft(contentType string, parentID int) error {
+	//create empty
+	now := int(time.Now().Unix())
+	article := entity.Article{Author: 1, Published: now, Modified: now}
+	err := article.Store()
+
+	//Save location
+	location := entity.Location{ParentID: -parentID,
+		ContentType: contentType,
+		ContentID:   article.CID,
+		UID:         util.GenerateUID()}
+	err = location.Store()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (content ContentHandler) Publish() {
 
 }

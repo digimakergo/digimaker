@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"database/sql"
+	"dm/handler"
 	"dm/model/entity"
 	"fmt"
 	"html/template"
@@ -25,9 +26,26 @@ func Display(w http.ResponseWriter) {
 	tpl.Execute(w, locations)
 }
 
+func Draft(w http.ResponseWriter, r *http.Request) {
+	handler := handler.ContentHandler{}
+	handler.Create(title, 1)
+}
+
+func Publish(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		Display(w)
+	})
+
+	http.HandleFunc("/content/draft", func(w http.ResponseWriter, r *http.Request) {
+		Draft(w, r)
+	})
+
+	http.HandleFunc("/content/publish", func(w http.ResponseWriter, r *http.Request) {
+		Publish(w, r)
 	})
 
 	http.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {

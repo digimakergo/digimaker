@@ -29,6 +29,8 @@ import (
 // Implement dm.model.ContentTyper interface
 type Article struct {
 	CID       int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Status    int                 `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Author    int                 `boil:"author" json:"author" toml:"author" yaml:"author"`
 	Title     field.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Body      field.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
 	Published int                 `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
@@ -40,13 +42,15 @@ type Article struct {
 	Location `boil:"dm_location,bind"`
 }
 
-func (c *Article) Fields() map[string]model.Fielder {
+func (c Article) Fields() map[string]model.Fielder {
 	return nil
 }
 
 func (c *Article) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.CID
+	result["status"] = c.Status
+	result["author"] = c.Author
 	result["title"] = c.Title
 	result["body"] = c.Body
 	result["published"] = c.Published
@@ -59,11 +63,15 @@ func (c *Article) TableName() string {
 	return "dm_article"
 }
 
-func (c *Article) Field(name string) interface{} {
+func (c Article) Field(name string) interface{} {
 	var result interface{}
 	switch name {
 	case "id", "CID":
 		result = c.CID
+	case "status", "Status":
+		result = c.Status
+	case "author", "Author":
+		result = c.Author
 	case "title", "Title":
 		result = c.Title
 	case "body", "Body":
@@ -96,6 +104,8 @@ func (c Article) Store() error {
 
 var ArticleColumns = struct {
 	CID       string
+	Status    string
+	Author    string
 	Title     string
 	Body      string
 	Published string
@@ -103,6 +113,8 @@ var ArticleColumns = struct {
 	RemoteID  string
 }{
 	CID:       "id",
+	Status:    "status",
+	Author:    "author",
 	Title:     "title",
 	Body:      "body",
 	Published: "published",
@@ -127,9 +139,9 @@ func (*articleR) NewStruct() *articleR {
 type articleL struct{}
 
 var (
-	articleColumns               = []string{"id", "title", "body", "published", "modified", "remote_id"}
+	articleColumns               = []string{"id", "status", "author", "title", "body", "published", "modified", "remote_id"}
 	articleColumnsWithoutDefault = []string{"title", "body", "published", "modified", "remote_id"}
-	articleColumnsWithDefault    = []string{"id"}
+	articleColumnsWithDefault    = []string{"id", "status", "author"}
 	articlePrimaryKeyColumns     = []string{"id"}
 )
 
