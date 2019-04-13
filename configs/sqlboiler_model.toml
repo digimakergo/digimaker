@@ -7,7 +7,7 @@ output = "model/entity"
 no-tests = "true"
 templates = [
   "/Users/xc/go/caf-prototype/src/github.com/volatiletech/sqlboiler/templates",
-  "/Users/xc/go/caf-prototype/src/dm/codegen/entities/model"
+  "/Users/xc/go/caf-prototype/src/dm/codegen/entities/model/templates"
 ]
 
 [mysql]
@@ -18,8 +18,17 @@ dbname = "dev_emf"
 sslmode = "false"
 blacklist = ['dm_relation','dm_location','dm_version']
 
-#[imports.all]
-#third_party = ['"dm/model"']
+[imports.all]
+third_party = ['"github.com/volatiletech/sqlboiler/boil"',
+                '"github.com/volatiletech/sqlboiler/queries/qmhelper"',
+                '"github.com/volatiletech/sqlboiler/strmangle"',
+                '"github.com/pkg/errors"',
+               '"github.com/volatiletech/sqlboiler/queries"',
+               '"dm/type_default/field"',
+               '"dm/model"',
+               '. "dm/query"',
+               '"dm/type_default/field"',
+               '"dm/db"']
 
 ##TODO: use a better mechanism to diffenticate fields between:
 ##1) preserved: eg. id, published.
@@ -37,10 +46,6 @@ db_type = "varchar"
 [types.replace]
 type = "field.TextField"
 
-[types.imports]
-third_party = ['"dm/type_default/field"', '"dm/model"', '. "dm/query"']
-
-
 # Richtext
 [[types]]
 [types.match]
@@ -49,10 +54,6 @@ db_type = "text"
 
 [types.replace]
 type = "field.RichTextField"
-
-[types.imports]
-third_party = ['"dm/type_default/field"', '"dm/db"']
-
 
 ##Execlude below types replacement
 
@@ -87,12 +88,6 @@ nullable = true
 type = "int"
 
 
-[aliases.tables.dm_location]
-up_plural = "Locations"
-up_singular = "Location"
-down_plural = "locations"
-down_singular = "location"
-
 [aliases.tables.dm_folder]
 up_plural = "Folders"
 up_singular = "Folder"
@@ -119,9 +114,3 @@ down_singular = "user"
 
 [aliases.tables.dm_user.columns]
 id = "CID"
-
-[aliases.tables.dm_version]
-up_plural = "Versions"
-up_singular = "Version"
-down_plural = "versions"
-down_singular = "version"

@@ -17,7 +17,6 @@ import (
 	"dm/model"
 	. "dm/query"
 	"dm/type_default/field"
-
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"

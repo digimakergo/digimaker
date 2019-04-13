@@ -4,9 +4,11 @@
 package entity
 
 var TableNames = struct {
-	DMLocation string
-	DMVersion  string
+	DMArticle string
+	DMFolder  string
+	DMUser    string
 }{
-	DMLocation: "dm_location",
-	DMVersion:  "dm_version",
+	DMArticle: "dm_article",
+	DMFolder:  "dm_folder",
+	DMUser:    "dm_user",
 }
