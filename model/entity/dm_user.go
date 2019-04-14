@@ -61,6 +61,10 @@ func (c *User) Values() map[string]interface{} {
 	return result
 }
 
+func (c *User) Value(identifier string, value interface{}) {
+
+}
+
 func (c *User) TableName() string {
 	return "dm_user"
 }

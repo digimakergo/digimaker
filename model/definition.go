@@ -3,12 +3,20 @@
 
 package model
 
-import "dm/util"
+import (
+	"dm/util"
+	"errors"
+)
 
 type ContentTypeSetting struct {
-	TableName  string            `json:"table_name"`
-	Versioning bool              `json:"versioning"`
-	Fields     map[string]string `json:"fields"`
+	TableName  string                  `json:"table_name"`
+	Versioning bool                    `json:"versioning"`
+	Fields     map[string]ContentField `json:"fields"`
+}
+
+type ContentField struct {
+	FieldType string `json:"type"`
+	Required  bool   `json:"required"`
 }
 
 type DatatypeSetting struct {
@@ -45,6 +53,17 @@ func LoadDefinition() error {
 	DatatypeDefinition = datatypeDef
 
 	return nil
+}
+
+func GetContentDefinition(contentType string) (ContentTypeSetting, error) {
+	definition := ContentTypeDefinition
+	result, ok := definition[contentType]
+	if ok {
+		return result, nil
+	} else {
+		return ContentTypeSetting{}, errors.New("content type " + contentType + "doesn't exist.")
+	}
+
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json

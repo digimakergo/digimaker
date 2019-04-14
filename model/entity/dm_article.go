@@ -59,6 +59,10 @@ func (c *Article) Values() map[string]interface{} {
 	return result
 }
 
+func (c *Article) Value(identifier string, value interface{}) {
+
+}
+
 func (c *Article) TableName() string {
 	return "dm_article"
 }

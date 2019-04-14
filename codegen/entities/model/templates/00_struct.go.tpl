@@ -35,6 +35,10 @@ func ( c *{{$alias.UpSingular}} ) Values() map[string]interface{}{
     return result
 }
 
+func ( c *{{$alias.UpSingular}} ) Value( identifier string, value interface{} ){
+   
+}
+
 func ( c *{{$alias.UpSingular}} ) TableName() string{
 	 return "{{.Table.Name}}"
 }

@@ -56,6 +56,10 @@ func (c *Folder) Values() map[string]interface{} {
 	return result
 }
 
+func (c *Folder) Value(identifier string, value interface{}) {
+
+}
+
 func (c *Folder) TableName() string {
 	return "dm_folder"
 }

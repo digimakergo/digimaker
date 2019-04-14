@@ -2,30 +2,29 @@
   "folder":{
      "table_name": "dm_folder",
      "versioning": false,
-     "fields": { "title": "text",
-                 "author": "author",
-                 "summary": "richtext",
-                 "published": "datetime",
-                 "modified": "datetime"
+     "locationing": true,
+     "fields": { "title"  : {"type":"text", "required":false},
+                 "author" : {"type":"author", "required":false},
+                 "summary": {"type":"richtext", "required":false}
                }
    },
 
   "article":{
       "table_name": "dm_article",
       "versioning": true,
-      "fields": { "title": "text",
-                  "summary": "richtext",
-                  "body": "richtext",
-                  "published": "datetime",
-                  "modified": "datetime"
+      "locationing": true,
+      "fields": { "title"  : {"type":"text", "required":false},
+                  "author" : {"type":"author", "required":false},
+                  "summary": {"type":"richtext", "required":false}
                 }
    },
   "user":{
       "table_name": "dm_user",
       "versioning": true,
-      "fields":{ "login": "text",
-                 "password": "password",
-                 "firstname": "text",
-                 "lastname": "text" }
+      "locationing": true,
+      "fields":{ "login": {"type":"text", "required":false},
+                 "password": {"type":"password", "required":false},
+                 "firstname": {"type":"text", "required":false},
+                 "lastname": {"type":"text", "required":false} }
                }
 }

@@ -8,6 +8,7 @@ This is a parent struct which consits of location and the content itself(eg. art
 */
 
 import (
+	"dm/model"
 	"dm/model/entity"
 	"dm/util"
 	"strconv"
@@ -48,6 +49,35 @@ func (handler *ContentHandler) Create(title string, parentID int) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+//Format of fields: eg. title:"test", modified: 12121
+func (handler *ContentHandler) store(parentID int, contentType string, fields map[string]interface{}) {
+	handler.Validate(contentType, fields)
+}
+
+//return a validation result instance
+func (handler *ContentHandler) Validate(contentType string, fields map[string]interface{}) error {
+	definition, err := model.GetContentDefinition(contentType)
+	if err != nil {
+		return errors.Wrap(err, "Error in "+contentType)
+	}
+	//check required
+	fieldsDef := definition.Fields
+	var requiredFields []string
+	for identifier, fieldDef := range fieldsDef {
+		if fieldDef.Required {
+			if _, found := fields[identifier]; !found {
+				requiredFields = append(requiredFields, identifier)
+			} else {
+				//check if it's empty
+			}
+		}
+	}
+	//Validate with hook
+
+	//Store with hook
 	return nil
 }
 
