@@ -7,7 +7,8 @@ import (
 	"database/sql"
 	"dm/model"
 	"dm/util"
-	"errors"
+
+	"github.com/pkg/errors"
 )
 
 var db *sql.DB
@@ -26,14 +27,13 @@ func DB() (*sql.DB, error) {
 
 		db, err := sql.Open(dbConfig["type"], connString)
 		if err != nil {
-			errorMessage := "Can not open. error: " + err.Error() + " Conneciton string: " + connString
-			util.Error(errorMessage)
-			return nil, errors.New(errorMessage)
+			errorMessage := "[DB]Can not open. error: " + err.Error() + " Conneciton string: " + connString
+			return nil, errors.Wrap(err, errorMessage)
 		}
 
-		if db.Ping() != nil {
-			util.Error("Can not connect with connection string: " + connString)
-			return nil, err
+		err = db.Ping()
+		if err != nil {
+			return nil, errors.Wrap(err, "[DB]Can not ping to connect with connection string: "+connString)
 		}
 		return db, nil
 	}

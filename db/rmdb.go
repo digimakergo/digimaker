@@ -7,10 +7,10 @@ import (
 	"dm/model"
 	"dm/query"
 	"dm/util"
-	"errors"
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
+	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/queries"
 )
 
@@ -30,7 +30,7 @@ func (rmdb *RMDB) GetByID(contentType string, id int, content model.ContentTyper
 func (*RMDB) GetByFields(contentType string, condition query.Condition, content model.ContentTyper) error {
 	db, err := DB()
 	if err != nil {
-		return errors.New("Error when connecting db: " + err.Error())
+		return errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
 	}
 
 	contentTypeDef := model.ContentTypeDefinition[contentType]
@@ -47,9 +47,8 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 	err = queries.Raw(sql, values...).Bind(context.Background(), db, content)
 
 	if err != nil {
-		message := "Error when query table: " + tableName + " " + err.Error() + "sql: " + sql
-		util.Error(message)
-		return errors.New(message)
+		message := "[RMDB.GetByFields]Error when query table: " + tableName + ".sql - " + sql
+		return errors.Wrap(err, message)
 	}
 	return nil
 }
@@ -80,19 +79,19 @@ func (RMDB) Insert(tablename string, values map[string]interface{}) (int, error)
 	util.Debug("db", sql)
 	db, err := DB()
 	if err != nil {
-		return 0, err //todo: use new error type
+		return 0, errors.Wrap(err, "[RBDM.Insert] Error when getting db connection.")
 	}
 	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
 	if err != nil {
-		return 0, err //todo: use new error type
+		return 0, errors.Wrap(err, "[RBDM.Insert]Error when executing. sql - "+sql)
 	}
 	id, err := result.LastInsertId()
 	if err != nil {
-		return 0, err //todo: use new error type
+		return 0, errors.Wrap(err, "[RBDM.Insert]Error when inserting. sql - "+sql)
 	}
 	util.Debug("db", "Insert results in id: "+strconv.FormatInt(id, 10))
 
-	return int(id), err
+	return int(id), nil
 }
 
 //Generic update an entity
@@ -111,16 +110,16 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition qu
 	sql += " WHERE " + conditionString
 	db, err := DB()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "[RMDB.Update]Error when getting db connection.")
 	}
 	util.Debug("db", sql)
 	//todo: use transaction
 	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
+	if err != nil {
+		return errors.Wrap(err, "[RMDB.Update]Error when updating. sql - "+sql)
+	}
 	resultRows, _ := result.RowsAffected()
 	util.Debug("db", "Updated rows:"+strconv.FormatInt(resultRows, 10))
-	if err != nil {
-		return err //todo: use new error type
-	}
 	return nil
 }
 
