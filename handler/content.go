@@ -10,7 +10,10 @@ This is a parent struct which consits of location and the content itself(eg. art
 import (
 	"dm/model/entity"
 	"dm/util"
+	"strconv"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type Contenter interface {
@@ -58,7 +61,10 @@ func (content ContentHandler) Draft(contentType string, parentID int) error {
 	now := int(time.Now().Unix())
 	article := entity.Article{Author: 1, Published: now, Modified: now}
 	err := article.Store()
-
+	if err != nil {
+		return errors.Wrap(err, "[Handler.Draft]Error when creating article with parent id:"+
+			strconv.Itoa(parentID)+". No location crreated.")
+	}
 	//Save location
 	location := entity.Location{ParentID: -parentID,
 		ContentType: contentType,
@@ -66,7 +72,8 @@ func (content ContentHandler) Draft(contentType string, parentID int) error {
 		UID:         util.GenerateUID()}
 	err = location.Store()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "[Handler.Draft]Error when creating location with content type -"+
+			contentType+", content id -"+strconv.Itoa(article.CID)+", parent id - "+strconv.Itoa(parentID))
 	}
 	return nil
 }
