@@ -5,6 +5,7 @@ package type_default
 
 import (
 	//content "dm/type_default/content"
+	"dm/model"
 	field "dm/type_default/field"
 )
 
@@ -38,4 +39,24 @@ func (TypeLoaderDefault) FieldTypeList() []string {
 
 func (TypeLoaderDefault) ContentTypeList() []string {
 	return []string{"article", "folder"}
+}
+
+func GetFieldType(fieldType string) model.Fielder {
+	var result model.Fielder
+	switch fieldType {
+	case "text":
+		result = field.TextField{}
+	case "richtext":
+		result = field.RichTextField{}
+	}
+	return result
+}
+
+func GetFieldtypeHanlder(fieldType string) model.FieldtypeHandler {
+	var result model.FieldtypeHandler
+	switch fieldType {
+	case "text":
+		result = field.TextFieldHandler{}
+	}
+	return result
 }

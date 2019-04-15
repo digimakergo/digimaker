@@ -5,14 +5,13 @@ package field
 
 import (
 	"database/sql/driver"
-	"dm/model"
 	"errors"
 )
 
 //TextField is a field for normal text line. It implements Datatyper
 type TextField struct {
-	*model.Field
-	data string
+	data     string
+	ViewData interface{}
 }
 
 //When update db.
@@ -33,4 +32,9 @@ func (t *TextField) Scan(src interface{}) error {
 
 	t.data = source
 	return nil
+}
+
+//convert data to view data.
+func (t TextField) ViewValue() {
+
 }

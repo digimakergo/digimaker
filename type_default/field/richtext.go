@@ -5,11 +5,9 @@ package field
 
 import (
 	"database/sql/driver"
-	"dm/model"
 )
 
 type RichTextField struct {
-	*model.Field
 	data string
 }
 

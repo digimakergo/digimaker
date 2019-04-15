@@ -29,13 +29,19 @@ type ContentTyper interface {
 //All of the fields will implements this interface
 type Fielder interface {
 	//Get value of
-	Value() string
+	//Value() string
 
 	//Create()
 	//Validate()
 	//SetStoreData()
 }
 
+type FieldtypeHandler interface {
+	ToStorage() interface{}
+	Validate() (bool, string)
+}
+
+//For enitities.
 type Entitier interface {
 	TableName() string
 	Values() map[string]interface{}

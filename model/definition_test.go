@@ -17,4 +17,7 @@ func TestLoad(t *testing.T) {
 	t.Log(fmt.Printf(ContentTypeDefinition["folder"].TableName + "\n"))
 	t.Log(fmt.Printf(ContentTypeDefinition["article"].TableName + "\n"))
 
+	s := "hello world"
+	//var text TextDatatype = "GOod"
+	fmt.Println(TextDatatype(s))
 }
