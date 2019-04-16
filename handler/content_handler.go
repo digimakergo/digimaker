@@ -70,7 +70,8 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	for identifier, fieldDef := range fieldsDef {
 		fieldHandler := type_default.NewHandler(fieldsDef[identifier].FieldType)
 		_, fieldExists := inputs[identifier]
-		if (!fieldExists && fieldDef.Required) || (fieldExists && fieldHandler.IsEmpty(inputs[identifier])) {
+		if fieldDef.Required &&
+			(!fieldExists || (fieldExists && fieldHandler.IsEmpty(inputs[identifier]))) {
 			fieldResult := FieldValidationResult{Field: identifier, Detail: "1"}
 			result.Fields = append(result.Fields, fieldResult)
 		}
