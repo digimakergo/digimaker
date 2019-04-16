@@ -6,6 +6,6 @@ type ValidationResult struct {
 }
 
 type FieldValidationResult struct {
-	Field  string
-	Detail string //1 means required, other message means real messgae.
+	Identifier string
+	Detail     string //1 means required, other message means real messgae.
 }

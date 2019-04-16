@@ -4,6 +4,8 @@ import (
 	"dm/model"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidtion(t *testing.T) {
@@ -13,6 +15,11 @@ func TestValidtion(t *testing.T) {
 	params := map[string]interface{}{"title": "ff", "body": "Hello"}
 	result, _ := handler.Validate("article", params)
 	fmt.Println(result)
+	assert.Equal(t, result, ValidationResult{})
+
+	params = map[string]interface{}{"title": "", "body": "Hello"}
+	result, _ = handler.Validate("article", params)
+	assert.Equal(t, result.Fields[0].Identifier, "title")
 	//handler.Draft("article", 1)
 
 }
