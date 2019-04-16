@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestCreate(t *testing.T) {
+func TestValidtion(t *testing.T) {
 	model.LoadDefinition()
 
 	handler := ContentHandler{}
