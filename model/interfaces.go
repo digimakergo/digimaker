@@ -37,8 +37,9 @@ type Fielder interface {
 }
 
 type FieldtypeHandler interface {
-	ToStorage() interface{}
-	Validate() (bool, string)
+	ToStorage(input interface{}) interface{}
+	Validate(input interface{}) (bool, string)
+	IsEmpty(input interface{}) bool
 }
 
 //For enitities.

@@ -10,6 +10,7 @@ This is a parent struct which consits of location and the content itself(eg. art
 import (
 	"dm/model"
 	"dm/model/entity"
+	"dm/type_default"
 	"dm/util"
 	"strconv"
 	"time"
@@ -57,28 +58,37 @@ func (handler *ContentHandler) store(parentID int, contentType string, fields ma
 	handler.Validate(contentType, fields)
 }
 
-//return a validation result instance
-func (handler *ContentHandler) Validate(contentType string, fields map[string]interface{}) error {
+//return a validation result
+func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (ValidationResult, error) {
 	definition, err := model.GetContentDefinition(contentType)
 	if err != nil {
-		return errors.Wrap(err, "Error in "+contentType)
+		return ValidationResult{}, errors.Wrap(err, "Error in "+contentType)
 	}
 	//check required
 	fieldsDef := definition.Fields
-	var requiredFields []string
+	result := ValidationResult{}
 	for identifier, fieldDef := range fieldsDef {
-		if fieldDef.Required {
-			if _, found := fields[identifier]; !found {
-				requiredFields = append(requiredFields, identifier)
-			} else {
-				//check if it's empty
-			}
+		fieldHandler := type_default.NewHandler(fieldsDef[identifier].FieldType)
+		_, fieldExists := inputs[identifier]
+		if (!fieldExists && fieldDef.Required) || (fieldExists && fieldHandler.IsEmpty(inputs[identifier])) {
+			fieldResult := FieldValidationResult{Field: identifier, Detail: "1"}
+			result.Fields = append(result.Fields, fieldResult)
 		}
 	}
-	//Validate with hook
+	if len(result.Fields) > 0 {
+		return result, nil
+	}
+	//Validate field
+	for identifier, input := range inputs {
+		fieldHanlder := type_default.NewHandler(fieldsDef[identifier].FieldType)
+		if valid, detail := fieldHanlder.Validate(input); !valid {
+			fieldResult := FieldValidationResult{Field: identifier, Detail: detail}
+			result.Fields = append(result.Fields, fieldResult)
+		}
+	}
 
-	//Store with hook
-	return nil
+	//todo: add more custom validation based on type
+	return ValidationResult{}, nil
 }
 
 func (content ContentHandler) Store() error {

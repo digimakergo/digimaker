@@ -1,14 +1,24 @@
 package field
 
+import (
+	"strings"
+)
+
 //implement FieldtypeHandler
 type TextFieldHandler struct {
-	Input interface{}
 }
 
-func (t TextFieldHandler) Validate() (bool, string) {
+func (t TextFieldHandler) Validate(input interface{}) (bool, string) {
 	return true, ""
 }
 
-func (t TextFieldHandler) ToStorage() interface{} {
-	return t.Input.(string)
+func (t TextFieldHandler) ToStorage(input interface{}) interface{} {
+	return input.(string)
+}
+
+func (t TextFieldHandler) IsEmpty(input interface{}) bool {
+	if strings.TrimSpace(input.(string)) == "" {
+		return true
+	}
+	return false
 }

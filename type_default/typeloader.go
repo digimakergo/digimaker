@@ -41,7 +41,7 @@ func (TypeLoaderDefault) ContentTypeList() []string {
 	return []string{"article", "folder"}
 }
 
-func GetFieldType(fieldType string) model.Fielder {
+func NewFieldType(fieldType string) model.Fielder {
 	var result model.Fielder
 	switch fieldType {
 	case "text":
@@ -52,10 +52,12 @@ func GetFieldType(fieldType string) model.Fielder {
 	return result
 }
 
-func GetFieldtypeHanlder(fieldType string) model.FieldtypeHandler {
+func NewHandler(fieldType string) model.FieldtypeHandler {
 	var result model.FieldtypeHandler
 	switch fieldType {
 	case "text":
+		result = field.TextFieldHandler{}
+	default:
 		result = field.TextFieldHandler{}
 	}
 	return result
