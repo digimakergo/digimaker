@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"dm/db"
+	"dm/fieldtype"
 	"dm/model"
 	. "dm/query"
-	"dm/type_default/field"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -28,15 +28,15 @@ import (
 // User is an object representing the database table.
 // Implement dm.model.ContentTyper interface
 type User struct {
-	CID       int             `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Login     null.String     `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
-	Firstname field.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
-	Lastname  null.String     `boil:"lastname" json:"lastname,omitempty" toml:"lastname" yaml:"lastname,omitempty"`
-	Password  null.String     `boil:"password" json:"password,omitempty" toml:"password" yaml:"password,omitempty"`
-	Mobile    null.String     `boil:"mobile" json:"mobile,omitempty" toml:"mobile" yaml:"mobile,omitempty"`
-	RemoteID  null.String     `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
-	Published int             `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified  int             `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	CID       int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Login     null.String         `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
+	Firstname fieldtype.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
+	Lastname  null.String         `boil:"lastname" json:"lastname,omitempty" toml:"lastname" yaml:"lastname,omitempty"`
+	Password  null.String         `boil:"password" json:"password,omitempty" toml:"password" yaml:"password,omitempty"`
+	Mobile    null.String         `boil:"mobile" json:"mobile,omitempty" toml:"mobile" yaml:"mobile,omitempty"`
+	RemoteID  null.String         `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
+	Published int                 `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
+	Modified  int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
 
 	R        *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L        userL  `boil:"-" json:"-" toml:"-" yaml:"-"`

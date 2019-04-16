@@ -1,4 +1,4 @@
-package field
+package fieldtype
 
 import (
 	"strings"

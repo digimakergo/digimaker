@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"dm/db"
+	"dm/fieldtype"
 	"dm/model"
 	. "dm/query"
-	"dm/type_default/field"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -28,14 +28,14 @@ import (
 // Article is an object representing the database table.
 // Implement dm.model.ContentTyper interface
 type Article struct {
-	CID       int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Status    int                 `boil:"status" json:"status" toml:"status" yaml:"status"`
-	Author    int                 `boil:"author" json:"author" toml:"author" yaml:"author"`
-	Title     field.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
-	Body      field.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
-	Published int                 `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified  int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
-	RemoteID  string              `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
+	CID       int                     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Status    int                     `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Author    int                     `boil:"author" json:"author" toml:"author" yaml:"author"`
+	Title     fieldtype.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Body      fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
+	Published int                     `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
+	Modified  int                     `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	RemoteID  string                  `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
 	R        *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L        articleL  `boil:"-" json:"-" toml:"-" yaml:"-"`

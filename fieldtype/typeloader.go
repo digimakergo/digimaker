@@ -1,12 +1,11 @@
 //Author xc, Created on 2019-03-25 20:00
 //{COPYRIGHTS}
 
-package type_default
+package fieldtype
 
 import (
 	//content "dm/type_default/content"
 	"dm/model"
-	field "dm/type_default/field"
 )
 
 //TypeLoaderDefault implements FieldInstancer and ContentTypeInstancer
@@ -17,9 +16,9 @@ func (TypeLoaderDefault) Instance(extendedType string, identifier string) interf
 	if extendedType == "field" {
 		switch identifier {
 		case "text":
-			result = new(field.TextField)
+			result = new(TextField)
 		case "richtext":
-			result = new(field.RichTextField)
+			result = new(RichTextField)
 		default:
 		}
 	} else if extendedType == "contenttype" {
@@ -45,9 +44,9 @@ func NewFieldType(fieldType string) model.Fielder {
 	var result model.Fielder
 	switch fieldType {
 	case "text":
-		result = field.TextField{}
+		result = TextField{}
 	case "richtext":
-		result = field.RichTextField{}
+		result = RichTextField{}
 	}
 	return result
 }
@@ -56,9 +55,9 @@ func NewHandler(fieldType string) model.FieldtypeHandler {
 	var result model.FieldtypeHandler
 	switch fieldType {
 	case "text":
-		result = field.TextFieldHandler{}
+		result = TextFieldHandler{}
 	default:
-		result = field.TextFieldHandler{}
+		result = TextFieldHandler{}
 	}
 	return result
 }

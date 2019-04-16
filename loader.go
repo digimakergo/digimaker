@@ -3,7 +3,7 @@
 
 package dm
 
-import "dm/type_default"
+import "dm/fieldtype"
 
 //TypeLoader is a interface for plugin to register content type, data type, etc.
 //Basically one typerloader is one plugin.
@@ -22,7 +22,7 @@ func RegisterTypeLoaders() {
 	typeLoaders["datatype"] = make(map[string]TypeLoader)
 
 	//Get loaders
-	defaultLoader := type_default.TypeLoaderDefault{}
+	defaultLoader := fieldtype.TypeLoaderDefault{}
 	contentTypeList := defaultLoader.ContentTypeList()
 	for _, identifier := range contentTypeList {
 		typeLoaders["contenttype"][identifier] = &defaultLoader

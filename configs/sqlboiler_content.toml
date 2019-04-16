@@ -24,10 +24,9 @@ third_party = ['"github.com/volatiletech/sqlboiler/boil"',
                 '"github.com/volatiletech/sqlboiler/strmangle"',
                 '"github.com/pkg/errors"',
                '"github.com/volatiletech/sqlboiler/queries"',
-               '"dm/type_default/field"',
+               '"dm/fieldtype"',
                '"dm/model"',
                '. "dm/query"',
-               '"dm/type_default/field"',
                '"dm/db"']
 
 ##TODO: use a better mechanism to diffenticate fields between:
@@ -44,7 +43,7 @@ third_party = ['"github.com/volatiletech/sqlboiler/boil"',
 db_type = "varchar"
 
 [types.replace]
-type = "field.TextField"
+type = "fieldtype.TextField"
 
 # Richtext
 [[types]]
@@ -53,7 +52,7 @@ db_type = "text"
 
 
 [types.replace]
-type = "field.RichTextField"
+type = "fieldtype.RichTextField"
 
 ##Execlude below types replacement
 

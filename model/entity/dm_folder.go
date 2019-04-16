@@ -14,9 +14,9 @@ import (
 	"time"
 
 	"dm/db"
+	"dm/fieldtype"
 	"dm/model"
 	. "dm/query"
-	"dm/type_default/field"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -27,13 +27,13 @@ import (
 // Folder is an object representing the database table.
 // Implement dm.model.ContentTyper interface
 type Folder struct {
-	CID        int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
-	FolderType string              `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
-	Title      field.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
-	Summary    field.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-	Published  int                 `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified   int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
-	RemoteID   string              `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
+	CID        int                     `boil:"id" json:"id" toml:"id" yaml:"id"`
+	FolderType string                  `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
+	Title      fieldtype.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
+	Summary    fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+	Published  int                     `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
+	Modified   int                     `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	RemoteID   string                  `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
 	R        *folderR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L        folderL  `boil:"-" json:"-" toml:"-" yaml:"-"`

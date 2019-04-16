@@ -8,9 +8,9 @@ This is a parent struct which consits of location and the content itself(eg. art
 */
 
 import (
+	"dm/fieldtype"
 	"dm/model"
 	"dm/model/entity"
-	"dm/type_default"
 	"dm/util"
 	"strconv"
 	"time"
@@ -68,7 +68,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	fieldsDef := definition.Fields
 	result := ValidationResult{}
 	for identifier, fieldDef := range fieldsDef {
-		fieldHandler := type_default.NewHandler(fieldsDef[identifier].FieldType)
+		fieldHandler := fieldtype.NewHandler(fieldsDef[identifier].FieldType)
 		_, fieldExists := inputs[identifier]
 		if fieldDef.Required &&
 			(!fieldExists || (fieldExists && fieldHandler.IsEmpty(inputs[identifier]))) {
@@ -81,7 +81,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	}
 	//Validate field
 	for identifier, input := range inputs {
-		fieldHanlder := type_default.NewHandler(fieldsDef[identifier].FieldType)
+		fieldHanlder := fieldtype.NewHandler(fieldsDef[identifier].FieldType)
 		if valid, detail := fieldHanlder.Validate(input); !valid {
 			fieldResult := FieldValidationResult{Identifier: identifier, Detail: detail}
 			result.Fields = append(result.Fields, fieldResult)
