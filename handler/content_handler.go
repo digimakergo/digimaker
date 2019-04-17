@@ -38,7 +38,7 @@ func (content ContentHandler) CreateLocation(parentID int) {
 }
 
 //Validate and Return a validation result
-func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) ValidationResult {
+func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
 	definition := model.GetContentDefinition(contentType)
 	//check required
 	fieldsDef := definition.Fields
@@ -53,7 +53,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 		}
 	}
 	if len(result.Fields) > 0 {
-		return result
+		return false, result
 	}
 	//Validate field
 	for identifier, input := range inputs {
@@ -65,7 +65,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	}
 
 	//todo: add more custom validation based on type
-	return ValidationResult{}
+	return true, ValidationResult{}
 }
 
 func (content ContentHandler) Draft(contentType string, parentID int) error {

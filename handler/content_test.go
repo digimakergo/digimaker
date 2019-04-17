@@ -13,12 +13,12 @@ func TestValidtion(t *testing.T) {
 
 	handler := ContentHandler{}
 	params := map[string]interface{}{"title": "ff", "body": "Hello"}
-	result := handler.Validate("article", params)
+	passed, result := handler.Validate("article", params)
 	fmt.Println(result)
-	assert.Equal(t, result, ValidationResult{})
+	assert.Equal(t, passed, true)
 
 	params = map[string]interface{}{"title": "", "body": "Hello"}
-	result = handler.Validate("article", params)
+	_, result = handler.Validate("article", params)
 	assert.Equal(t, result.Fields[0].Identifier, "title")
 	//handler.Draft("article", 1)
 
