@@ -16,6 +16,9 @@
 <body>
   <h2>Locations</h2>
   <div>
+      Example: <a href="./?id=1">1</a> <a href="./?id=2">2</a>
+  </div>
+  <div>
     <table>
     <tr>
       <td>ID</td>
@@ -23,14 +26,12 @@
       <td>Name</td>
       <td>Parent</td>
     </tr>
-    {{range .}}
     <tr>
       <td>{{.ID}}</td>
       <td>{{.ContentType}}</td>
       <td>{{.Name}}</td>
       <td> {{.ParentID}}</td>
     </tr>
-    {{end}}
     </table>
   </div>
 </body>

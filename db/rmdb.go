@@ -19,7 +19,7 @@ type RMDB struct{}
 
 //Query by ID
 func (rmdb *RMDB) GetByID(contentType string, id int, content model.ContentTyper) error {
-	return rmdb.GetByFields(contentType, query.Cond("id", id), content)
+	return rmdb.GetByFields(contentType, query.Cond("c.id", id), content) //todo: use table name as parameter
 }
 
 //Query to fill in contentTyper. Use reference in content parameter.

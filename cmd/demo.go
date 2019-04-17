@@ -1,34 +1,47 @@
 package main
 
 import (
-	"context"
-	"database/sql"
-	"dm/handler"
+	"dm/db"
+	"dm/model"
 	"dm/model/entity"
 	"fmt"
 	"html/template"
 	"net/http"
+	"os"
+	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
-	. "github.com/volatiletech/sqlboiler/queries/qm"
 )
+
+func BootStrap() {
+	if os.Args[1] != "" {
+		model.DMPath = os.Args[1]
+	}
+	model.LoadDefinition()
+}
 
 //This is a initial try which use template to do basic feature.
 
-func Display(w http.ResponseWriter) {
+func Display(w http.ResponseWriter, r *http.Request) {
 	tpl := template.Must(template.ParseFiles("../web/template/view.html"))
-	db := GetDB()
-	locations, err := entity.Locations(Where("parent_id != -1")).All(context.Background(), db)
-	if err != nil {
-		panic(err)
+	rmdb := db.DBHanlder()
+	article := entity.Article{}
+	idStr := r.FormValue("id")
+	id := 1
+	if idStr != "" {
+		id, _ = strconv.Atoi(idStr)
 	}
 
-	tpl.Execute(w, locations)
+	err := rmdb.GetByID("article", id, &article)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	tpl.Execute(w, article)
 }
 
 func Draft(w http.ResponseWriter, r *http.Request) {
-	handler := handler.ContentHandler{}
-	handler.Create(title, 1)
+	// handler := handler.ContentHandler{}
 }
 
 func Publish(w http.ResponseWriter, r *http.Request) {
@@ -36,8 +49,9 @@ func Publish(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	BootStrap()
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		Display(w)
+		Display(w, r)
 	})
 
 	http.HandleFunc("/content/draft", func(w http.ResponseWriter, r *http.Request) {
@@ -52,19 +66,4 @@ func main() {
 		fmt.Fprintf(w, "User-agent: * \nDisallow /")
 	})
 	http.ListenAndServe(":8089", nil)
-}
-
-func GetDB() *sql.DB {
-	db, err := sql.Open("mysql", "test:test123@tcp(185.35.187.91)/dev_emf")
-
-	if err != nil {
-		fmt.Printf(err.Error())
-		return nil
-	}
-
-	if db.Ping() != nil {
-		fmt.Printf(err.Error())
-		return nil
-	}
-	return db
 }
