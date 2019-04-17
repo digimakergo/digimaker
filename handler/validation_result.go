@@ -1,7 +1,7 @@
 package handler
 
 type ValidationResult struct {
-	Message string
+	Message []string
 	Fields  []FieldValidationResult
 }
 

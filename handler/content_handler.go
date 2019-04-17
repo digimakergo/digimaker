@@ -37,33 +37,9 @@ func (content ContentHandler) CreateLocation(parentID int) {
 	location.Store()
 }
 
-//Create draft of a content. parent_id will be -1 in this case
-func (handler *ContentHandler) Create(title string, parentID int) error {
-	//Save content
-	now := int(time.Now().Unix())
-	article := entity.Article{Author: 1, Published: now, Modified: now}
-	article.Store()
-
-	//Save location
-	location := entity.Location{ParentID: parentID, ContentID: article.CID, UID: util.GenerateUID()}
-	err := location.Store()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-//Format of fields: eg. title:"test", modified: 12121
-func (handler *ContentHandler) store(parentID int, contentType string, fields map[string]interface{}) {
-	handler.Validate(contentType, fields)
-}
-
-//return a validation result
-func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (ValidationResult, error) {
-	definition, err := model.GetContentDefinition(contentType)
-	if err != nil {
-		return ValidationResult{}, errors.Wrap(err, "Error in "+contentType)
-	}
+//Validate and Return a validation result
+func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) ValidationResult {
+	definition := model.GetContentDefinition(contentType)
 	//check required
 	fieldsDef := definition.Fields
 	result := ValidationResult{}
@@ -77,7 +53,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 		}
 	}
 	if len(result.Fields) > 0 {
-		return result, nil
+		return result
 	}
 	//Validate field
 	for identifier, input := range inputs {
@@ -89,12 +65,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	}
 
 	//todo: add more custom validation based on type
-	return ValidationResult{}, nil
-}
-
-func (content ContentHandler) Store() error {
-	//Store Location
-	return nil
+	return ValidationResult{}
 }
 
 func (content ContentHandler) Draft(contentType string, parentID int) error {
@@ -119,6 +90,40 @@ func (content ContentHandler) Draft(contentType string, parentID int) error {
 	return nil
 }
 
+//Publish a draft
 func (content ContentHandler) Publish() {
 
+}
+
+//Create a content(same behavior as Draft&Publish but store published version directly)
+func (handler *ContentHandler) Create(title string, parentID int) error {
+	//Save content
+	now := int(time.Now().Unix())
+	article := entity.Article{Author: 1, Published: now, Modified: now}
+	article.Store()
+
+	//Save location
+	location := entity.Location{ParentID: parentID, ContentID: article.CID, UID: util.GenerateUID()}
+	err := location.Store()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//Update content.
+//The inputs doesn't need to include all required fields. However if it's there,
+// it will check if it's required&empty
+func (content ContentHandler) Update(id int, inputs map[string]interface{}) {
+
+}
+
+//Delete content
+func (content ContentHandler) Delete(id int, toTrash bool) {
+
+}
+
+//Format of fields: eg. title:"test", modified: 12121
+func (handler *ContentHandler) store(parentID int, contentType string, fields map[string]interface{}) {
+	handler.Validate(contentType, fields)
 }

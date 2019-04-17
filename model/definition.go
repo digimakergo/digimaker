@@ -5,7 +5,6 @@ package model
 
 import (
 	"dm/util"
-	"errors"
 )
 
 type ContentTypeSetting struct {
@@ -55,13 +54,13 @@ func LoadDefinition() error {
 	return nil
 }
 
-func GetContentDefinition(contentType string) (ContentTypeSetting, error) {
+func GetContentDefinition(contentType string) ContentTypeSetting {
 	definition := ContentTypeDefinition
 	result, ok := definition[contentType]
 	if ok {
-		return result, nil
+		return result
 	} else {
-		return ContentTypeSetting{}, errors.New("content type " + contentType + "doesn't exist.")
+		return ContentTypeSetting{}
 	}
 
 }
