@@ -14,8 +14,9 @@ import (
 	"time"
 
 	"dm/db"
-	"dm/model"
+	"dm/fieldtype"
 	. "dm/query"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -42,7 +43,7 @@ type Location struct {
 	P           string `boil:"p" json:"p" toml:"p" yaml:"p"`
 }
 
-func (c *Location) Fields() map[string]model.Fielder {
+func (c *Location) Fields() map[string]fieldtype.Fielder {
 	return nil
 }
 

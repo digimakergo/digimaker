@@ -3,11 +3,6 @@
 
 package fieldtype
 
-import (
-	//content "dm/type_default/content"
-	"dm/model"
-)
-
 //TypeLoaderDefault implements FieldInstancer and ContentTypeInstancer
 type TypeLoaderDefault struct{}
 
@@ -40,8 +35,8 @@ func (TypeLoaderDefault) ContentTypeList() []string {
 	return []string{"article", "folder"}
 }
 
-func NewFieldType(fieldType string) model.Fielder {
-	var result model.Fielder
+func NewFieldType(fieldType string) Fielder {
+	var result Fielder
 	switch fieldType {
 	case "text":
 		result = TextField{}
@@ -51,8 +46,8 @@ func NewFieldType(fieldType string) model.Fielder {
 	return result
 }
 
-func NewHandler(fieldType string) model.FieldtypeHandler {
-	var result model.FieldtypeHandler
+func NewHandler(fieldType string) FieldtypeHandler {
+	var result FieldtypeHandler
 	switch fieldType {
 	case "text":
 		result = TextFieldHandler{}

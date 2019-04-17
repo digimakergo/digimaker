@@ -22,7 +22,7 @@ type {{$alias.UpSingular}} struct {
 
 }
 
-func ( c {{$alias.UpSingular}} ) Fields() map[string]model.Fielder{
+func ( c {{$alias.UpSingular}} ) Fields() map[string]fieldtype.Fielder{
 	 return nil
 }
 
@@ -36,7 +36,7 @@ func ( c *{{$alias.UpSingular}} ) Values() map[string]interface{}{
 }
 
 func ( c *{{$alias.UpSingular}} ) Value( identifier string, value interface{} ){
-   
+
 }
 
 func ( c *{{$alias.UpSingular}} ) TableName() string{

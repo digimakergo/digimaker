@@ -1,7 +1,7 @@
 //Author xc, Created on 2019-03-28 21:00
 //{COPYRIGHTS}
 
-package model
+package def
 
 import (
 	"fmt"
@@ -17,7 +17,4 @@ func TestLoad(t *testing.T) {
 	t.Log(fmt.Printf(ContentTypeDefinition["folder"].TableName + "\n"))
 	t.Log(fmt.Printf(ContentTypeDefinition["article"].TableName + "\n"))
 
-	s := "hello world"
-	//var text TextDatatype = "GOod"
-	fmt.Println(TextDatatype(s))
 }

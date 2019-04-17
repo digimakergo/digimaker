@@ -1,14 +1,23 @@
 package entity
 
-import "dm/model"
+func NewInstance(contentType string) interface{} {
+	// var result model.ContentTyper
+	// switch contentType {
+	// case "article":
+	// 	result = Article{}
+	// case "folder":
+	// 	result = Folder{}
+	// }
+	return Article{}
+}
 
-func NewContentType(contentType string) model.ContentTyper {
-	var result model.ContentTyper
+func NewListInstance(contentType string, instance *interface{}) {
+	var result interface{}
 	switch contentType {
 	case "article":
-		result = Article{}
+		result = []Article{}
 	case "folder":
-		result = Folder{}
+		result = []Folder{}
 	}
-	return result
+	instance = &result
 }

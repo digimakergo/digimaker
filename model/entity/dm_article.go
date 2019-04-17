@@ -15,7 +15,6 @@ import (
 
 	"dm/db"
 	"dm/fieldtype"
-	"dm/model"
 	. "dm/query"
 
 	"github.com/pkg/errors"
@@ -42,7 +41,7 @@ type Article struct {
 	Location `boil:"dm_location,bind"`
 }
 
-func (c Article) Fields() map[string]model.Fielder {
+func (c Article) Fields() map[string]fieldtype.Fielder {
 	return nil
 }
 

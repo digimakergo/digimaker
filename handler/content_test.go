@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"dm/model"
+	"dm/def"
 	"fmt"
 	"testing"
 
@@ -9,7 +9,7 @@ import (
 )
 
 func TestValidtion(t *testing.T) {
-	model.LoadDefinition()
+	def.LoadDefinition()
 
 	handler := ContentHandler{}
 	params := map[string]interface{}{"title": "ff", "body": "Hello"}

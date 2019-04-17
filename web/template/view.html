@@ -14,11 +14,19 @@
 </head>
 
 <body>
-  <h2>Locations</h2>
+  <h2>Demo</h2>
+  <h3>List:</h3>
+  {{range $index,$folder := .folders}}
+    <div><a href=".?id={{$folder.CID}}">{{$folder.CID}}</a>: {{$folder.Name}}</div>
+  {{end}}
+
   <div>
-      Example: <a href="./?id=1">1</a> <a href="./?id=2">2</a>
+      {{range $index,$article := .articles}}
+        <div><a href=".?id={{$article.CID}}">{{$article.CID}}</a>: {{$article.Name}}</div>
+      {{end}}
   </div>
-  <div>
+  <hr />
+  <div class="block">
     <table>
     <tr>
       <td>ID</td>
@@ -27,10 +35,10 @@
       <td>Parent</td>
     </tr>
     <tr>
-      <td>{{.ID}}</td>
-      <td>{{.ContentType}}</td>
-      <td>{{.Name}}</td>
-      <td> {{.ParentID}}</td>
+      <td>{{.article.CID}}</td>
+      <td>{{.article.ContentType}}</td>
+      <td>{{.article.Name}}</td>
+      <td> {{.article.ParentID}}</td>
     </tr>
     </table>
   </div>

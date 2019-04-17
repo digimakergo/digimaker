@@ -3,6 +3,8 @@
 
 package model
 
+import "dm/fieldtype"
+
 //All the content type(eg. article, folder) will implement this interface.
 type ContentTyper interface {
 	// Since go's embeded struct can't really inherit well from BaseContentType(eg. ID)
@@ -17,29 +19,13 @@ type ContentTyper interface {
 	*/
 
 	//Return all fields
-	Fields() map[string]Fielder
+	Fields() map[string]fieldtype.Fielder
 
 	//Visit  field dynamically
 	Field(name string) interface{}
 
 	//Visit all attribute dynamically including Fields + internal attribute eg. id, parent_id.
 	//Attr(name string) interface{}
-}
-
-//All of the fields will implements this interface
-type Fielder interface {
-	//Get value of
-	//Value() string
-
-	//Create()
-	//Validate()
-	//SetStoreData()
-}
-
-type FieldtypeHandler interface {
-	ToStorage(input interface{}) interface{}
-	Validate(input interface{}) (bool, string)
-	IsEmpty(input interface{}) bool
 }
 
 //For enitities.

@@ -15,8 +15,8 @@ import (
 
 	"dm/db"
 	"dm/fieldtype"
-	"dm/model"
 	. "dm/query"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -40,7 +40,7 @@ type Folder struct {
 	Location `boil:"dm_location,bind"`
 }
 
-func (c Folder) Fields() map[string]model.Fielder {
+func (c Folder) Fields() map[string]fieldtype.Fielder {
 	return nil
 }
 

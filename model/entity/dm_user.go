@@ -15,8 +15,8 @@ import (
 
 	"dm/db"
 	"dm/fieldtype"
-	"dm/model"
 	. "dm/query"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -43,7 +43,7 @@ type User struct {
 	Location `boil:"dm_location,bind"`
 }
 
-func (c User) Fields() map[string]model.Fielder {
+func (c User) Fields() map[string]fieldtype.Fielder {
 	return nil
 }
 

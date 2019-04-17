@@ -5,7 +5,6 @@ package db
 
 import (
 	"database/sql"
-	"dm/model"
 	"dm/util"
 
 	"github.com/pkg/errors"
@@ -47,5 +46,5 @@ type DBer interface {
 }
 
 type DBEntitier interface {
-	GetByID(contentType string, id int) model.ContentTyper
+	GetByID(contentType string, id int) interface{}
 }

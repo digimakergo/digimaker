@@ -2,8 +2,10 @@ package main
 
 import (
 	"dm/db"
-	"dm/model"
+	"dm/def"
+	"dm/handler"
 	"dm/model/entity"
+	"dm/query"
 	"dm/util"
 	"fmt"
 	"html/template"
@@ -17,10 +19,10 @@ import (
 func BootStrap() {
 	if len(os.Args) >= 2 && os.Args[1] != "" {
 		path := os.Args[1]
-		model.DMPath = path
+		def.DMPath = path
 		util.DefaultSettings.ConfigFolder = path + "/configs"
 	}
-	model.LoadDefinition()
+	def.LoadDefinition()
 }
 
 //This is a initial try which use template to do basic feature.
@@ -36,11 +38,19 @@ func Display(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err := rmdb.GetByID("article", id, &article)
+
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	tpl.Execute(w, article)
+	var articles []entity.Article
+	handler.Query.List("article", query.Cond("1", "1"), &articles)
+
+	var folders []entity.Folder
+	handler.Query.List("folder", query.Cond("1", "1"), &folders)
+	fmt.Println(folders)
+
+	tpl.Execute(w, map[string]interface{}{"article": article, "articles": articles, "folders": folders})
 }
 
 func Draft(w http.ResponseWriter, r *http.Request) {

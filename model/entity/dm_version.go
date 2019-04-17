@@ -14,8 +14,9 @@ import (
 	"time"
 
 	"dm/db"
-	"dm/model"
+	"dm/fieldtype"
 	. "dm/query"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -33,7 +34,7 @@ type Version struct {
 	Data      string `boil:"data" json:"data" toml:"data" yaml:"data"`
 }
 
-func (c *Version) Fields() map[string]model.Fielder {
+func (c *Version) Fields() map[string]fieldtype.Fielder {
 	return nil
 }
 

@@ -4,7 +4,7 @@ package db
 
 import (
 	"context"
-	"dm/model"
+	"dm/def"
 	"dm/query"
 	"dm/util"
 	"strconv"
@@ -18,7 +18,7 @@ import (
 type RMDB struct{}
 
 //Query by ID
-func (rmdb *RMDB) GetByID(contentType string, id int, content model.ContentTyper) error {
+func (rmdb *RMDB) GetByID(contentType string, id int, content interface{}) error {
 	return rmdb.GetByFields(contentType, query.Cond("c.id", id), content) //todo: use table name as parameter
 }
 
@@ -27,13 +27,13 @@ func (rmdb *RMDB) GetByID(contentType string, id int, content model.ContentTyper
 //  var content model.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, content)
 //
-func (*RMDB) GetByFields(contentType string, condition query.Condition, content model.ContentTyper) error {
+func (*RMDB) GetByFields(contentType string, condition query.Condition, content interface{}) error {
 	db, err := DB()
 	if err != nil {
 		return errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
 	}
 
-	contentTypeDef := model.ContentTypeDefinition[contentType]
+	contentTypeDef := def.ContentTypeDefinition[contentType]
 	tableName := contentTypeDef.TableName
 
 	//get condition string for fields

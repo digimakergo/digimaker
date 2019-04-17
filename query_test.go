@@ -2,7 +2,8 @@ package dm
 
 import (
 	"dm/db"
-	"dm/model"
+	"dm/def"
+	"dm/handler"
 	"dm/model/entity"
 	. "dm/query"
 	"dm/util"
@@ -14,7 +15,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	model.LoadDefinition()
+	def.LoadDefinition()
 	m.Run()
 }
 
@@ -63,4 +64,9 @@ func TestUpdate(t *testing.T) {
 	// article3 := new(entity.Article)
 	// article3.RemoteID = "5555555"
 	// article3.Store()
+
+	var articles []entity.Article
+	handler.Query.List("article", Cond("1", "1"), &articles)
+	fmt.Println(articles)
+
 }
