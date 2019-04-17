@@ -4,6 +4,7 @@ import (
 	"dm/db"
 	"dm/model"
 	"dm/model/entity"
+	"dm/util"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -15,7 +16,9 @@ import (
 
 func BootStrap() {
 	if os.Args[1] != "" {
-		model.DMPath = os.Args[1]
+		path := os.Args[1]
+		model.DMPath = path
+		util.DefaultSettings.ConfigFolder = path + "/configs"
 	}
 	model.LoadDefinition()
 }
