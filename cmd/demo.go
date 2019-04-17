@@ -15,7 +15,7 @@ import (
 )
 
 func BootStrap() {
-	if len(os.Args) > 2 && os.Args[1] != "" {
+	if len(os.Args) >= 2 && os.Args[1] != "" {
 		path := os.Args[1]
 		model.DMPath = path
 		util.DefaultSettings.ConfigFolder = path + "/configs"
