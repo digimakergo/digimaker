@@ -1,7 +1,7 @@
 {{- $alias := .Aliases.Table .Table.Name -}}
 
 // {{$alias.UpSingular}} is an object representing the database table.
-// Implement dm.model.ContentTyper interface
+// Implement dm.contenttype.ContentTyper interface
 type {{$alias.UpSingular}} struct {
 	{{- range $column := .Table.Columns -}}
 	{{- $colAlias := $alias.Column $column.Name -}}

@@ -7,7 +7,7 @@ import (
 )
 
 // func TestMain(m *testing.M) {
-// 	//model.LoadDefinition()
+// 	//contenttype.LoadDefinition()
 // 	m.Run()
 // }
 

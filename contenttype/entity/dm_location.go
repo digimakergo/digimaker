@@ -25,7 +25,7 @@ import (
 )
 
 // Location is an object representing the database table.
-// Implement dm.model.ContentTyper interface
+// Implement dm.contenttype.ContentTyper interface
 type Location struct {
 	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	ParentID    int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`

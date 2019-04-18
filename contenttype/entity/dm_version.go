@@ -25,7 +25,7 @@ import (
 )
 
 // Version is an object representing the database table.
-// Implement dm.model.ContentTyper interface
+// Implement dm.contenttype.ContentTyper interface
 type Version struct {
 	ID        int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Type      string `boil:"type" json:"type" toml:"type" yaml:"type"`

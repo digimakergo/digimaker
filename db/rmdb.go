@@ -4,7 +4,7 @@ package db
 
 import (
 	"context"
-	"dm/def"
+	"dm/contenttype"
 	"dm/query"
 	"dm/util"
 	"strconv"
@@ -24,7 +24,7 @@ func (rmdb *RMDB) GetByID(contentType string, id int, content interface{}) error
 
 //Query to fill in contentTyper. Use reference in content parameter.
 //It fill in with nil if nothing found(no error returned in this case)
-//  var content model.Article
+//  var content contenttype.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, content)
 //
 func (*RMDB) GetByFields(contentType string, condition query.Condition, content interface{}) error {
@@ -33,7 +33,7 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 		return errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
 	}
 
-	contentTypeDef := def.GetContentDefinition(contentType)
+	contentTypeDef := contenttype.GetContentDefinition(contentType)
 	tableName := contentTypeDef.TableName
 
 	//get condition string for fields

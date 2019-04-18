@@ -25,7 +25,7 @@ import (
 )
 
 // Folder is an object representing the database table.
-// Implement dm.model.ContentTyper interface
+// Implement dm.contenttype.ContentTyper interface
 type Folder struct {
 	CID        int                     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	FolderType string                  `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`

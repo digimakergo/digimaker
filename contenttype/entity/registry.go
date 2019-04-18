@@ -1,9 +1,9 @@
 package entity
 
-import "dm/model"
+import "dm/contenttype"
 
 func NewInstance(contentType string) interface{} {
-	// var result model.ContentTyper
+	// var result contenttype.ContentTyper
 	// switch contentType {
 	// case "article":
 	// 	result = Article{}
@@ -15,21 +15,21 @@ func NewInstance(contentType string) interface{} {
 
 //Global variable for registering contentType
 //todo: support collection, eg.[]article to bind collection easier from db.
-var contenttypeRegistry = map[string]func() model.ContentTyper{}
+var contenttypeRegistry = map[string]func() contenttype.ContentTyper{}
 
-func Register(contentType string, newContentType func() model.ContentTyper) {
+func Register(contentType string, newContentType func() contenttype.ContentTyper) {
 	contenttypeRegistry[contentType] = newContentType
 }
 
-func NewContentType(contentType string) model.ContentTyper {
+func NewContentType(contentType string) contenttype.ContentTyper {
 	return contenttypeRegistry[contentType]()
 }
 
 func init() {
-	Register("article", func() model.ContentTyper {
+	Register("article", func() contenttype.ContentTyper {
 		return Article{}
 	})
-	Register("folder", func() model.ContentTyper {
+	Register("folder", func() contenttype.ContentTyper {
 		return Folder{}
 	})
 }

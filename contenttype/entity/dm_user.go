@@ -26,7 +26,7 @@ import (
 )
 
 // User is an object representing the database table.
-// Implement dm.model.ContentTyper interface
+// Implement dm.contenttype.ContentTyper interface
 type User struct {
 	CID       int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Login     null.String         `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`

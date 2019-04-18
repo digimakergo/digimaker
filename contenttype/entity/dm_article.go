@@ -25,7 +25,7 @@ import (
 )
 
 // Article is an object representing the database table.
-// Implement dm.model.ContentTyper interface
+// Implement dm.contenttype.ContentTyper interface
 type Article struct {
 	CID       int                     `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Status    int                     `boil:"status" json:"status" toml:"status" yaml:"status"`

@@ -1,10 +1,10 @@
 package dm
 
 import (
+	"dm/contenttype"
+	"dm/contenttype/entity"
 	"dm/db"
-	"dm/def"
 	"dm/handler"
-	"dm/model/entity"
 	. "dm/query"
 	"dm/util"
 	"fmt"
@@ -15,7 +15,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	def.LoadDefinition()
+	contenttype.LoadDefinition(contenttype.DMPath + "/configs")
 	m.Run()
 }
 

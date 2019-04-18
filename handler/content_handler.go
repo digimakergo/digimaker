@@ -8,9 +8,9 @@ This is a parent struct which consits of location and the content itself(eg. art
 */
 
 import (
-	"dm/def"
+	"dm/contenttype"
+	"dm/contenttype/entity"
 	"dm/fieldtype"
-	"dm/model/entity"
 	"dm/util"
 	"strconv"
 	"time"
@@ -39,7 +39,7 @@ func (content ContentHandler) CreateLocation(parentID int) {
 
 //Validate and Return a validation result
 func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
-	definition := def.GetContentDefinition(contentType)
+	definition := contenttype.GetContentDefinition(contentType)
 	//check required
 	fieldsDef := definition.Fields
 	result := ValidationResult{}

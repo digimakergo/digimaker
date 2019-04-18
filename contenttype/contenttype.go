@@ -1,7 +1,7 @@
 //Author xc, Created on 2019-03-28 20:00
 //{COPYRIGHTS}
 
-package model
+package contenttype
 
 type ContentType struct {
 	DataID    int

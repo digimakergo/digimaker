@@ -25,7 +25,7 @@ third_party = ['"github.com/volatiletech/sqlboiler/boil"',
                 '"github.com/pkg/errors"',
                '"github.com/volatiletech/sqlboiler/queries"',
                '"dm/fieldtype"',
-               '"dm/model"',
+               '"dm/contenttype"',
                '. "dm/query"',
                '"dm/db"']
 
