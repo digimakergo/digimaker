@@ -17,12 +17,12 @@
   <h2>Demo</h2>
   <h3>List:</h3>
   {{range $index,$folder := .folders}}
-    <div>{{$folder.CID}}: {{$folder.Name}}</div>
+    <div>{{$folder.ID}} ({{$folder.CID}}): {{$folder.Name}}</div>
   {{end}}
   <br />
   <div>
       {{range $index,$article := .articles}}
-        <div><a href=".?id={{$article.CID}}">{{$article.CID}}</a>: {{$article.Name}}</div>
+        <div><a href=".?id={{$article.ID}}">{{$article.ID}}</a>: {{$article.Name}}</div>
       {{end}}
   </div>
   <hr />

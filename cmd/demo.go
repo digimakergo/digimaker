@@ -33,7 +33,7 @@ func Display(w http.ResponseWriter, r *http.Request) {
 	rmdb := db.DBHanlder()
 	article := entity.Article{}
 	idStr := r.FormValue("id")
-	id := 1
+	id := 2
 	if idStr != "" {
 		id, _ = strconv.Atoi(idStr)
 	}

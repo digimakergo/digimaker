@@ -19,7 +19,7 @@ type RMDB struct{}
 
 //Query by ID
 func (rmdb *RMDB) GetByID(contentType string, id int, content interface{}) error {
-	return rmdb.GetByFields(contentType, query.Cond("c.id", id), content) //todo: use table name as parameter
+	return rmdb.GetByFields(contentType, query.Cond("dm_location.id", id), content) //todo: use table name as parameter
 }
 
 //Query to fill in contentTyper. Use reference in content parameter.
@@ -38,9 +38,21 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 
 	//get condition string for fields
 	conditions, values := BuildCondition(condition)
-	sql := `SELECT * FROM dm_location location, ` + tableName + ` c
-                   WHERE location.content_id=c.id
-                         AND location.content_type= '` + contentType + `'
+	//todo: get columns from either config or entities
+	columns := []string{"id", "parent_id", "main_id",
+		"hierarchy", "content_type",
+		"content_id", "language",
+		"name", "is_hidden", "is_invisible",
+		"priority", "uid", "section", "p"}
+	locationColumns := ""
+	for _, column := range columns {
+		locationColumns += `dm_location.` + column + ` AS "dm_location.` + column + `",`
+	}
+	locationColumns = locationColumns[:len(locationColumns)-1]
+
+	sql := `SELECT c.*, ` + locationColumns + ` FROM dm_location, ` + tableName + ` c
+                   WHERE dm_location.content_id=c.id
+                         AND dm_location.content_type= '` + contentType + `'
                          AND ` + conditions
 
 	util.Debug("db", sql)

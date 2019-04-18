@@ -32,8 +32,9 @@ func TestQuery(t *testing.T) {
 	assert.NotNil(t, article)
 
 	var folders []entity.Folder
-	handler.Query.List("folder", query.Cond("1", "1"), &folders)
-	fmt.Println(folders)
+	handler.Query.List("folder", Cond("1", "1"), &folders)
+	fmt.Println("HELLO")
+	fmt.Println(folders[0])
 }
 
 func TestUpdate(t *testing.T) {
