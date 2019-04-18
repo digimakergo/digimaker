@@ -24,13 +24,15 @@ DROP TABLE IF EXISTS `dm_article`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_article` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `status` int(11) NOT NULL DEFAULT '0',
+  `author` int(11) NOT NULL DEFAULT '0',
   `title` varchar(255) NOT NULL DEFAULT '',
   `body` text NOT NULL,
   `published` int(11) DEFAULT NULL,
   `modified` int(11) DEFAULT NULL,
   `remote_id` varchar(30) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -39,7 +41,7 @@ CREATE TABLE `dm_article` (
 
 LOCK TABLES `dm_article` WRITE;
 /*!40000 ALTER TABLE `dm_article` DISABLE KEYS */;
-INSERT INTO `dm_article` VALUES (1,'Welcome','good2',111111,12313,'bin3hvli6ekgsag0fnj0'),(2,'DM EMF is released','News....!',1213131,12313,'');
+INSERT INTO `dm_article` VALUES (1,1,1,'Welcome','test2019-04-18 21:11:57.903629 +0200 CEST m=+0.466513532',111111,12313,'biscnvdi6ekjnkrmrtt0'),(2,1,1,'DM EMF is released','News....!',1213131,12313,''),(3,1,1,'','',NULL,NULL,''),(4,1,1,'','',NULL,231213,''),(5,1,1,'','',NULL,NULL,''),(6,0,0,'','',NULL,NULL,'5555555'),(7,0,1,'','',1555160703,1555160703,''),(8,0,1,'','',1555160780,1555160780,''),(9,0,1,'','',1555163008,1555163008,''),(10,0,1,'','',1555167726,1555167726,''),(11,0,1,'','',1555172650,1555172650,''),(12,0,1,'','',1555172678,1555172678,''),(13,0,0,'','',0,0,'bis7ehti6ekh9l3ahps0');
 /*!40000 ALTER TABLE `dm_article` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -55,8 +57,8 @@ CREATE TABLE `dm_folder` (
   `folder_type` varchar(30) NOT NULL DEFAULT '',
   `title` varchar(255) NOT NULL DEFAULT '',
   `summary` text NOT NULL,
-  `published` int(11) DEFAULT NULL,
-  `modified` int(11) DEFAULT NULL,
+  `published` int(11) NOT NULL DEFAULT '0',
+  `modified` int(11) NOT NULL DEFAULT '0',
   `remote_id` varchar(30) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
@@ -68,7 +70,7 @@ CREATE TABLE `dm_folder` (
 
 LOCK TABLES `dm_folder` WRITE;
 /*!40000 ALTER TABLE `dm_folder` DISABLE KEYS */;
-INSERT INTO `dm_folder` VALUES (1,'','Home','',NULL,NULL,''),(2,'','Blog','',NULL,NULL,''),(3,'','News','',NULL,NULL,''),(4,'','Contact Us','',NULL,NULL,''),(5,'','Users','',NULL,NULL,''),(6,'','Share Content','',NULL,NULL,'master-50');
+INSERT INTO `dm_folder` VALUES (1,'','Home','',0,0,''),(2,'','Blog','',0,0,''),(3,'','News','',0,0,''),(4,'','Contact Us','',0,0,''),(5,'','Users','',0,0,''),(6,'','Share Content','',0,0,'master-50');
 /*!40000 ALTER TABLE `dm_folder` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -95,7 +97,7 @@ CREATE TABLE `dm_location` (
   `section` varchar(50) NOT NULL DEFAULT '',
   `p` varchar(30) NOT NULL DEFAULT 'c',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -104,7 +106,7 @@ CREATE TABLE `dm_location` (
 
 LOCK TABLES `dm_location` WRITE;
 /*!40000 ALTER TABLE `dm_location` DISABLE KEYS */;
-INSERT INTO `dm_location` VALUES (1,0,1,'1','folder',1,'eng-gb','Home',0,0,0,'','content','c'),(2,1,2,'1/2','article',1,'eng-gb','Welcome',0,0,0,'bin1oj5i6ekglgsliq4g','content','c'),(3,1,3,'1/3','folder',2,'eng-gb','Blog',0,0,0,'','content','c'),(4,1,4,'1/4','folder',3,'eng-gb','News',0,0,0,'','content','recent'),(5,1,5,'1/5','folder',4,'eng-gb','Contact Us',0,0,0,'','content','archive'),(6,4,6,'1/4/6','article',2,'eng-gb','EM EMF is released',0,0,0,'','content','c'),(7,0,7,'7','folder',5,'eng-gb','Users',0,0,0,'','user','c'),(8,7,8,'7/8','user',1,'eng-gb','Chen Xiongjie',0,0,0,'','user','c'),(9,0,9,'9','folder',9,'eng-gb','Shared Contents',0,0,0,'','',''),(10,0,10,'','folder',9,'eng-gb','Test folder',0,0,0,'','',''),(11,-1,11,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c'),(12,-1,12,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c');
+INSERT INTO `dm_location` VALUES (1,0,1,'1','folder',1,'eng-gb','Home',0,0,0,'','content','c'),(2,1,2,'1/2','article',1,'eng-gb','Welcome',0,0,0,'bin1oj5i6ekglgsliq4g','content','c'),(3,1,3,'1/3','folder',2,'eng-gb','Blog',0,0,0,'','content','c'),(4,1,4,'1/4','folder',3,'eng-gb','News',0,0,0,'','content','recent'),(5,1,5,'1/5','folder',4,'eng-gb','Contact Us',0,0,0,'','content','archive'),(6,4,6,'1/4/6','article',2,'eng-gb','EM EMF is released',0,0,0,'','content','c'),(7,0,7,'7','folder',5,'eng-gb','Users',0,0,0,'','user','c'),(8,7,8,'7/8','user',1,'eng-gb','Chen Xiongjie',0,0,0,'','user','c'),(9,0,9,'9','folder',9,'eng-gb','Shared Contents',0,0,0,'','',''),(10,0,10,'','folder',9,'eng-gb','Test folder',0,0,0,'','',''),(11,-1,11,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c'),(12,-1,12,'','folder',0,'eng-gb','Test folder',0,0,0,'','','c'),(14,1,0,'','',0,'','',0,0,0,'','',''),(15,1,0,'','',0,'','',0,0,0,'biottj5i6ekipupsp7b0','',''),(16,1,0,'','',0,'','',0,0,0,'biouf05i6ekj5fs07k20','',''),(17,1,0,'','',0,'','',0,0,0,'biovjrli6ekjf1sm1n6g','',''),(18,1,0,'','',0,'','',0,0,0,'bip0qali6ekk630i8slg','',''),(19,-1,0,'','article',0,'','',0,0,0,'bip0qhli6ekk6rst2630','','');
 /*!40000 ALTER TABLE `dm_location` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,6 +181,8 @@ CREATE TABLE `dm_version` (
   `type` varchar(50) NOT NULL,
   `content_id` int(11) NOT NULL,
   `version` int(11) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0',
+  `author` int(11) NOT NULL DEFAULT '0',
   `data` longtext NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
@@ -190,7 +194,7 @@ CREATE TABLE `dm_version` (
 
 LOCK TABLES `dm_version` WRITE;
 /*!40000 ALTER TABLE `dm_version` DISABLE KEYS */;
-INSERT INTO `dm_version` VALUES (1,'article',1,1,'');
+INSERT INTO `dm_version` VALUES (1,'article',1,1,0,0,'');
 /*!40000 ALTER TABLE `dm_version` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -203,4 +207,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-10 21:24:50
+-- Dump completed on 2019-04-18 21:32:14
