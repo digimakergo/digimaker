@@ -22,3 +22,7 @@ func (t TextFieldHandler) IsEmpty(input interface{}) bool {
 	}
 	return false
 }
+
+func init() {
+	RegisterHanlder("text", TextFieldHandler{})
+}

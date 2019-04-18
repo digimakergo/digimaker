@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"dm/def"
 	"fmt"
 	"testing"
 
@@ -9,7 +8,6 @@ import (
 )
 
 func TestValidtion(t *testing.T) {
-	def.LoadDefinition()
 
 	handler := ContentHandler{}
 	params := map[string]interface{}{"title": "ff", "body": "Hello"}

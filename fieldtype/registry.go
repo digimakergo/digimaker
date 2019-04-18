@@ -35,24 +35,26 @@ func (TypeLoaderDefault) ContentTypeList() []string {
 	return []string{"article", "folder"}
 }
 
-func NewFieldType(fieldType string) Fielder {
-	var result Fielder
-	switch fieldType {
-	case "text":
-		result = TextField{}
-	case "richtext":
-		result = RichTextField{}
-	}
-	return result
+//global variable for registering handlers
+//A handler is always singleton
+var handlerRegistry = map[string]FieldtypeHandler{}
+
+func RegisterHanlder(fieldType string, handler FieldtypeHandler) {
+	handlerRegistry[fieldType] = handler
 }
 
-func NewHandler(fieldType string) FieldtypeHandler {
-	var result FieldtypeHandler
-	switch fieldType {
-	case "text":
-		result = TextFieldHandler{}
-	default:
-		result = TextFieldHandler{}
-	}
-	return result
+func GetHandler(fieldType string) FieldtypeHandler {
+	return handlerRegistry[fieldType]
+}
+
+//Global variable for registering fieldtypes
+//Use call back to make sure it's not the same instance( the receiver can still singleton it )
+var fieldtypeRegistry = map[string]func() Fielder{}
+
+func RegisterField(fieldType string, newFieldType func() Fielder) {
+	fieldtypeRegistry[fieldType] = newFieldType
+}
+
+func NewFieldType(fieldType string) Fielder {
+	return fieldtypeRegistry[fieldType]()
 }

@@ -11,9 +11,3 @@ type DefaultSettingsType struct {
 }
 
 var DefaultSettings = DefaultSettingsType{"site", "/Users/xc/go/caf-prototype/src/dm/configs"}
-
-func InitSettings(settings ...string) {
-	if settings == nil {
-		//todo: init framework, change DefaultSettings
-	}
-}

@@ -44,10 +44,10 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	fieldsDef := definition.Fields
 	result := ValidationResult{}
 	for identifier, fieldDef := range fieldsDef {
-		fieldHandler := fieldtype.NewHandler(fieldsDef[identifier].FieldType)
+		fieldHandler := fieldtype.GetHandler(fieldsDef[identifier].FieldType)
 		_, fieldExists := inputs[identifier]
 		if fieldDef.Required &&
-			(!fieldExists || (fieldExists && fieldHandler.IsEmpty(inputs[identifier]))) {
+			(!fieldExists || (fieldExists && fieldHandler != nil && fieldHandler.IsEmpty(inputs[identifier]))) {
 			fieldResult := FieldValidationResult{Identifier: identifier, Detail: "1"}
 			result.Fields = append(result.Fields, fieldResult)
 		}
@@ -57,7 +57,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	}
 	//Validate field
 	for identifier, input := range inputs {
-		fieldHanlder := fieldtype.NewHandler(fieldsDef[identifier].FieldType)
+		fieldHanlder := fieldtype.GetHandler(fieldsDef[identifier].FieldType)
 		if valid, detail := fieldHanlder.Validate(input); !valid {
 			fieldResult := FieldValidationResult{Identifier: identifier, Detail: detail}
 			result.Fields = append(result.Fields, fieldResult)
