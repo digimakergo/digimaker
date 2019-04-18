@@ -18,9 +18,6 @@ type ContentField struct {
 	Required  bool   `json:"required"`
 }
 
-//todo: use dynamic way
-var DMPath = "/Users/xc/go/caf-prototype/src/dm"
-
 //ContentTypeDefinition Content types which defined in contenttype.json
 var contentTypeDefinition map[string]ContentTypeSetting
 

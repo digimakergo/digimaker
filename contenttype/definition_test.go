@@ -9,7 +9,9 @@ import (
 )
 
 func TestLoad(t *testing.T) {
-	err := LoadDefinition(DMPath + "/configs")
+	//todo: remove it and in test
+	var path = "/Users/xc/go/caf-prototype/src/dm"
+	err := LoadDefinition(path + "/configs")
 	if err != nil {
 		t.Fail()
 	}

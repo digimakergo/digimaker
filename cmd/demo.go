@@ -1,11 +1,11 @@
 package main
 
 import (
-	"dm/db"
 	"dm/contenttype"
+	"dm/contenttype/entity"
+	"dm/db"
 	"dm/fieldtype"
 	"dm/handler"
-	"dm/contenttype/entity"
 	"dm/query"
 	"dm/util"
 	"fmt"
@@ -20,10 +20,9 @@ import (
 func BootStrap() {
 	if len(os.Args) >= 2 && os.Args[1] != "" {
 		path := os.Args[1]
-		contenttype.DMPath = path
-		util.DefaultSettings.ConfigFolder = path + "/configs"
+		util.SetConfigFolder(path + "/configs")
 	}
-	configPath := contenttype.DMPath + "/configs"
+	configPath := util.ConfigFolder()
 	contenttype.LoadDefinition(configPath)
 	fieldtype.LoadDefinition(configPath)
 }
