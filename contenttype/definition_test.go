@@ -4,14 +4,16 @@
 package contenttype
 
 import (
+	"dm/util"
 	"fmt"
 	"testing"
 )
 
 func TestLoad(t *testing.T) {
 	//todo: remove it and in test
-	var path = "/Users/xc/go/caf-prototype/src/dm"
-	err := LoadDefinition(path + "/configs")
+	var path = "/Users/xc/go/caf-prototype/src/dm/configs"
+	util.SetConfigPath(path)
+	err := LoadDefinition()
 	if err != nil {
 		t.Fail()
 	}

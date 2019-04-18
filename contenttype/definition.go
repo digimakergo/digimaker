@@ -25,11 +25,11 @@ var contentTypeDefinition map[string]ContentTypeSetting
 //
 // It will not load anything unless all json' format matches the struct definition.
 //
-func LoadDefinition(configPath string) error {
+func LoadDefinition() error {
 
 	//Load contenttype.json into ContentTypeDefinition
 	var contentDef map[string]ContentTypeSetting
-	err := util.UnmarshalData(configPath+"/contenttype.json", &contentDef)
+	err := util.UnmarshalData(util.ConfigPath+"/contenttype.json", &contentDef)
 	if err != nil {
 		return err
 	}

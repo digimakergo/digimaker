@@ -71,10 +71,10 @@ type FieldtypeSetting struct {
 // Datatypes which defined in datatype.json
 var fieldtypeDefinition map[string]FieldtypeSetting
 
-func LoadDefinition(configPath string) error {
+func LoadDefinition() error {
 	//Load datatype.json into DatatypeDefinition
 	var def map[string]FieldtypeSetting
-	err := util.UnmarshalData(configPath+"/datatype.json", &def)
+	err := util.UnmarshalData(util.ConfigPath()+"/datatype.json", &def)
 	if err != nil {
 		return err
 	}

@@ -20,11 +20,11 @@ import (
 func BootStrap() {
 	if len(os.Args) >= 2 && os.Args[1] != "" {
 		path := os.Args[1]
-		util.SetConfigFolder(path + "/configs")
+		util.SetConfigPath(path + "/configs")
 	}
-	configPath := util.ConfigFolder()
-	contenttype.LoadDefinition(configPath)
-	fieldtype.LoadDefinition(configPath)
+	configPath := util.ConfigPath
+	contenttype.LoadDefinition()
+	fieldtype.LoadDefinition()
 }
 
 //This is a initial try which use template to do basic feature.

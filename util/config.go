@@ -14,11 +14,11 @@ type DefaultSettingsType struct {
 
 var defaultSettings = DefaultSettingsType{"site", "/Users/xc/go/caf-prototype/src/dm/configs"}
 
-func SetConfigFolder(folderPath string) {
+func SetConfigPath(folderPath string) {
 	defaultSettings.ConfigFolder = folderPath
 }
 
-func ConfigFolder() string {
+func ConfigPath() string {
 	return defaultSettings.ConfigFolder
 }
 
