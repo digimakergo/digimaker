@@ -22,7 +22,6 @@ func BootStrap() {
 		path := os.Args[1]
 		util.SetConfigPath(path + "/configs")
 	}
-	configPath := util.ConfigPath
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 }

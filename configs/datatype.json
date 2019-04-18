@@ -1,32 +1,32 @@
 {
    "text":{
-      "searchable": true,
-      "value": "TextField",
-      "dbtype": "string",
-      "name": "Text",
-      "translations": {"nor-no": "Tekst",
-                        "chi-cn": "文本"  },
-       },
+              "searchable": true,
+              "value": "TextField",
+              "dbtype": "string",
+              "name": "Text",
+              "translations": {"nor-no": "Tekst",
+                                "chi-cn": "文本"  }
+          },
    "richtext":{ "searchable": true,
-             "name": "Text",
-             "value": "TextField",
-             "dbtype": "text",
-             "translations": {"nor-no": "Tekst",
-                               "chi-cn": "文本"  },
+                 "name": "Text",
+                 "value": "TextField",
+                 "dbtype": "text",
+                 "translations": {"nor-no": "Tekst",
+                                   "chi-cn": "文本"  }
                 },
-   "datetime":{      "searchable": true,
-         "name": "Text",
-         "translations": {"nor-no": "Tekst",
-                           "chi-cn": "文本"  },
+   "datetime":{  "searchable": true,
+                 "name": "Text",
+                 "translations": {"nor-no": "Tekst",
+                                   "chi-cn": "文本"  }
              },
    "author":{      "searchable": true,
-         "name": "Text",
-         "translations": {"nor-no": "Tekst",
-                           "chi-cn": "文本"  },
+             "name": "Text",
+             "translations": {"nor-no": "Tekst",
+                               "chi-cn": "文本"  }
             },
    "dmgooglemap":{       "searchable": true,
          "name": "Text",
          "translations": {"nor-no": "Tekst",
-                           "chi-cn": "文本"  },
+                           "chi-cn": "文本"  }
          }
 }

@@ -29,7 +29,7 @@ func LoadDefinition() error {
 
 	//Load contenttype.json into ContentTypeDefinition
 	var contentDef map[string]ContentTypeSetting
-	err := util.UnmarshalData(util.ConfigPath+"/contenttype.json", &contentDef)
+	err := util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &contentDef)
 	if err != nil {
 		return err
 	}
