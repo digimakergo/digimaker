@@ -48,8 +48,7 @@ func Display(w http.ResponseWriter, r *http.Request) {
 	handler.Query.List("article", query.Cond("1", "1"), &articles)
 
 	var folders []entity.Folder
-	handler.Query.List("folder", query.Cond("1", "1"), &folders)
-	fmt.Println(folders)
+	handler.Query.List("folder", query.Cond("is_invisible", 0), &folders)
 
 	tpl.Execute(w, map[string]interface{}{"article": article, "articles": articles, "folders": folders})
 }

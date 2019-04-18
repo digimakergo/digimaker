@@ -15,7 +15,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	contenttype.LoadDefinition(contenttype.DMPath + "/configs")
+	contenttype.LoadDefinition()
 	m.Run()
 }
 
@@ -31,6 +31,9 @@ func TestQuery(t *testing.T) {
 
 	assert.NotNil(t, article)
 
+	var folders []entity.Folder
+	handler.Query.List("folder", query.Cond("1", "1"), &folders)
+	fmt.Println(folders)
 }
 
 func TestUpdate(t *testing.T) {

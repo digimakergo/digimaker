@@ -17,9 +17,9 @@
   <h2>Demo</h2>
   <h3>List:</h3>
   {{range $index,$folder := .folders}}
-    <div><a href=".?id={{$folder.CID}}">{{$folder.CID}}</a>: {{$folder.Name}}</div>
+    <div>{{$folder.CID}}: {{$folder.Name}}</div>
   {{end}}
-
+  <br />
   <div>
       {{range $index,$article := .articles}}
         <div><a href=".?id={{$article.CID}}">{{$article.CID}}</a>: {{$article.Name}}</div>

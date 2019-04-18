@@ -13,7 +13,7 @@ func (c contentQuery) List(contentType string, condition query.Condition, conten
 	dbhanlder := db.DBHanlder()
 	err := dbhanlder.GetByFields(contentType, condition, content)
 	if err != nil {
-		errors.Wrap(err, "Content Query error")
+		return errors.Wrap(err, "Content Query error")
 	}
 	return nil
 }
