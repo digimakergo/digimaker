@@ -3,6 +3,8 @@
 
 package fieldtype
 
+import "dm/util"
+
 //TypeLoaderDefault implements FieldInstancer and ContentTypeInstancer
 type TypeLoaderDefault struct{}
 
@@ -57,4 +59,25 @@ func RegisterField(fieldType string, newFieldType func() Fielder) {
 
 func NewFieldType(fieldType string) Fielder {
 	return fieldtypeRegistry[fieldType]()
+}
+
+type FieldtypeSetting struct {
+	Identifier   string            `json:"identifier"`
+	Name         string            `json:"name"`
+	Searchable   bool              `json:"searchable"`
+	Translations map[string]string `json:"translations"`
+}
+
+// Datatypes which defined in datatype.json
+var fieldtypeDefinition map[string]FieldtypeSetting
+
+func LoadDefinition(configPath string) error {
+	//Load datatype.json into DatatypeDefinition
+	var def map[string]FieldtypeSetting
+	err := util.UnmarshalData(configPath+"/datatype.json", &def)
+	if err != nil {
+		return err
+	}
+	fieldtypeDefinition = def
+	return nil
 }

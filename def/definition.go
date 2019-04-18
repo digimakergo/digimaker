@@ -18,44 +18,32 @@ type ContentField struct {
 	Required  bool   `json:"required"`
 }
 
-type DatatypeSetting struct {
-	Identifier   string            `json:"identifier"`
-	Name         string            `json:"name"`
-	Searchable   bool              `json:"searchable"`
-	Translations map[string]string `json:"translations"`
-}
-
 //todo: use dynamic way
 var DMPath = "/Users/xc/go/caf-prototype/src/dm"
+
+//ContentTypeDefinition Content types which defined in contenttype.json
+var contentTypeDefinition map[string]ContentTypeSetting
 
 //LoadDefinition Load all setting in file into memory.
 //
 // It will not load anything unless all json' format matches the struct definition.
 //
-func LoadDefinition() error {
+func LoadDefinition(configPath string) error {
 
 	//Load contenttype.json into ContentTypeDefinition
 	var contentDef map[string]ContentTypeSetting
-	err := util.UnmarshalData(DMPath+"/configs/"+"contenttype.json", &contentDef)
+	err := util.UnmarshalData(configPath+"/contenttype.json", &contentDef)
 	if err != nil {
 		return err
 	}
 
-	//Load datatype.json into DatatypeDefinition
-	var datatypeDef map[string]DatatypeSetting
-	err = util.UnmarshalData(DMPath+"/configs/"+"datatype.json", &datatypeDef)
-	if err != nil {
-		return err
-	}
-
-	ContentTypeDefinition = contentDef
-	DatatypeDefinition = datatypeDef
+	contentTypeDefinition = contentDef
 
 	return nil
 }
 
 func GetContentDefinition(contentType string) ContentTypeSetting {
-	definition := ContentTypeDefinition
+	definition := contentTypeDefinition
 	result, ok := definition[contentType]
 	if ok {
 		return result
@@ -64,12 +52,6 @@ func GetContentDefinition(contentType string) ContentTypeSetting {
 	}
 
 }
-
-//ContentTypeDefinition Content types which defined in contenttype.json
-var ContentTypeDefinition map[string]ContentTypeSetting
-
-//DatatypeDefinition Datatypes which defined in datatype.json
-var DatatypeDefinition map[string]DatatypeSetting
 
 //this is predefined, internal use
 var LocationFields = map[string]string{"id": "int",

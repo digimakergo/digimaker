@@ -3,6 +3,7 @@ package main
 import (
 	"dm/db"
 	"dm/def"
+	"dm/fieldtype"
 	"dm/handler"
 	"dm/model/entity"
 	"dm/query"
@@ -22,7 +23,9 @@ func BootStrap() {
 		def.DMPath = path
 		util.DefaultSettings.ConfigFolder = path + "/configs"
 	}
-	def.LoadDefinition()
+	configPath := def.DMPath + "/configs"
+	def.LoadDefinition(configPath)
+	fieldtype.LoadDefinition(configPath)
 }
 
 //This is a initial try which use template to do basic feature.

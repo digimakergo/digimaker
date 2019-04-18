@@ -33,7 +33,7 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 		return errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
 	}
 
-	contentTypeDef := def.ContentTypeDefinition[contentType]
+	contentTypeDef := def.GetContentDefinition(contentType)
 	tableName := contentTypeDef.TableName
 
 	//get condition string for fields

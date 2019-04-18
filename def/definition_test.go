@@ -9,12 +9,12 @@ import (
 )
 
 func TestLoad(t *testing.T) {
-	err := LoadDefinition()
+	err := LoadDefinition(DMPath + "/configs")
 	if err != nil {
 		t.Fail()
 	}
 
-	t.Log(fmt.Printf(ContentTypeDefinition["folder"].TableName + "\n"))
-	t.Log(fmt.Printf(ContentTypeDefinition["article"].TableName + "\n"))
+	t.Log(fmt.Printf(contentTypeDefinition["folder"].TableName + "\n"))
+	t.Log(fmt.Printf(contentTypeDefinition["article"].TableName + "\n"))
 
 }
