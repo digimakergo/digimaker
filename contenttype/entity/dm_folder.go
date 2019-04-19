@@ -44,7 +44,7 @@ func (c Folder) Fields() map[string]fieldtype.Fielder {
 	return nil
 }
 
-func (c *Folder) Values() map[string]interface{} {
+func (c Folder) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.CID
 	result["folder_type"] = c.FolderType

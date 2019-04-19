@@ -15,6 +15,7 @@ import (
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/gorilla/mux"
 )
 
 func BootStrap() {
@@ -28,15 +29,11 @@ func BootStrap() {
 
 //This is a initial try which use template to do basic feature.
 
-func Display(w http.ResponseWriter, r *http.Request) {
+func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	tpl := template.Must(template.ParseFiles("../web/template/view.html"))
 	rmdb := db.DBHanlder()
 	article := entity.Article{}
-	idStr := r.FormValue("id")
-	id := 2
-	if idStr != "" {
-		id, _ = strconv.Atoi(idStr)
-	}
+	id, _ := strconv.Atoi(vars["id"])
 
 	err := rmdb.GetByID("article", id, &article)
 
@@ -44,13 +41,32 @@ func Display(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	var articles []entity.Article
-	handler.Query.List("article", query.Cond("1", "1"), &articles)
-
+	//List of folder
 	var folders []entity.Folder
-	handler.Query.List("folder", query.Cond("is_invisible", 0), &folders)
+	handler.Query.List("folder", query.Cond("1", 1), &folders)
 
-	tpl.Execute(w, map[string]interface{}{"article": article, "articles": articles, "folders": folders})
+	//Get current Folder
+	var currentFolder entity.Folder
+	handler.Query.List("folder", query.Cond("dm_location.id", id), &currentFolder)
+
+	var variables map[string]interface{}
+	if currentFolder.CID != 0 {
+		//Get list of article
+		var articles []entity.Article
+		handler.Query.List("article", query.Cond("parent_id", id), &articles)
+
+		variables = map[string]interface{}{"current": currentFolder,
+			"list":    articles,
+			"folders": folders}
+	} else {
+		var currentArticle entity.Article
+		handler.Query.List("article", query.Cond("dm_location.id", id), &currentArticle)
+		variables = map[string]interface{}{"current": currentArticle,
+			"list":    nil,
+			"folders": folders}
+	}
+
+	tpl.Execute(w, variables)
 }
 
 func Draft(w http.ResponseWriter, r *http.Request) {
@@ -62,21 +78,31 @@ func Publish(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	BootStrap()
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		Display(w, r)
-	})
 
-	http.HandleFunc("/content/draft", func(w http.ResponseWriter, r *http.Request) {
+	BootStrap()
+	r := mux.NewRouter()
+	r.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		Display(w, r, vars)
+	})
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		Display(w, r, map[string]string{"id": "2"})
+	})
+	// http.HandleFunc("/content/view/", func(w http.ResponseWriter, r *http.Request) {
+	// 	Display(w, r)
+	// })
+
+	r.HandleFunc("/content/draft", func(w http.ResponseWriter, r *http.Request) {
 		Draft(w, r)
 	})
 
-	http.HandleFunc("/content/publish", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/content/publish", func(w http.ResponseWriter, r *http.Request) {
 		Publish(w, r)
 	})
 
-	http.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "User-agent: * \nDisallow /")
 	})
+	http.Handle("/", r)
 	http.ListenAndServe(":8089", nil)
 }

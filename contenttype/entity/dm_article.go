@@ -45,7 +45,7 @@ func (c Article) Fields() map[string]fieldtype.Fielder {
 	return nil
 }
 
-func (c *Article) Values() map[string]interface{} {
+func (c Article) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.CID
 	result["status"] = c.Status

@@ -26,7 +26,7 @@ func ( c {{$alias.UpSingular}} ) Fields() map[string]fieldtype.Fielder{
 	 return nil
 }
 
-func ( c *{{$alias.UpSingular}} ) Values() map[string]interface{}{
+func ( c {{$alias.UpSingular}} ) Values() map[string]interface{}{
     result := make(map[string]interface{})
     {{range $column := .Table.Columns -}}
     {{- $colAlias := $alias.Column $column.Name -}}
