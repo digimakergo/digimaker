@@ -23,11 +23,13 @@
 </head>
 
 <body>
-  <h2>Demo</h2>
+  <h2>{{.current.Name}}</h2>
+  <div style="float: right">
   <h3>All folders:</h3>
   {{range $index,$folder := .folders}}
     <div><a href="/content/view/{{$folder.ID}}">{{$folder.ID}}: {{$folder.Name}}</a></div>
   {{end}}
+  </div>
 
   <h3>Detail</h3>
   <div class="block">
@@ -36,11 +38,26 @@
 
   {{range $identifier, $value := $fields}}
   <div>
-    <label style="width:200px; display: inline-block">{{$identifier}}:</label> {{$value}}
+    <label style="width:200px; display: inline-block">{{$identifier}}:</label>
+
+    <span>
+        {{if (eq $identifier "title")}}
+            {{$value.ViewValue}}
+        {{else}}
+            {{$value}}
+        {{end}}
+    </span>
   </div>
   {{end}}
 
-  <h3>Articles under {{.current.Name}}</h3>
+  <h3>Folder under</h3>
+  <div>
+      {{range $index,$content := .folder_list}}
+        <div><a href="/content/view/{{$content.ID}}">{{$content.ID}}: {{$content.Name}}</a></div>
+      {{end}}
+  </div>
+
+  <h3>Articles under</h3>
   <div>
       {{range $index,$content := .list}}
         <div><a href="/content/view/{{$content.ID}}">{{$content.ID}}: {{$content.Name}}</a></div>

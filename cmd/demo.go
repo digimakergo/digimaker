@@ -43,7 +43,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 	//List of folder
 	var folders []entity.Folder
-	handler.Query.List("folder", query.Cond("1", 1), &folders)
+	handler.Query.List("folder", query.Cond("parent_id", 0), &folders)
 
 	//Get current Folder
 	var currentFolder entity.Folder
@@ -66,6 +66,9 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			"folders": folders}
 	}
 
+	var folderList []entity.Folder
+	handler.Query.List("folder", query.Cond("parent_id", id), &folderList)
+	variables["folder_list"] = folderList
 	tpl.Execute(w, variables)
 }
 
@@ -86,7 +89,7 @@ func main() {
 		Display(w, r, vars)
 	})
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		Display(w, r, map[string]string{"id": "2"})
+		Display(w, r, map[string]string{"id": "1"})
 	})
 	// http.HandleFunc("/content/view/", func(w http.ResponseWriter, r *http.Request) {
 	// 	Display(w, r)

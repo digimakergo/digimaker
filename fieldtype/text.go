@@ -35,6 +35,6 @@ func (t *TextField) Scan(src interface{}) error {
 }
 
 //convert data to view data.
-func (t TextField) ViewValue() {
-
+func (t TextField) ViewValue() string {
+	return t.data
 }
