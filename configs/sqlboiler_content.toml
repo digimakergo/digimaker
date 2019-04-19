@@ -3,11 +3,11 @@
 ##
 
 pkgname = "entity"
-output = "model/entity"
+output = "contenttype/entity"
 no-tests = "true"
 templates = [
   "/Users/xc/go/caf-prototype/src/github.com/volatiletech/sqlboiler/templates",
-  "/Users/xc/go/caf-prototype/src/dm/codegen/entities/model/templates"
+  "/Users/xc/go/caf-prototype/src/dm/codegen/entities/content/templates"
 ]
 
 [mysql]
@@ -16,7 +16,7 @@ user = "dev"
 pass = "D!g!m@ker"
 dbname = "dev_emf"
 sslmode = "false"
-blacklist = ['dm_relation','dm_location','dm_version']
+whitelist = ['dm_folder','dm_article', 'dm_user']
 
 [imports.all]
 third_party = ['"github.com/volatiletech/sqlboiler/boil"',
@@ -25,7 +25,6 @@ third_party = ['"github.com/volatiletech/sqlboiler/boil"',
                 '"github.com/pkg/errors"',
                '"github.com/volatiletech/sqlboiler/queries"',
                '"dm/fieldtype"',
-               '"dm/contenttype"',
                '. "dm/query"',
                '"dm/db"']
 

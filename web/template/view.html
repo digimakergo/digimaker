@@ -36,10 +36,12 @@
 
   {{$fields := .current.Values}}
 
+
+  <div><label>ID: </label><span>{{.current.ID}}</span></div>
+  <div><label>Type: </label><span>{{.current.ContentType}}</span></div>
   {{range $identifier, $value := $fields}}
   <div>
     <label style="width:200px; display: inline-block">{{$identifier}}:</label>
-
     <span>
         {{if (eq $identifier "title")}}
             {{$value.ViewValue}}

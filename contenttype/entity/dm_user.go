@@ -16,7 +16,6 @@ import (
 	"dm/db"
 	"dm/fieldtype"
 	. "dm/query"
-
 	"github.com/pkg/errors"
 	"github.com/volatiletech/null"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -47,7 +46,7 @@ func (c User) Fields() map[string]fieldtype.Fielder {
 	return nil
 }
 
-func (c *User) Values() map[string]interface{} {
+func (c User) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.CID
 	result["login"] = c.Login

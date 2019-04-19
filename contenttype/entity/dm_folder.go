@@ -16,7 +16,6 @@ import (
 	"dm/db"
 	"dm/fieldtype"
 	. "dm/query"
-
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -31,8 +30,8 @@ type Folder struct {
 	FolderType string                  `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
 	Title      fieldtype.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Summary    fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-	Published  int                     `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified   int                     `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	Published  int                     `boil:"published" json:"published" toml:"published" yaml:"published"`
+	Modified   int                     `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
 	RemoteID   string                  `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
 	R        *folderR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -137,8 +136,8 @@ type folderL struct{}
 
 var (
 	folderColumns               = []string{"id", "folder_type", "title", "summary", "published", "modified", "remote_id"}
-	folderColumnsWithoutDefault = []string{"folder_type", "title", "summary", "published", "modified", "remote_id"}
-	folderColumnsWithDefault    = []string{"id"}
+	folderColumnsWithoutDefault = []string{"folder_type", "title", "summary", "remote_id"}
+	folderColumnsWithDefault    = []string{"id", "published", "modified"}
 	folderPrimaryKeyColumns     = []string{"id"}
 )
 
