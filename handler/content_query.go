@@ -3,6 +3,7 @@ package handler
 import (
 	"dm/db"
 	"dm/query"
+	"dm/util"
 
 	"github.com/pkg/errors"
 )
@@ -13,7 +14,9 @@ func (c contentQuery) List(contentType string, condition query.Condition, conten
 	dbhanlder := db.DBHanlder()
 	err := dbhanlder.GetByFields(contentType, condition, content)
 	if err != nil {
-		return errors.Wrap(err, "Content Query error")
+		message := "[List]Content Query error"
+		util.Error(message, err.Error())
+		return errors.Wrap(err, message)
 	}
 	return nil
 }

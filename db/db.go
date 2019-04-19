@@ -15,27 +15,28 @@ var db *sql.DB
 //Get DB connection cached globally
 //Note: when using it, the related driver should be imported already
 func DB() (*sql.DB, error) {
-	if db != nil {
-		return db, nil
-	} else {
+	if db == nil {
 		dbConfig := util.GetConfigSection("database")
 		connString := dbConfig["username"] + ":" + dbConfig["password"] +
 			"@" + dbConfig["protocal"] +
 			"(" + dbConfig["host"] + ")/" +
 			dbConfig["database"] //todo: fix what if there is @ or / in the password?
 
-		db, err := sql.Open(dbConfig["type"], connString)
+		currentDB, err := sql.Open(dbConfig["type"], connString)
 		if err != nil {
 			errorMessage := "[DB]Can not open. error: " + err.Error() + " Conneciton string: " + connString
 			return nil, errors.Wrap(err, errorMessage)
 		}
-
-		err = db.Ping()
-		if err != nil {
-			return nil, errors.Wrap(err, "[DB]Can not ping to connect with connection string: "+connString)
-		}
-		return db, nil
+		db = currentDB
 	}
+	//ping take extra time. todo: check it in a better way.
+	/*
+		err := db.Ping()
+		if err != nil {
+			return nil, errors.Wrap(err, "[DB]Can not ping to connection. ")
+		}
+	*/
+	return db, nil
 }
 
 type DBer interface {
