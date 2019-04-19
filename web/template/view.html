@@ -25,7 +25,7 @@
 <body>
   <h2>{{.current.Name}}</h2>
   <div style="float: right">
-  <h3>All folders:</h3>
+  <h3>Top folders</h3>
   {{range $index,$folder := .folders}}
     <div><a href="/content/view/{{$folder.ID}}">{{$folder.ID}}: {{$folder.Name}}</a></div>
   {{end}}
@@ -36,9 +36,6 @@
 
   {{$fields := .current.Values}}
 
-
-  <div><label>ID: </label><span>{{.current.ID}}</span></div>
-  <div><label>Type: </label><span>{{.current.ContentType}}</span></div>
   {{range $identifier, $value := $fields}}
   <div>
     <label style="width:200px; display: inline-block">{{$identifier}}:</label>

@@ -31,8 +31,8 @@ type Article struct {
 	Author    int                     `boil:"author" json:"author" toml:"author" yaml:"author"`
 	Title     fieldtype.TextField     `boil:"title" json:"title" toml:"title" yaml:"title"`
 	Body      fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
-	Published int                     `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified  int                     `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	Published int                     `boil:"published" json:"published" toml:"published" yaml:"published"`
+	Modified  int                     `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
 	RemoteID  string                  `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 
 	R        *articleR `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -54,6 +54,9 @@ func (c Article) Values() map[string]interface{} {
 	result["published"] = c.Published
 	result["modified"] = c.Modified
 	result["remote_id"] = c.RemoteID
+	for key, value := range c.Location.Values() {
+		result[key] = value
+	}
 	return result
 }
 
@@ -142,8 +145,8 @@ type articleL struct{}
 
 var (
 	articleColumns               = []string{"id", "status", "author", "title", "body", "published", "modified", "remote_id"}
-	articleColumnsWithoutDefault = []string{"title", "body", "published", "modified", "remote_id"}
-	articleColumnsWithDefault    = []string{"id", "status", "author"}
+	articleColumnsWithoutDefault = []string{"title", "body", "remote_id"}
+	articleColumnsWithDefault    = []string{"id", "status", "author", "published", "modified"}
 	articlePrimaryKeyColumns     = []string{"id"}
 )
 

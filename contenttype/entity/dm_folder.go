@@ -52,6 +52,9 @@ func (c Folder) Values() map[string]interface{} {
 	result["published"] = c.Published
 	result["modified"] = c.Modified
 	result["remote_id"] = c.RemoteID
+	for key, value := range c.Location.Values() {
+		result[key] = value
+	}
 	return result
 }
 

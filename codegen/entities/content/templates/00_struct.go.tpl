@@ -32,6 +32,9 @@ func ( c {{$alias.UpSingular}} ) Values() map[string]interface{}{
     {{- $colAlias := $alias.Column $column.Name -}}
       result["{{$column.Name}}"]= c.{{$colAlias}}
     {{end -}}
+    for key, value := range c.Location.Values() {
+		result[key] = value
+	}
     return result
 }
 

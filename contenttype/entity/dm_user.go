@@ -27,15 +27,15 @@ import (
 // User is an object representing the database table.
 // Implement dm.contenttype.ContentTyper interface
 type User struct {
-	CID       int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Login     null.String         `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
-	Firstname fieldtype.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
-	Lastname  null.String         `boil:"lastname" json:"lastname,omitempty" toml:"lastname" yaml:"lastname,omitempty"`
-	Password  null.String         `boil:"password" json:"password,omitempty" toml:"password" yaml:"password,omitempty"`
-	Mobile    null.String         `boil:"mobile" json:"mobile,omitempty" toml:"mobile" yaml:"mobile,omitempty"`
-	RemoteID  null.String         `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
-	Published int                 `boil:"published" json:"published,omitempty" toml:"published" yaml:"published,omitempty"`
-	Modified  int                 `boil:"modified" json:"modified,omitempty" toml:"modified" yaml:"modified,omitempty"`
+	CID       int         `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Login     null.String `boil:"login" json:"login,omitempty" toml:"login" yaml:"login,omitempty"`
+	Firstname string      `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
+	Lastname  null.String `boil:"lastname" json:"lastname,omitempty" toml:"lastname" yaml:"lastname,omitempty"`
+	Password  null.String `boil:"password" json:"password,omitempty" toml:"password" yaml:"password,omitempty"`
+	Mobile    null.String `boil:"mobile" json:"mobile,omitempty" toml:"mobile" yaml:"mobile,omitempty"`
+	RemoteID  null.String `boil:"remote_id" json:"remote_id,omitempty" toml:"remote_id" yaml:"remote_id,omitempty"`
+	Published int         `boil:"published" json:"published" toml:"published" yaml:"published"`
+	Modified  int         `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
 
 	R        *userR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L        userL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -57,6 +57,9 @@ func (c User) Values() map[string]interface{} {
 	result["remote_id"] = c.RemoteID
 	result["published"] = c.Published
 	result["modified"] = c.Modified
+	for key, value := range c.Location.Values() {
+		result[key] = value
+	}
 	return result
 }
 
@@ -149,8 +152,8 @@ type userL struct{}
 
 var (
 	userColumns               = []string{"id", "login", "firstname", "lastname", "password", "mobile", "remote_id", "published", "modified"}
-	userColumnsWithoutDefault = []string{"login", "firstname", "lastname", "password", "mobile", "remote_id", "published", "modified"}
-	userColumnsWithDefault    = []string{"id"}
+	userColumnsWithoutDefault = []string{"login", "firstname", "lastname", "password", "mobile", "remote_id"}
+	userColumnsWithDefault    = []string{"id", "published", "modified"}
 	userPrimaryKeyColumns     = []string{"id"}
 )
 
