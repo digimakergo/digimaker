@@ -29,6 +29,10 @@ func ( {{$struct_name}} ) TableName() string{
 func (c {{$struct_name}}) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 
+    {{range $identifier, $fieldtype := .settings.Fields}}
+        result["{{$identifier}}"]=c.{{$identifier|UpperName}}
+    {{end}}
+
     for key, value := range c.ContentCommon.Values() {
         result[key] = value
     }

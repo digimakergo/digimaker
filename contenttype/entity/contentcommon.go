@@ -10,7 +10,7 @@ type ContentCommon struct {
 
 func (c ContentCommon) Values() map[string]interface{} {
 	result := make(map[string]interface{})
-	result["id"] = c.CID
+	result["cid"] = c.CID
 	result["published"] = c.Published
 	result["modified"] = c.Modified
 	result["remote_id"] = c.RemoteID

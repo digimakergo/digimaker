@@ -38,6 +38,16 @@ func ( User ) TableName() string{
 func (c User) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 
+    
+        result["firstname"]=c.Firstname
+    
+        result["lastname"]=c.Lastname
+    
+        result["login"]=c.Login
+    
+        result["password"]=c.Password
+    
+
     for key, value := range c.ContentCommon.Values() {
         result[key] = value
     }

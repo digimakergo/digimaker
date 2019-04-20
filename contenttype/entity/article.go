@@ -35,6 +35,14 @@ func ( Article ) TableName() string{
 func (c Article) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 
+    
+        result["body"]=c.Body
+    
+        result["summary"]=c.Summary
+    
+        result["title"]=c.Title
+    
+
     for key, value := range c.ContentCommon.Values() {
         result[key] = value
     }

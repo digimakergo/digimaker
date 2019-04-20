@@ -32,6 +32,12 @@ func ( Folder ) TableName() string{
 func (c Folder) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 
+    
+        result["summary"]=c.Summary
+    
+        result["title"]=c.Title
+    
+
     for key, value := range c.ContentCommon.Values() {
         result[key] = value
     }
