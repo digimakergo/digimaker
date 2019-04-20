@@ -15,6 +15,14 @@ func main() {
 
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
+
+	err := Generate(baseFolder)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+}
+
+func Generate(baseFolder string) error {
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
 		ParseFiles(baseFolder + "/cmd/gen_contenttypes/contenttype.tpl"))
@@ -28,13 +36,15 @@ func main() {
 		vars["settings"] = settings
 
 		path := folder + "/" + name + ".go"
+		//todo: genereate to a template folder first and then copy&override target,
+		//and if there is error remove that folder
 		file, _ := os.Create(path)
 		err := tpl.Execute(file, vars)
 		if err != nil {
-			fmt.Println(err.Error())
+			return err
 		}
 	}
-
+	return nil
 }
 
 func funcMap() template.FuncMap {

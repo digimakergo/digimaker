@@ -16,3 +16,5 @@ func (c ContentCommon) Values() map[string]interface{} {
 	result["remote_id"] = c.RemoteID
 	return result
 }
+
+//TODO: add more common methods related to content here.
