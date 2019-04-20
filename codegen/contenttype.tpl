@@ -12,8 +12,8 @@ import (
 {{$struct_name :=.name|Upper}}
 
 type {{$struct_name}} struct{
-     *Location
-     *ContentCommon
+     Location `boil:"dm_location,bind"`
+     ContentCommon `boil:",bind"`
     {{range $identifier, $fieldtype := .settings.Fields}}
      {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
      {{$identifier|Upper}} fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`

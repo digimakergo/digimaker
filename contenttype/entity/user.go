@@ -11,9 +11,9 @@ import (
 
 
 
-type Userf struct{
-     *Location
-     *ContentCommon
+type User struct{
+     Location `boil:"dm_location,bind"`
+     ContentCommon `boil:",bind"`
     
      
      Firstname fieldtype.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
@@ -30,12 +30,12 @@ type Userf struct{
 }
 
 
-func ( Userf ) TableName() string{
+func ( User ) TableName() string{
 	 return "dm_user"
 }
 
 
-func (c Userf) Values() map[string]interface{} {
+func (c User) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 
     for key, value := range c.ContentCommon.Values() {
@@ -48,7 +48,7 @@ func (c Userf) Values() map[string]interface{} {
 	return result
 }
 
-func (c Userf) Store() error {
+func (c User) Store() error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
 		id, err := handler.Insert(c.TableName(), c.Values())

@@ -22,7 +22,7 @@ func main() {
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}
 		vars["def_fieldtype"] = fieldtype.GetDefinition()
-		vars["name"] = name + "f"
+		vars["name"] = name
 		vars["settings"] = settings
 
 		path := folder + "/" + name + ".go"

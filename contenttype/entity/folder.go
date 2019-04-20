@@ -11,9 +11,9 @@ import (
 
 
 
-type Folderf struct{
-     *Location
-     *ContentCommon
+type Folder struct{
+     Location `boil:"dm_location,bind"`
+     ContentCommon `boil:",bind"`
     
      
      Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
@@ -24,12 +24,12 @@ type Folderf struct{
 }
 
 
-func ( Folderf ) TableName() string{
+func ( Folder ) TableName() string{
 	 return "dm_folder"
 }
 
 
-func (c Folderf) Values() map[string]interface{} {
+func (c Folder) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 
     for key, value := range c.ContentCommon.Values() {
@@ -42,7 +42,7 @@ func (c Folderf) Values() map[string]interface{} {
 	return result
 }
 
-func (c Folderf) Store() error {
+func (c Folder) Store() error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
 		id, err := handler.Insert(c.TableName(), c.Values())

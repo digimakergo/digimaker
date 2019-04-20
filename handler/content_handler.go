@@ -71,7 +71,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 func (content ContentHandler) Draft(contentType string, parentID int) error {
 	//create empty
 	now := int(time.Now().Unix())
-	article := entity.Article{Author: 1, Published: now, Modified: now}
+	article := entity.Article{ContentCommon: entity.ContentCommon{Author: 1, Published: now, Modified: now}}
 	err := article.Store()
 	if err != nil {
 		return errors.Wrap(err, "[Handler.Draft]Error when creating article with parent id:"+
@@ -99,7 +99,7 @@ func (content ContentHandler) Publish() {
 func (handler *ContentHandler) Create(title string, parentID int) error {
 	//Save content
 	now := int(time.Now().Unix())
-	article := entity.Article{Author: 1, Published: now, Modified: now}
+	article := entity.Article{ContentCommon: entity.ContentCommon{Author: 1, Published: now, Modified: now}}
 	article.Store()
 
 	//Save location

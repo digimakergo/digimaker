@@ -3,8 +3,6 @@
 
 package contenttype
 
-import "dm/fieldtype"
-
 //All the content type(eg. article, folder) will implement this interface.
 type ContentTyper interface {
 	// Since go's embeded struct can't really inherit well from BaseContentType(eg. ID)
@@ -19,10 +17,12 @@ type ContentTyper interface {
 	*/
 
 	//Return all fields
-	Fields() map[string]fieldtype.Fielder
+	//Fields() map[string]fieldtype.Fielder
+
+	Values() map[string]interface{}
 
 	//Visit  field dynamically
-	Field(name string) interface{}
+	//Field(name string) interface{}
 
 	//Visit all attribute dynamically including Fields + internal attribute eg. id, parent_id.
 	//Attr(name string) interface{}

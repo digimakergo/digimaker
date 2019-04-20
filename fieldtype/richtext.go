@@ -5,6 +5,7 @@ package fieldtype
 
 import (
 	"database/sql/driver"
+	"errors"
 )
 
 type RichTextField struct {
@@ -17,6 +18,16 @@ func (t RichTextField) Value() (driver.Value, error) {
 }
 
 func (t *RichTextField) Scan(src interface{}) error {
-	t.data = "good2"
+	var source string
+	switch src.(type) {
+	case string:
+		source = src.(string)
+	case []byte:
+		source = string(src.([]byte))
+	default:
+		return errors.New("Incompatible type for GzippedText")
+	}
+
+	t.data = source
 	return nil
 }

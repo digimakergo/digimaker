@@ -4,32 +4,40 @@
 package entity
 
 import (
-	"dm/db"
+    "dm/db"
 	"dm/fieldtype"
 	. "dm/query"
 )
 
-type Articlef struct {
-	*Location
-	*ContentCommon
 
-	Body fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
 
-	Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-
-	Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+type Article struct{
+     Location `boil:"dm_location,bind"`
+     ContentCommon `boil:",bind"`
+    
+     
+     Body fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
+    
+     
+     Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+    
+     
+     Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+    
 }
 
-func (Articlef) TableName() string {
-	return "dm_article"
+
+func ( Article ) TableName() string{
+	 return "dm_article"
 }
 
-func (c Articlef) Values() map[string]interface{} {
+
+func (c Article) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 
-	for key, value := range c.ContentCommon.Values() {
-		result[key] = value
-	}
+    for key, value := range c.ContentCommon.Values() {
+        result[key] = value
+    }
 
 	for key, value := range c.Location.Values() {
 		result[key] = value
@@ -37,7 +45,7 @@ func (c Articlef) Values() map[string]interface{} {
 	return result
 }
 
-func (c Articlef) Store() error {
+func (c Article) Store() error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
 		id, err := handler.Insert(c.TableName(), c.Values())
