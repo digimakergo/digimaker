@@ -11,13 +11,15 @@ import (
 
 //Generate content types
 func main() {
+	baseFolder := "/Users/xc/go/caf-prototype/src/dm"
+
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
-		ParseFiles("../codegen/contenttype.tpl"))
+		ParseFiles(baseFolder + "/cmd/gen_contenttypes/contenttype.tpl"))
 
-	folder := "/Users/xc/go/caf-prototype/src/dm/contenttype/entity"
+	folder := baseFolder + "/contenttype/entity"
 	contentTypeDef := contenttype.GetDefinition()
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}

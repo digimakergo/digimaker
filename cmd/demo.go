@@ -18,6 +18,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//go:generate go run gen_contenttypes/gen.go
 func BootStrap() {
 	if len(os.Args) >= 2 && os.Args[1] != "" {
 		path := os.Args[1]
@@ -25,6 +26,7 @@ func BootStrap() {
 	}
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
+
 }
 
 //This is a initial try which use template to do basic feature.
