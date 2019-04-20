@@ -4,7 +4,6 @@
      "versioning": false,
      "locationing": true,
      "fields": { "title"  : {"type":"text", "required":false},
-                 "author" : {"type":"author", "required":false},
                  "summary": {"type":"richtext", "required":false}
                }
    },
@@ -14,9 +13,8 @@
       "versioning": true,
       "locationing": true,
       "fields": { "title"  : {"type":"text", "required":true},
-                  "author" : {"type":"author", "required":false},
                   "summary": {"type":"richtext", "required":false},
-                  "body": {"type": "text", "required": false}
+                  "body": {"type": "richtext", "required": false}
                 }
    },
   "user":{

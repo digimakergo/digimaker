@@ -61,15 +61,18 @@ func NewFieldType(fieldType string) Fielder {
 	return fieldtypeRegistry[fieldType]()
 }
 
+type FieldTypeSettings map[string]FieldtypeSetting
+
 type FieldtypeSetting struct {
 	Identifier   string            `json:"identifier"`
 	Name         string            `json:"name"`
 	Searchable   bool              `json:"searchable"`
+	Value        string            `json:"value"`
 	Translations map[string]string `json:"translations"`
 }
 
 // Datatypes which defined in datatype.json
-var fieldtypeDefinition map[string]FieldtypeSetting
+var fieldtypeDefinition FieldTypeSettings
 
 func LoadDefinition() error {
 	//Load datatype.json into DatatypeDefinition
@@ -80,4 +83,8 @@ func LoadDefinition() error {
 	}
 	fieldtypeDefinition = def
 	return nil
+}
+
+func GetDefinition() FieldTypeSettings {
+	return fieldtypeDefinition
 }

@@ -7,6 +7,8 @@ import (
 	"dm/util"
 )
 
+type ContentTypeSettings map[string]ContentTypeSetting
+
 type ContentTypeSetting struct {
 	TableName  string                  `json:"table_name"`
 	Versioning bool                    `json:"versioning"`
@@ -19,7 +21,7 @@ type ContentField struct {
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json
-var contentTypeDefinition map[string]ContentTypeSetting
+var contentTypeDefinition ContentTypeSettings
 
 //LoadDefinition Load all setting in file into memory.
 //
@@ -39,6 +41,11 @@ func LoadDefinition() error {
 	return nil
 }
 
+func GetDefinition() ContentTypeSettings {
+	return contentTypeDefinition
+}
+
+//todo: Use a better name
 func GetContentDefinition(contentType string) ContentTypeSetting {
 	definition := contentTypeDefinition
 	result, ok := definition[contentType]
@@ -47,5 +54,4 @@ func GetContentDefinition(contentType string) ContentTypeSetting {
 	} else {
 		return ContentTypeSetting{}
 	}
-
 }

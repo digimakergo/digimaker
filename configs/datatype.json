@@ -2,30 +2,37 @@
    "text":{
               "searchable": true,
               "value": "TextField",
-              "dbtype": "string",
               "name": "Text",
               "translations": {"nor-no": "Tekst",
                                 "chi-cn": "文本"  }
           },
    "richtext":{ "searchable": true,
-                 "name": "Text",
-                 "value": "TextField",
-                 "dbtype": "text",
+                 "name": "Rich Text",
+                 "value": "RichTextField",
                  "translations": {"nor-no": "Tekst",
                                    "chi-cn": "文本"  }
                 },
    "datetime":{  "searchable": true,
+                  "value": "TextField",
                  "name": "Text",
                  "translations": {"nor-no": "Tekst",
                                    "chi-cn": "文本"  }
              },
    "author":{      "searchable": true,
              "name": "Text",
+             "value": "TextField",
              "translations": {"nor-no": "Tekst",
                                "chi-cn": "文本"  }
             },
+    "password":{      "searchable": true,
+                      "name": "Text",
+                      "value": "TextField",
+                      "translations": {"nor-no": "Tekst",
+                                        "chi-cn": "文本"  }
+                     },
    "dmgooglemap":{       "searchable": true,
          "name": "Text",
+         "value": "TextField",
          "translations": {"nor-no": "Tekst",
                            "chi-cn": "文本"  }
          }
