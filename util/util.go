@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/rs/xid"
 )
@@ -86,4 +87,13 @@ func GenerateUID() string {
 	guid := xid.New()
 	guidStr := guid.String()
 	return guidStr
+}
+
+//Convert like "hello_world" to "HelloWorld"
+func UpperName(input string) string {
+	arr := strings.Split(input, "_")
+	for i := range arr {
+		arr[i] = strings.Title(arr[i])
+	}
+	return strings.Join(arr, "")
 }

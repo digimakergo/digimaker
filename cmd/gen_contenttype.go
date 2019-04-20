@@ -3,10 +3,10 @@ package main
 import (
 	"dm/contenttype"
 	"dm/fieldtype"
+	"dm/util"
 	"fmt"
 	"html/template"
 	"os"
-	"strings"
 )
 
 //Generate content types
@@ -32,11 +32,12 @@ func main() {
 			fmt.Println(err.Error())
 		}
 	}
+
 }
 
 func funcMap() template.FuncMap {
 	funcMap := template.FuncMap{
-		"Upper": strings.Title,
+		"UpperName": util.UpperName,
 	}
 	return funcMap
 }

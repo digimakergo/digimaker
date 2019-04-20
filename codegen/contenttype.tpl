@@ -9,14 +9,14 @@ import (
 	. "dm/query"
 )
 
-{{$struct_name :=.name|Upper}}
+{{$struct_name :=.name|UpperName}}
 
 type {{$struct_name}} struct{
      Location `boil:"dm_location,bind"`
      ContentCommon `boil:",bind"`
     {{range $identifier, $fieldtype := .settings.Fields}}
      {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
-     {{$identifier|Upper}} fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+     {{$identifier|UpperName}} fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
     {{end}}
 }
 
