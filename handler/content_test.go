@@ -2,7 +2,6 @@ package handler
 
 import (
 	"dm/contenttype"
-	"dm/contenttype/entity"
 	"dm/query"
 	"fmt"
 	"testing"
@@ -22,7 +21,6 @@ func TestValidtion(t *testing.T) {
 	//handler.Draft("article", 1)
 
 	contenttype.LoadDefinition()
-	list, _ := Query.List("folder", query.Cond("1", 1))
-	list1 := *list.(*[]entity.Folder)
-	fmt.Println(list1[0].CID)
+	list, _ := Query.List("article", query.Cond("1", 1))
+	fmt.Println(list)
 }

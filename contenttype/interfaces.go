@@ -28,6 +28,8 @@ type ContentTyper interface {
 	//Attr(name string) interface{}
 }
 
+type ContentList []ContentTyper
+
 //For enitities.
 type Entitier interface {
 	TableName() string

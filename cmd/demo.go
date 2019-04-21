@@ -44,32 +44,27 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	}
 
 	//List of folder
-	var folders []entity.Folder
-	handler.Query.List("folder", query.Cond("parent_id", 0), &folders)
+	folders, _ := handler.Query.List("folder", query.Cond("parent_id", 0))
 
 	//Get current Folder
-	var currentFolder entity.Folder
-	handler.Query.List("folder", query.Cond("dm_location.id", id), &currentFolder)
+	currentFolder, _ := handler.Query.One("folder", query.Cond("dm_location.id", id))
 
 	var variables map[string]interface{}
-	if currentFolder.CID != 0 {
+	if currentFolder != nil {
 		//Get list of article
-		var articles []entity.Article
-		handler.Query.List("article", query.Cond("parent_id", id), &articles)
+		articles, _ := handler.Query.List("article", query.Cond("parent_id", id))
 
 		variables = map[string]interface{}{"current": currentFolder,
 			"list":    articles,
 			"folders": folders}
 	} else {
-		var currentArticle entity.Article
-		handler.Query.List("article", query.Cond("dm_location.id", id), &currentArticle)
+		currentArticle, _ := handler.Query.One("article", query.Cond("dm_location.id", id))
 		variables = map[string]interface{}{"current": currentArticle,
 			"list":    nil,
 			"folders": folders}
 	}
 
-	var folderList []entity.Folder
-	handler.Query.List("folder", query.Cond("parent_id", id), &folderList)
+	folderList, _ := handler.Query.List("folder", query.Cond("parent_id", id))
 	variables["folder_list"] = folderList
 	tpl.Execute(w, variables)
 }

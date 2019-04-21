@@ -10,21 +10,31 @@ import (
 	"github.com/pkg/errors"
 )
 
-type contentQuery struct{}
+type ContentQuery struct{}
 
 //Fetch one content
-func (c contentQuery) One(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
-	content := entity.NewInstance(contentType)
-
+func (cq ContentQuery) One(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
+	list, err := cq.List(contentType, condition)
+	if list != nil {
+		return list[0], err
+	} else {
+		return nil, err
+	}
 }
 
 //Fetch a list of content
-func (c contentQuery) List(contentType string, condition query.Condition) {
-
+func (cq ContentQuery) List(contentType string, condition query.Condition) ([]contenttype.ContentTyper, error) {
+	contentList := entity.NewList(contentType)
+	err := cq.Fill(contentType, condition, contentList)
+	if err != nil {
+		return nil, err
+	}
+	result := entity.ToList(contentType, contentList)
+	return result, err
 }
 
 //Fill all data into content which is a pointer
-func (c contentQuery) Fill(contentType string, condition query.Condition, content interface{}) error {
+func (cq ContentQuery) Fill(contentType string, condition query.Condition, content interface{}) error {
 	dbhandler := db.DBHanlder()
 	err := dbhandler.GetByFields(contentType, condition, content)
 	if err != nil {
@@ -35,4 +45,5 @@ func (c contentQuery) Fill(contentType string, condition query.Condition, conten
 	return nil
 }
 
-var Query contentQuery = contentQuery{}
+//todo: use method instead of global variable
+var Query ContentQuery = ContentQuery{}
