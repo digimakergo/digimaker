@@ -27,12 +27,13 @@ CREATE TABLE `dm_article` (
   `status` int(11) NOT NULL DEFAULT '0',
   `author` int(11) NOT NULL DEFAULT '0',
   `title` varchar(255) NOT NULL DEFAULT '',
+  `summary` text NOT NULL,
   `body` text NOT NULL,
-  `published` int(11) DEFAULT NULL,
-  `modified` int(11) DEFAULT NULL,
+  `published` int(11) NOT NULL DEFAULT '0',
+  `modified` int(11) NOT NULL DEFAULT '0',
   `remote_id` varchar(30) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +42,7 @@ CREATE TABLE `dm_article` (
 
 LOCK TABLES `dm_article` WRITE;
 /*!40000 ALTER TABLE `dm_article` DISABLE KEYS */;
-INSERT INTO `dm_article` VALUES (1,1,1,'Welcome','test2019-04-18 21:11:57.903629 +0200 CEST m=+0.466513532',111111,12313,'biscnvdi6ekjnkrmrtt0'),(2,1,1,'DM EMF is released','News....!',1213131,12313,''),(3,1,1,'','',NULL,NULL,''),(4,1,1,'','',NULL,231213,''),(5,1,1,'','',NULL,NULL,''),(6,0,0,'','',NULL,NULL,'5555555'),(7,0,1,'','',1555160703,1555160703,''),(8,0,1,'','',1555160780,1555160780,''),(9,0,1,'','',1555163008,1555163008,''),(10,0,1,'','',1555167726,1555167726,''),(11,0,1,'','',1555172650,1555172650,''),(12,0,1,'','',1555172678,1555172678,''),(13,0,0,'','',0,0,'bis7ehti6ekh9l3ahps0');
+INSERT INTO `dm_article` VALUES (1,1,1,'Welcome','','test2019-04-21 21:15:03.379424 +0200 CEST m=+0.119375313',111111,12313,'bit31n5i6eko5oe5fo9g'),(2,0,0,'Welcome','','',0,0,'bisdku5i6ekklfcg6sf0'),(3,1,1,'','','',0,0,''),(4,1,1,'','','',0,231213,''),(5,1,1,'','','',0,0,''),(6,0,0,'','','',0,0,'5555555'),(7,0,1,'','','',1555160703,1555160703,''),(8,0,1,'','','',1555160780,1555160780,''),(9,0,1,'','','',1555163008,1555163008,''),(10,0,1,'','','',1555167726,1555167726,''),(11,0,1,'','','',1555172650,1555172650,''),(12,0,1,'','','',1555172678,1555172678,''),(13,0,0,'','','',0,0,'bis7ehti6ekh9l3ahps0'),(14,0,0,'','','',0,0,'bisdi55i6ekkgnv0v0mg'),(15,0,0,'Welcome','','test2019-04-21 21:11:36.811602 +0200 CEST m=+0.295915534',111111,12313,'biuc2dti6ekjbfn7atk0'),(16,0,0,'','','',0,5555555,'');
 /*!40000 ALTER TABLE `dm_article` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -153,8 +154,8 @@ CREATE TABLE `dm_user` (
   `password` varchar(50) DEFAULT NULL,
   `mobile` varchar(50) DEFAULT NULL,
   `remote_id` varchar(30) DEFAULT '',
-  `published` int(11) DEFAULT NULL,
-  `modified` int(11) DEFAULT NULL,
+  `published` int(11) NOT NULL DEFAULT '0',
+  `modified` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -165,7 +166,7 @@ CREATE TABLE `dm_user` (
 
 LOCK TABLES `dm_user` WRITE;
 /*!40000 ALTER TABLE `dm_user` DISABLE KEYS */;
-INSERT INTO `dm_user` VALUES (1,'chen','Chen','Xiongjie','fdsafasfiifhsdf23131','+4796888261','',NULL,NULL);
+INSERT INTO `dm_user` VALUES (1,'chen','Chen','Xiongjie','fdsafasfiifhsdf23131','+4796888261','',0,0);
 /*!40000 ALTER TABLE `dm_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -207,4 +208,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-18 21:32:14
+-- Dump completed on 2019-04-21 21:16:49
