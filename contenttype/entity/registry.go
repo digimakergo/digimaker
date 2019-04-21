@@ -3,14 +3,14 @@ package entity
 import "dm/contenttype"
 
 func NewInstance(contentType string) interface{} {
-	// var result contenttype.ContentTyper
-	// switch contentType {
-	// case "article":
-	// 	result = Article{}
-	// case "folder":
-	// 	result = Folder{}
-	// }
-	return Article{}
+	var result interface{}
+	switch contentType {
+	case "article":
+		result = &[]Article{}
+	case "folder":
+		result = &[]Folder{}
+	}
+	return result
 }
 
 //Global variable for registering contentType

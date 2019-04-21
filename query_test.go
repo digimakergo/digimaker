@@ -77,4 +77,9 @@ func TestUpdate(t *testing.T) {
 	var article4 []entity.Article
 	handler.Query.List("article", Cond("content_id", 1), &article4)
 	fmt.Println(article4)
+
+	fmt.Println("folder")
+	//var currentArticle entity.Article
+	handler.Query.List1("folder", Cond("dm_location.id", 1))
+
 }
