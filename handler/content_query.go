@@ -13,7 +13,7 @@ import (
 type ContentQuery struct{}
 
 //Fetch one content
-func (cq ContentQuery) One(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
+func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
 	list, err := cq.List(contentType, condition)
 	if list != nil {
 		return list[0], err
@@ -46,4 +46,8 @@ func (cq ContentQuery) Fill(contentType string, condition query.Condition, conte
 }
 
 //todo: use method instead of global variable
-var Query ContentQuery = ContentQuery{}
+var querier ContentQuery = ContentQuery{}
+
+func Querier() ContentQuery {
+	return querier
+}

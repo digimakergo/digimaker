@@ -31,8 +31,7 @@ func TestQuery(t *testing.T) {
 
 	assert.NotNil(t, article)
 
-	var folders []entity.Folder
-	handler.Query.List("folder", Cond("1", "1"), &folders)
+	folders, _ := handler.Querier().List("folder", Cond("1", "1"))
 	fmt.Println("HELLO")
 	fmt.Println(folders[0])
 }
@@ -69,17 +68,11 @@ func TestUpdate(t *testing.T) {
 	// article3.RemoteID = "5555555"
 	// article3.Store()
 
-	var articles []entity.Article
-	handler.Query.List("article", Cond("1", "1"), &articles)
+	articles, err := handler.Querier().List("article", Cond("1", "1"))
 	fmt.Println(articles)
 
 	fmt.Println("New article")
-	var article4 []entity.Article
-	handler.Query.List("article", Cond("content_id", 1), &article4)
+	article4, err := handler.Querier().List("article", Cond("content_id", 1))
 	fmt.Println(article4)
-
-	fmt.Println("folder")
-	//var currentArticle entity.Article
-	handler.Query.List1("folder", Cond("dm_location.id", 1))
 
 }

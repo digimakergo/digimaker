@@ -44,27 +44,27 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	}
 
 	//List of folder
-	folders, _ := handler.Query.List("folder", query.Cond("parent_id", 0))
+	folders, _ := handler.Querier().List("folder", query.Cond("parent_id", 0))
 
 	//Get current Folder
-	currentFolder, _ := handler.Query.One("folder", query.Cond("dm_location.id", id))
+	currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("dm_location.id", id))
 
 	var variables map[string]interface{}
 	if currentFolder != nil {
 		//Get list of article
-		articles, _ := handler.Query.List("article", query.Cond("parent_id", id))
+		articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
 
 		variables = map[string]interface{}{"current": currentFolder,
 			"list":    articles,
 			"folders": folders}
 	} else {
-		currentArticle, _ := handler.Query.One("article", query.Cond("dm_location.id", id))
+		currentArticle, _ := handler.Querier().Fetch("article", query.Cond("dm_location.id", id))
 		variables = map[string]interface{}{"current": currentArticle,
 			"list":    nil,
 			"folders": folders}
 	}
 
-	folderList, _ := handler.Query.List("folder", query.Cond("parent_id", id))
+	folderList, _ := handler.Querier().List("folder", query.Cond("parent_id", id))
 	variables["folder_list"] = folderList
 	tpl.Execute(w, variables)
 }
