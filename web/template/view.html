@@ -8,7 +8,7 @@
 <body style="padding: 10px">
   <h2>{{.current.Name}}</h2>
   <div style="float: right">
-  <a href="/content/new/4">Create new</a>
+  <a href="/content/new/4" class="btn btn-primary">Create new</a>
   <h3>Top folders</h3>
   {{range $index,$folder := .folders}}
     <div><a href="/content/view/{{$folder.ID}}">{{$folder.ID}}: {{$folder.Name}}</a></div>
