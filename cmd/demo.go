@@ -69,8 +69,12 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	tpl.Execute(w, variables)
 }
 
-func Draft(w http.ResponseWriter, r *http.Request) {
+func New(w http.ResponseWriter, r *http.Request) {
 	// handler := handler.ContentHandler{}
+	tpl := template.Must(template.ParseFiles("../web/template/new.html"))
+	//variables := map[string]interface{}{}
+	vars := mux.Vars(r)
+	tpl.Execute(w, vars)
 }
 
 func Publish(w http.ResponseWriter, r *http.Request) {
@@ -92,8 +96,8 @@ func main() {
 	// 	Display(w, r)
 	// })
 
-	r.HandleFunc("/content/draft", func(w http.ResponseWriter, r *http.Request) {
-		Draft(w, r)
+	r.HandleFunc("/content/new/{id}", func(w http.ResponseWriter, r *http.Request) {
+		New(w, r)
 	})
 
 	r.HandleFunc("/content/publish", func(w http.ResponseWriter, r *http.Request) {

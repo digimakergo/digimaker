@@ -1,30 +1,14 @@
 <html>
 <head>
   <title>Example</title>
-  <style>
-    body{
-      font-family: Verdana;
-      line-height: 1.5;
-    }
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
-    body, table{
-            font-size: 0.9em;
-    }
-
-    a{
-        text-decoration: none;
-        color: darkblue
-    }
-
-    a:hover{
-        color: #ad680c
-    }
-  </style>
 </head>
 
 <body>
   <h2>{{.current.Name}}</h2>
   <div style="float: right">
+  <a href="/content/new/4">Create new</a>
   <h3>Top folders</h3>
   {{range $index,$folder := .folders}}
     <div><a href="/content/view/{{$folder.ID}}">{{$folder.ID}}: {{$folder.Name}}</a></div>
