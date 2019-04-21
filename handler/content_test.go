@@ -2,7 +2,6 @@ package handler
 
 import (
 	"dm/contenttype"
-	"dm/handler"
 	"dm/query"
 	"fmt"
 	"testing"
@@ -22,6 +21,6 @@ func TestValidtion(t *testing.T) {
 	//handler.Draft("article", 1)
 
 	contenttype.LoadDefinition()
-	list, _ := handler.Querier().List("article", query.Cond("1", 1))
+	list, _ := Querier().List("article", query.Cond("1", 1))
 	fmt.Println(list)
 }

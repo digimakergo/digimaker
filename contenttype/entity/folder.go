@@ -5,6 +5,7 @@ package entity
 
 import (
     "dm/db"
+    "dm/contenttype"
 	"dm/fieldtype"
 	. "dm/query"
 )
@@ -61,4 +62,30 @@ func (c Folder) Store() error {
 		return err
 	}
 	return nil
+}
+
+
+func init() {
+	new := func() contenttype.ContentTyper {
+		return &Folder{}
+	}
+
+	newList := func() interface{} {
+		return &[]Folder{}
+	}
+
+	convert := func(obj interface{}) []contenttype.ContentTyper {
+		list := obj.(*[]Folder)
+		var result []contenttype.ContentTyper
+		for _, item := range *list {
+			result = append(result, item)
+		}
+		return result
+	}
+
+	Register("folder",
+		ContentTypeRegister{
+			New:            new,
+			NewList:        newList,
+			ToContentTyper: convert})
 }

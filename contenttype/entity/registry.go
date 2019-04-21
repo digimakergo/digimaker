@@ -2,63 +2,31 @@ package entity
 
 import "dm/contenttype"
 
-//Global variable for registering contentType
-//todo: support collection, eg.[]article to bind collection easier from db.
-var contenttypeRegistry = map[string]func() contenttype.ContentTyper{}
-
-func Register(contentType string, newContentType func() contenttype.ContentTyper) {
-	contenttypeRegistry[contentType] = newContentType
+//todo: use a better name. eg. ContentTypeMethod
+type ContentTypeRegister struct {
+	New            func() contenttype.ContentTyper
+	NewList        func() interface{}
+	ToContentTyper func(obj interface{}) []contenttype.ContentTyper
 }
 
-func NewContentType(contentType string) contenttype.ContentTyper {
-	return contenttypeRegistry[contentType]()
+var contenttypeList = map[string]ContentTypeRegister{}
+
+//Register a content type and store in global variable
+func Register(contentType string, register ContentTypeRegister) {
+	contenttypeList[contentType] = register
 }
 
-func init() {
-	Register("article", func() contenttype.ContentTyper {
-		return Article{}
-	})
-	Register("folder", func() contenttype.ContentTyper {
-		return Folder{}
-	})
-}
-
+//Create new list.eg &[]Article{}
 func NewList(contentType string) interface{} {
-	var result interface{}
-	switch contentType {
-	case "article":
-		result = &[]Article{}
-	case "folder":
-		result = &[]Folder{}
-	}
-	return result
+	return contenttypeList[contentType].NewList()
 }
 
+//Create new content instance, eg. &Article{}
 func NewInstance(contentType string) contenttype.ContentTyper {
-	var result contenttype.ContentTyper
-	switch contentType {
-	case "article":
-		result = &Article{}
-	case "folder":
-		result = &Folder{}
-	}
-	return result
+	return contenttypeList[contentType].New()
 }
 
-func ToList(contentType string, obj interface{}) []contenttype.ContentTyper {
-	//todo: check type first
-	var result []contenttype.ContentTyper
-	if contentType == "article" {
-		list := obj.(*[]Article)
-		for _, item := range *list {
-			result = append(result, item)
-		}
-	} else if contentType == "folder" {
-		list := obj.(*[]Folder)
-		for _, item := range *list {
-			result = append(result, item)
-		}
-	}
-
-	return result
+//Convert a list of content to contenttyper interface list since go doesn't do it automatically
+func ToContentTyper(contentType string, obj interface{}) []contenttype.ContentTyper {
+	return contenttypeList[contentType].ToContentTyper(obj)
 }

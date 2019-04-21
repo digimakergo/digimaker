@@ -5,6 +5,7 @@ package entity
 
 import (
     "dm/db"
+    "dm/contenttype"
 	"dm/fieldtype"
 	. "dm/query"
 )
@@ -56,4 +57,30 @@ func (c {{$struct_name}}) Store() error {
 		return err
 	}
 	return nil
+}
+
+
+func init() {
+	new := func() contenttype.ContentTyper {
+		return &{{$struct_name}}{}
+	}
+
+	newList := func() interface{} {
+		return &[]{{$struct_name}}{}
+	}
+
+	convert := func(obj interface{}) []contenttype.ContentTyper {
+		list := obj.(*[]{{$struct_name}})
+		var result []contenttype.ContentTyper
+		for _, item := range *list {
+			result = append(result, item)
+		}
+		return result
+	}
+
+	Register("{{.name}}",
+		ContentTypeRegister{
+			New:            new,
+			NewList:        newList,
+			ToContentTyper: convert})
 }

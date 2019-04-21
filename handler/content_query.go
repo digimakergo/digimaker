@@ -29,7 +29,7 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) ([]co
 	if err != nil {
 		return nil, err
 	}
-	result := entity.ToList(contentType, contentList)
+	result := entity.ToContentTyper(contentType, contentList)
 	return result, err
 }
 
