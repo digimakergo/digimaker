@@ -82,5 +82,5 @@ func init() {
 		ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
-			ToContentTyper: convert})
+			ListToContentTyper: convert})
 }

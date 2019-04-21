@@ -4,39 +4,49 @@
 package entity
 
 import (
-	"dm/contenttype"
-	"dm/db"
+    "dm/db"
+    "dm/contenttype"
 	"dm/fieldtype"
 	. "dm/query"
 )
 
-type Article struct {
-	Location      `boil:"dm_location,bind"`
-	ContentCommon `boil:",bind"`
 
-	Body fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
 
-	Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-
-	Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+type Article struct{
+     Location `boil:"dm_location,bind"`
+     ContentCommon `boil:",bind"`
+    
+     
+     Body fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
+    
+     
+     Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+    
+     
+     Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+    
 }
 
-func (Article) TableName() string {
-	return "dm_article"
+
+func ( Article ) TableName() string{
+	 return "dm_article"
 }
+
 
 func (c Article) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 
-	result["body"] = c.Body
+    
+        result["body"]=c.Body
+    
+        result["summary"]=c.Summary
+    
+        result["title"]=c.Title
+    
 
-	result["summary"] = c.Summary
-
-	result["title"] = c.Title
-
-	for key, value := range c.ContentCommon.Values() {
-		result[key] = value
-	}
+    for key, value := range c.ContentCommon.Values() {
+        result[key] = value
+    }
 
 	for key, value := range c.Location.Values() {
 		result[key] = value
@@ -58,6 +68,7 @@ func (c Article) Store() error {
 	}
 	return nil
 }
+
 
 func init() {
 	new := func() contenttype.ContentTyper {
@@ -81,5 +92,5 @@ func init() {
 		ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
-			ToContentTyper: convert})
+			ListToContentTyper: convert})
 }
