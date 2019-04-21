@@ -98,7 +98,7 @@ func (c Location) Path() []string {
 	return path
 }
 
-func (c Location) Store() error {
+func (c *Location) Store() error {
 	handler := db.DBHanlder()
 	if c.ID == 0 {
 		id, err := handler.Insert(c.TableName(), c.Values())

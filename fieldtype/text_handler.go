@@ -13,7 +13,7 @@ func (t TextFieldHandler) Validate(input interface{}) (bool, string) {
 }
 
 func (t TextFieldHandler) ToStorage(input interface{}) interface{} {
-	return input.(string)
+	return TextField{Data: input.(string)}
 }
 
 func (t TextFieldHandler) IsEmpty(input interface{}) bool {

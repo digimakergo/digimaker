@@ -10,13 +10,13 @@ import (
 
 //TextField is a field for normal text line. It implements Datatyper
 type TextField struct {
-	data     string
-	ViewData interface{}
+	Data     string
+	viewData interface{}
 }
 
 //When update db.
 func (t TextField) Value() (driver.Value, error) {
-	return t.data, nil
+	return t.Data, nil
 }
 
 func (t *TextField) Scan(src interface{}) error {
@@ -30,11 +30,11 @@ func (t *TextField) Scan(src interface{}) error {
 		return errors.New("Incompatible type for GzippedText")
 	}
 
-	t.data = source
+	t.Data = source
 	return nil
 }
 
 //convert data to view data.
 func (t TextField) ViewValue() string {
-	return t.data
+	return t.Data
 }

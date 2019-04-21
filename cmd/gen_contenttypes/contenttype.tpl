@@ -13,30 +13,31 @@ import (
 {{$struct_name :=.name|UpperName}}
 
 type {{$struct_name}} struct{
-     Location `boil:"dm_location,bind"`
      ContentCommon `boil:",bind"`
     {{range $identifier, $fieldtype := .settings.Fields}}
      {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
      {{$identifier|UpperName}} fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
     {{end}}
+     Location `boil:"location,bind"`
 }
-
 
 func ( {{$struct_name}} ) TableName() string{
 	 return "{{.settings.TableName}}"
 }
 
-
-func (c {{$struct_name}}) Values() map[string]interface{} {
+func (c {{$struct_name}}) contentValues() map[string]interface{} {
 	result := make(map[string]interface{})
-
     {{range $identifier, $fieldtype := .settings.Fields}}
         result["{{$identifier}}"]=c.{{$identifier|UpperName}}
     {{end}}
+	for key, value := range c.ContentCommon.Values() {
+		result[key] = value
+	}
+	return result
+}
 
-    for key, value := range c.ContentCommon.Values() {
-        result[key] = value
-    }
+func (c {{$struct_name}}) Values() map[string]interface{} {
+    result := c.contentValues()
 
 	for key, value := range c.Location.Values() {
 		result[key] = value
@@ -44,16 +45,18 @@ func (c {{$struct_name}}) Values() map[string]interface{} {
 	return result
 }
 
-func (c {{$struct_name}}) Store() error {
+//Store content.
+//Note: it will set id to CID after success
+func (c *{{$struct_name}}) Store() error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.Values())
+		id, err := handler.Insert(c.TableName(), c.contentValues())
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.CID))
+		err := handler.Update(c.TableName(), c.contentValues(), Cond("id", c.CID))
 		return err
 	}
 	return nil

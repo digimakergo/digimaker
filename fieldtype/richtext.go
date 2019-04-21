@@ -9,12 +9,12 @@ import (
 )
 
 type RichTextField struct {
-	data string
+	Data string
 }
 
 //when update db
 func (t RichTextField) Value() (driver.Value, error) {
-	return t.data, nil
+	return t.Data, nil
 }
 
 func (t *RichTextField) Scan(src interface{}) error {
@@ -28,6 +28,6 @@ func (t *RichTextField) Scan(src interface{}) error {
 		return errors.New("Incompatible type for GzippedText")
 	}
 
-	t.data = source
+	t.Data = source
 	return nil
 }

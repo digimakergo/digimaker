@@ -13,7 +13,6 @@ import (
 
 
 type Folder struct{
-     Location `boil:"dm_location,bind"`
      ContentCommon `boil:",bind"`
     
      
@@ -22,26 +21,28 @@ type Folder struct{
      
      Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
     
+     Location `boil:"location,bind"`
 }
-
 
 func ( Folder ) TableName() string{
 	 return "dm_folder"
 }
 
-
-func (c Folder) Values() map[string]interface{} {
+func (c Folder) contentValues() map[string]interface{} {
 	result := make(map[string]interface{})
-
     
         result["summary"]=c.Summary
     
         result["title"]=c.Title
     
+	for key, value := range c.ContentCommon.Values() {
+		result[key] = value
+	}
+	return result
+}
 
-    for key, value := range c.ContentCommon.Values() {
-        result[key] = value
-    }
+func (c Folder) Values() map[string]interface{} {
+    result := c.contentValues()
 
 	for key, value := range c.Location.Values() {
 		result[key] = value
@@ -49,16 +50,18 @@ func (c Folder) Values() map[string]interface{} {
 	return result
 }
 
-func (c Folder) Store() error {
+//Store content.
+//Note: it will set id to CID after success
+func (c *Folder) Store() error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.Values())
+		id, err := handler.Insert(c.TableName(), c.contentValues())
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.CID))
+		err := handler.Update(c.TableName(), c.contentValues(), Cond("id", c.CID))
 		return err
 	}
 	return nil

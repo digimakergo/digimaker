@@ -19,7 +19,7 @@ type RMDB struct{}
 
 //Query by ID
 func (rmdb *RMDB) GetByID(contentType string, id int, content interface{}) error {
-	return rmdb.GetByFields(contentType, query.Cond("dm_location.id", id), content) //todo: use table name as parameter
+	return rmdb.GetByFields(contentType, query.Cond("location.id", id), content) //todo: use table name as parameter
 }
 
 //Query to fill in contentTyper. Use reference in content parameter.
@@ -46,20 +46,21 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 		"priority", "uid", "section", "p"}
 	locationColumns := ""
 	for _, column := range columns {
-		locationColumns += `dm_location.` + column + ` AS "dm_location.` + column + `",`
+		locationColumns += `location.` + column + ` AS "location.` + column + `",`
 	}
 	locationColumns = locationColumns[:len(locationColumns)-1]
 
-	sql := `SELECT c.*, ` + locationColumns + ` FROM dm_location, ` + tableName + ` c
-                   WHERE dm_location.content_id=c.id
-                         AND dm_location.content_type= '` + contentType + `'
+	sql := `SELECT c.*, ` + locationColumns + `
+                   FROM dm_location location, ` + tableName + ` c
+                   WHERE location.content_id=c.id
+                         AND location.content_type= '` + contentType + `'
                          AND ` + conditions
 
 	util.Debug("db", sql)
 	err = queries.Raw(sql, values...).Bind(context.Background(), db, content)
 
 	if err != nil {
-		message := "[RMDB.GetByFields]Error when query table: " + tableName + ".sql - " + sql
+		message := "[RMDB.GetByFields]Error when query. sql - " + sql
 		return errors.Wrap(err, message)
 	}
 	return nil

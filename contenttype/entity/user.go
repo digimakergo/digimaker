@@ -13,7 +13,6 @@ import (
 
 
 type User struct{
-     Location `boil:"dm_location,bind"`
      ContentCommon `boil:",bind"`
     
      
@@ -28,17 +27,15 @@ type User struct{
      
      Password fieldtype.TextField `boil:"password" json:"password" toml:"password" yaml:"password"`
     
+     Location `boil:"location,bind"`
 }
-
 
 func ( User ) TableName() string{
 	 return "dm_user"
 }
 
-
-func (c User) Values() map[string]interface{} {
+func (c User) contentValues() map[string]interface{} {
 	result := make(map[string]interface{})
-
     
         result["firstname"]=c.Firstname
     
@@ -48,10 +45,14 @@ func (c User) Values() map[string]interface{} {
     
         result["password"]=c.Password
     
+	for key, value := range c.ContentCommon.Values() {
+		result[key] = value
+	}
+	return result
+}
 
-    for key, value := range c.ContentCommon.Values() {
-        result[key] = value
-    }
+func (c User) Values() map[string]interface{} {
+    result := c.contentValues()
 
 	for key, value := range c.Location.Values() {
 		result[key] = value
@@ -59,16 +60,18 @@ func (c User) Values() map[string]interface{} {
 	return result
 }
 
-func (c User) Store() error {
+//Store content.
+//Note: it will set id to CID after success
+func (c *User) Store() error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.Values())
+		id, err := handler.Insert(c.TableName(), c.contentValues())
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.CID))
+		err := handler.Update(c.TableName(), c.contentValues(), Cond("id", c.CID))
 		return err
 	}
 	return nil

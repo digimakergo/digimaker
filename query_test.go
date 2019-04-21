@@ -63,16 +63,18 @@ func TestUpdate(t *testing.T) {
 
 	//assert.Equal(t, article2.RemoteID, uid)
 
-	//insert
+	// //insert
 	// article3 := new(entity.Article)
-	// article3.RemoteID = "5555555"
-	// article3.Store()
+	// article3.Modified = 5555555
+	// err = article3.Store()
 
 	articles, err := handler.Querier().List("article", Cond("1", "1"))
 	fmt.Println(articles)
 
 	fmt.Println("New article")
-	article4, err := handler.Querier().List("article", Cond("content_id", 1))
-	fmt.Println(article4)
+	article4, err := handler.Querier().Fetch("article", Cond("location.id", 2))
+	//fmt.Println(article4.(entity.Folder).ContentCommon.CID)
+	fmt.Println(article4.(entity.Article).ContentCommon)
+	fmt.Println(article4.Values())
 
 }

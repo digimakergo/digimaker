@@ -40,6 +40,7 @@ func (content ContentHandler) CreateLocation(parentID int) {
 //Validate and Return a validation result
 func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
 	definition := contenttype.GetContentDefinition(contentType)
+	//todo: check there is no extra field in the inputs
 	//check required
 	fieldsDef := definition.Fields
 	result := ValidationResult{}
@@ -71,7 +72,7 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 func (content ContentHandler) Draft(contentType string, parentID int) error {
 	//create empty
 	now := int(time.Now().Unix())
-	article := entity.Article{ContentCommon: entity.ContentCommon{Author: 1, Published: now, Modified: now}}
+	article := entity.Article{ContentCommon: entity.ContentCommon{Published: now, Modified: now}}
 	err := article.Store()
 	if err != nil {
 		return errors.Wrap(err, "[Handler.Draft]Error when creating article with parent id:"+
@@ -96,19 +97,50 @@ func (content ContentHandler) Publish() {
 }
 
 //Create a content(same behavior as Draft&Publish but store published version directly)
-func (handler *ContentHandler) Create(title string, parentID int) error {
+func (handler *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID int) (bool, ValidationResult, error) {
+	//Validate
+	valid, validationResult := handler.Validate(contentType, inputs)
+
+	if !valid {
+		return false, validationResult, nil
+	}
+
+	fieldType := contenttype.GetContentDefinition("article").Fields["title"].FieldType
+	fieldtypeHandler := fieldtype.GetHandler(fieldType)
+	titleField := fieldtypeHandler.ToStorage(inputs["title"])
+
+	fieldType = contenttype.GetContentDefinition("article").Fields["body"].FieldType
+	fieldtypeHandler = fieldtype.GetHandler(fieldType)
+	bodyField := fieldtypeHandler.ToStorage(inputs["body"])
+
 	//Save content
 	now := int(time.Now().Unix())
-	article := entity.Article{ContentCommon: entity.ContentCommon{Author: 1, Published: now, Modified: now}}
-	article.Store()
+	article := entity.Article{ContentCommon: entity.ContentCommon{
+		Published: now,
+		Modified:  now,
+		RemoteID:  util.GenerateUID()}}
+	article.Title = titleField.(fieldtype.TextField)
+	article.Body = bodyField.(fieldtype.RichTextField)
+	err := article.Store()
+	if err != nil {
+		return false, ValidationResult{}, err
+	}
+	//todo: add commit and rollback for the whole saving
 
 	//Save location
-	location := entity.Location{ParentID: parentID, ContentID: article.CID, UID: util.GenerateUID()}
-	err := location.Store()
+	location := entity.Location{ParentID: parentID,
+		ContentID:   article.CID,
+		ContentType: contentType,
+		UID:         util.GenerateUID()}
+	location.Name = article.Title.Data
+	err = location.Store()
 	if err != nil {
-		return err
+		return false, ValidationResult{}, err
 	}
-	return nil
+
+	//todo: update other things in location like main_id, hierarchy
+
+	return true, ValidationResult{}, nil
 }
 
 //Update content.

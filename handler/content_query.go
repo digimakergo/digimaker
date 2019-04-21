@@ -14,6 +14,7 @@ type ContentQuery struct{}
 
 //Fetch one content
 func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
+	//todo: use limit in this case so it doesn't fetch more into memory.
 	list, err := cq.List(contentType, condition)
 	if list != nil {
 		return list[0], err

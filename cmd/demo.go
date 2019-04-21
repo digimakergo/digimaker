@@ -47,7 +47,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	folders, _ := handler.Querier().List("folder", query.Cond("parent_id", 0))
 
 	//Get current Folder
-	currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("dm_location.id", id))
+	currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("location.id", id))
 
 	var variables map[string]interface{}
 	if currentFolder != nil {
@@ -58,7 +58,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			"list":    articles,
 			"folders": folders}
 	} else {
-		currentArticle, _ := handler.Querier().Fetch("article", query.Cond("dm_location.id", id))
+		currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
 		variables = map[string]interface{}{"current": currentArticle,
 			"list":    nil,
 			"folders": folders}
