@@ -97,7 +97,7 @@ func (content ContentHandler) Publish() {
 }
 
 //Create a content(same behavior as Draft&Publish but store published version directly)
-func (handler *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID int) (bool, ValidationResult, error) {
+func (handler *ContentHandler) Create(parentID int, contentType string, inputs map[string]interface{}) (bool, ValidationResult, error) {
 	//Validate
 	valid, validationResult := handler.Validate(contentType, inputs)
 
@@ -105,23 +105,26 @@ func (handler *ContentHandler) Create(contentType string, inputs map[string]inte
 		return false, validationResult, nil
 	}
 
-	fieldType := contenttype.GetContentDefinition("article").Fields["title"].FieldType
-	fieldtypeHandler := fieldtype.GetHandler(fieldType)
-	titleField := fieldtypeHandler.ToStorage(inputs["title"])
+	content := entity.NewInstance(contentType)
 
-	fieldType = contenttype.GetContentDefinition("article").Fields["body"].FieldType
-	fieldtypeHandler = fieldtype.GetHandler(fieldType)
-	bodyField := fieldtypeHandler.ToStorage(inputs["body"])
+	contentDefinition := contenttype.GetContentDefinition(contentType)
+	fieldsDefinition := contentDefinition.Fields
+	for identifier, input := range inputs {
+		fieldType := fieldsDefinition[identifier].FieldType
+		fieldtypeHandler := fieldtype.GetHandler(fieldType)
+		fieldValue := fieldtypeHandler.ToStorage(input)
+		err := content.SetValue(identifier, fieldValue)
+		if err != nil {
+			return false, ValidationResult{}, errors.Wrap(err, "[Create]Can not set input to "+identifier)
+		}
+	}
 
-	//Save content
 	now := int(time.Now().Unix())
-	article := entity.Article{ContentCommon: entity.ContentCommon{
-		Published: now,
-		Modified:  now,
-		RemoteID:  util.GenerateUID()}}
-	article.Title = titleField.(fieldtype.TextField)
-	article.Body = bodyField.(fieldtype.RichTextField)
-	err := article.Store()
+	content.SetValue("published", now)
+	content.SetValue("modified", now)
+	content.SetValue("remote_id", util.GenerateUID())
+
+	err := content.Store()
 	if err != nil {
 		return false, ValidationResult{}, err
 	}
@@ -129,10 +132,12 @@ func (handler *ContentHandler) Create(contentType string, inputs map[string]inte
 
 	//Save location
 	location := entity.Location{ParentID: parentID,
-		ContentID:   article.CID,
+		ContentID:   content.Value("cid").(int),
 		ContentType: contentType,
 		UID:         util.GenerateUID()}
-	location.Name = article.Title.Data
+	//todo: set name based on rules. Now it's all based on title.
+	contentName := content.Value("title").(fieldtype.TextField).Data
+	location.Name = contentName
 	err = location.Store()
 	if err != nil {
 		return false, ValidationResult{}, err

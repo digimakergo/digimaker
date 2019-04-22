@@ -71,10 +71,36 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 func New(w http.ResponseWriter, r *http.Request) {
 	// handler := handler.ContentHandler{}
-	tpl := template.Must(template.ParseFiles("../web/template/new.html"))
-	//variables := map[string]interface{}{}
+
 	vars := mux.Vars(r)
-	tpl.Execute(w, vars)
+
+	variables := map[string]interface{}{}
+	variables["id"] = vars["id"]
+	variables["type"] = vars["type"]
+	variables["posted"] = false
+	if r.Method == "POST" {
+		variables["posted"] = true
+		if vars["type"] == "article" {
+			parentID, _ := strconv.Atoi(vars["id"])
+			title := r.FormValue("title")
+			body := r.FormValue("body")
+			handler := handler.ContentHandler{}
+			success, result, error := handler.Create(parentID, "article", map[string]interface{}{"title": title, "body": body})
+			if !success {
+				variables["success"] = false
+				if error != nil {
+					variables["error"] = error.Error()
+				}
+				variables["validation"] = result
+			} else {
+				variables["success"] = true
+			}
+		}
+
+	}
+	tpl := template.Must(template.ParseFiles("../web/template/new_" + vars["type"] + ".html"))
+	//variables := map[string]interface{}{}
+	tpl.Execute(w, variables)
 }
 
 func Publish(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +122,7 @@ func main() {
 	// 	Display(w, r)
 	// })
 
-	r.HandleFunc("/content/new/{id}", func(w http.ResponseWriter, r *http.Request) {
+	r.HandleFunc("/content/new/{type}/{id}", func(w http.ResponseWriter, r *http.Request) {
 		New(w, r)
 	})
 

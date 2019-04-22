@@ -51,13 +51,13 @@ func GetHandler(fieldType string) FieldtypeHandler {
 
 //Global variable for registering fieldtypes
 //Use call back to make sure it's not the same instance( the receiver can still singleton it )
-var fieldtypeRegistry = map[string]func() Fielder{}
+var fieldtypeRegistry = map[string]func() Fieldtyper{}
 
-func RegisterField(fieldType string, newFieldType func() Fielder) {
+func RegisterField(fieldType string, newFieldType func() Fieldtyper) {
 	fieldtypeRegistry[fieldType] = newFieldType
 }
 
-func NewFieldType(fieldType string) Fielder {
+func NewFieldType(fieldType string) Fieldtyper {
 	return fieldtypeRegistry[fieldType]()
 }
 

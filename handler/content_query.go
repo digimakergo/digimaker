@@ -15,23 +15,22 @@ type ContentQuery struct{}
 //Fetch one content
 func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
 	//todo: use limit in this case so it doesn't fetch more into memory.
-	list, err := cq.List(contentType, condition)
-	if list != nil {
-		return list[0], err
-	} else {
+	content := entity.NewInstance(contentType)
+	err := cq.Fill(contentType, condition, content)
+	if err != nil {
 		return nil, err
 	}
+	return content, err
 }
 
-//Fetch a list of content
-func (cq ContentQuery) List(contentType string, condition query.Condition) ([]contenttype.ContentTyper, error) {
+//Fetch a list of content, return eg. *[]Article
+func (cq ContentQuery) List(contentType string, condition query.Condition) (interface{}, error) {
 	contentList := entity.NewList(contentType)
 	err := cq.Fill(contentType, condition, contentList)
 	if err != nil {
 		return nil, err
 	}
-	result := entity.ToContentTyper(contentType, contentList)
-	return result, err
+	return contentList, err
 }
 
 //Fill all data into content which is a pointer

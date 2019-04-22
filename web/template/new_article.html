@@ -1,13 +1,25 @@
 <html>
 <header>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </header>
 
 <body style="padding: 10px">
     <h2>New article</h2>
-    <form>
+    <form method="post">
         <input type="hidden" name="parent" value="{{.id}}" />
-        <div style="width: 600px;">
+        <input type="hidden" name="type" value="article" />
+        {{if .posted}}
+            {{if $.success}}
+                <div class="alert-info">Success.</div>
+             {{else}}
+                {{range $index,$field := $.validation.Fields}}
+                    <div>{{$field.Identifier}}: {{$field.Detail}}</div>
+                {{end}}
+             {{end}}
+        {{end}}
+        <div style="">
             <div class="form-group">
                 <label>Title:</label>
                 <input type="text" class="form-control" name="title" />
@@ -19,7 +31,7 @@
             <div>
                 <input type="submit" class="btn btn-primary" value="Submit" />
 
-                <input type="reset" value="Reset" />
+                <input type="reset" class="btn btn-light" value="Reset" />
             </div>
         </div>
         </form>

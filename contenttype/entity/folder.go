@@ -24,11 +24,11 @@ type Folder struct{
      Location `boil:"location,bind"`
 }
 
-func ( Folder ) TableName() string{
+func ( *Folder ) TableName() string{
 	 return "dm_folder"
 }
 
-func (c Folder) contentValues() map[string]interface{} {
+func (c *Folder) contentValues() map[string]interface{} {
 	result := make(map[string]interface{})
     
         result["summary"]=c.Summary
@@ -41,13 +41,53 @@ func (c Folder) contentValues() map[string]interface{} {
 	return result
 }
 
-func (c Folder) Values() map[string]interface{} {
+func (c *Folder) Values() map[string]interface{} {
     result := c.contentValues()
 
 	for key, value := range c.Location.Values() {
 		result[key] = value
 	}
 	return result
+}
+
+func (c *Folder) Value(identifier string) interface{} {
+	var result interface{}
+	switch identifier {
+    
+    case "summary":
+        result = c.Summary
+    
+    case "title":
+        result = c.Title
+    
+	case "cid":
+		result = c.ContentCommon.CID
+    default:
+    	result = c.ContentCommon.Value( identifier )
+    }
+	return result
+}
+
+
+func (c *Folder) SetValue(identifier string, value interface{}) error {
+	switch identifier {
+        
+             
+            case "summary":
+            c.Summary = value.(fieldtype.RichTextField)
+        
+             
+            case "title":
+            c.Title = value.(fieldtype.TextField)
+        
+	default:
+		err := c.ContentCommon.SetValue(identifier, value)
+        if err != nil{
+            return err
+        }
+	}
+	//todo: check if identifier exist
+	return nil
 }
 
 //Store content.
@@ -77,18 +117,8 @@ func init() {
 		return &[]Folder{}
 	}
 
-	convert := func(obj interface{}) []contenttype.ContentTyper {
-		list := obj.(*[]Folder)
-		var result []contenttype.ContentTyper
-		for _, item := range *list {
-			result = append(result, item)
-		}
-		return result
-	}
-
 	Register("folder",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList,
-			ListToContentTyper: convert})
+			NewList:        newList})
 }

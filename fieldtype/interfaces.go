@@ -1,7 +1,7 @@
 package fieldtype
 
 //All of the fields will implements this interface
-type Fielder interface {
+type Fieldtyper interface {
 	//Get value of
 	//Value() string
 

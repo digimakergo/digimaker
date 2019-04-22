@@ -21,11 +21,11 @@ type {{$struct_name}} struct{
      Location `boil:"location,bind"`
 }
 
-func ( {{$struct_name}} ) TableName() string{
+func ( *{{$struct_name}} ) TableName() string{
 	 return "{{.settings.TableName}}"
 }
 
-func (c {{$struct_name}}) contentValues() map[string]interface{} {
+func (c *{{$struct_name}}) contentValues() map[string]interface{} {
 	result := make(map[string]interface{})
     {{range $identifier, $fieldtype := .settings.Fields}}
         result["{{$identifier}}"]=c.{{$identifier|UpperName}}
@@ -36,13 +36,46 @@ func (c {{$struct_name}}) contentValues() map[string]interface{} {
 	return result
 }
 
-func (c {{$struct_name}}) Values() map[string]interface{} {
+func (c *{{$struct_name}}) Values() map[string]interface{} {
     result := c.contentValues()
 
 	for key, value := range c.Location.Values() {
 		result[key] = value
 	}
 	return result
+}
+
+func (c *{{$struct_name}}) Value(identifier string) interface{} {
+	var result interface{}
+	switch identifier {
+    {{range $identifier, $fieldtype := .settings.Fields}}
+    case "{{$identifier}}":
+        result = c.{{$identifier|UpperName}}
+    {{end}}
+	case "cid":
+		result = c.ContentCommon.CID
+    default:
+    	result = c.ContentCommon.Value( identifier )
+    }
+	return result
+}
+
+
+func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error {
+	switch identifier {
+        {{range $identifier, $fieldtype := .settings.Fields}}
+             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
+            case "{{$identifier}}":
+            c.{{$identifier|UpperName}} = value.(fieldtype.{{$type_settings.Value}})
+        {{end}}
+	default:
+		err := c.ContentCommon.SetValue(identifier, value)
+        if err != nil{
+            return err
+        }
+	}
+	//todo: check if identifier exist
+	return nil
 }
 
 //Store content.
@@ -72,18 +105,8 @@ func init() {
 		return &[]{{$struct_name}}{}
 	}
 
-	convert := func(obj interface{}) []contenttype.ContentTyper {
-		list := obj.(*[]{{$struct_name}})
-		var result []contenttype.ContentTyper
-		for _, item := range *list {
-			result = append(result, item)
-		}
-		return result
-	}
-
 	Register("{{.name}}",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList,
-			ListToContentTyper: convert})
+			NewList:        newList})
 }

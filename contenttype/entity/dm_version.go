@@ -34,7 +34,7 @@ type Version struct {
 	Data      string `boil:"data" json:"data" toml:"data" yaml:"data"`
 }
 
-func (c *Version) Fields() map[string]fieldtype.Fielder {
+func (c *Version) Fields() map[string]fieldtype.Fieldtyper {
 	return nil
 }
 

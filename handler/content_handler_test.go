@@ -3,7 +3,9 @@ package handler
 import (
 	"dm/contenttype"
 	"dm/fieldtype"
+	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -26,9 +28,13 @@ func TestValidtion(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	// handler := ContentHandler{}
+	handler := ContentHandler{}
 	// params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "body": "Hello"}
-	// _, result, err := handler.Create("article", params, 4)
-	// fmt.Println(result)
-	// fmt.Println(err)
+	// _, result, err := handler.Create(4, "article", params)
+
+	params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "summary": "Hello"}
+	_, result, err := handler.Create(4, "folder", params)
+
+	fmt.Println(result)
+	fmt.Println(err)
 }

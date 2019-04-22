@@ -30,11 +30,11 @@ type User struct{
      Location `boil:"location,bind"`
 }
 
-func ( User ) TableName() string{
+func ( *User ) TableName() string{
 	 return "dm_user"
 }
 
-func (c User) contentValues() map[string]interface{} {
+func (c *User) contentValues() map[string]interface{} {
 	result := make(map[string]interface{})
     
         result["firstname"]=c.Firstname
@@ -51,13 +51,67 @@ func (c User) contentValues() map[string]interface{} {
 	return result
 }
 
-func (c User) Values() map[string]interface{} {
+func (c *User) Values() map[string]interface{} {
     result := c.contentValues()
 
 	for key, value := range c.Location.Values() {
 		result[key] = value
 	}
 	return result
+}
+
+func (c *User) Value(identifier string) interface{} {
+	var result interface{}
+	switch identifier {
+    
+    case "firstname":
+        result = c.Firstname
+    
+    case "lastname":
+        result = c.Lastname
+    
+    case "login":
+        result = c.Login
+    
+    case "password":
+        result = c.Password
+    
+	case "cid":
+		result = c.ContentCommon.CID
+    default:
+    	result = c.ContentCommon.Value( identifier )
+    }
+	return result
+}
+
+
+func (c *User) SetValue(identifier string, value interface{}) error {
+	switch identifier {
+        
+             
+            case "firstname":
+            c.Firstname = value.(fieldtype.TextField)
+        
+             
+            case "lastname":
+            c.Lastname = value.(fieldtype.TextField)
+        
+             
+            case "login":
+            c.Login = value.(fieldtype.TextField)
+        
+             
+            case "password":
+            c.Password = value.(fieldtype.TextField)
+        
+	default:
+		err := c.ContentCommon.SetValue(identifier, value)
+        if err != nil{
+            return err
+        }
+	}
+	//todo: check if identifier exist
+	return nil
 }
 
 //Store content.
@@ -87,18 +141,8 @@ func init() {
 		return &[]User{}
 	}
 
-	convert := func(obj interface{}) []contenttype.ContentTyper {
-		list := obj.(*[]User)
-		var result []contenttype.ContentTyper
-		for _, item := range *list {
-			result = append(result, item)
-		}
-		return result
-	}
-
 	Register("user",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList,
-			ListToContentTyper: convert})
+			NewList:        newList})
 }

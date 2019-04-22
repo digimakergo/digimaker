@@ -29,7 +29,7 @@ type Location struct {
 	P           string `boil:"p" json:"p" toml:"p" yaml:"p"`
 }
 
-func (c *Location) Fields() map[string]fieldtype.Fielder {
+func (c *Location) Fields() map[string]fieldtype.Fieldtyper {
 	return nil
 }
 

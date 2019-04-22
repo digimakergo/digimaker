@@ -17,9 +17,15 @@ type ContentTyper interface {
 	*/
 
 	//Return all fields
-	//Fields() map[string]fieldtype.Fielder
+	//Fields() map[string]fieldtype.Fieldtyper
 
 	Values() map[string]interface{}
+
+	SetValue(identifier string, value interface{}) error
+
+	Store() error
+
+	Value(identifier string) interface{}
 
 	//Visit  field dynamically
 	//Field(name string) interface{}
