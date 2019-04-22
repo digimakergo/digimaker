@@ -41,6 +41,12 @@ func (c *Folder) contentValues() map[string]interface{} {
 	return result
 }
 
+func (c *Folder) IdentifierList() []string {
+	return append(c.ContentCommon.IdentifierList(),[]string{ "summary","title",}...)
+}
+
+//todo: cache this(maybe cache map in a private property?)
+//todo: maybe return all field identifers as []string?
 func (c *Folder) Values() map[string]interface{} {
     result := c.contentValues()
 

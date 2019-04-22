@@ -7,6 +7,10 @@ type ContentCommon struct {
 	RemoteID  string `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 }
 
+func (c ContentCommon) IdentifierList() []string {
+	return []string{"cid", "published", "modified", "remote_id"}
+}
+
 func (c ContentCommon) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.CID

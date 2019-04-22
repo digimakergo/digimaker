@@ -133,6 +133,9 @@ func main() {
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "User-agent: * \nDisallow /")
 	})
+
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../web"))))
+
 	http.Handle("/", r)
 	http.ListenAndServe(":8089", nil)
 }

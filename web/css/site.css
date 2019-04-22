@@ -1,0 +1,13 @@
+body{
+    margin: 10px;
+}
+
+.tool{
+    float: right;
+}
+
+@media only screen and (max-width: 600px) {
+    .tool{
+        float: none
+    }
+}

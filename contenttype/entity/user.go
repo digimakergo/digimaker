@@ -51,6 +51,12 @@ func (c *User) contentValues() map[string]interface{} {
 	return result
 }
 
+func (c *User) IdentifierList() []string {
+	return append(c.ContentCommon.IdentifierList(),[]string{ "firstname","lastname","login","password",}...)
+}
+
+//todo: cache this(maybe cache map in a private property?)
+//todo: maybe return all field identifers as []string?
 func (c *User) Values() map[string]interface{} {
     result := c.contentValues()
 

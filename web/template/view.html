@@ -3,17 +3,15 @@
   <title>Example</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+  <link href="/static/css/site.css" rel="stylesheet">
 </head>
 
-<body style="padding: 10px">
+<body>
   <h2>{{.current.Name}}</h2>
-  <div style="float: right">
+  <div class="tool">
   <div>
-      <a href="/content/new/folder/{{.current.ID}}" class="btn btn-primary">Create new Folder</a> <br /><br />
-  </div>
-  <div>
-      <a href="/content/new/article/{{.current.ID}}" class="btn btn-primary">Create new article</a>
+      <a href="/content/new/folder/{{.current.ID}}" class="btn btn-primary btn-sm">New Folder</a>
+      <a href="/content/new/article/{{.current.ID}}" class="btn btn-primary btn-sm">New article</a>
   </div>
   <h3>Top folders</h3>
   {{range $index,$folder := .folders}}
@@ -21,19 +19,14 @@
   {{end}}
   </div>
 
-  <h3>Detail</h3>
   <div class="block">
 
-  {{$fields := .current.Values}}
+  {{$fields := .current.IdentifierList}}
 
-  <div style="border: 1px solid #e8e8e8;
-    height: 200px;
-    overflow: scroll;
-    width: 400px;
-    border-radius: 5px;
-    padding: 10px;
-    box-shadow: 2px 3px 3px 0px #e8e8e8;">
-  {{range $identifier, $value := $fields}}
+  <div>
+  <div>ID: {{.current.ID}}</div>
+  {{range $i, $identifier := $fields}}
+  {{$value := $.current.Value $identifier }}
   <div>
     <label style="width:200px; display: inline-block">{{$identifier}}:</label>
     <span>
@@ -46,7 +39,6 @@
   </div>
   {{end}}
 </div>
-<br />
 
   <h3>Folder under</h3>
   <div>
