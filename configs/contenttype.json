@@ -3,7 +3,7 @@
      "table_name": "dm_folder",
      "versioning": false,
      "locationing": true,
-     "fields": { "title"  : {"type":"text", "required":false},
+     "fields": { "title"  : {"type":"text", "required":true},
                  "summary": {"type":"richtext", "required":false}
                }
    },
