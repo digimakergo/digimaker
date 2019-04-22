@@ -34,7 +34,9 @@ func ( *User ) TableName() string{
 	 return "dm_user"
 }
 
-func (c *User) contentValues() map[string]interface{} {
+
+//todo: cache this? (then you need a reload?)
+func (c *User) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         result["firstname"]=c.Firstname
@@ -53,17 +55,6 @@ func (c *User) contentValues() map[string]interface{} {
 
 func (c *User) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "firstname","lastname","login","password",}...)
-}
-
-//todo: cache this(maybe cache map in a private property?)
-//todo: maybe return all field identifers as []string?
-func (c *User) Values() map[string]interface{} {
-    result := c.contentValues()
-
-	for key, value := range c.Location.Values() {
-		result[key] = value
-	}
-	return result
 }
 
 func (c *User) Value(identifier string) interface{} {
@@ -125,13 +116,13 @@ func (c *User) SetValue(identifier string, value interface{}) error {
 func (c *User) Store() error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.contentValues())
+		id, err := handler.Insert(c.TableName(), c.ToMap())
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.contentValues(), Cond("id", c.CID))
+		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID))
 		return err
 	}
 	return nil

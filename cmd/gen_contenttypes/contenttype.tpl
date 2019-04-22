@@ -25,7 +25,9 @@ func ( *{{$struct_name}} ) TableName() string{
 	 return "{{.settings.TableName}}"
 }
 
-func (c *{{$struct_name}}) contentValues() map[string]interface{} {
+
+//todo: cache this? (then you need a reload?)
+func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     {{range $identifier, $fieldtype := .settings.Fields}}
         result["{{$identifier}}"]=c.{{$identifier|UpperName}}
@@ -38,17 +40,6 @@ func (c *{{$struct_name}}) contentValues() map[string]interface{} {
 
 func (c *{{$struct_name}}) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .settings.Fields}}"{{$identifier}}",{{end}}}...)
-}
-
-//todo: cache this(maybe cache map in a private property?)
-//todo: maybe return all field identifers as []string?
-func (c *{{$struct_name}}) Values() map[string]interface{} {
-    result := c.contentValues()
-
-	for key, value := range c.Location.Values() {
-		result[key] = value
-	}
-	return result
 }
 
 func (c *{{$struct_name}}) Value(identifier string) interface{} {
@@ -89,13 +80,13 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
 func (c *{{$struct_name}}) Store() error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.contentValues())
+		id, err := handler.Insert(c.TableName(), c.ToMap())
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.contentValues(), Cond("id", c.CID))
+		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID))
 		return err
 	}
 	return nil
