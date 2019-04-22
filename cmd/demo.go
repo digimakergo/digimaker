@@ -80,21 +80,25 @@ func New(w http.ResponseWriter, r *http.Request) {
 	variables["posted"] = false
 	if r.Method == "POST" {
 		variables["posted"] = true
-		if vars["type"] == "article" {
-			parentID, _ := strconv.Atoi(vars["id"])
-			title := r.FormValue("title")
-			body := r.FormValue("body")
-			handler := handler.ContentHandler{}
-			success, result, error := handler.Create(parentID, "article", map[string]interface{}{"title": title, "body": body})
-			if !success {
-				variables["success"] = false
-				if error != nil {
-					variables["error"] = error.Error()
-				}
-				variables["validation"] = result
-			} else {
-				variables["success"] = true
+		parentID, _ := strconv.Atoi(vars["id"])
+		params := map[string]interface{}{}
+		r.ParseForm()
+		for key, value := range r.PostForm {
+			if key != "id" && key != "type" {
+				params[key] = value[0]
 			}
+		}
+		contentType := r.PostFormValue("type")
+		handler := handler.ContentHandler{}
+		success, result, error := handler.Create(parentID, contentType, params)
+		if !success {
+			variables["success"] = false
+			if error != nil {
+				variables["error"] = error.Error()
+			}
+			variables["validation"] = result
+		} else {
+			variables["success"] = true
 		}
 
 	}

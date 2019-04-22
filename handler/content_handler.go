@@ -29,7 +29,6 @@ type Contenter interface {
 }
 
 type ContentHandler struct {
-	Content *entity.Article
 }
 
 func (content ContentHandler) CreateLocation(parentID int) {

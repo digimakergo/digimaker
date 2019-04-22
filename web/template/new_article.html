@@ -8,7 +8,6 @@
 <body>
     <h2>New article</h2>
     <form method="post">
-        <input type="hidden" name="parent" value="{{.id}}" />
         <input type="hidden" name="type" value="article" />
         {{if .posted}}
             {{if $.success}}
