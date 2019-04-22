@@ -41,6 +41,7 @@ func (content ContentHandler) CreateLocation(parentID int) {
 func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
 	definition := contenttype.GetContentDefinition(contentType)
 	//todo: check there is no extra field in the inputs
+	//todo: check max length
 	//check required
 	fieldsDef := definition.Fields
 	result := ValidationResult{}
@@ -109,6 +110,11 @@ func (handler *ContentHandler) Create(parentID int, contentType string, inputs m
 
 	contentDefinition := contenttype.GetContentDefinition(contentType)
 	fieldsDefinition := contentDefinition.Fields
+
+	//todo: check if all the inputs are needed.
+
+	//todo: check all kind of validation
+
 	for identifier, input := range inputs {
 		fieldType := fieldsDefinition[identifier].FieldType
 		fieldtypeHandler := fieldtype.GetHandler(fieldType)

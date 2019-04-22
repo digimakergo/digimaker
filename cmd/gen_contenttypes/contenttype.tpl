@@ -36,6 +36,8 @@ func (c *{{$struct_name}}) contentValues() map[string]interface{} {
 	return result
 }
 
+//todo: cache this(maybe cache map in a private property?)
+//todo: maybe return all field identifers as []string?
 func (c *{{$struct_name}}) Values() map[string]interface{} {
     result := c.contentValues()
 
