@@ -1,4 +1,11 @@
 {
+   "relationlist":{
+       "searchable": false,
+       "value": "RelationList",
+       "name": "Relation List",
+       "translations": {"nor-no": "Tekst",
+                         "chi-cn": "文本"  }
+   },
    "text":{
               "searchable": true,
               "value": "TextField",

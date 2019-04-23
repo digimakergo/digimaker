@@ -5,8 +5,6 @@ type ContentCommon struct {
 	Published int    `boil:"published" json:"published" toml:"published" yaml:"published"`
 	Modified  int    `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
 	CUID      string `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
-	//Relations betwen contents. this is a cache, real relation is in dm_relation table.
-	RelationList ContentRelationList `boil:"relation_list" json:"relation_list" toml:"relation_list" yaml:"relation_list"`
 }
 
 func (c ContentCommon) IdentifierList() []string {
@@ -19,7 +17,6 @@ func (c ContentCommon) Values() map[string]interface{} {
 	result["published"] = c.Published
 	result["modified"] = c.Modified
 	result["cuid"] = c.CUID
-	result["relation_list"] = c.RelationList
 	return result
 }
 

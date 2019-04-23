@@ -14,7 +14,11 @@
       "locationing": true,
       "fields": { "title"  : {"type":"text", "required":true},
                   "summary": {"type":"richtext", "required":false},
-                  "body": {"type": "richtext", "required": false}
+                  "body": {"type": "richtext", "required": false},
+                  "related_articles": { "type":"relationlist",
+                                        "required":false,
+                                        "parameters":{ "type": "article" }
+                                      }
                 }
    },
   "user":{

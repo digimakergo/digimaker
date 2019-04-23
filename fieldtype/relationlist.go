@@ -1,7 +1,7 @@
-//Author xc, Created on 2019-04-23 16:50
+//Author xc, Created on 2019-04-23 22:20
 //{COPYRIGHTS}
 
-package entity
+package fieldtype
 
 import (
 	"encoding/json"
@@ -9,27 +9,17 @@ import (
 	"github.com/pkg/errors"
 )
 
-type RelationSetting map[string]string
-
-//A relationtype is to cache relation group information in an article,
-//in db it can be a serilized string or json
-//The real reation is in dm_relation
-//So this is a low level field type(datatype), which is simiar to string
-type ContentRelationList struct {
+type RelationList struct {
 	data string
 	//Value is a group of relations.
 	//eg. { "relation_articles": [ {"name":"Break news",
 	//                               "uid":"999y32gghh",
 	//                                "id": 1123 } ],
 	//       "related_links": ... }
-	Value map[string][]RelationSetting
+	Value []map[string]string
 }
 
-func (relations *ContentRelationList) GetRelationList(identifier string) []RelationSetting {
-	return relations.Value[identifier]
-}
-
-func (relations *ContentRelationList) Scan(src interface{}) error {
+func (relations *RelationList) Scan(src interface{}) error {
 	var source string
 	switch src.(type) {
 	case string:

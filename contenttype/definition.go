@@ -16,8 +16,9 @@ type ContentTypeSetting struct {
 }
 
 type ContentField struct {
-	FieldType string `json:"type"`
-	Required  bool   `json:"required"`
+	FieldType  string            `json:"type"`
+	Required   bool              `json:"required"`
+	Parameters map[string]string `json:"parameters"`
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json

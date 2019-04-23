@@ -38,11 +38,7 @@
         {{end}}
     </span>
   </div>
-  {{end}}
-  {{if .current.RelationList.Value }}
-  <h4>Related articles</h4>
-  <div><a href="/{{(index .current.RelationList.Value.related_articles 0).name}}">{{(index .current.RelationList.Value.related_articles 0).name}}</a></div>
-  {{end}}
+  {{end}}  
 </div>
 
   <h3>Folder under</h3>
