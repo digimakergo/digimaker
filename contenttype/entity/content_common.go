@@ -4,11 +4,13 @@ type ContentCommon struct {
 	CID       int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Published int    `boil:"published" json:"published" toml:"published" yaml:"published"`
 	Modified  int    `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
-	RemoteID  string `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
+	CUID      string `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	//Relations betwen contents. this is a cache, real relation is in dm_relation table.
+	RelationList ContentRelationList `boil:"relation_list" json:"relation_list" toml:"relation_list" yaml:"relation_list"`
 }
 
 func (c ContentCommon) IdentifierList() []string {
-	return []string{"cid", "published", "modified", "remote_id"}
+	return []string{"cid", "published", "modified", "cuid"}
 }
 
 func (c ContentCommon) Values() map[string]interface{} {
@@ -16,7 +18,8 @@ func (c ContentCommon) Values() map[string]interface{} {
 	result["id"] = c.CID
 	result["published"] = c.Published
 	result["modified"] = c.Modified
-	result["remote_id"] = c.RemoteID
+	result["cuid"] = c.CUID
+	result["relation_list"] = c.RelationList
 	return result
 }
 
@@ -29,8 +32,8 @@ func (c *ContentCommon) Value(identifier string) interface{} {
 		result = c.Modified
 	case "published":
 		result = c.Published
-	case "remote_id":
-		result = c.RemoteID
+	case "cuid":
+		result = c.CUID
 	}
 	return result
 }
@@ -43,8 +46,8 @@ func (c *ContentCommon) SetValue(identifier string, value interface{}) error {
 		c.Published = value.(int)
 	case "modified":
 		c.Modified = value.(int)
-	case "remote_id":
-		c.RemoteID = value.(string)
+	case "cuid":
+		c.CUID = value.(string)
 	}
 	return nil
 }
