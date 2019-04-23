@@ -25,6 +25,7 @@
 
   <div>
   <div>ID: {{.current.ID}}</div>
+  <div>UID: {{.current.UID}}</div>
   {{range $i, $identifier := $fields}}
   {{$value := $.current.Value $identifier }}
   <div>
