@@ -26,6 +26,7 @@
   <div>
   <div>ID: {{.current.ID}}</div>
   <div>UID: {{.current.UID}}</div>
+  <div>Relations: {{.current.Relations}}</div>
   {{range $i, $identifier := $fields}}
   {{$value := $.current.Value $identifier }}
   <div>
@@ -38,7 +39,7 @@
         {{end}}
     </span>
   </div>
-  {{end}}  
+  {{end}}
 </div>
 
   <h3>Folder under</h3>

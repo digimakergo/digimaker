@@ -52,7 +52,7 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 
 	relationQuery := ` ,
                     GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
-                                      'from_location',relation.from_location,
+                                      'from_location', relation.from_location,
                                       'description',relation.description,
                                       'data' ,relation.data )
                          ORDER BY relation.priority ) as relations`
@@ -64,7 +64,7 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
                      LEFT JOIN dm_relation relation
                         ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
                      WHERE ` + conditions + `
-                     GROUP BY relation.to_content_id, relation.to_type`
+                     GROUP BY location.id`
 
 	util.Debug("db", sql)
 	err = queries.Raw(sql, values...).Bind(context.Background(), db, content)

@@ -75,8 +75,6 @@ func TestUpdate(t *testing.T) {
 
 	fmt.Println("New article")
 	article4, err := handler.Querier().Fetch("article", Cond("location.id", 42))
-	//fmt.Println(article4.(entity.Folder).ContentCommon.CID)
-	// fmt.Println(article4.(entity.Article).ContentCommon)
 	fmt.Println(article4.(*entity.Article).Relations.Value)
 
 }
