@@ -4,6 +4,7 @@ import (
 	"dm/contenttype"
 	"dm/db"
 	"fmt"
+	"time"
 )
 
 type RelationHandler struct {
@@ -18,14 +19,15 @@ func (handler *RelationHandler) AddTo(toContent contenttype.ContentTyper, from c
 	fmt.Println(toContent)
 	values := map[string]interface{}{
 		"from_location": from.ToMap()["id"],
-		"to_content":    toContent.Value("cid"),
-		"relation_type": contenttype.GetContentDefinition(toContent.ContentType()).Fields[identifier].FieldType,
+		"to_content_id": toContent.Value("cid"),
+		"to_type":       toContent.ContentType(),
 		"priority":      0,
-		"identifier":    identifier} //todo: get data from value pattern
+		"identifier":    identifier,
+		"description":   "Test" + time.Now().String()} //todo: get data from value pattern
 	id, err := db.Insert("dm_relation", values)
 	fmt.Println(id)
 	fmt.Println(err)
-	return err
+	return nil
 }
 
 //Update all contents which is related to current content(fromContent)
