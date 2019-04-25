@@ -41,9 +41,9 @@
          "name": "Relation list",
          "value": "RelationList",
          "is_relation": true,
-         "relation_settings": {"value_type": "*",
-                               "value_from":"id,name",
-                               "value_pattern":"{id},{name}",
+         "relation_settings": {"contenttype_from": "*",
+                               "data_fields":"id,name",
+                               "data_pattern":"{id},{name}",
                                "name": "Relation List"
                          },
          "translations": {"nor-no": "Tekst",
@@ -56,9 +56,9 @@
          "value": "RelationList",
          "is_relation": true,
          "relation_settings": {
-                     "value_type": "image",
-                     "value_from":"cuid,image_path",
-                     "value_pattern":"{cuid},{image_path}"
+                     "contenttype_from": "image",
+                     "data_fields":"cuid,image_path",
+                     "data_pattern":"{cuid},{image_path}"
                  },
          "translations": {"nor-no": "Tekst",
                            "chi-cn": "文本"  }

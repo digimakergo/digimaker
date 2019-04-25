@@ -18,6 +18,9 @@ func (c ContentCommon) Values() map[string]interface{} {
 	result["published"] = c.Published
 	result["modified"] = c.Modified
 	result["cuid"] = c.CUID
+	for identifier, relationValue := range c.Relations.Value {
+		result[identifier] = relationValue
+	}
 	return result
 }
 
@@ -32,6 +35,8 @@ func (c *ContentCommon) Value(identifier string) interface{} {
 		result = c.Published
 	case "cuid":
 		result = c.CUID
+	case "relations":
+		result = c.Relations
 	}
 	return result
 }

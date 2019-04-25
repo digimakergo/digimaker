@@ -26,7 +26,6 @@
   <div>
   <div>ID: {{.current.ID}}</div>
   <div>UID: {{.current.UID}}</div>
-  <div>Relations: {{.current.Relations}}</div>
   {{range $i, $identifier := $fields}}
   {{$value := $.current.Value $identifier }}
   <div>
@@ -41,6 +40,15 @@
   </div>
   {{end}}
 </div>
+
+{{if eq .current.ContentType "article"}}
+<h4>Related articles</h4>
+<ul>
+    {{range $i, $article := .current.Value "related_articles"}}
+        <li><a href="{{$article.from_location}}">{{index $article "data"}} <i>{{index $article "description"}}</i></a></li>
+    {{end}}
+</ul>
+{{end}}
 
   <h3>Folder under</h3>
   <div>

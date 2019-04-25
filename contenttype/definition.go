@@ -4,6 +4,7 @@
 package contenttype
 
 import (
+	"dm/fieldtype"
 	"dm/util"
 )
 
@@ -19,6 +20,10 @@ type ContentField struct {
 	FieldType  string            `json:"type"`
 	Required   bool              `json:"required"`
 	Parameters map[string]string `json:"parameters"`
+}
+
+func (f *ContentField) GetDefinition() fieldtype.FieldtypeSetting {
+	return fieldtype.GetDefinition()[f.FieldType]
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json

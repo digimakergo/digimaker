@@ -16,7 +16,9 @@ type {{$struct_name}} struct{
      ContentCommon `boil:",bind"`
     {{range $identifier, $fieldtype := .settings.Fields}}
      {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
-     {{$identifier|UpperName}} fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+     {{if not $type_settings.IsRelation }}
+        {{$identifier|UpperName}} fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+     {{end}}
     {{end}}
      Location `boil:"location,bind"`
 }
@@ -34,7 +36,9 @@ func ( *{{$struct_name}} ) ContentType() string{
 func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     {{range $identifier, $fieldtype := .settings.Fields}}
+        {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
         result["{{$identifier}}"]=c.{{$identifier|UpperName}}
+        {{end}}
     {{end}}
 	for key, value := range c.ContentCommon.Values() {
 		result[key] = value
@@ -51,7 +55,11 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
 	switch identifier {
     {{range $identifier, $fieldtype := .settings.Fields}}
     case "{{$identifier}}":
-        result = c.{{$identifier|UpperName}}
+        {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
+            result = c.{{$identifier|UpperName}}
+        {{else}}
+            result = c.Relations.Value["{{$identifier}}"]
+        {{end}}
     {{end}}
 	case "cid":
 		result = c.ContentCommon.CID
@@ -65,9 +73,11 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
 func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         {{range $identifier, $fieldtype := .settings.Fields}}
-             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
+            {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
+            {{if not $type_settings.IsRelation}}
             case "{{$identifier}}":
             c.{{$identifier|UpperName}} = value.(fieldtype.{{$type_settings.Value}})
+            {{end}}
         {{end}}
 	default:
 		err := c.ContentCommon.SetValue(identifier, value)

@@ -16,10 +16,14 @@ type Folder struct{
      ContentCommon `boil:",bind"`
     
      
-     Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+     
+        Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+     
     
      
-     Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+     
+        Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+     
     
      Location `boil:"location,bind"`
 }
@@ -37,9 +41,13 @@ func ( *Folder ) ContentType() string{
 func (c *Folder) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
+        
         result["summary"]=c.Summary
+        
     
+        
         result["title"]=c.Title
+        
     
 	for key, value := range c.ContentCommon.Values() {
 		result[key] = value
@@ -56,10 +64,14 @@ func (c *Folder) Value(identifier string) interface{} {
 	switch identifier {
     
     case "summary":
-        result = c.Summary
+        
+            result = c.Summary
+        
     
     case "title":
-        result = c.Title
+        
+            result = c.Title
+        
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -73,13 +85,17 @@ func (c *Folder) Value(identifier string) interface{} {
 func (c *Folder) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
-             
+            
+            
             case "summary":
             c.Summary = value.(fieldtype.RichTextField)
+            
         
-             
+            
+            
             case "title":
             c.Title = value.(fieldtype.TextField)
+            
         
 	default:
 		err := c.ContentCommon.SetValue(identifier, value)

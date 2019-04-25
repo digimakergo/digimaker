@@ -3,6 +3,8 @@
 package entity
 
 import (
+	"dm/contenttype"
+	"dm/fieldtype"
 	"encoding/json"
 
 	"github.com/pkg/errors"
@@ -20,10 +22,16 @@ type Relation struct {
 	RemoteID        string `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
 }
 
-//todo: separate ContentRelations with fieldtype.RelationList
-//,since ContentRelations will be a container for RelationList instances.
+//Generate data based on data_pattern in the relation type.
+//eg. typical relation list is name+url
+//   cover image can be name+image id+image alias(eg. medium/coverimage)
+// slideshows can be same as cover image, but will be more images, which is supported automatically
+func (r *Relation) GenerateData(toContent contenttype.ContentTyper, identifier string, fromContent contenttype.ContentTyper) {
+
+}
+
 type ContentRelations struct {
-	Value map[string][]map[string]interface{}
+	Value map[string][]fieldtype.RelationField
 }
 
 func (relations *ContentRelations) Scan(src interface{}) error {
@@ -39,23 +47,23 @@ func (relations *ContentRelations) Scan(src interface{}) error {
 
 	relationData := "[" + source + "]"
 
-	// //	var objmap map[string]*json.RawMessage
-	var objmap []map[string]interface{}
-	//
-	err := json.Unmarshal([]byte(relationData), &objmap)
+	var mapObject []map[string]interface{}
+	err := json.Unmarshal([]byte(relationData), &mapObject)
 	if err != nil {
 		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+source)
 	}
 
-	value := map[string][]map[string]interface{}{}
-	for _, item := range objmap {
+	//todo: validate keys and make sure it's pre defined
+	value := map[string][]fieldtype.RelationField{}
+	for _, item := range mapObject {
 		if item["identifier"] != nil {
 			identifier := item["identifier"].(string)
-			delete(item, "identifier")
-			if _, ok := relations.Value[identifier]; ok {
-				value[identifier] = append(relations.Value[identifier], item)
+			if _, ok := value[identifier]; ok {
+				value[identifier] = append(value[identifier], item)
 			} else {
-				value[identifier] = []map[string]interface{}{item}
+				var fieldValue fieldtype.RelationField = item
+				fieldValue.Restructure()
+				value[identifier] = []fieldtype.RelationField{fieldValue}
 			}
 		}
 	}

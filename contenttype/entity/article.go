@@ -15,8 +15,6 @@ type Article struct {
 
 	Body fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
 
-	RelatedArticles fieldtype.RelationList `boil:"related_articles" json:"related_articles" toml:"related_articles" yaml:"related_articles"`
-
 	Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
 
 	Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
@@ -38,8 +36,6 @@ func (c *Article) ToMap() map[string]interface{} {
 
 	result["body"] = c.Body
 
-	result["related_articles"] = c.RelatedArticles
-
 	result["summary"] = c.Summary
 
 	result["title"] = c.Title
@@ -51,7 +47,7 @@ func (c *Article) ToMap() map[string]interface{} {
 }
 
 func (c *Article) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(), []string{"body", "related_articles", "summary", "title"}...)
+	return append(c.ContentCommon.IdentifierList(), []string{"body", "coverimage", "related_articles", "summary", "title"}...)
 }
 
 func (c *Article) Value(identifier string) interface{} {
@@ -59,15 +55,23 @@ func (c *Article) Value(identifier string) interface{} {
 	switch identifier {
 
 	case "body":
+
 		result = c.Body
 
+	case "coverimage":
+
+		result = c.Relations.Value["coverimage"]
+
 	case "related_articles":
-		result = c.RelatedArticles
+
+		result = c.Relations.Value["related_articles"]
 
 	case "summary":
+
 		result = c.Summary
 
 	case "title":
+
 		result = c.Title
 
 	case "cid":
@@ -83,9 +87,6 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
 
 	case "body":
 		c.Body = value.(fieldtype.RichTextField)
-
-	case "related_articles":
-		c.RelatedArticles = value.(fieldtype.RelationList)
 
 	case "summary":
 		c.Summary = value.(fieldtype.RichTextField)
