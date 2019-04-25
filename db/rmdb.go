@@ -50,11 +50,21 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 	}
 	locationColumns = locationColumns[:len(locationColumns)-1]
 
-	sql := `SELECT c.*, ` + locationColumns + `
-                   FROM dm_location location, ` + tableName + ` c
-                   WHERE location.content_id=c.id
-                         AND location.content_type= '` + contentType + `'
-                         AND ` + conditions
+	relationQuery := ` ,
+                    GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
+                                      'from_location',relation.from_location,
+                                      'description',relation.description,
+                                      'data' ,relation.data )
+                         ORDER BY relation.priority ) as relations`
+
+	sql := `SELECT c.*, ` + locationColumns + relationQuery + `
+                   FROM ( ` + tableName + ` c
+                     INNER JOIN dm_location location
+                        ON location.content_type = '` + contentType + `' AND location.content_id=c.id )
+                     LEFT JOIN dm_relation relation
+                        ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
+                     WHERE ` + conditions + `
+                     GROUP BY relation.to_content_id, relation.to_type`
 
 	util.Debug("db", sql)
 	err = queries.Raw(sql, values...).Bind(context.Background(), db, content)

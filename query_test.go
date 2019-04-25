@@ -4,6 +4,7 @@ import (
 	"dm/contenttype"
 	"dm/contenttype/entity"
 	"dm/db"
+	"dm/fieldtype"
 	"dm/handler"
 	. "dm/query"
 	"dm/util"
@@ -16,6 +17,7 @@ import (
 
 func TestMain(m *testing.M) {
 	contenttype.LoadDefinition()
+	fieldtype.LoadDefinition()
 	m.Run()
 }
 
@@ -33,7 +35,7 @@ func TestQuery(t *testing.T) {
 
 	folders, _ := handler.Querier().List("folder", Cond("1", "1"))
 	fmt.Println("HELLO")
-	fmt.Println(folders[0])
+	fmt.Println(folders.(*[]entity.Folder))
 }
 
 func TestUpdate(t *testing.T) {
@@ -45,7 +47,7 @@ func TestUpdate(t *testing.T) {
 	fmt.Println(article)
 	uid := util.GenerateUID()
 	println(uid)
-	article.RemoteID = uid
+	article.UID = uid
 	err := article.Store()
 	fmt.Println(err)
 
@@ -72,9 +74,9 @@ func TestUpdate(t *testing.T) {
 	fmt.Println(articles)
 
 	fmt.Println("New article")
-	article4, err := handler.Querier().Fetch("article", Cond("location.id", 2))
+	article4, err := handler.Querier().Fetch("article", Cond("location.id", 42))
 	//fmt.Println(article4.(entity.Folder).ContentCommon.CID)
-	fmt.Println(article4.(entity.Article).ContentCommon)
-	fmt.Println(article4.Values())
+	// fmt.Println(article4.(entity.Article).ContentCommon)
+	fmt.Println(article4.(*entity.Article).Relations.Value)
 
 }

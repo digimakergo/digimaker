@@ -34,6 +34,10 @@ func ( *User ) TableName() string{
 	 return "dm_user"
 }
 
+func ( *User ) ContentType() string{
+	 return "user"
+}
+
 
 //todo: cache this? (then you need a reload?)
 func (c *User) ToMap() map[string]interface{} {

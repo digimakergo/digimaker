@@ -1,10 +1,13 @@
 package entity
 
+import "dm/fieldtype"
+
 type ContentCommon struct {
-	CID       int    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Published int    `boil:"published" json:"published" toml:"published" yaml:"published"`
-	Modified  int    `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
-	CUID      string `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	CID       int                    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Published int                    `boil:"published" json:"published" toml:"published" yaml:"published"`
+	Modified  int                    `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
+	CUID      string                 `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	Relations fieldtype.RelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
 func (c ContentCommon) IdentifierList() []string {

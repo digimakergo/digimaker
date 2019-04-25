@@ -15,3 +15,9 @@ type FieldtypeHandler interface {
 	Validate(input interface{}) (bool, string)
 	IsEmpty(input interface{}) bool
 }
+
+//Relation field handler can convert relations into RelationField
+type RelationFieldHandler interface {
+	ToStorage(contents interface{}) interface{}
+	UpdateOne(toContent interface{}, identifier string, from interface{})
+}

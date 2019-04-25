@@ -1,11 +1,4 @@
 {
-   "relationlist":{
-       "searchable": false,
-       "value": "RelationList",
-       "name": "Relation List",
-       "translations": {"nor-no": "Tekst",
-                         "chi-cn": "文本"  }
-   },
    "text":{
               "searchable": true,
               "value": "TextField",
@@ -42,5 +35,32 @@
          "value": "TextField",
          "translations": {"nor-no": "Tekst",
                            "chi-cn": "文本"  }
-         }
+         },
+     "relationlist":{
+         "searchable": false,
+         "name": "Relation list",
+         "value": "RelationList",
+         "is_relation": true,
+         "relation_settings": {"value_type": "*",
+                               "value_from":"id,name",
+                               "value_pattern":"{id},{name}",
+                               "name": "Relation List"
+                         },
+         "translations": {"nor-no": "Tekst",
+                           "chi-cn": "文本"  }
+     },
+
+     "image_relation":{
+         "searchable": false,
+         "name": "Related Images",
+         "value": "RelationList",
+         "is_relation": true,
+         "relation_settings": {
+                     "value_type": "image",
+                     "value_from":"cuid,image_path",
+                     "value_pattern":"{cuid},{image_path}"
+                 },
+         "translations": {"nor-no": "Tekst",
+                           "chi-cn": "文本"  }
+     }
 }

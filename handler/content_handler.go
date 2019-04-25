@@ -169,3 +169,7 @@ func (content ContentHandler) Delete(id int, toTrash bool) {
 func (handler *ContentHandler) store(parentID int, contentType string, fields map[string]interface{}) {
 	handler.Validate(contentType, fields)
 }
+
+func (handler *ContentHandler) UpdateRelation(content contenttype.ContentTyper) {
+
+}

@@ -25,6 +25,10 @@ func ( *{{$struct_name}} ) TableName() string{
 	 return "{{.settings.TableName}}"
 }
 
+func ( *{{$struct_name}} ) ContentType() string{
+	 return "{{.name}}"
+}
+
 
 //todo: cache this? (then you need a reload?)
 func (c *{{$struct_name}}) ToMap() map[string]interface{} {

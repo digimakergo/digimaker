@@ -28,6 +28,10 @@ func ( *Folder ) TableName() string{
 	 return "dm_folder"
 }
 
+func ( *Folder ) ContentType() string{
+	 return "folder"
+}
+
 
 //todo: cache this? (then you need a reload?)
 func (c *Folder) ToMap() map[string]interface{} {
