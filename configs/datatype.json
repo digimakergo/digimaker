@@ -43,6 +43,7 @@
          "is_relation": true,
          "relation_settings": {"contenttype_from": "*",
                                "data_fields":"id,name",
+			       "embed_data": false,
                                "data_pattern":"{id},{name}",
                                "name": "Relation List"
                          },
@@ -50,6 +51,20 @@
                            "chi-cn": "文本"  }
      },
 
+     "editor_list":{
+         "searchable": false,
+         "name": "Editors",
+         "value": "RelationList",
+         "is_relation": true,
+         "relation_settings": {
+                     "contenttype_from": "user",
+                     "data_fields":"name, email",
+                     "embed_data":true,
+                     "data_pattern":"{name},{email}"
+                 },
+         "translations": {"nor-no": "Tekst",
+                           "chi-cn": "文本"  }
+     },
      "image_relation":{
          "searchable": false,
          "name": "Related Images",
@@ -58,7 +73,8 @@
          "relation_settings": {
                      "contenttype_from": "image",
                      "data_fields":"cuid,image_path",
-                     "data_pattern":"{cuid},{image_path}"
+                     "embed_data":false,
+		     "data_pattern":"{cuid},{image_path}"
                  },
          "translations": {"nor-no": "Tekst",
                            "chi-cn": "文本"  }
