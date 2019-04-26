@@ -64,13 +64,13 @@ func NewFieldType(fieldType string) Fieldtyper {
 type FieldTypeSettings map[string]FieldtypeSetting
 
 type FieldtypeSetting struct {
-	Identifier       string            `json:"identifier"`
-	Name             string            `json:"name"`
-	Searchable       bool              `json:"searchable"`
-	Value            string            `json:"value"`
-	Translations     map[string]string `json:"translations"`
-	IsRelation       bool              `json:"is_relation"`
-	RelationSettings map[string]string `json:"relation_settings"`
+	Identifier       string                 `json:"identifier"`
+	Name             string                 `json:"name"`
+	Searchable       bool                   `json:"searchable"`
+	Value            string                 `json:"value"`
+	Translations     map[string]string      `json:"translations"`
+	IsRelation       bool                   `json:"is_relation"`
+	RelationSettings map[string]interface{} `json:"relation_settings"`
 }
 
 // Datatypes which defined in datatype.json

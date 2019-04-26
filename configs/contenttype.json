@@ -13,6 +13,7 @@
       "versioning": true,
       "locationing": true,
       "fields": { "title"  : {"type":"text", "required":true},
+                  "editors": {"type":"editorlist", "required": false},
                   "coverimage":{"type":"image_relation", "required":false},
                   "summary": {"type":"richtext", "required":false},
                   "body": {"type": "richtext", "required": false},

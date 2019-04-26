@@ -30,6 +30,13 @@
                       "translations": {"nor-no": "Tekst",
                                         "chi-cn": "文本"  }
                      },
+     "editorlist":{
+         "searchable": true,
+         "name": "Editors",
+         "value": "EditorList",
+         "translations": {"nor-no": "Tekst",
+                           "chi-cn": "文本"  }
+     },
    "dmgooglemap":{       "searchable": true,
          "name": "Text",
          "value": "TextField",
@@ -47,21 +54,6 @@
                                "data_pattern":"{id},{name}",
                                "name": "Relation List"
                          },
-         "translations": {"nor-no": "Tekst",
-                           "chi-cn": "文本"  }
-     },
-
-     "editor_list":{
-         "searchable": false,
-         "name": "Editors",
-         "value": "RelationList",
-         "is_relation": true,
-         "relation_settings": {
-                     "contenttype_from": "user",
-                     "data_fields":"name, email",
-                     "embed_data":true,
-                     "data_pattern":"{name},{email}"
-                 },
          "translations": {"nor-no": "Tekst",
                            "chi-cn": "文本"  }
      },

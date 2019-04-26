@@ -74,7 +74,7 @@ func TestUpdate(t *testing.T) {
 	fmt.Println(articles)
 
 	fmt.Println("New article")
-	article4, err := handler.Querier().Fetch("article", Cond("location.id", 42))
-	fmt.Println(article4.(*entity.Article).Relations.Value)
+	article4, err := handler.Querier().Fetch("article", Cond("location.id", 43))
+	fmt.Println(article4.(*entity.Article).Editors)
 
 }

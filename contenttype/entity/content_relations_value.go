@@ -4,6 +4,7 @@ package entity
 import (
 	"dm/fieldtype"
 	"encoding/json"
+	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -28,6 +29,8 @@ func (relations *ContentRelationsValue) Scan(src interface{}) error {
 	}
 
 	relationData := "[" + source + "]"
+
+	fmt.Println(relationData)
 
 	var mapObject []map[string]interface{}
 	err := json.Unmarshal([]byte(relationData), &mapObject)
