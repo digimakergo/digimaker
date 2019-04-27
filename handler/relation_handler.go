@@ -27,7 +27,7 @@ func (handler *RelationHandler) Add(to contenttype.ContentTyper, from contenttyp
 	contentType := to.ContentType()
 	fromLocationID := from.Value("id").(int)
 
-	//Validate if it's added already.
+	//Check if it's added already.
 	dbHandler := db.DBHanlder()
 	currentRelation := entity.Relation{}
 	dbHandler.GetEnity("dm_relation", Cond("to_content_id", contentID).
