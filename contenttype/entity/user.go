@@ -4,6 +4,7 @@
 package entity
 
 import (
+    "database/sql"
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
@@ -153,16 +154,16 @@ func (c *User) SetValue(identifier string, value interface{}) error {
 
 //Store content.
 //Note: it will set id to CID after success
-func (c *User) Store() error {
+func (c *User) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap())
+		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID))
+		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID), transaction...)
 		return err
 	}
 	return nil

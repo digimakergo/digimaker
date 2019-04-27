@@ -76,16 +76,16 @@ func (c *Version) Field(name string) interface{} {
 	return result
 }
 
-func (c Version) Store() error {
+func (c Version) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.ID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap())
+		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
 		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.ID))
+		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil

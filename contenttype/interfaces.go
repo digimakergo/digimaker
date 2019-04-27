@@ -3,6 +3,8 @@
 
 package contenttype
 
+import "database/sql"
+
 //All the content type(eg. article, folder) will implement this interface.
 type ContentTyper interface {
 	// Since go's embeded struct can't really inherit well from BaseContentType(eg. ID)
@@ -23,7 +25,7 @@ type ContentTyper interface {
 
 	SetValue(identifier string, value interface{}) error
 
-	Store() error
+	Store(...*sql.Tx) error
 
 	Value(identifier string) interface{}
 

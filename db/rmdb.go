@@ -4,6 +4,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"dm/contenttype"
 	"dm/query"
 	"dm/util"
@@ -15,7 +16,9 @@ import (
 )
 
 // Implement DBEntitier
-type RMDB struct{}
+type RMDB struct {
+	Transaction *sql.Tx
+}
 
 //Query by ID
 func (rmdb *RMDB) GetByID(contentType string, id int, content interface{}) error {
@@ -98,65 +101,83 @@ func (*RMDB) GetEntities() {
 
 }
 
-func (RMDB) Insert(tablename string, values map[string]interface{}) (int, error) {
-	sql := "INSERT INTO " + tablename + " ("
+func (RMDB) Insert(tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
+	sqlStr := "INSERT INTO " + tablename + " ("
 	valuesString := "VALUES("
 	var valueParameters []interface{}
 	if len(values) > 0 {
 		for name, value := range values {
 			if name != "id" {
-				sql += name + ","
+				sqlStr += name + ","
 				valuesString += "?,"
 				valueParameters = append(valueParameters, value)
 			}
 		}
-		sql = sql[:len(sql)-1]
+		sqlStr = sqlStr[:len(sqlStr)-1]
 		valuesString = valuesString[:len(valuesString)-1]
 	}
-	sql += ")"
+	sqlStr += ")"
 	valuesString += ")"
-	sql = sql + " " + valuesString
-	util.Debug("db", sql)
-	db, err := DB()
-	if err != nil {
-		return 0, errors.Wrap(err, "[RBDM.Insert] Error when getting db connection.")
+	sqlStr = sqlStr + " " + valuesString
+	util.Debug("db", sqlStr)
+
+	var result sql.Result
+	var error error
+	//execute using and without using transaction
+	if len(transation) == 0 {
+		db, err := DB()
+		if err != nil {
+			return 0, errors.Wrap(err, "[RBDM.Insert] Error when getting db connection.")
+		}
+		result, error = db.ExecContext(context.Background(), sqlStr, valueParameters...)
+	} else {
+		result, error = transation[0].ExecContext(context.Background(), sqlStr, valueParameters...)
 	}
-	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
-	if err != nil {
-		return 0, errors.Wrap(err, "[RBDM.Insert]Error when executing. sql - "+sql)
+	//execution error
+	if error != nil {
+		return 0, errors.Wrap(error, "[RBDM.Insert]Error when executing. sql - "+sqlStr)
 	}
 	id, err := result.LastInsertId()
+	//Get id error
 	if err != nil {
-		return 0, errors.Wrap(err, "[RBDM.Insert]Error when inserting. sql - "+sql)
+		return 0, errors.Wrap(err, "[RBDM.Insert]Error when inserting. sql - "+sqlStr)
 	}
+
 	util.Debug("db", "Insert results in id: "+strconv.FormatInt(id, 10))
 
 	return int(id), nil
 }
 
 //Generic update an entity
-func (RMDB) Update(tablename string, values map[string]interface{}, condition query.Condition) error {
-	sql := "UPDATE " + tablename + " SET "
+func (RMDB) Update(tablename string, values map[string]interface{}, condition query.Condition, transation ...*sql.Tx) error {
+	sqlStr := "UPDATE " + tablename + " SET "
 	var valueParameters []interface{}
 	for name, value := range values {
 		if name != "id" {
-			sql += name + "=?,"
+			sqlStr += name + "=?,"
 			valueParameters = append(valueParameters, value)
 		}
 	}
-	sql = sql[:len(sql)-1]
+	sqlStr = sqlStr[:len(sqlStr)-1]
 	conditionString, conditionValues := BuildCondition(condition)
 	valueParameters = append(valueParameters, conditionValues...)
-	sql += " WHERE " + conditionString
-	db, err := DB()
-	if err != nil {
-		return errors.Wrap(err, "[RMDB.Update]Error when getting db connection.")
+	sqlStr += " WHERE " + conditionString
+
+	util.Debug("db", sqlStr)
+
+	var result sql.Result
+	var error error
+	if len(transation) == 0 {
+		db, err := DB()
+		if err != nil {
+			return errors.Wrap(err, "[RBDM.Update] Error when getting db connection.")
+		}
+		result, error = db.ExecContext(context.Background(), sqlStr, valueParameters...)
+	} else {
+		result, error = transation[0].ExecContext(context.Background(), sqlStr, valueParameters...)
 	}
-	util.Debug("db", sql)
-	//todo: use transaction
-	result, err := db.ExecContext(context.Background(), sql, valueParameters...)
-	if err != nil {
-		return errors.Wrap(err, "[RMDB.Update]Error when updating. sql - "+sql)
+	if error != nil {
+		return errors.Wrap(error, "[RMDB.Update]Error when updating. sql - "+sqlStr)
 	}
 	resultRows, _ := result.RowsAffected()
 	util.Debug("db", "Updated rows:"+strconv.FormatInt(resultRows, 10))

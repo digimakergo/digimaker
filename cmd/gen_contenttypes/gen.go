@@ -5,8 +5,8 @@ import (
 	"dm/fieldtype"
 	"dm/util"
 	"fmt"
-	"html/template"
 	"os"
+	"text/template"
 )
 
 //Generate content types
