@@ -16,5 +16,5 @@ func TestCreateRelation(t *testing.T) {
 	// article, _ := Querier().Fetch("article", query.Cond("location.id", 42))
 	//
 	// priority, _ := strconv.Atoi(time.Now().Format("0102150405"))
-	// handler.AddTo(currentArticle, article, "related_articles", priority, time.Now().String())
+	// handler.Add(currentArticle, article, "related_articles", priority, time.Now().String())
 }

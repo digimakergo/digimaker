@@ -14,28 +14,12 @@ type RelationHandler struct {
 }
 
 //Add a content to current content(toContent)
-func (handler *RelationHandler) AddTo(to contenttype.ContentTyper, from contenttype.ContentTyper, identifier string, priority int, description string) error {
-
-	fieldSetting, ok := contenttype.GetContentDefinition(to.ContentType()).Fields[identifier]
-	if !ok {
-		return errors.New("[handler.AddTo]Target content doesn't have field " + identifier)
-	}
-
-	fieldDef := fieldSetting.GetDefinition()
-	if !fieldDef.IsRelation {
-		return errors.New("[handler.AddTo]field" + identifier + "is not a relation type.")
-	}
-
-	dataFields := strings.Split(fieldDef.RelationSettings.DataFields, ",")
-	dataList := []interface{}{}
+func (handler *RelationHandler) Add(to contenttype.ContentTyper, from contenttype.ContentTyper, identifier string, priority int, description string) error {
 	//todo: validate if the fromField exist. this maybe done in bootstrap/generating datatype config
-
-	for _, fromField := range dataFields {
-		//todo: convert value
-		dataList = append(dataList, from.Value(fromField))
+	data, err := handler.generateData(to, identifier, from)
+	if err != nil {
+		return errors.Wrap(err, "[hanlder.AddTo]")
 	}
-	dataPattern := fieldDef.RelationSettings.DataPattern
-	data := fmt.Sprintf(dataPattern, dataList...)
 
 	//todo: validate if it's added already.
 	relation := entity.Relation{
@@ -46,12 +30,36 @@ func (handler *RelationHandler) AddTo(to contenttype.ContentTyper, from contentt
 		Identifier:   identifier,
 		Description:  description,
 		Data:         data}
-	err := relation.Store()
+	err = relation.Store()
 	if err != nil {
 		errors.Wrap(err, "[handler.AddTo]Saving relation error.")
 	}
 
 	return nil
+}
+
+//Generate relation data based on name pattern.
+func (handler *RelationHandler) generateData(to contenttype.ContentTyper, identifier string, from contenttype.ContentTyper) (string, error) {
+	fieldSetting, ok := contenttype.GetContentDefinition(to.ContentType()).Fields[identifier]
+	if !ok {
+		return "", errors.New("Target content doesn't have field " + identifier)
+	}
+
+	fieldDef := fieldSetting.GetDefinition()
+	if !fieldDef.IsRelation {
+		return "", errors.New("field" + identifier + "is not a relation type.")
+	}
+
+	dataFields := strings.Split(fieldDef.RelationSettings.DataFields, ",")
+	dataList := []interface{}{}
+
+	for _, fromField := range dataFields {
+		//todo: convert value
+		dataList = append(dataList, from.Value(fromField))
+	}
+	dataPattern := fieldDef.RelationSettings.DataPattern
+	data := fmt.Sprintf(dataPattern, dataList...)
+	return data, nil
 }
 
 //Update all contents which is related to current content(fromContent)
