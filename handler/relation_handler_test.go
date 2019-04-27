@@ -22,7 +22,7 @@ func TestCreateRelation(t *testing.T) {
 	article, _ := Querier().Fetch("article", query.Cond("location.id", 42))
 
 	priority, _ := strconv.Atoi(time.Now().Format("0102150405"))
-	err := handler.Add(currentArticle, article, "related_articles", priority, time.Now().String())
+	err := handler.AddContent(currentArticle, article, "related_articles", priority, time.Now().String())
 	fmt.Println(err)
 	assert.Equal(t, nil, err)
 }
