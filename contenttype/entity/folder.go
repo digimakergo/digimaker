@@ -7,6 +7,7 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
+    "dm/util"
 	. "dm/query"
 )
 
@@ -60,7 +61,10 @@ func (c *Folder) IdentifierList() []string {
 }
 
 func (c *Folder) Value(identifier string) interface{} {
-	var result interface{}
+    if util.Contains( c.Location.IdentifierList(), identifier ) {
+        return c.Location.Field( identifier )
+    }
+    var result interface{}
 	switch identifier {
     
     case "summary":

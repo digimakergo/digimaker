@@ -16,3 +16,12 @@ func IfElse(cond bool, trueV interface{}, falseV interface{}) interface{} {
 	}
 	return result
 }
+
+func Contains(strings []string, element string) bool {
+	for _, s := range strings {
+		if s == element {
+			return true
+		}
+	}
+	return false
+}

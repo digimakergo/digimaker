@@ -2,8 +2,11 @@
 ##Generate models for general use. eg. dm_location
 ##
 
+
+# run sqlboiler --config configs/sqlboiler_core.toml  mysql
+
 pkgname = "entity"
-output = "model/entity"
+output = "contenttype/entity"
 no-tests = "true"
 templates = [
   "/Users/xc/go/caf-prototype/src/github.com/volatiletech/sqlboiler/templates",
@@ -16,7 +19,7 @@ user = "dev"
 pass = "D!g!m@ker"
 dbname = "dev_emf"
 sslmode = "false"
-whitelist = ['dm_location', 'dm_version']
+whitelist = ['dm_relation','dm_version']
 
 [imports.all]
 third_party = ['"github.com/volatiletech/sqlboiler/boil"',
@@ -24,15 +27,14 @@ third_party = ['"github.com/volatiletech/sqlboiler/boil"',
                 '"github.com/volatiletech/sqlboiler/strmangle"',
                 '"github.com/pkg/errors"',
                '"github.com/volatiletech/sqlboiler/queries"',
-               '"dm/contenttype"',
                '. "dm/query"',
                '"dm/db"']
 
-[aliases.tables.dm_location]
-up_plural = "Locations"
-up_singular = "Location"
-down_plural = "locations"
-down_singular = "location"
+[aliases.tables.dm_relation]
+up_plural = "Relations"
+up_singular = "Relation"
+down_plural = "relations"
+down_singular = "relation"
 
 [aliases.tables.dm_version]
 up_plural = "Versions"

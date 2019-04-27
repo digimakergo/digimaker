@@ -14,9 +14,7 @@ import (
 	"time"
 
 	"dm/db"
-	"dm/fieldtype"
 	. "dm/query"
-
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -31,19 +29,23 @@ type Version struct {
 	Type      string `boil:"type" json:"type" toml:"type" yaml:"type"`
 	ContentID int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	Version   int    `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Status    int8   `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Author    int    `boil:"author" json:"author" toml:"author" yaml:"author"`
 	Data      string `boil:"data" json:"data" toml:"data" yaml:"data"`
+
+	R        *versionR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L        versionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	Location `boil:"dm_location,bind"`
 }
 
-func (c *Version) Fields() map[string]fieldtype.Fieldtyper {
-	return nil
-}
-
-func (c *Version) Values() map[string]interface{} {
+func (c *Version) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.ID
 	result["type"] = c.Type
 	result["content_id"] = c.ContentID
 	result["version"] = c.Version
+	result["status"] = c.Status
+	result["author"] = c.Author
 	result["data"] = c.Data
 	return result
 }
@@ -63,6 +65,10 @@ func (c *Version) Field(name string) interface{} {
 		result = c.ContentID
 	case "version", "Version":
 		result = c.Version
+	case "status", "Status":
+		result = c.Status
+	case "author", "Author":
+		result = c.Author
 	case "data", "Data":
 		result = c.Data
 	default:
@@ -73,22 +79,56 @@ func (c *Version) Field(name string) interface{} {
 func (c Version) Store() error {
 	handler := db.DBHanlder()
 	if c.ID == 0 {
-		id, err := handler.Insert(c.TableName(), c.Values())
+		id, err := handler.Insert(c.TableName(), c.ToMap())
 		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.ID))
+		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.ID))
 		return err
 	}
 	return nil
 }
 
+var VersionColumns = struct {
+	ID        string
+	Type      string
+	ContentID string
+	Version   string
+	Status    string
+	Author    string
+	Data      string
+}{
+	ID:        "id",
+	Type:      "type",
+	ContentID: "content_id",
+	Version:   "version",
+	Status:    "status",
+	Author:    "author",
+	Data:      "data",
+}
+
+// VersionRels is where relationship names are stored.
+var VersionRels = struct {
+}{}
+
+// versionR is where relationships are stored.
+type versionR struct {
+}
+
+// NewStruct creates a new relationship struct
+func (*versionR) NewStruct() *versionR {
+	return &versionR{}
+}
+
+// versionL is where Load methods for each relationship are stored.
+type versionL struct{}
+
 var (
-	versionColumns               = []string{"id", "type", "content_id", "version", "data"}
+	versionColumns               = []string{"id", "type", "content_id", "version", "status", "author", "data"}
 	versionColumnsWithoutDefault = []string{"type", "content_id", "version", "data"}
-	versionColumnsWithDefault    = []string{"id"}
+	versionColumnsWithDefault    = []string{"id", "status", "author"}
 	versionPrimaryKeyColumns     = []string{"id"}
 )
 

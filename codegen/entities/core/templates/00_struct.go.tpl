@@ -22,11 +22,7 @@ type {{$alias.UpSingular}} struct {
 
 }
 
-func ( c *{{$alias.UpSingular}} ) Fields() map[string]fieldtype.Fielder{
-	 return nil
-}
-
-func ( c *{{$alias.UpSingular}} ) Values() map[string]interface{}{
+func ( c *{{$alias.UpSingular}} ) ToMap() map[string]interface{}{
     result := make(map[string]interface{})
     {{range $column := .Table.Columns -}}
     {{- $colAlias := $alias.Column $column.Name -}}
@@ -54,14 +50,14 @@ func ( c *{{$alias.UpSingular}} ) Field( name string ) interface{}{
 
 func (c {{$alias.UpSingular}}) Store() error {
     handler := db.DBHanlder()
-    if c.CID == 0 {
-        id, err := handler.Insert(c.TableName(), c.Values())
-        c.CID = id
+    if c.ID == 0 {
+        id, err := handler.Insert(c.TableName(), c.ToMap())
+        c.ID = id
         if err != nil {
             return err
         }
     } else {
-        err := handler.Update(c.TableName(), c.Values(), Cond("id", c.CID))
+        err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.ID))
         return err
     }
     return nil

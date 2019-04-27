@@ -28,6 +28,9 @@ type ContentTyper interface {
 	Value(identifier string) interface{}
 
 	ContentType() string
+
+	IdentifierList() []string
+
 	//Visit  field dynamically
 	//Field(name string) interface{}
 

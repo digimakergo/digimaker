@@ -49,9 +49,9 @@
          "value": "RelationList",
          "is_relation": true,
          "relation_settings": {"contenttype_from": "*",
-                               "data_fields":"id,name",
+                               "data_fields":"cid,title",
 			       "embed_data": false,
-                               "data_pattern":"{id},{name}",
+                               "data_pattern":"%[1]d %[2]s",
                                "name": "Relation List"
                          },
          "translations": {"nor-no": "Tekst",

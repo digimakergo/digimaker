@@ -8,6 +8,7 @@ import (
 	"dm/db"
 	"dm/fieldtype"
 	. "dm/query"
+	"dm/util"
 )
 
 type Article struct {
@@ -55,6 +56,9 @@ func (c *Article) IdentifierList() []string {
 }
 
 func (c *Article) Value(identifier string) interface{} {
+	if util.Contains(c.Location.IdentifierList(), identifier) {
+		return c.Location.Field(identifier)
+	}
 	var result interface{}
 	switch identifier {
 

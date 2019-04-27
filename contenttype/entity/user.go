@@ -7,6 +7,7 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
+    "dm/util"
 	. "dm/query"
 )
 
@@ -78,7 +79,10 @@ func (c *User) IdentifierList() []string {
 }
 
 func (c *User) Value(identifier string) interface{} {
-	var result interface{}
+    if util.Contains( c.Location.IdentifierList(), identifier ) {
+        return c.Location.Field( identifier )
+    }
+    var result interface{}
 	switch identifier {
     
     case "firstname":

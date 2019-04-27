@@ -7,6 +7,7 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
+    "dm/util"
 	. "dm/query"
 )
 
@@ -51,7 +52,10 @@ func (c *{{$struct_name}}) IdentifierList() []string {
 }
 
 func (c *{{$struct_name}}) Value(identifier string) interface{} {
-	var result interface{}
+    if util.Contains( c.Location.IdentifierList(), identifier ) {
+        return c.Location.Field( identifier )
+    }
+    var result interface{}
 	switch identifier {
     {{range $identifier, $fieldtype := .settings.Fields}}
     case "{{$identifier}}":

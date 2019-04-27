@@ -56,6 +56,10 @@ func (c *Location) TableName() string {
 	return "dm_location"
 }
 
+func (c *Location) IdentifierList() []string {
+	return []string{"id", "parent_id", "main_id", "hierarchy", "content_id"}
+}
+
 func (c *Location) Field(name string) interface{} {
 	var result interface{}
 	switch name {
