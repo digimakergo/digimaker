@@ -24,22 +24,24 @@
   {{$fields := .current.IdentifierList}}
 
   <div>
-  <div>ID: {{.current.ID}}</div>
-  <div>UID: {{.current.UID}}</div>
+  <table>
+      <tr><td>ID: </td><td>{{.current.ID}}</td></tr>
+      <tr><td>UID: </td><td>{{.current.UID}}</td></tr>
   {{range $i, $identifier := $fields}}
   {{$value := $.current.Value $identifier }}
-  <div>
-    <label style="width:200px; display: inline-block">{{$identifier}}:</label>
-    <span>
+  <tr><td>{{$identifier}}:</td>
+    <td>
         {{if (eq $identifier "title")}}
             {{$value.ViewValue}}
         {{else}}
             {{$value}}
         {{end}}
-    </span>
-  </div>
+    </td>
+</tr>
   {{end}}
+</table>
 </div>
+
 
 {{if eq .current.ContentType "article"}}
 <h4>Related articles</h4>
