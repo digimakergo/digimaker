@@ -129,6 +129,7 @@ func (RMDB) Insert(tablename string, values map[string]interface{}, transation .
 		if err != nil {
 			return 0, errors.Wrap(err, "[RBDM.Insert] Error when getting db connection.")
 		}
+		//todo: create context to isolate queries.
 		result, error = db.ExecContext(context.Background(), sqlStr, valueParameters...)
 	} else {
 		result, error = transation[0].ExecContext(context.Background(), sqlStr, valueParameters...)
