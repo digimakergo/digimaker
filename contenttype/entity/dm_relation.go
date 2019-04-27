@@ -15,6 +15,7 @@ import (
 
 	"dm/db"
 	. "dm/query"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"

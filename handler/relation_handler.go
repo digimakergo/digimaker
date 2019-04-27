@@ -3,8 +3,10 @@ package handler
 import (
 	"dm/contenttype"
 	"dm/contenttype/entity"
+	"dm/db"
+	. "dm/query"
 	"fmt"
-
+	"strconv"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -18,21 +20,38 @@ func (handler *RelationHandler) Add(to contenttype.ContentTyper, from contenttyp
 	//todo: validate if the fromField exist. this maybe done in bootstrap/generating datatype config
 	data, err := handler.generateData(to, identifier, from)
 	if err != nil {
-		return errors.Wrap(err, "[hanlder.AddTo]")
+		return errors.Wrap(err, "[relationhandler.AddTo]")
 	}
 
-	//todo: validate if it's added already.
+	contentID := to.Value("content_id").(int)
+	contentType := to.ContentType()
+	fromLocationID := from.Value("id").(int)
+
+	//Validate if it's added already.
+	dbHandler := db.DBHanlder()
+	currentRelation := entity.Relation{}
+	dbHandler.GetEnity("dm_relation", Cond("to_content_id", contentID).
+		Cond("from_location", fromLocationID).
+		Cond("identifier", identifier),
+		&currentRelation)
+
+	if currentRelation.ID != 0 {
+		return errors.New("[relationhandler.Add]Relation existing already to " +
+			strconv.Itoa(contentID) + " on " + identifier +
+			" from " + strconv.Itoa(fromLocationID))
+	}
+
 	relation := entity.Relation{
-		ToContentID:  to.Value("content_id").(int),
-		ToType:       to.ContentType(),
-		FromLocation: from.Value("id").(int),
+		ToContentID:  contentID,
+		ToType:       contentType,
+		FromLocation: fromLocationID,
 		Priority:     priority,
 		Identifier:   identifier,
 		Description:  description,
 		Data:         data}
 	err = relation.Store()
 	if err != nil {
-		errors.Wrap(err, "[handler.AddTo]Saving relation error.")
+		errors.Wrap(err, "[relationhandler.AddTo]Saving relation error.")
 	}
 
 	return nil

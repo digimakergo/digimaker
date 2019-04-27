@@ -77,6 +77,22 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 	return nil
 }
 
+//todo: support limit.
+func (*RMDB) GetEnity(tablename string, condition query.Condition, entity interface{}) error {
+	conditions, values := BuildCondition(condition)
+	sql := "SELECT * FROM " + tablename + " WHERE " + conditions
+	util.Debug("db", sql)
+	db, err := DB()
+	if err != nil {
+		return errors.Wrap(err, "[RMDB.GetEntity]Error when connecting db.")
+	}
+	err = queries.Raw(sql, values...).Bind(context.Background(), db, entity)
+	if err != nil {
+		return errors.Wrap(err, "[RMDB.GetEntity]Error when query.")
+	}
+	return nil
+}
+
 //Fetch multiple enities
 func (*RMDB) GetEntities() {
 
