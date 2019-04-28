@@ -15,6 +15,10 @@ import (
 type RelationHandler struct {
 }
 
+func (handler *RelationHandler) AddContentID(to contenttype.ContentTyper, contentID int, contentType string, identifer string, priority int, description string) error {
+	return nil
+}
+
 //Add a content to current content(toContent)
 func (handler *RelationHandler) AddContent(to contenttype.ContentTyper, from contenttype.ContentTyper, identifier string, priority int, description string) error {
 	//todo: validate if the fromField exist. this maybe done in bootstrap/generating datatype config

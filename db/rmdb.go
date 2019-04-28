@@ -61,21 +61,25 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
                                       'data' ,relation.data )
                          ORDER BY relation.priority ) as relations`
 
-	sql := `SELECT c.*, ` + locationColumns + relationQuery + `
-                   FROM ( ` + tableName + ` c
+	sqlStr := `SELECT content.*, ` + locationColumns + relationQuery + `
+                   FROM ( ` + tableName + ` content
                      INNER JOIN dm_location location
-                        ON location.content_type = '` + contentType + `' AND location.content_id=c.id )
+                        ON location.content_type = '` + contentType + `' AND location.content_id=content.id )
                      LEFT JOIN dm_relation relation
-                        ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
+                        ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
                      WHERE ` + conditions + `
                      GROUP BY location.id`
 
-	util.Debug("db", sql)
-	err = queries.Raw(sql, values...).Bind(context.Background(), db, content)
+	util.Debug("db", sqlStr)
+	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
 
 	if err != nil {
-		message := "[RMDB.GetByFields]Error when query. sql - " + sql
-		return errors.Wrap(err, message)
+		if err == sql.ErrNoRows {
+			util.Warning("db", err.Error())
+		} else {
+			message := "[RMDB.GetByFields]Error when query. sql - " + sqlStr
+			return errors.Wrap(err, message)
+		}
 	}
 	return nil
 }
@@ -83,14 +87,16 @@ func (*RMDB) GetByFields(contentType string, condition query.Condition, content 
 //todo: support limit.
 func (*RMDB) GetEnity(tablename string, condition query.Condition, entity interface{}) error {
 	conditions, values := BuildCondition(condition)
-	sql := "SELECT * FROM " + tablename + " WHERE " + conditions
-	util.Debug("db", sql)
+	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions
+	util.Debug("db", sqlStr)
 	db, err := DB()
 	if err != nil {
 		return errors.Wrap(err, "[RMDB.GetEntity]Error when connecting db.")
 	}
-	err = queries.Raw(sql, values...).Bind(context.Background(), db, entity)
-	if err != nil {
+	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
+	if err == sql.ErrNoRows {
+		util.Warning("db", err.Error())
+	} else {
 		return errors.Wrap(err, "[RMDB.GetEntity]Error when query.")
 	}
 	return nil

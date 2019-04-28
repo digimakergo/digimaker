@@ -6,11 +6,38 @@ import (
 	"dm/db"
 	"dm/query"
 	"dm/util"
+	"strconv"
 
 	"github.com/pkg/errors"
 )
 
 type ContentQuery struct{}
+
+//Fetch content by location id.
+//If no location found. it will return nil and error message.
+func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, error) {
+	//get type first by location.
+	dbhandler := db.DBHanlder()
+	location := entity.Location{}
+	err := dbhandler.GetEnity("dm_location", query.Cond("id", locationID), &location)
+	if err != nil {
+		return nil, errors.Wrap(err, "[contentquery.fetchByLocationID]Can not fetch location by locationID "+strconv.Itoa(locationID))
+	}
+	if location.ID == 0 {
+		return nil, errors.New("[contentquery.fetchByLocationID]Location is empty.")
+	}
+
+	//fetch by content id.
+	contentID := location.ContentID
+	contentType := location.ContentType
+	result, err := cq.FetchByContentID(contentType, contentID)
+	return result, err
+}
+
+//Fetch a content by content id.
+func (cq ContentQuery) FetchByContentID(contentType string, contentID int) (contenttype.ContentTyper, error) {
+	return cq.Fetch(contentType, query.Cond("content.id", contentID))
+}
 
 //Fetch one content
 func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
