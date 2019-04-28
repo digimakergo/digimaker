@@ -6,6 +6,9 @@ body{
     float: right;
 }
 
+a:hover{
+    text-decoration: none
+}
 
 a.action{
     color:#696969
