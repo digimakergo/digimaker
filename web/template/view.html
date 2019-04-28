@@ -1,7 +1,9 @@
 <html>
 <head>
-  <title>Example</title>
+  <title>DM Content Engine Demo</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/static/css/site.css" rel="stylesheet">
 </head>
@@ -55,14 +57,22 @@
   <h3>Folder under</h3>
   <div>
       {{range $index,$content := .folder_list}}
-        <div><a href="/content/view/{{$content.ID}}">{{$content.ID}}. {{$content.Name}}</a></div>
+        <div>
+            <a href="/content/view/{{$content.ID}}">{{$content.ID}}. {{$content.Name}}</a>
+            <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
+            <a href="/content/edit/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
+        </div>
       {{end}}
   </div>
 
   <h3>Articles under</h3>
   <div>
       {{range $index,$content := .list}}
-        <div><a href="/content/view/{{$content.ID}}">{{$content.ID}}. {{$content.Name}}</a></div>
+        <div>
+            <a href="/content/view/{{$content.ID}}">{{$content.ID}}. {{$content.Name}}</a>
+            <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
+            <a href="/content/edit/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
+        </div>
       {{end}}
   </div>
 

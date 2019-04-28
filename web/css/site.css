@@ -6,6 +6,15 @@ body{
     float: right;
 }
 
+
+a.action{
+    color:#696969
+}
+
+a.action:hover{
+    color:#000000
+}
+
 @media only screen and (max-width: 600px) {
     .tool{
         float: none
