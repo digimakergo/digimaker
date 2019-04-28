@@ -51,7 +51,14 @@
     {{range $i, $article := .current.Value "related_articles"}}
         <li><a href="{{$article.from_location}}">{{index $article "data"}} <i>{{index $article "description"}}</i></a></li>
     {{end}}
+    <li>
+        <a href="#" class="action" title="Add related articles">
+               <i class="fas fa-plus-circle"></i>
+                Add articles
+        </a>
+    </li>
 </ul>
+
 {{end}}
 
   <h3>Folder under</h3>
