@@ -37,7 +37,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	article := entity.Article{}
 	id, _ := strconv.Atoi(vars["id"])
 
-	err := rmdb.GetByID("article", id, &article)
+	err := rmdb.GetByID("article", "dm_article", id, &article)
 
 	if err != nil {
 		fmt.Println(err)
@@ -50,7 +50,8 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("location.id", id))
 
 	var variables map[string]interface{}
-	if currentFolder != nil {
+	c := currentFolder.(*entity.Folder)
+	if c.ID != 0 {
 		//Get list of article
 		articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
 
@@ -59,6 +60,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			"folders": folders}
 	} else {
 		currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
+
 		variables = map[string]interface{}{"current": currentArticle,
 			"list":    nil,
 			"folders": folders}
