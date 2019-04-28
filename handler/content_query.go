@@ -21,10 +21,10 @@ func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, erro
 	location := entity.Location{}
 	err := dbhandler.GetEnity("dm_location", query.Cond("id", locationID), &location)
 	if err != nil {
-		return nil, errors.Wrap(err, "[contentquery.fetchByLocationID]Can not fetch location by locationID "+strconv.Itoa(locationID))
+		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
 	}
 	if location.ID == 0 {
-		return nil, errors.New("[contentquery.fetchByLocationID]Location is empty.")
+		return nil, errors.New("[contentquery.fetchbyid]Location is empty.")
 	}
 
 	//fetch by content id.
