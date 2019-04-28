@@ -22,7 +22,7 @@ type {{$struct_name}} struct{
         {{$identifier|UpperName}} fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
      {{end}}
     {{end}}
-     Location `boil:"location,bind"`
+     contenttype.Location `boil:"location,bind"`
 }
 
 func ( *{{$struct_name}} ) TableName() string{
@@ -31,6 +31,10 @@ func ( *{{$struct_name}} ) TableName() string{
 
 func ( *{{$struct_name}} ) ContentType() string{
 	 return "{{.name}}"
+}
+
+func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
+    return &c.Location
 }
 
 

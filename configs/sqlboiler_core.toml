@@ -5,8 +5,8 @@
 
 # run sqlboiler --config configs/sqlboiler_core.toml  mysql
 
-pkgname = "entity"
-output = "contenttype/entity"
+pkgname = "contenttype"
+output = "contenttype"
 no-tests = "true"
 templates = [
   "/Users/xc/go/caf-prototype/src/github.com/volatiletech/sqlboiler/templates",

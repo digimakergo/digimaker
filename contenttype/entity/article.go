@@ -43,7 +43,7 @@ type Article struct{
         Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
      
     
-     Location `boil:"location,bind"`
+     contenttype.Location `boil:"location,bind"`
 }
 
 func ( *Article ) TableName() string{
@@ -52,6 +52,10 @@ func ( *Article ) TableName() string{
 
 func ( *Article ) ContentType() string{
 	 return "article"
+}
+
+func (c *Article) GetLocation() *contenttype.Location{
+    return &c.Location
 }
 
 

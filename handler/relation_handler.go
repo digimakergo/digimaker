@@ -2,7 +2,6 @@ package handler
 
 import (
 	"dm/contenttype"
-	"dm/contenttype/entity"
 	"dm/db"
 	. "dm/query"
 	"fmt"
@@ -33,7 +32,7 @@ func (handler *RelationHandler) AddContent(to contenttype.ContentTyper, from con
 
 	//Check if it's added already.
 	dbHandler := db.DBHanlder()
-	currentRelation := entity.Relation{}
+	currentRelation := contenttype.Relation{}
 	dbHandler.GetEnity("dm_relation", Cond("to_content_id", contentID).
 		Cond("from_location", fromLocationID).
 		Cond("identifier", identifier),
@@ -45,7 +44,7 @@ func (handler *RelationHandler) AddContent(to contenttype.ContentTyper, from con
 			" from " + strconv.Itoa(fromLocationID))
 	}
 
-	relation := entity.Relation{
+	relation := contenttype.Relation{
 		ToContentID:  contentID,
 		ToType:       contentType,
 		FromLocation: fromLocationID,

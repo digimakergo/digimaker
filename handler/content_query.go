@@ -18,7 +18,7 @@ type ContentQuery struct{}
 func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, error) {
 	//get type first by location.
 	dbhandler := db.DBHanlder()
-	location := entity.Location{}
+	location := contenttype.Location{}
 	err := dbhandler.GetEnity("dm_location", query.Cond("id", locationID), &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
@@ -63,7 +63,8 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) (inte
 //Fill all data into content which is a pointer
 func (cq ContentQuery) Fill(contentType string, condition query.Condition, content interface{}) error {
 	dbhandler := db.DBHanlder()
-	err := dbhandler.GetByFields(contentType, condition, content)
+	tableName := contenttype.GetContentDefinition(contentType).TableName
+	err := dbhandler.GetByFields(contentType, tableName, condition, content)
 	if err != nil {
 		message := "[List]Content Query error"
 		util.Error(message, err.Error())

@@ -5,7 +5,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"dm/contenttype"
 	"dm/query"
 	"dm/util"
 	"strconv"
@@ -21,8 +20,8 @@ type RMDB struct {
 }
 
 //Query by ID
-func (rmdb *RMDB) GetByID(contentType string, id int, content interface{}) error {
-	return rmdb.GetByFields(contentType, query.Cond("location.id", id), content) //todo: use table name as parameter
+func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content interface{}) error {
+	return rmdb.GetByFields(contentType, tableName, query.Cond("location.id", id), content) //todo: use table name as parameter
 }
 
 //Query to fill in contentTyper. Use reference in content parameter.
@@ -30,14 +29,11 @@ func (rmdb *RMDB) GetByID(contentType string, id int, content interface{}) error
 //  var content contenttype.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, content)
 //
-func (*RMDB) GetByFields(contentType string, condition query.Condition, content interface{}) error {
+func (*RMDB) GetByFields(contentType string, tableName string, condition query.Condition, content interface{}) error {
 	db, err := DB()
 	if err != nil {
 		return errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
 	}
-
-	contentTypeDef := contenttype.GetContentDefinition(contentType)
-	tableName := contentTypeDef.TableName
 
 	//get condition string for fields
 	conditions, values := BuildCondition(condition)

@@ -27,7 +27,7 @@ type Folder struct{
         Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
      
     
-     Location `boil:"location,bind"`
+     contenttype.Location `boil:"location,bind"`
 }
 
 func ( *Folder ) TableName() string{
@@ -36,6 +36,10 @@ func ( *Folder ) TableName() string{
 
 func ( *Folder ) ContentType() string{
 	 return "folder"
+}
+
+func (c *Folder) GetLocation() *contenttype.Location{
+    return &c.Location
 }
 
 

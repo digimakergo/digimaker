@@ -33,6 +33,8 @@ type ContentTyper interface {
 
 	IdentifierList() []string
 
+	GetLocation() *Location
+
 	//Visit  field dynamically
 	//Field(name string) interface{}
 

@@ -37,7 +37,7 @@ type User struct{
         Password fieldtype.TextField `boil:"password" json:"password" toml:"password" yaml:"password"`
      
     
-     Location `boil:"location,bind"`
+     contenttype.Location `boil:"location,bind"`
 }
 
 func ( *User ) TableName() string{
@@ -46,6 +46,10 @@ func ( *User ) TableName() string{
 
 func ( *User ) ContentType() string{
 	 return "user"
+}
+
+func (c *User) GetLocation() *contenttype.Location{
+    return &c.Location
 }
 
 

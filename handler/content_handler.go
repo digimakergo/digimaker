@@ -32,7 +32,7 @@ type ContentHandler struct {
 }
 
 func (content ContentHandler) CreateLocation(parentID int) {
-	location := entity.Location{ParentID: parentID}
+	location := contenttype.Location{ParentID: parentID}
 	location.Store()
 }
 
@@ -79,7 +79,7 @@ func (content ContentHandler) Draft(contentType string, parentID int) error {
 			strconv.Itoa(parentID)+". No location crreated.")
 	}
 	//Save location
-	location := entity.Location{ParentID: -parentID,
+	location := contenttype.Location{ParentID: -parentID,
 		ContentType: contentType,
 		ContentID:   article.CID,
 		UID:         util.GenerateUID()}
@@ -136,7 +136,7 @@ func (handler *ContentHandler) Create(parentID int, contentType string, inputs m
 	//todo: add commit and rollback for the whole saving
 
 	//Save location
-	location := entity.Location{ParentID: parentID,
+	location := contenttype.Location{ParentID: parentID,
 		ContentID:   content.Value("cid").(int),
 		ContentType: contentType,
 		UID:         util.GenerateUID()}
