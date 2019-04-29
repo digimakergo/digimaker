@@ -8,12 +8,17 @@ This is a parent struct which consits of location and the content itself(eg. art
 */
 
 import (
+	"context"
+	"database/sql"
 	"dm/contenttype"
 	"dm/contenttype/entity"
+	"dm/db"
 	"dm/fieldtype"
 	"dm/util"
 	"strconv"
 	"time"
+
+	. "dm/query"
 
 	"github.com/pkg/errors"
 )
@@ -160,9 +165,63 @@ func (content ContentHandler) Update(id int, inputs map[string]interface{}) {
 
 }
 
-//Delete content
-func (content ContentHandler) Delete(id int, toTrash bool) {
+//Delete content by location id
+func (ch ContentHandler) DeleteByID(id int, toTrash bool) error {
+	content, err := Querier().FetchByID(id)
+	if err != nil {
+		return errors.New("[handler.delete]Content doesn't exist with id: " + strconv.Itoa(id))
+	}
+	err = ch.DeleteByContent(content, toTrash)
+	return err
+}
 
+//Delete content
+func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTrash bool) error {
+	database, err := db.DB()
+	if err != nil {
+		util.Error(err.Error())
+		return errors.New("[handler.deleteByContent]Can not create connection.")
+	}
+	tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		message := "[handler.deleteByContent]Can not create transaction."
+		util.Error(message + err.Error())
+		return errors.New(message)
+	}
+
+	//Delete relation first.
+	relations := content.GetRelations()
+	if len(relations.Value) > 0 {
+		dbHandler := db.DBHanlder()
+		err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
+		if err != nil {
+			message := "[handler.deleteByContent]Can not delete relation."
+			util.Error(message + err.Error())
+			return errors.New(message)
+		}
+	}
+
+	//Delete location
+	//todo: if there are more locations, delete the current location only. or delete all location.
+	err = content.GetLocation().Delete(tx)
+	if err != nil {
+		tx.Rollback()
+	} else {
+		//Delete content
+		err = content.Delete(tx)
+		if err != nil {
+			tx.Rollback()
+		}
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		message := "[handler.deleteByContent]Can not commit."
+		util.Error(message + err.Error())
+		return errors.New(message)
+	}
+
+	return nil
 }
 
 //Format of fields: eg. title:"test", modified: 12121

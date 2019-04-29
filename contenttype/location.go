@@ -4,6 +4,7 @@
 package contenttype
 
 import (
+	"database/sql"
 	"dm/db"
 	"dm/fieldtype"
 	. "dm/query"
@@ -118,4 +119,11 @@ func (c *Location) Store() error {
 		return err
 	}
 	return nil
+}
+
+//Delete location only
+func (l *Location) Delete(transaction ...*sql.Tx) error {
+	handler := db.DBHanlder()
+	contentError := handler.Delete(l.TableName(), Cond("id", l.ID), transaction...)
+	return contentError
 }

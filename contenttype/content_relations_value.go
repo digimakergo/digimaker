@@ -1,5 +1,7 @@
 //Author xc, Created on 2019-04-25 21:00
-package entity
+//{COPYRIGHTS}
+
+package contenttype
 
 import (
 	"dm/fieldtype"
@@ -8,8 +10,6 @@ import (
 
 	"github.com/pkg/errors"
 )
-
-//{COPYRIGHTS}
 
 //ContentRelations as a struct which is linked into a content.
 //The purpose is for binding & access.

@@ -27,6 +27,8 @@ type ContentTyper interface {
 
 	Store(...*sql.Tx) error
 
+	Delete(transaction ...*sql.Tx) error
+
 	Value(identifier string) interface{}
 
 	ContentType() string
@@ -35,11 +37,7 @@ type ContentTyper interface {
 
 	GetLocation() *Location
 
-	//Visit  field dynamically
-	//Field(name string) interface{}
-
-	//Visit all attribute dynamically including Fields + internal attribute eg. id, parent_id.
-	//Attr(name string) interface{}
+	GetRelations() *ContentRelationsValue
 }
 
 type ContentList []ContentTyper

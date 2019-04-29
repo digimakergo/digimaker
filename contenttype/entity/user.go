@@ -173,6 +173,12 @@ func (c *User) Store(transaction ...*sql.Tx) error {
 	return nil
 }
 
+//Delete content only
+func (c *User) Delete(transaction ...*sql.Tx) error {
+	handler := db.DBHanlder()
+	contentError := handler.Delete(c.TableName(), Cond("id", c.CID), transaction...)
+	return contentError
+}
 
 func init() {
 	new := func() contenttype.ContentTyper {

@@ -188,8 +188,30 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition qu
 }
 
 //Delete based on condition
-func (*RMDB) Delete(name string, condition interface{}) {
+func (*RMDB) Delete(tableName string, condition query.Condition, transation ...*sql.Tx) error {
+	conditionString, conditionValues := BuildCondition(condition)
+	sqlStr := "DELETE FROM " + tableName + " WHERE " + conditionString
 
+	util.Debug("db", sqlStr)
+
+	var result sql.Result
+	var error error
+
+	if len(transation) == 0 {
+		db, err := DB()
+		if err != nil {
+			return errors.Wrap(err, "[RBDM.Delete] Error when getting db connection.")
+		}
+		result, error = db.ExecContext(context.Background(), sqlStr, conditionValues...)
+	} else {
+		result, error = transation[0].ExecContext(context.Background(), sqlStr, conditionValues...)
+	}
+	if error != nil {
+		return errors.Wrap(error, "[RMDB.Delete]Error when deleting. sql - "+sqlStr)
+	}
+	resultRows, _ := result.RowsAffected()
+	util.Debug("db", "Deleted rows:"+strconv.FormatInt(resultRows, 10))
+	return nil
 }
 
 var dbObject = RMDB{}

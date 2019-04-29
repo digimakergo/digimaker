@@ -3,6 +3,7 @@ package handler
 import (
 	"dm/contenttype"
 	"dm/fieldtype"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -35,4 +36,11 @@ func TestCreate(t *testing.T) {
 	//
 	// fmt.Println(result)
 	// fmt.Println(err)
+}
+
+func TestDelete(t *testing.T) {
+	handler := ContentHandler{}
+	err := handler.DeleteByID(43, false)
+	fmt.Println(err)
+	assert.Equal(t, nil, err)
 }

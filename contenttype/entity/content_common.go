@@ -1,11 +1,13 @@
 package entity
 
+import "dm/contenttype"
+
 type ContentCommon struct {
-	CID       int                   `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Published int                   `boil:"published" json:"published" toml:"published" yaml:"published"`
-	Modified  int                   `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
-	CUID      string                `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
-	Relations ContentRelationsValue `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
+	CID       int                               `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Published int                               `boil:"published" json:"published" toml:"published" yaml:"published"`
+	Modified  int                               `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
+	CUID      string                            `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	Relations contenttype.ContentRelationsValue `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
 func (c ContentCommon) IdentifierList() []string {
@@ -55,8 +57,12 @@ func (c *ContentCommon) SetValue(identifier string, value interface{}) error {
 	return nil
 }
 
-func GetCID(c *ContentCommon) int {
+func (c *ContentCommon) GetCID() int {
 	return c.CID
+}
+
+func (c *ContentCommon) GetRelations() *contenttype.ContentRelationsValue {
+	return &c.Relations
 }
 
 //TODO: add more common methods related to content here.
