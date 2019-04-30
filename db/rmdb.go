@@ -80,6 +80,10 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
 	return nil
 }
 
+func (*RMDB) Count(tablename string, condition query.Condition) (int, error) {
+	return 0, nil
+}
+
 //todo: support limit.
 func (*RMDB) GetEnity(tablename string, condition query.Condition, entity interface{}) error {
 	conditions, values := BuildCondition(condition)

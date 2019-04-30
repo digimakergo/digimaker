@@ -193,6 +193,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTra
 	relations := content.GetRelations()
 	if len(relations.Value) > 0 {
 		dbHandler := db.DBHanlder()
+		//todo: check cid is not empty.
 		err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
 		if err != nil {
 			message := "[handler.deleteByContent]Can not delete relation."

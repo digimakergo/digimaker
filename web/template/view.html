@@ -12,8 +12,13 @@
   <h2>{{.current.Name}}</h2>
   <div class="tool">
   <div>
+  <div>
       <a href="/content/new/folder/{{.current.ID}}" class="btn btn-primary btn-sm">New Folder</a>
       <a href="/content/new/article/{{.current.ID}}" class="btn btn-primary btn-sm">New article</a>
+  </div>
+    <div>
+      <a href="#">Content types</a>
+  </div>
   </div>
   <h3>Top folders</h3>
   {{range $index,$folder := .folders}}
