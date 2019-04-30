@@ -18,6 +18,14 @@ a.action:hover{
     color:#000000
 }
 
+.hide{
+    display: none;
+}
+
+.block{
+    margin-top: 10px
+}
+
 @media only screen and (max-width: 600px) {
     .tool{
         float: none

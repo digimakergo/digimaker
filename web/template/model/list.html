@@ -1,0 +1,51 @@
+<html>
+
+
+<head>
+  <title>DM Content Engine Demo</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+  <script
+    src="https://code.jquery.com/jquery-2.2.4.min.js"
+    integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
+    crossorigin="anonymous"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/static/css/site.css" rel="stylesheet">
+</head>
+<body>
+
+<script>
+
+function showFields( button ){
+
+    var fields = $(button).parent().parent().find( ".fields" );
+    if( fields.is( ":visible" ) ){
+        fields.hide();
+    }else{
+        fields.show();
+    }
+}
+</script>
+
+<h3>Content types</h3>
+<div><a href="#" class="btn btn-primary btn-sm">New type</a></div>
+{{range $contentType, $def := .definition}}
+    <div>
+        <div>{{$contentType}}
+            <a href="javascript:void();" onclick="showFields( this )">Show</a>
+
+            <a href="javascript:void();"><i class="far fa-edit"></i></a>
+        </div>
+        <ul class="fields hide">
+            {{range $identifier, $fieldDef := $def.Fields}}
+                <li >{{$identifier}} [{{$fieldDef.FieldType}}] </li>
+            {{end}}
+        </ul>
+    </div>
+{{end}}
+
+<div class="block"><a href="/">Back to home</a></div>
+</body>
+</html>

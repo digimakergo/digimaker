@@ -113,6 +113,13 @@ func Publish(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func ModelList(w http.ResponseWriter, r *http.Request) {
+	tpl := template.Must(template.ParseFiles("../web/template/model/list.html"))
+	variables := map[string]interface{}{}
+	variables["definition"] = contenttype.GetDefinition()
+	tpl.Execute(w, variables)
+}
+
 func main() {
 
 	BootStrap()
@@ -134,6 +141,10 @@ func main() {
 
 	r.HandleFunc("/content/publish", func(w http.ResponseWriter, r *http.Request) {
 		Publish(w, r)
+	})
+
+	r.HandleFunc("/model/list", func(w http.ResponseWriter, r *http.Request) {
+		ModelList(w, r)
 	})
 
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
