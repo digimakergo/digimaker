@@ -33,7 +33,7 @@
   <div>
   <table>
       <tr><td>ID: </td><td>{{.current.ID}}</td></tr>
-      <tr><td>UID: </td><td>{{.current.UID}}</td></tr>
+      <tr><td>CID: </td><td>{{.current.CID}}</td></tr>
   {{range $i, $identifier := $fields}}
   {{$value := $.current.Value $identifier }}
   <tr><td style="width: 150px">{{(index $.current_def.Fields $identifier).Name}}:</td>
