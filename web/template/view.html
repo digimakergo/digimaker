@@ -12,13 +12,20 @@
   <h2>{{.current.Name}}</h2>
   <div class="tool">
   <div>
-  <div>
-      <a href="/content/new/folder/{{.current.ID}}" class="btn btn-primary btn-sm">New Folder</a>
-      <a href="/content/new/article/{{.current.ID}}" class="btn btn-primary btn-sm">New article</a>
-  </div>
-    <div>
-      <a href="/model/list">Content types</a>
-  </div>
+     <div>
+          <ul>
+              <li>
+                  <a href="/model/list"><i class="far fa-images"></i> Media</a>
+              </li>
+              <li>
+                  <a href="/model/list" title="User and access"><i class="fas fa-users"></i></i> Users</a>
+              </li>
+          </ul>
+      </div>
+      <div>
+          <a href="/content/new/folder/{{.current.ID}}" class="btn btn-primary btn-sm">New Folder</a>
+          <a href="/content/new/article/{{.current.ID}}" class="btn btn-primary btn-sm">New article</a>
+      </div>
   </div>
   <h3>Top folders</h3>
   {{range $index,$folder := .folders}}
@@ -88,6 +95,18 @@
       {{end}}
   </div>
 
+  </div>
+
+  <div class="admin">
+      <ul>
+          <li>For system administrator</li>
+          <li>
+              <a href="/model/list"><i class="fas fa-user-cog"></i> Permission settings</a>
+          </li>
+          <li>
+              <a href="/model/list"><i class="fas fa-wrench"></i> Content setup</a>
+          </li>
+      </ul>
   </div>
 </body>
 </html>
