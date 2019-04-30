@@ -23,8 +23,10 @@ function showFields( button ){
     var fields = $(button).parent().parent().find( ".fields" );
     if( fields.is( ":visible" ) ){
         fields.hide();
+        $(button).text( "Show" );
     }else{
         fields.show();
+        $(button).text( "Hide" );
     }
 }
 </script>
@@ -37,10 +39,16 @@ function showFields( button ){
             <a href="javascript:void();" onclick="showFields( this )">Show</a>
 
             <a href="javascript:void();"><i class="far fa-edit"></i></a>
+
+            {{if(eq $contentType "user")}}
+            {{else}}
+            <a href="javascript:void();"><i class="far fa-trash-alt"></i></a>
+            {{end}}
         </div>
         <ul class="fields hide">
-            {{range $identifier, $fieldDef := $def.Fields}}
-                <li >{{$identifier}} [{{$fieldDef.FieldType}}] </li>
+            {{range $i,$identifier := $def.FieldsDisplay}}
+                {{$fieldDef :=(index $def.Fields $identifier)}}
+                <li >{{$fieldDef.Name}} [{{$identifier}}, {{$fieldDef.FieldType}}] </li>
             {{end}}
         </ul>
     </div>

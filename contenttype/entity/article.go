@@ -99,7 +99,7 @@ func (c *Article) IdentifierList() []string {
 }
 
 func (c *Article) DisplayIdentifierList() []string {
-	return []string{ "title","editors","coverimage","summary","body","related_articles",}
+	return []string{ "title","editors","coverimage","summary","body","related_articles","useful_resources",}
 }
 
 func (c *Article) Value(identifier string) interface{} {
