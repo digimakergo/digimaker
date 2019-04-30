@@ -56,14 +56,16 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
 
 		variables = map[string]interface{}{"current": currentFolder,
-			"list":    articles,
-			"folders": folders}
+			"list":        articles,
+			"current_def": contenttype.GetContentDefinition("folder"),
+			"folders":     folders}
 	} else {
 		currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
 
 		variables = map[string]interface{}{"current": currentArticle,
-			"list":    nil,
-			"folders": folders}
+			"list":        nil,
+			"current_def": contenttype.GetContentDefinition("article"),
+			"folders":     folders}
 	}
 
 	folderList, _ := handler.Querier().List("folder", query.Cond("parent_id", id))

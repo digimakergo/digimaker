@@ -11,12 +11,14 @@ import (
 type ContentTypeSettings map[string]ContentTypeSetting
 
 type ContentTypeSetting struct {
-	TableName  string                  `json:"table_name"`
-	Versioning bool                    `json:"versioning"`
-	Fields     map[string]ContentField `json:"fields"`
+	TableName     string                  `json:"table_name"`
+	Versioning    bool                    `json:"versioning"`
+	FieldsDisplay []string                `json:"fields_display"`
+	Fields        map[string]ContentField `json:"fields"`
 }
 
 type ContentField struct {
+	Name       string            `json:"name"`
 	FieldType  string            `json:"type"`
 	Required   bool              `json:"required"`
 	Parameters map[string]string `json:"parameters"`

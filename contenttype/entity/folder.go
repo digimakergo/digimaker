@@ -65,6 +65,10 @@ func (c *Folder) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "summary","title",}...)
 }
 
+func (c *Folder) DisplayIdentifierList() []string {
+	return []string{ "title","summary",}
+}
+
 func (c *Folder) Value(identifier string) interface{} {
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )

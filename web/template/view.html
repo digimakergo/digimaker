@@ -28,7 +28,7 @@
 
   <div class="block">
 
-  {{$fields := .current.IdentifierList}}
+  {{$fields := .current.DisplayIdentifierList}}
 
   <div>
   <table>
@@ -36,7 +36,7 @@
       <tr><td>UID: </td><td>{{.current.UID}}</td></tr>
   {{range $i, $identifier := $fields}}
   {{$value := $.current.Value $identifier }}
-  <tr><td>{{$identifier}}:</td>
+  <tr><td style="width: 150px">{{(index $.current_def.Fields $identifier).Name}}:</td>
     <td>
         {{if (eq $identifier "title")}}
             {{$value.ViewValue}}

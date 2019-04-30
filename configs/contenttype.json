@@ -3,8 +3,9 @@
      "table_name": "dm_folder",
      "versioning": false,
      "locationing": true,
-     "fields": { "title"  : {"type":"text", "required":true},
-                 "summary": {"type":"richtext", "required":false}
+     "fields_display":["title", "summary"],
+     "fields": { "title"  : {"type":"text", "name":"Title", "required":true},
+                 "summary": {"type":"richtext", "name":"Summary", "required":false}
                }
    },
 
@@ -12,24 +13,32 @@
       "table_name": "dm_article",
       "versioning": true,
       "locationing": true,
-      "fields": { "title"  : {"type":"text", "required":true},
-                  "editors": {"type":"editorlist", "required": false},
-                  "coverimage":{"type":"image_relation", "required":false},
-                  "summary": {"type":"richtext", "required":false},
-                  "body": {"type": "richtext", "required": false},
+      "fields_display":["title", "editors", "coverimage", "summary", "body", "related_articles"],
+      "fields": { "title"  : {"type":"text", "name":"Title", "required":true},
+                  "editors": {"type":"editorlist", "name":"Editors", "required": false},
+                  "coverimage":{"type":"image_relation", "name":"Cover image", "required":false},
+                  "summary": {"type":"richtext", "name":"Summary", "required":false},
+                  "body": {"type": "richtext", "name":"Body", "required": false},
                   "related_articles": { "type":"relationlist",
                                         "required":false,
+                                        "name":"Related articles",
                                         "parameters":{ "type": "article" }
-                                      }
+                                    },
+                 "useful_resources": { "type":"relationlist",
+                                      "required":false,
+                                      "name":"Useful resources",
+                                      "parameters":{ "type": "*" }
+                                  }
                 }
    },
   "user":{
       "table_name": "dm_user",
       "versioning": true,
       "locationing": true,
-      "fields":{ "login": {"type":"text", "required":false},
-                 "password": {"type":"password", "required":false},
-                 "firstname": {"type":"text", "required":false},
-                 "lastname": {"type":"text", "required":false} }
+      "fields_display":["firstname", "lastname"],
+      "fields":{ "login": {"type":"text", "name":"Username","required":false},
+                 "password": {"type":"password", "name":"Password", "required":false},
+                 "firstname": {"type":"text", "name":"First name", "required":false},
+                 "lastname": {"type":"text", "name":"Last name", "required":false} }
                }
 }

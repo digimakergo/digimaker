@@ -56,6 +56,10 @@ func (c *{{$struct_name}}) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .settings.Fields}}"{{$identifier}}",{{end}}}...)
 }
 
+func (c *{{$struct_name}}) DisplayIdentifierList() []string {
+	return []string{ {{range $,$identifier := .settings.FieldsDisplay}}"{{$identifier}}",{{end}}}
+}
+
 func (c *{{$struct_name}}) Value(identifier string) interface{} {
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )

@@ -83,6 +83,10 @@ func (c *User) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "firstname","lastname","login","password",}...)
 }
 
+func (c *User) DisplayIdentifierList() []string {
+	return []string{ "firstname","lastname",}
+}
+
 func (c *User) Value(identifier string) interface{} {
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )
