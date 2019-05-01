@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.25, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.26, for Linux (x86_64)
 --
 -- Host: 185.35.187.91    Database: dev_emf
 -- ------------------------------------------------------
--- Server version	5.7.25-0ubuntu0.16.04.2
+-- Server version	5.7.26-0ubuntu0.16.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -36,7 +36,7 @@ CREATE TABLE `dm_article` (
   `modified` int(11) NOT NULL DEFAULT '0',
   `cuid` varchar(30) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +45,7 @@ CREATE TABLE `dm_article` (
 
 LOCK TABLES `dm_article` WRITE;
 /*!40000 ALTER TABLE `dm_article` DISABLE KEYS */;
-INSERT INTO `dm_article` VALUES (1,1,1,'','Welcome','','test2019-04-28 23:36:26.242035 +0200 CEST m=+0.116724089',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(2,0,0,'','Welcome','','',NULL,NULL,0,0,'bisdku5i6ekklfcg6sf0'),(3,1,1,'','','','',NULL,NULL,0,0,''),(4,1,1,'','','','',NULL,NULL,0,231213,''),(5,1,1,'','','','',NULL,NULL,0,0,''),(6,0,0,'','','','',NULL,NULL,0,0,'5555555'),(7,0,1,'','','','',NULL,NULL,1555160703,1555160703,''),(8,0,1,'','','','',NULL,NULL,1555160780,1555160780,''),(9,0,1,'','','','',NULL,NULL,1555163008,1555163008,''),(10,0,1,'','','','',NULL,NULL,1555167726,1555167726,''),(11,0,1,'','','','',NULL,NULL,1555172650,1555172650,''),(12,0,1,'','','','',NULL,NULL,1555172678,1555172678,''),(13,0,0,'','','','',NULL,NULL,0,0,'bis7ehti6ekh9l3ahps0'),(14,0,0,'','','','',NULL,NULL,0,0,'bisdi55i6ekkgnv0v0mg'),(15,0,0,'','Welcome','','test2019-04-21 21:11:36.811602 +0200 CEST m=+0.295915534',NULL,NULL,111111,12313,'biuc2dti6ekjbfn7atk0'),(16,0,0,'','','','',NULL,NULL,0,5555555,''),(17,0,0,'','','','',NULL,NULL,1555876380,1555876380,'biuck75i6ekkfim1fpa0'),(21,0,0,'','Test','','',NULL,NULL,1555877658,1555877658,'biucu6li6ekl32m1osp0'),(22,0,0,'','Test21.04.2019 22:25','','',NULL,NULL,1555878336,1555878336,'biud3g5i6eklll6a37og'),(23,0,0,'','Test 21.04.2019 22:25','','',NULL,NULL,1555878350,1555878350,'biud3jli6eklm8ldajr0'),(24,0,0,'','Test 21.04.2019 22:28','','Hello',NULL,NULL,1555878483,1555878483,'biud4kti6eklqplqrd6g'),(25,0,0,'','Test 22.04.2019 11:56','','Hello',NULL,NULL,1555927010,1555927010,'biuovoli6eko05jjm38g'),(26,0,0,'','Test 22.04.2019 12:04','','Hello',NULL,NULL,1555927488,1555927488,'biup3g5i6eko66e9n4mg'),(30,0,0,'','Test 22.04.2019 14:11','','Hello',NULL,NULL,1555935086,1555935086,'biuqurli6ekgrts6st2g'),(31,0,0,'','Test 22.04.2019 14:25','','Hello',NULL,NULL,1555935929,1555935929,'biur5edi6ekh8f72bo7g'),(32,0,0,'','Title1','','Hello world',NULL,NULL,1555937684,1555937684,'biurj55i6ekhu6c75ddg'),(33,0,0,'','Good1','','Test',NULL,NULL,1555937783,1555937783,'biurjtti6ekhu6c75deg'),(34,0,0,'','This is good','','This is nice. :)',NULL,NULL,1555938679,1555938679,'biurqtti6eki3if9odf0'),(35,0,0,'','This is nice news','','Hello world!',NULL,NULL,1555938869,1555938869,'biursda23akqmj2f50jg'),(36,0,0,'','Hello world','','Hello world body....',NULL,NULL,1555939459,1555939459,'bius10q23akqkp7g55l0'),(37,0,0,'','This is created from mobile','','Hjnvhknssw',NULL,NULL,1555941765,1555941765,'biusj1a23akqkp7g55m0'),(38,0,0,'{\"name\":\"chen\", \"email\":\"chen@digimaker.no\"}','This is nice','','This is nice...',NULL,NULL,1555956628,1555956628,'biv075223akkdeldlaa0'),(39,0,0,'','Test','','This is the body text',NULL,NULL,1556010895,1556010895,'bivdf3q23akl47h33nj0'),(40,0,0,'','Welcome','','test2019-04-25 21:17:54.254423 +0200 CEST m=+0.114920807',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(41,0,0,'','Welcome','','test2019-04-25 21:19:41.86809 +0200 CEST m=+0.115214177',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(42,0,0,'','Welcome','','test2019-04-25 21:27:05.720371 +0200 CEST m=+0.118570830',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(43,0,0,'','Welcome','','test2019-04-25 21:37:36.70084 +0200 CEST m=+0.125834685',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(44,0,0,'','Welcome','','test2019-04-25 21:42:00.007948 +0200 CEST m=+0.150465957',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(45,0,0,'','Welcome','','test2019-04-26 20:22:58.858131 +0200 CEST m=+0.124329785',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(46,0,0,'','Welcome','','test2019-04-26 20:39:29.818206 +0200 CEST m=+0.121351436',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(47,0,0,'','Welcome','','test2019-04-26 20:48:49.455475 +0200 CEST m=+0.152287431',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(48,0,0,'','Welcome','','test2019-04-26 20:49:24.199451 +0200 CEST m=+0.147711459',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0');
+INSERT INTO `dm_article` VALUES (1,1,1,'','Welcome','','test2019-04-28 23:36:26.242035 +0200 CEST m=+0.116724089',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(2,0,0,'','Welcome','','',NULL,NULL,0,0,'bisdku5i6ekklfcg6sf0'),(3,1,1,'','','','',NULL,NULL,0,0,''),(4,1,1,'','','','',NULL,NULL,0,231213,''),(5,1,1,'','','','',NULL,NULL,0,0,''),(6,0,0,'','','','',NULL,NULL,0,0,'5555555'),(7,0,1,'','','','',NULL,NULL,1555160703,1555160703,''),(8,0,1,'','','','',NULL,NULL,1555160780,1555160780,''),(9,0,1,'','','','',NULL,NULL,1555163008,1555163008,''),(10,0,1,'','','','',NULL,NULL,1555167726,1555167726,''),(11,0,1,'','','','',NULL,NULL,1555172650,1555172650,''),(12,0,1,'','','','',NULL,NULL,1555172678,1555172678,''),(13,0,0,'','','','',NULL,NULL,0,0,'bis7ehti6ekh9l3ahps0'),(14,0,0,'','','','',NULL,NULL,0,0,'bisdi55i6ekkgnv0v0mg'),(15,0,0,'','Welcome','','test2019-04-21 21:11:36.811602 +0200 CEST m=+0.295915534',NULL,NULL,111111,12313,'biuc2dti6ekjbfn7atk0'),(16,0,0,'','','','',NULL,NULL,0,5555555,''),(17,0,0,'','','','',NULL,NULL,1555876380,1555876380,'biuck75i6ekkfim1fpa0'),(21,0,0,'','Test','','',NULL,NULL,1555877658,1555877658,'biucu6li6ekl32m1osp0'),(22,0,0,'','Test21.04.2019 22:25','','',NULL,NULL,1555878336,1555878336,'biud3g5i6eklll6a37og'),(23,0,0,'','Test 21.04.2019 22:25','','',NULL,NULL,1555878350,1555878350,'biud3jli6eklm8ldajr0'),(24,0,0,'','Test 21.04.2019 22:28','','Hello',NULL,NULL,1555878483,1555878483,'biud4kti6eklqplqrd6g'),(25,0,0,'','Test 22.04.2019 11:56','','Hello',NULL,NULL,1555927010,1555927010,'biuovoli6eko05jjm38g'),(26,0,0,'','Test 22.04.2019 12:04','','Hello',NULL,NULL,1555927488,1555927488,'biup3g5i6eko66e9n4mg'),(30,0,0,'','Test 22.04.2019 14:11','','Hello',NULL,NULL,1555935086,1555935086,'biuqurli6ekgrts6st2g'),(31,0,0,'','Test 22.04.2019 14:25','','Hello',NULL,NULL,1555935929,1555935929,'biur5edi6ekh8f72bo7g'),(32,0,0,'','Title1','','Hello world',NULL,NULL,1555937684,1555937684,'biurj55i6ekhu6c75ddg'),(33,0,0,'','Good1','','Test',NULL,NULL,1555937783,1555937783,'biurjtti6ekhu6c75deg'),(35,0,0,'','This is nice news','','Hello world!',NULL,NULL,1555938869,1555938869,'biursda23akqmj2f50jg'),(39,0,0,'','Test','','This is the body text',NULL,NULL,1556010895,1556010895,'bivdf3q23akl47h33nj0'),(40,0,0,'','Welcome','','test2019-04-25 21:17:54.254423 +0200 CEST m=+0.114920807',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(41,0,0,'','Welcome','','test2019-04-25 21:19:41.86809 +0200 CEST m=+0.115214177',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(42,0,0,'','Welcome','','test2019-04-25 21:27:05.720371 +0200 CEST m=+0.118570830',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(43,0,0,'','Welcome','','test2019-04-25 21:37:36.70084 +0200 CEST m=+0.125834685',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(44,0,0,'','Welcome','','test2019-04-25 21:42:00.007948 +0200 CEST m=+0.150465957',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(45,0,0,'','Welcome','','test2019-04-26 20:22:58.858131 +0200 CEST m=+0.124329785',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(46,0,0,'','Welcome','','test2019-04-26 20:39:29.818206 +0200 CEST m=+0.121351436',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(47,0,0,'','Welcome','','test2019-04-26 20:48:49.455475 +0200 CEST m=+0.152287431',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(48,0,0,'','Welcome','','test2019-04-26 20:49:24.199451 +0200 CEST m=+0.147711459',NULL,NULL,111111,12313,'biud4cti6eklq51ea0p0'),(50,0,0,'','This is a test blog','','This is a test blog',NULL,NULL,1556720283,1556720283,''),(51,0,0,'','hello ','','dssas',NULL,NULL,1556727927,1556727927,'');
 /*!40000 ALTER TABLE `dm_article` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -63,9 +63,9 @@ CREATE TABLE `dm_folder` (
   `summary` text NOT NULL,
   `published` int(11) NOT NULL DEFAULT '0',
   `modified` int(11) NOT NULL DEFAULT '0',
-  `remote_id` varchar(30) NOT NULL DEFAULT '',
+  `cuid` varchar(30) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -74,8 +74,39 @@ CREATE TABLE `dm_folder` (
 
 LOCK TABLES `dm_folder` WRITE;
 /*!40000 ALTER TABLE `dm_folder` DISABLE KEYS */;
-INSERT INTO `dm_folder` VALUES (1,'','Home','',0,0,''),(2,'','Blog','',0,0,''),(3,'','News','',0,0,''),(4,'','Contact Us','',0,0,''),(5,'','Users','',0,0,''),(6,'','Share Content','',0,0,'master-50'),(7,'','Test 22.04.2019 14:28','Hello',1555936081,1555936081,'biur6kdi6ekh9pi7ku3g'),(8,'','Test 22.04.2019 14:53','Hello',1555937595,1555937595,'biurieti6ekhrsfq478g'),(9,'','Test 22.04.2019 15:43','Hello',1555940637,1555940637,'biusa7di6eki608cromg'),(10,'','Test folder','Folder',1555960873,1555960873,'biv18adi6ekji63i8nh0'),(11,'','Test','Test1',1555960929,1555960929,'biv18odi6ekjir18f450');
+INSERT INTO `dm_folder` VALUES (1,'home','Home','',0,0,''),(2,'','Blog','',0,0,''),(3,'','News','',0,0,''),(4,'','Contact Us','',0,0,''),(5,'users','Users','',0,0,''),(6,'','Share Content','',0,0,'master-50'),(7,'','Test 22.04.2019 14:28','Hello',1555936081,1555936081,'biur6kdi6ekh9pi7ku3g'),(8,'','Test 22.04.2019 14:53','Hello',1555937595,1555937595,'biurieti6ekhrsfq478g'),(9,'','Test 22.04.2019 15:43','Hello',1555940637,1555940637,'biusa7di6eki608cromg'),(10,'','Test folder','Folder',1555960873,1555960873,'biv18adi6ekji63i8nh0'),(11,'','Test','Test1',1555960929,1555960929,'biv18odi6ekjir18f450'),(12,'media','Media','',1556718902,1556718902,''),(15,'','Test1','',1556740823,1556740823,'bj4vllq23akuvlesh6r0'),(16,'image','Images','',1556741569,1556741569,'bj4vrga23akuvlesh6s0'),(17,'','Site 1','',1556742887,1556742887,'bj505pq23akuvlesh6t0'),(18,'image','Images','',1556742897,1556742897,'bj505sa23akuvlesh6u0'),(19,'','News','',1556742925,1556742925,'bj5063a23akuvlesh6v0'),(20,'','Blogs','',1556742936,1556742936,'bj5066223akuvlesh700'),(21,'','Contact us','',1556743366,1556743366,'bj509hi23akvcebdgsu0');
 /*!40000 ALTER TABLE `dm_folder` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `dm_image`
+--
+
+DROP TABLE IF EXISTS `dm_image`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `dm_image` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `author` int(11) NOT NULL DEFAULT '0',
+  `type` varchar(30) NOT NULL DEFAULT '',
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `path` varchar(255) NOT NULL DEFAULT '',
+  `published` int(11) NOT NULL DEFAULT '0',
+  `modified` int(11) NOT NULL DEFAULT '0',
+  `attached_location` int(11) NOT NULL DEFAULT '0',
+  `cuid` varchar(30) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `dm_image`
+--
+
+LOCK TABLES `dm_image` WRITE;
+/*!40000 ALTER TABLE `dm_image` DISABLE KEYS */;
+INSERT INTO `dm_image` VALUES (1,0,'','ddd','1/2/test.jpg',0,0,0,''),(2,0,'imgcloud','ddd','1/xesfddsfsdiioll.jpg',0,0,56,''),(3,0,'','test1','1/2/test2.jpg',0,0,54,''),(4,0,'','test2','1/dsfsdfsq.jpg',0,0,56,'');
+/*!40000 ALTER TABLE `dm_image` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -104,7 +135,7 @@ CREATE TABLE `dm_location` (
   `section` varchar(50) NOT NULL DEFAULT '',
   `p` varchar(30) NOT NULL DEFAULT 'c',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=60 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -113,7 +144,7 @@ CREATE TABLE `dm_location` (
 
 LOCK TABLES `dm_location` WRITE;
 /*!40000 ALTER TABLE `dm_location` DISABLE KEYS */;
-INSERT INTO `dm_location` VALUES (1,0,1,'1','','folder',1,'eng-gb',0,'Home',0,0,0,'','','content','c'),(2,1,2,'1/2','','article',1,'eng-gb',0,'Welcome',0,0,0,'bin1oj5i6ekglgsliq4g','','content','c'),(3,1,3,'1/3','','folder',2,'eng-gb',0,'Blog',0,0,0,'','','content','c'),(4,1,4,'1/4','','folder',3,'eng-gb',0,'News',0,0,0,'','','content','recent'),(5,1,5,'1/5','','folder',4,'eng-gb',0,'Contact Us',0,0,0,'','','content','archive'),(6,4,6,'1/4/6','','article',2,'eng-gb',0,'EM EMF is released',0,0,0,'','','content','c'),(7,0,7,'7','','folder',5,'eng-gb',0,'Users',0,0,0,'','','user','c'),(8,7,8,'7/8','','user',1,'eng-gb',0,'Chen Xiongjie',0,0,0,'','','user','c'),(11,-1,11,'','','folder',0,'eng-gb',0,'Test folder',0,0,0,'','','','c'),(12,-1,12,'','','folder',0,'eng-gb',0,'Test folder',0,0,0,'','','','c'),(14,1,0,'','','',0,'',0,'',0,0,0,'','','',''),(15,1,0,'','','',0,'',0,'',0,0,0,'biottj5i6ekipupsp7b0','','',''),(16,1,0,'','','',0,'',0,'',0,0,0,'biouf05i6ekj5fs07k20','','',''),(17,1,0,'','','',0,'',0,'',0,0,0,'biovjrli6ekjf1sm1n6g','','',''),(18,1,0,'','','',0,'',0,'',0,0,0,'bip0qali6ekk630i8slg','','',''),(19,-1,0,'','','article',0,'',0,'',0,0,0,'bip0qhli6ekk6rst2630','','',''),(20,4,0,'','','article',0,'',0,'',0,0,0,'biuck75i6ekkfim1fpag','','',''),(24,4,0,'','','article',21,'',0,'Test',0,0,0,'biucu6li6ekl32m1ospg','','',''),(25,4,0,'','','article',22,'',0,'Test21.04.2019 22:25',0,0,0,'biud3g5i6eklll6a37p0','','',''),(26,4,0,'','','article',23,'',0,'Test 21.04.2019 22:25',0,0,0,'biud3jli6eklm8ldajrg','','',''),(27,4,0,'','','article',24,'',0,'Test 21.04.2019 22:28',0,0,0,'biud4kti6eklqplqrd70','','',''),(28,4,0,'','','article',0,'',0,'',0,0,0,'biuovoli6eko05jjm390','','',''),(33,4,0,'','','article',31,'',0,'Test 22.04.2019 14:25',0,0,0,'biur5edi6ekh8f72bo80','','',''),(34,4,0,'','','folder',7,'',0,'Test 22.04.2019 14:28',0,0,0,'biur6kdi6ekh9pi7ku40','','',''),(35,4,0,'','','folder',8,'',0,'Test 22.04.2019 14:53',0,0,0,'biurieti6ekhrsfq4790','','',''),(36,1,0,'','','article',32,'',0,'Title1',0,0,0,'biurj55i6ekhu6c75de0','','',''),(37,1,0,'','','article',33,'',0,'Good1',0,0,0,'biurjtti6ekhu6c75df0','','',''),(38,1,0,'','','article',34,'',0,'This is good',0,0,0,'biurqu5i6eki3if9odfg','','',''),(39,4,0,'','','article',35,'',0,'This is nice news',0,0,0,'biursda23akqmj2f50k0','','',''),(40,1,0,'','','article',36,'',0,'Hello world',0,0,0,'bius10q23akqkp7g55lg','','',''),(41,4,0,'','','folder',9,'',0,'Test 22.04.2019 15:43',0,0,0,'biusa7di6eki608cron0','','',''),(42,1,0,'','','article',37,'',0,'This is created from mobile',0,0,0,'biusj1a23akqkp7g55mg','','',''),(43,1,0,'','','article',38,'',0,'This is nice',0,0,0,'biv075223akkdeldlaag','','',''),(44,5,0,'','','folder',10,'',0,'Test folder',0,0,0,'biv18adi6ekji63i8nhg','','',''),(45,5,0,'','','folder',11,'',0,'Test',0,0,0,'biv18odi6ekjir18f45g','','',''),(46,4,0,'','home/news/test','article',39,'',0,'Test',0,0,0,'bivdf3q23akl47h33njg','','','');
+INSERT INTO `dm_location` VALUES (1,0,1,'1','','folder',1,'eng-gb',0,'Home',0,0,0,'','','content','c'),(2,1,2,'1/2','','article',1,'eng-gb',0,'Welcome',0,0,0,'bin1oj5i6ekglgsliq4g','','content','c'),(3,1,3,'1/3','','folder',2,'eng-gb',0,'Blog',0,0,0,'','','content','c'),(4,1,4,'1/4','','folder',3,'eng-gb',0,'News',0,0,0,'','','content','recent'),(5,1,5,'1/5','','folder',4,'eng-gb',0,'Contact Us',0,0,0,'','','content','archive'),(6,4,6,'1/4/6','','article',2,'eng-gb',0,'EM EMF is released',0,0,0,'','','content','c'),(7,0,7,'7','','folder',5,'eng-gb',0,'Users',0,0,0,'','','user','c'),(8,7,8,'7/8','','user',1,'eng-gb',0,'Chen Xiongjie',0,0,0,'','','user','c'),(11,-1,11,'','','folder',0,'eng-gb',0,'Test folder',0,0,0,'','','','c'),(12,-1,12,'','','folder',0,'eng-gb',0,'Test folder',0,0,0,'','','','c'),(14,1,0,'','','',0,'',0,'',0,0,0,'','','',''),(15,1,0,'','','',0,'',0,'',0,0,0,'biottj5i6ekipupsp7b0','','',''),(16,1,0,'','','',0,'',0,'',0,0,0,'biouf05i6ekj5fs07k20','','',''),(17,1,0,'','','',0,'',0,'',0,0,0,'biovjrli6ekjf1sm1n6g','','',''),(18,1,0,'','','',0,'',0,'',0,0,0,'bip0qali6ekk630i8slg','','',''),(19,-1,0,'','','article',0,'',0,'',0,0,0,'bip0qhli6ekk6rst2630','','',''),(20,4,0,'','','article',0,'',0,'',0,0,0,'biuck75i6ekkfim1fpag','','',''),(24,4,0,'','','article',21,'',0,'Test',0,0,0,'biucu6li6ekl32m1ospg','','',''),(25,4,0,'','','article',22,'',0,'Test21.04.2019 22:25',0,0,0,'biud3g5i6eklll6a37p0','','',''),(26,4,0,'','','article',23,'',0,'Test 21.04.2019 22:25',0,0,0,'biud3jli6eklm8ldajrg','','',''),(27,4,0,'','','article',24,'',0,'Test 21.04.2019 22:28',0,0,0,'biud4kti6eklqplqrd70','','',''),(28,4,0,'','','article',0,'',0,'',0,0,0,'biuovoli6eko05jjm390','','',''),(33,4,0,'','','article',31,'',0,'Test 22.04.2019 14:25',0,0,0,'biur5edi6ekh8f72bo80','','',''),(34,4,0,'','','folder',7,'',0,'Test 22.04.2019 14:28',0,0,0,'biur6kdi6ekh9pi7ku40','','',''),(35,4,0,'','','folder',8,'',0,'Test 22.04.2019 14:53',0,0,0,'biurieti6ekhrsfq4790','','',''),(36,1,0,'','','article',32,'',0,'Title1',0,0,0,'biurj55i6ekhu6c75de0','','',''),(37,1,0,'','','article',33,'',0,'Good1',0,0,0,'biurjtti6ekhu6c75df0','','',''),(39,4,0,'','','article',35,'',0,'This is nice news',0,0,0,'biursda23akqmj2f50k0','','',''),(41,4,0,'','','folder',9,'',0,'Test 22.04.2019 15:43',0,0,0,'biusa7di6eki608cron0','','',''),(44,5,0,'','','folder',10,'',0,'Test folder',0,0,0,'biv18adi6ekji63i8nhg','','',''),(45,5,0,'','','folder',11,'',0,'Test',0,0,0,'biv18odi6ekjir18f45g','','',''),(46,4,0,'','home/news/test','article',39,'',0,'Test',0,0,0,'bivdf3q23akl47h33njg','','',''),(48,0,0,'','','folder',12,'',0,'Media',0,0,0,'bj4qadi23akjgtfqkbgg','','',''),(49,3,0,'','','article',50,'',0,'This is a test blog',0,0,0,'bj4ql6q23aks3f0ancbg','','',''),(50,4,0,'','','article',51,'',0,'hello ',0,0,0,'bj4sgtq23aks3f0anccg','','',''),(53,1,0,'','','folder',15,'',0,'Test1',0,0,0,'bj4vllq23akuvlesh6rg','','',''),(54,48,0,'','','folder',16,'',0,'Images',0,0,0,'bj4vrga23akuvlesh6sg','','',''),(55,1,0,'','','folder',17,'',0,'Site 1',0,0,0,'bj505pq23akuvlesh6tg','','',''),(56,55,0,'','','folder',18,'',0,'Images',0,0,0,'bj505sa23akuvlesh6ug','','',''),(57,55,0,'','','folder',19,'',0,'News',0,0,0,'bj5063a23akuvlesh6vg','','',''),(58,55,0,'','','folder',20,'',0,'Blogs',0,0,0,'bj5066223akuvlesh70g','','',''),(59,55,0,'','','folder',21,'',0,'Contact us',0,0,0,'bj509hi23akvcebdgsug','','','');
 /*!40000 ALTER TABLE `dm_location` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -146,7 +177,7 @@ CREATE TABLE `dm_relation` (
 
 LOCK TABLES `dm_relation` WRITE;
 /*!40000 ALTER TABLE `dm_relation` DISABLE KEYS */;
-INSERT INTO `dm_relation` VALUES (1,10,'article',5,'',0,1,'cover_image','Profile picture','web/images/22x/3ee22/ddxexxxxx.png',''),(3,37,'article',1,'article',2,0,'related_articles','','Welcome',''),(4,37,'article',1,'',0,0,'translation','nor-no','',''),(8,2,'article',0,'',37,10,'related_articles','f','',''),(9,37,'article',0,'',40,10,'related_articles','hello:)','Hello world',''),(10,2,'article',0,'',37,0,'related_articles','Test2019-04-25 22:08:24.937221 +0200 CEST m=+0.077377383','',''),(13,2,'article',0,'',42,0,'related_articles','','37 {This is created from mobile <nil>}',''),(14,2,'article',0,'',42,0,'related_articles','','37 {This is created from mobile <nil>}',''),(15,2,'article',0,'',42,427123440,'related_articles','2019-04-27 12:34:40.415358 +0200 CEST m=+0.079602793','37 {This is created from mobile <nil>}',''),(16,2,'article',0,'',42,427123629,'related_articles','2019-04-27 12:36:29.588874 +0200 CEST m=+0.075406532','37 {This is created from mobile <nil>}',''),(19,0,'',0,'',0,0,'','Test1','',''),(21,0,'',0,'',0,0,'','Test2','',''),(22,0,'',0,'',0,0,'','Test2','',''),(25,0,'',0,'',0,0,'','Test1','',''),(26,0,'',0,'',0,0,'','Test2','','');
+INSERT INTO `dm_relation` VALUES (1,10,'article',5,'',0,1,'cover_image','Profile picture','web/images/22x/3ee22/ddxexxxxx.png',''),(8,2,'article',0,'',37,10,'related_articles','f','',''),(10,2,'article',0,'',37,0,'related_articles','Test2019-04-25 22:08:24.937221 +0200 CEST m=+0.077377383','',''),(13,2,'article',0,'',42,0,'related_articles','','37 {This is created from mobile <nil>}',''),(14,2,'article',0,'',42,0,'related_articles','','37 {This is created from mobile <nil>}',''),(15,2,'article',0,'',42,427123440,'related_articles','2019-04-27 12:34:40.415358 +0200 CEST m=+0.079602793','37 {This is created from mobile <nil>}',''),(16,2,'article',0,'',42,427123629,'related_articles','2019-04-27 12:36:29.588874 +0200 CEST m=+0.075406532','37 {This is created from mobile <nil>}',''),(19,0,'',0,'',0,0,'','Test1','',''),(21,0,'',0,'',0,0,'','Test2','',''),(22,0,'',0,'',0,0,'','Test2','',''),(26,0,'',0,'',0,0,'','Test2','','');
 /*!40000 ALTER TABLE `dm_relation` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -219,4 +250,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-04-29 21:50:31
+-- Dump completed on 2019-05-01 23:37:56
