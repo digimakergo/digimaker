@@ -18,6 +18,10 @@ a.action:hover{
     color:#000000
 }
 
+.admin a{
+    color: #0593ce;
+}
+
 ul{
     list-style-type: none;
     padding-left: 5px;
