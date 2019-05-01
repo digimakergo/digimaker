@@ -132,7 +132,7 @@ func (handler *ContentHandler) Create(parentID int, contentType string, inputs m
 	now := int(time.Now().Unix())
 	content.SetValue("published", now)
 	content.SetValue("modified", now)
-	content.SetValue("remote_id", util.GenerateUID())
+	content.SetValue("cuid", util.GenerateUID())
 
 	database, err := db.DB()
 	if err != nil {
