@@ -192,6 +192,7 @@ func (ch ContentHandler) DeleteByID(id int, toTrash bool) error {
 //Note: this is only for when there is 1 location.
 //  You need to judge if there are more than one locations before invoking this.
 func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTrash bool) error {
+	//todo: check delete children. There should be more consideration if there are more children.
 	//Delete location
 	location := content.GetLocation()
 	if location.CountLocations() > 1 {
