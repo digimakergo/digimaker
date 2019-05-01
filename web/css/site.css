@@ -66,6 +66,13 @@ ul{
     font-size: 80%
 }
 
+img.line{
+    margin-top: 2px;
+    height: 30px;
+}
+
+
+
 @media only screen and (max-width: 600px) {
     .tool{
         float: none

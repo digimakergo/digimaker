@@ -82,11 +82,16 @@
       {{end}}
   </div>
 
-  <h3>Articles under</h3>
+  <h3>Contents under</h3>
   <div>
       {{range $index,$content := .list}}
         <div>
+            {{if eq $content.ContentType "image" }}
+                {{$content.ID}}. {{$content.Title.Value}}
+                <img class="line" src="/static/images/{{$content.Path.Value}}" />
+            {{else}}
             <a href="/content/view/{{$content.ID}}">{{$content.ID}}. {{$content.Name}}</a>
+             {{end}}
             <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
             <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
         </div>

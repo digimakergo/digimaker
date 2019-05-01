@@ -52,13 +52,25 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	var variables map[string]interface{}
 	c := currentFolder.(*entity.Folder)
 	if c.ID != 0 {
-		//Get list of article
-		articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
+		//Folder. Get list of article
 
 		variables = map[string]interface{}{"current": currentFolder,
-			"list":        articles,
 			"current_def": contenttype.GetContentDefinition("folder"),
 			"folders":     folders}
+
+		folderType := currentFolder.Value("folder_type").(fieldtype.TextField)
+		fmt.Println(folderType)
+		if folderType.Data == "image" {
+			images := &[]entity.Image{}
+			handler := db.DBHanlder()
+			handler.GetEnity("dm_image", query.Cond("attached_location", currentFolder.GetLocation().ID), images)
+			variables["list"] = images
+			fmt.Println(images)
+		} else {
+			articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
+			variables["list"] = articles
+		}
+
 	} else {
 		currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
 
