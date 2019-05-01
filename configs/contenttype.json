@@ -6,7 +6,7 @@
      "fields_display":["title", "summary"],
      "sub_types":["folder","article"],
      "fields": { "title"  : {"type":"text", "name":"Title", "required":true},
-                 "folder_type"  : {"type":"text", "name":"Folder Type", "required":true},
+                 "folder_type"  : {"type":"text", "name":"Folder Type", "required":false},
                  "summary": {"type":"richtext", "name":"Summary", "required":false}
                }
    },

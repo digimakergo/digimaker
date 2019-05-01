@@ -134,8 +134,18 @@ func (handler *ContentHandler) Create(parentID int, contentType string, inputs m
 	content.SetValue("modified", now)
 	content.SetValue("remote_id", util.GenerateUID())
 
-	err := content.Store()
+	database, err := db.DB()
 	if err != nil {
+		return false, ValidationResult{}, errors.New("Can't get db connection.")
+	}
+	tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return false, ValidationResult{}, errors.New("Can't get transaction.")
+	}
+
+	err = content.Store(tx)
+	if err != nil {
+		tx.Rollback()
 		return false, ValidationResult{}, err
 	}
 	//todo: add commit and rollback for the whole saving
@@ -148,11 +158,13 @@ func (handler *ContentHandler) Create(parentID int, contentType string, inputs m
 	//todo: set name based on rules. Now it's all based on title.
 	contentName := content.Value("title").(fieldtype.TextField).Data
 	location.Name = contentName
-	err = location.Store()
+	err = location.Store(tx)
 	if err != nil {
+		tx.Rollback()
 		return false, ValidationResult{}, err
 	}
 
+	tx.Commit()
 	//todo: update other things in location like main_id, hierarchy
 
 	return true, ValidationResult{}, nil

@@ -9,6 +9,16 @@
     <h2>New Folder</h2>
     <form method="post">
         <input type="hidden" name="type" value="folder" />
+        {{if .posted}}
+            {{if $.success}}
+                <div class="alert-info">Success.</div>
+             {{else}}
+                {{range $index,$field := $.validation.Fields}}
+                    <div>{{$field.Identifier}}: {{$field.Detail}}</div>
+                {{end}}
+             {{end}}
+        {{end}}
+        {{.error}}
         <div style="">
             <div class="form-group">
                 <label>Title:</label>

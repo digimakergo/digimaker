@@ -106,16 +106,16 @@ func (c Location) Path() []string {
 	return path
 }
 
-func (c *Location) Store() error {
+func (c *Location) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.ID == 0 {
-		id, err := handler.Insert(c.TableName(), c.Values())
+		id, err := handler.Insert(c.TableName(), c.Values(), transaction...)
 		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.ID))
+		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil

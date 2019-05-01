@@ -95,6 +95,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 		contentType := r.PostFormValue("type")
 		handler := handler.ContentHandler{}
 		success, result, error := handler.Create(parentID, contentType, params)
+		fmt.Println(success, result, error)
 		if !success {
 			variables["success"] = false
 			if error != nil {
