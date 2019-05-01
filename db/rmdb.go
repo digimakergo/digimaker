@@ -80,8 +80,23 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
 	return nil
 }
 
+// Count based on condition
 func (*RMDB) Count(tablename string, condition query.Condition) (int, error) {
-	return 0, nil
+	conditions, values := BuildCondition(condition)
+	sqlStr := "SELECT COUNT(*) AS count FROM " + tablename + " WHERE " + conditions
+	util.Debug("db", sqlStr)
+	db, err := DB()
+	if err != nil {
+		return 0, errors.Wrap(err, "[RMDB.Count]Error when connecting db.")
+	}
+	rows, err := queries.Raw(sqlStr, values...).QueryContext(context.Background(), db)
+	if err != nil {
+		return 0, errors.Wrap(err, "[RMDB.Count]Error when querying.")
+	}
+	rows.Next()
+	var count int
+	rows.Scan(&count)
+	return count, nil
 }
 
 //todo: support limit.

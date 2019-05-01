@@ -168,6 +168,7 @@ func (content ContentHandler) Update(id int, inputs map[string]interface{}) {
 //Delete content by location id
 func (ch ContentHandler) DeleteByID(id int, toTrash bool) error {
 	content, err := Querier().FetchByID(id)
+	//todo: check how many. if more than 1, delete current only(and set main_id if needed)
 	if err != nil {
 		return errors.New("[handler.delete]Content doesn't exist with id: " + strconv.Itoa(id))
 	}
@@ -175,55 +176,59 @@ func (ch ContentHandler) DeleteByID(id int, toTrash bool) error {
 	return err
 }
 
-//Delete content
+//Delete content, relations and location.
+//Note: this is only for when there is 1 location.
+//  You need to judge if there are more than one locations before invoking this.
 func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTrash bool) error {
-	database, err := db.DB()
-	if err != nil {
-		util.Error(err.Error())
-		return errors.New("[handler.deleteByContent]Can not create connection.")
-	}
-	tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
-	if err != nil {
-		tx.Rollback()
-		message := "[handler.deleteByContent]Can not create transaction."
-		util.Error(message + err.Error())
-		return errors.New(message)
-	}
-
-	//Delete relation first.
-	relations := content.GetRelations()
-	if len(relations.Value) > 0 {
-		dbHandler := db.DBHanlder()
-		//todo: check cid is not empty.
-		err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
+	//Delete location
+	location := content.GetLocation()
+	if location.CountLocations() > 1 {
+		return errors.New("There are more than 1 location. Remove location first.")
+	} else {
+		database, err := db.DB()
+		if err != nil {
+			util.Error(err.Error())
+			return errors.New("[handler.deleteByContent]Can not create connection.")
+		}
+		tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
 		if err != nil {
 			tx.Rollback()
-			message := "[handler.deleteByContent]Can not delete relation."
+			message := "[handler.deleteByContent]Can not create transaction."
+			util.Error(message + err.Error())
+			return errors.New(message)
+		}
+
+		//Delete relation first.
+		relations := content.GetRelations()
+		if len(relations.Value) > 0 {
+			dbHandler := db.DBHanlder()
+			err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
+			if err != nil {
+				tx.Rollback()
+				message := "[handler.deleteByContent]Can not delete relation."
+				util.Error(message + err.Error())
+				return errors.New(message)
+			}
+		}
+
+		err = content.GetLocation().Delete(tx)
+		if err != nil {
+			tx.Rollback()
+		} else {
+			//Delete content
+			err = content.Delete(tx)
+			if err != nil {
+				tx.Rollback()
+			}
+		}
+
+		err = tx.Commit()
+		if err != nil {
+			message := "[handler.deleteByContent]Can not commit."
 			util.Error(message + err.Error())
 			return errors.New(message)
 		}
 	}
-
-	//Delete location
-	//todo: if there are more locations, delete the current location only. or delete all location.
-	err = content.GetLocation().Delete(tx)
-	if err != nil {
-		tx.Rollback()
-	} else {
-		//Delete content
-		err = content.Delete(tx)
-		if err != nil {
-			tx.Rollback()
-		}
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		message := "[handler.deleteByContent]Can not commit."
-		util.Error(message + err.Error())
-		return errors.New(message)
-	}
-
 	return nil
 }
 

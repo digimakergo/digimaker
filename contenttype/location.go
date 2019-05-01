@@ -121,6 +121,22 @@ func (c *Location) Store() error {
 	return nil
 }
 
+//Count how many locations for the same content
+//Note: the count is instant so not cached.
+func (l *Location) CountLocations() int {
+	handler := db.DBHanlder()
+	count, err := handler.Count("dm_location", Cond("content_type", l.ContentType).Cond("content_id", l.ContentID))
+	if err != nil {
+		//todo: panic to top
+	}
+	return count
+}
+
+//If the location is main location
+func (l *Location) IsMainLocation() bool {
+	return l.MainID == l.ID
+}
+
 //Delete location only
 func (l *Location) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()

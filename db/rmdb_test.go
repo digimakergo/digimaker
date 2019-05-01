@@ -3,6 +3,8 @@
 package db
 
 import (
+	"dm/query"
+	"fmt"
 	"testing"
 )
 
@@ -29,4 +31,10 @@ func TestInsert(t *testing.T) {
 	// if err != nil {
 	// 	tx.Rollback()
 	// }
+}
+
+func TestCount(t *testing.T) {
+	rmdb := RMDB{}
+	count, err := rmdb.Count("dm_location", query.Cond("1", 1))
+	fmt.Println(count, err)
 }

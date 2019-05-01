@@ -40,7 +40,7 @@ func TestCreate(t *testing.T) {
 
 func TestDelete(t *testing.T) {
 	handler := ContentHandler{}
-	err := handler.DeleteByID(42, false)
+	err := handler.DeleteByID(40, false)
 	fmt.Println(err)
 	assert.Equal(t, nil, err)
 }
