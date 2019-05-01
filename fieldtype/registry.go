@@ -29,14 +29,6 @@ func (TypeLoaderDefault) Instance(extendedType string, identifier string) interf
 	return result
 }
 
-func (TypeLoaderDefault) FieldTypeList() []string {
-	return []string{"text", "richtext"}
-}
-
-func (TypeLoaderDefault) ContentTypeList() []string {
-	return []string{"article", "folder"}
-}
-
 //global variable for registering handlers
 //A handler is always singleton
 var handlerRegistry = map[string]FieldtypeHandler{}
