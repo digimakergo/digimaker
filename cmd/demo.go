@@ -111,6 +111,18 @@ func New(w http.ResponseWriter, r *http.Request) {
 	tpl.Execute(w, variables)
 }
 
+func Delete(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	handler := handler.ContentHandler{}
+	id, _ := strconv.Atoi(vars["id"])
+	err := handler.DeleteByID(id, false)
+	if err != nil {
+		w.Write([]byte(("error:" + err.Error())))
+	} else {
+		w.Write([]byte("success!"))
+	}
+}
+
 func Publish(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -139,6 +151,10 @@ func main() {
 
 	r.HandleFunc("/content/new/{type}/{id}", func(w http.ResponseWriter, r *http.Request) {
 		New(w, r)
+	})
+
+	r.HandleFunc("/content/delete/{id}", func(w http.ResponseWriter, r *http.Request) {
+		Delete(w, r)
 	})
 
 	r.HandleFunc("/content/publish", func(w http.ResponseWriter, r *http.Request) {
