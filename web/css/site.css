@@ -18,6 +18,28 @@ a.action:hover{
     color:#000000
 }
 
+.type-home::before{
+    content: '\f015';
+    font-family: fontawesome;
+    font-style: normal;
+}
+
+.type-media::before{
+    content: '\f03e';
+    font-family: fontawesome;
+    font-style: normal;
+}
+
+.type-users::before{
+    content: '\f0c0';
+    font-family: fontawesome;
+    font-style: normal;
+}
+
+a.btn{
+    margin-top: 5px;
+}
+
 .admin a{
     color: #0593ce;
 }

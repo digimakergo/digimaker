@@ -11,26 +11,24 @@
 <body>
   <h2>{{.current.Name}}</h2>
   <div class="tool">
-  <div>
-     <div>
-          <ul>
-              <li>
-                  <a href="/model/list"><i class="far fa-images"></i> Media</a>
-              </li>
-              <li>
-                  <a href="/model/list" title="User and access"><i class="fas fa-users"></i></i> Users</a>
-              </li>
-          </ul>
-      </div>
       <div>
-          <a href="/content/new/folder/{{.current.ID}}" class="btn btn-primary btn-sm">New Folder</a>
+          <ul>
+          {{range $index,$folder := .folders}}
+            <div>
+                <li>
+                <a href="/content/view/{{$folder.ID}}">
+                    <i class="type-{{$folder.FolderType.Value}}"></i>
+                    {{$folder.Name}}</a>
+                </li>
+                </div>
+          {{end}}
+          </ul>
+        </div>
+
+      <div>
+          <a href="/content/new/folder/{{.current.ID}}" class="btn btn-primary btn-sm">New Folder</a> <br />
           <a href="/content/new/article/{{.current.ID}}" class="btn btn-primary btn-sm">New article</a>
       </div>
-  </div>
-  <h3>Top folders</h3>
-  {{range $index,$folder := .folders}}
-    <div><a href="/content/view/{{$folder.ID}}">{{$folder.ID}}. {{$folder.Name}}</a></div>
-  {{end}}
   </div>
 
   <div class="block">

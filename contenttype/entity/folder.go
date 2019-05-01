@@ -19,6 +19,11 @@ type Folder struct{
     
      
      
+        FolderType fieldtype.TextField `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
+     
+    
+     
+     
         Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
      
     
@@ -48,6 +53,10 @@ func (c *Folder) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         
+        result["folder_type"]=c.FolderType
+        
+    
+        
         result["summary"]=c.Summary
         
     
@@ -62,7 +71,7 @@ func (c *Folder) ToMap() map[string]interface{} {
 }
 
 func (c *Folder) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "summary","title",}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ "folder_type","summary","title",}...)
 }
 
 func (c *Folder) DisplayIdentifierList() []string {
@@ -75,6 +84,11 @@ func (c *Folder) Value(identifier string) interface{} {
     }
     var result interface{}
 	switch identifier {
+    
+    case "folder_type":
+        
+            result = c.FolderType
+        
     
     case "summary":
         
@@ -97,6 +111,12 @@ func (c *Folder) Value(identifier string) interface{} {
 
 func (c *Folder) SetValue(identifier string, value interface{}) error {
 	switch identifier {
+        
+            
+            
+            case "folder_type":
+            c.FolderType = value.(fieldtype.TextField)
+            
         
             
             

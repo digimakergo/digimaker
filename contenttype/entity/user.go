@@ -84,7 +84,7 @@ func (c *User) IdentifierList() []string {
 }
 
 func (c *User) DisplayIdentifierList() []string {
-	return []string{ "firstname","lastname",}
+	return []string{ "firstname","lastname","login","password",}
 }
 
 func (c *User) Value(identifier string) interface{} {
