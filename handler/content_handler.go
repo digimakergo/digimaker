@@ -184,6 +184,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTra
 	}
 	tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
+		tx.Rollback()
 		message := "[handler.deleteByContent]Can not create transaction."
 		util.Error(message + err.Error())
 		return errors.New(message)
@@ -196,6 +197,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTra
 		//todo: check cid is not empty.
 		err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
 		if err != nil {
+			tx.Rollback()
 			message := "[handler.deleteByContent]Can not delete relation."
 			util.Error(message + err.Error())
 			return errors.New(message)
