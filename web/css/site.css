@@ -32,9 +32,11 @@ ul{
 }
 
 .admin{
+    margin-top: 50px;
     position: absolute;
-    bottom: 0px;
-    right: 10px;
+    padding: 5px;
+    text-align: center;
+    width: 100%;
     font-size: 80%
 }
 
@@ -44,8 +46,6 @@ ul{
     }
 
     .admin{
-        margin-top: 50px;
-        font-size: :90%;
-        position: relative;
+
     }
 }

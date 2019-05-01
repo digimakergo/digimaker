@@ -4,6 +4,7 @@
      "versioning": false,
      "locationing": true,
      "fields_display":["title", "summary"],
+     "sub_types":["folder","article"],
      "fields": { "title"  : {"type":"text", "name":"Title", "required":true},
                  "summary": {"type":"richtext", "name":"Summary", "required":false}
                }
