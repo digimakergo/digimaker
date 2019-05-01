@@ -3,7 +3,7 @@ package entity
 import "dm/contenttype"
 
 type ContentCommon struct {
-	CID       int                               `boil:"id" json:"id" toml:"id" yaml:"id"`
+	CID       int                               `boil:"cid" json:"cid" toml:"cid" yaml:"cid"`
 	Published int                               `boil:"published" json:"published" toml:"published" yaml:"published"`
 	Modified  int                               `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
 	CUID      string                            `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`

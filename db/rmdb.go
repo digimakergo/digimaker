@@ -57,7 +57,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
                                       'data' ,relation.data )
                          ORDER BY relation.priority ) as relations`
 
-	sqlStr := `SELECT content.*, ` + locationColumns + relationQuery + `
+	sqlStr := `SELECT content.*, content.id AS cid, ` + locationColumns + relationQuery + `
                    FROM ( ` + tableName + ` content
                      INNER JOIN dm_location location
                         ON location.content_type = '` + contentType + `' AND location.content_id=content.id )
