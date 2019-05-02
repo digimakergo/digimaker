@@ -24,13 +24,14 @@ a.action:hover{
 }
 
 .icon-type{
-    font-family: "Font Awesome 5 Free";
+    font-family: "Font Awesome 5\ Free";
     font-style: normal;
     margin-right: 3px;
+   font-weight: 900;
+
 }
 
 .type-home::before{
-    font-family: fontawesome;
     content: '\f015';
 }
 
@@ -43,21 +44,21 @@ a.action:hover{
 }
 
 .type-users::before{
-    font-family: fontawesome;
     content: '\f0c0';
 }
 
 .type-folder-::before{
     content: '\f07b';
+    font-weight: 400;
 }
 
 .type-folder-site::before{
     content:"\f108";
-    font-family: fontawesome;
 }
 
 .type-folder-image::before{
     content: '\f302';
+    font-weight: 400;
 }
 
 .type-folder-file::before{
