@@ -84,16 +84,21 @@
   <h3>Contents under</h3>
   <div>
       {{range $index,$content := .list}}
-        <div>
             {{if eq $content.ContentType "image" }}
-                {{$content.ID}}. {{$content.Title.Value}}
-                <img class="line" src="/static/images/{{$content.Path.Value}}" />
+                <div class="blockview">
+                    <a href="/static/images/{{$content.Path.Value}}">
+                    <img src="/static/images/{{$content.Path.Value}}" />
+                    <div>{{$content.ID}}. {{$content.Title.Value}}</div>
+                    </a>
+                </div>
             {{else}}
+                    <div>
                 <a href="/content/view/{{$content.ID}}">{{$content.ID}}. {{$content.Name}}</a>
                 <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
                 <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
+                </div>
              {{end}}
-        </div>
+
       {{end}}
   </div>
 

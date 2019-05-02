@@ -102,7 +102,14 @@ img.line{
     height: 30px;
 }
 
+.blockview{
+    display: inline-block;
+    width: 200px;
+}
 
+.blockview img{
+    max-width: 100%;
+}
 
 @media only screen and (max-width: 600px) {
     .tool{
