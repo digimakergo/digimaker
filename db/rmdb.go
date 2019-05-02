@@ -64,7 +64,8 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
                      LEFT JOIN dm_relation relation
                         ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
                      WHERE ` + conditions + `
-                     GROUP BY location.id`
+                     GROUP BY location.id
+                     ORDER BY location.priority, location.id`
 
 	util.Debug("db", sqlStr)
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)

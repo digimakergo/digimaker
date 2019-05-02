@@ -6,7 +6,12 @@ body{
     float: right;
 }
 
+a{
+    color: #16710c
+}
+
 a:hover{
+    color: #33562f;
     text-decoration: none
 }
 
@@ -18,22 +23,47 @@ a.action:hover{
     color:#000000
 }
 
-.type-home::before{
-    content: '\f015';
-    font-family: fontawesome;
+.icon-type{
+    font-family: "Font Awesome 5 Free";
     font-style: normal;
+    margin-right: 3px;
+}
+
+.type-home::before{
+    font-family: fontawesome;
+    content: '\f015';
 }
 
 .type-media::before{
-    content: '\f03e';
-    font-family: fontawesome;
-    font-style: normal;
+    content: '\f302';
+}
+
+.type-file::before{
+
 }
 
 .type-users::before{
-    content: '\f0c0';
     font-family: fontawesome;
-    font-style: normal;
+    content: '\f0c0';
+}
+
+.type-folder-::before{
+    content: '\f07b';
+}
+
+.type-folder-site::before{
+    content:"\f108";
+    font-family: fontawesome;
+}
+
+.type-folder-image::before{
+    content: '\f302';
+}
+
+.type-folder-file::before{
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    content: '\f65e';
 }
 
 a.btn{

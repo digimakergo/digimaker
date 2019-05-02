@@ -17,8 +17,7 @@
             <div>
                 <li>
                 <a href="/content/view/{{$folder.ID}}">
-                    <i class="type-{{$folder.FolderType.Value}}"></i>
-                    {{$folder.Name}}</a>
+                    <i class="icon-type  type-{{$folder.FolderType.Value}}"></i>{{$folder.Name}}</a>
                 </li>
                 </div>
           {{end}}
@@ -75,7 +74,7 @@
   <div>
       {{range $index,$content := .folder_list}}
         <div>
-            <a href="/content/view/{{$content.ID}}">{{$content.ID}}. {{$content.Name}}</a>
+            <a href="/content/view/{{$content.ID}}" title="{{$content.ID}}"><i class="icon-type type-folder-{{$content.FolderType.Value}}"></i>{{$content.Name}}</a>
             <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
             <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
         </div>
