@@ -2,7 +2,7 @@ body{
 
 }
 
-body > div{
+body > div, body > form{
     padding-left: 5px;
 }
 
