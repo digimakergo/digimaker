@@ -118,7 +118,6 @@ img.line{
 
 .debug{
     font-family: monospace;
-    padding: 3px;
     font-size: 12px;
     position: fixed;
     bottom: 0px;
@@ -130,6 +129,9 @@ img.line{
 
 .debug .title{
     margin-right: 10px;
+    padding: 3px;
+    display: inline-block;
+    font-weight: bold;
 }
 
 .debug h4{
