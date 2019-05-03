@@ -31,6 +31,67 @@ function showFields( button ){
 }
 </script>
 
+<div class="right" style="float: right">
+<ul>
+    <li>
+        <a href="#" class="active">
+        <i class="fas fa-list-alt"></i> Content types
+    </a>
+    </li>
+
+    <li>
+        <a href="#">
+            <i class="fas fa-tools"></i> Content settings
+        </a>
+    </li>
+
+
+    <li>
+        <a href="#">
+        <i class="fas fa-cubes"></i> Modules
+    </a>
+    </li>
+
+    <li>
+        <a href="#">
+            <i class="fas fa-file-export"></i> Export content
+        </a>
+    </li>
+
+    <li>
+        <a href="#">
+            <i class="fas fa-hammer"></i> Debug setting
+        </a>
+    </li>
+
+    <li>
+        <a href="#">
+            <i class="fas fa-clipboard-list"></i> Error log
+        </a>
+    </li>
+
+    <li>
+        <a href="#">
+            <i class="fas fa-shield-alt"></i> Authentication
+        </a>
+    </li>
+
+    <li>
+        <a href="#">
+            <i class="fas fa-user-tag"></i> General permission
+        </a>
+    </li>
+
+
+    <li>
+        <a href="#" class="pro" title="Tool for sites and applications.">
+            <i class="fas fa-tools"></i> Monitor tool(pro)
+        </a>
+    </li>
+
+</ul>
+</div>
+
 <h3>Content types</h3>
 <div><a href="#" class="btn btn-primary btn-sm">New type</a></div>
 {{range $contentType, $def := .definition}}
@@ -54,6 +115,10 @@ function showFields( button ){
     </div>
 {{end}}
 
-<div class="block"><a href="/">Back to home</a></div>
+<div class="admin">
+    Powered by <a href="#" class="dm-name">DM Content framework</a>
+</div>
+
+
 </body>
 </html>

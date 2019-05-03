@@ -4,6 +4,7 @@ body{
 
 body > div, body > form{
     padding-left: 5px;
+    padding-right: 5px;
 }
 
 .tool{
@@ -12,6 +13,10 @@ body > div, body > form{
 
 a{
     color: #43474a
+}
+
+a.active{
+    color: #0593ce
 }
 
 a:hover{
@@ -144,6 +149,14 @@ img.line{
 }
 
 .debug table{
+}
+
+.pro{
+    color: #d27140
+}
+
+.admin .admin-console{
+    color: grey
 }
 
 @media only screen and (max-width: 600px) {
