@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -33,6 +34,7 @@ func BootStrap() {
 
 func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	tpl := template.Must(template.ParseFiles("../web/template/view.html"))
+	queryStart := time.Now()
 	rmdb := db.DBHanlder()
 	article := entity.Article{}
 	id, _ := strconv.Atoi(vars["id"])
@@ -80,9 +82,19 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			"folders":     folders}
 	}
 
+	queryEnd := time.Now()
+	queryDuration := queryEnd.Sub(queryStart)
+
+	templateStart := time.Now()
 	folderList, _ := handler.Querier().List("folder", query.Cond("parent_id", id))
 	variables["folder_list"] = folderList
 	tpl.Execute(w, variables)
+	templateEnd := time.Now()
+	period := templateEnd.Sub(templateStart).Nanoseconds()
+	w.Write([]byte("<script>var dmtime={ 'total': " + strconv.Itoa(int(templateEnd.Sub(queryStart).Nanoseconds()/1000000)) +
+		", 'query':" +
+		strconv.Itoa(int(queryDuration/1000000)) + ", 'template':" +
+		strconv.Itoa(int(period/1000000)) + "};</script>"))
 }
 
 func New(w http.ResponseWriter, r *http.Request) {
