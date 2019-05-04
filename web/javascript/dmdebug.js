@@ -6,5 +6,9 @@ $(document).ready(function(){
         "<span>Query: </span><span>"+dmtime.query+"ms</span> "+
         "<span>Template: </span><span>"+dmtime.template+"ms</span></div>"+
         "</div>";
+    if( errorLog != "" )
+    {
+        html += "<div class='error'>"+errorLog+"</div>";
+    }
     $("body").append( html );
 });

@@ -1,0 +1,35 @@
+
+.debug{
+    font-family: monospace;
+    font-size: 12px;
+    position: fixed;
+    bottom: 0px;
+    width: 100%;
+    left:0px;
+    background: #f1f1f1;
+    border-top: 1px dotted #bdbdbd;
+}
+
+.debug > div{
+     white-space: nowrap;
+
+}
+
+.debug .title{
+    margin-right: 10px;
+    padding: 3px;
+    display: inline-block;
+    font-weight: bold;
+}
+
+.debug h4{
+    font-size: 1em
+}
+
+.debug table{
+}
+
+.error{
+    font-family: monospace;
+    color: red
+}

@@ -8,12 +8,12 @@ import (
 	"dm/handler"
 	"dm/query"
 	"dm/util"
+	"dm/util/debugger"
 	"fmt"
 	"html/template"
 	"net/http"
 	"os"
 	"strconv"
-	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -31,70 +31,104 @@ func BootStrap() {
 }
 
 //This is a initial try which use template to do basic feature.
-
 func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
-	tpl := template.Must(template.ParseFiles("../web/template/view.html"))
-	queryStart := time.Now()
-	rmdb := db.DBHanlder()
-	article := entity.Article{}
-	id, _ := strconv.Atoi(vars["id"])
-
-	err := rmdb.GetByID("article", "dm_article", id, &article)
-
+	//start request timing
+	debugger.StartTiming(r.Context(), "request", "request")
+	parser, err := template.ParseFiles("../web/template/view.html")
+	queryDuration := 0
+	templateDuration := 0
 	if err != nil {
-		fmt.Println(err)
-	}
+		debugger.AddError(r.Context(), err.Error(), "template")
+	} else {
+		tpl := template.Must(parser, err)
 
-	//List of folder
-	folders, _ := handler.Querier().List("folder", query.Cond("parent_id", 0))
+		//logic timing
+		debugger.StartTiming(r.Context(), "logic", "logic")
+		rmdb := db.DBHanlder()
+		article := entity.Article{}
+		id, _ := strconv.Atoi(vars["id"])
 
-	//Get current Folder
-	currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("location.id", id))
+		err := rmdb.GetByID("article", "dm_article", id, &article)
 
-	var variables map[string]interface{}
-	c := currentFolder.(*entity.Folder)
-	if c.ID != 0 {
-		//Folder. Get list of article
-
-		variables = map[string]interface{}{"current": currentFolder,
-			"current_def": contenttype.GetContentDefinition("folder"),
-			"folders":     folders}
-
-		folderType := currentFolder.Value("folder_type").(fieldtype.TextField)
-		fmt.Println(folderType)
-		if folderType.Data == "image" {
-			images := &[]entity.Image{}
-			handler := db.DBHanlder()
-			handler.GetEnity("dm_image", query.Cond("attached_location", currentFolder.GetLocation().ID), images)
-			variables["list"] = images
-			fmt.Println(images)
-		} else {
-			articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
-			variables["list"] = articles
+		if err != nil {
+			fmt.Println(err)
 		}
 
-	} else {
-		currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
+		//List of folder
+		folders, _ := handler.Querier().List("folder", query.Cond("parent_id", 0))
 
-		variables = map[string]interface{}{"current": currentArticle,
-			"list":        nil,
-			"current_def": contenttype.GetContentDefinition("article"),
-			"folders":     folders}
+		//Get current Folder
+		currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("location.id", id))
+
+		var variables map[string]interface{}
+		c := currentFolder.(*entity.Folder)
+		if c.ID != 0 {
+			//Folder. Get list of article
+
+			variables = map[string]interface{}{"current": currentFolder,
+				"current_def": contenttype.GetContentDefinition("folder"),
+				"folders":     folders}
+
+			folderType := currentFolder.Value("folder_type").(fieldtype.TextField)
+			fmt.Println(folderType)
+			if folderType.Data == "image" {
+				images := &[]entity.Image{}
+				handler := db.DBHanlder()
+				handler.GetEnity("dm_image", query.Cond("attached_location", currentFolder.GetLocation().ID), images)
+				variables["list"] = images
+				fmt.Println(images)
+			} else {
+				articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
+				variables["list"] = articles
+			}
+
+		} else {
+			currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
+
+			variables = map[string]interface{}{"current": currentArticle,
+				"list":        nil,
+				"current_def": contenttype.GetContentDefinition("article"),
+				"folders":     folders}
+		}
+
+		//end Logic timing
+		debugger.EndTiming(r.Context(), "logic", "logic")
+		queryDuration = debugger.GetDebugger(r.Context()).Timers["logic"].Duration
+
+		//template timing
+		debugger.StartTiming(r.Context(), "template", "all")
+
+		folderList, _ := handler.Querier().List("folder", query.Cond("parent_id", id))
+		variables["folder_list"] = folderList
+		err = tpl.Execute(w, variables)
+		if err != nil {
+			debugger.AddError(r.Context(), err.Error(), "template")
+		}
+
+		//template timing end
+		debugger.EndTiming(r.Context(), "template", "all")
+		templateDuration = debugger.GetDebugger(r.Context()).Timers["template"].Duration
 	}
 
-	queryEnd := time.Now()
-	queryDuration := queryEnd.Sub(queryStart)
+	//system timing end
+	debugger.EndTiming(r.Context(), "request", "request")
 
-	templateStart := time.Now()
-	folderList, _ := handler.Querier().List("folder", query.Cond("parent_id", id))
-	variables["folder_list"] = folderList
-	tpl.Execute(w, variables)
-	templateEnd := time.Now()
-	period := templateEnd.Sub(templateStart).Nanoseconds()
-	w.Write([]byte("<script>var dmtime={ 'total': " + strconv.Itoa(int(templateEnd.Sub(queryStart).Nanoseconds()/1000000)) +
+	errorLog := ""
+	for _, item := range debugger.GetDebugger(r.Context()).List {
+		if item.Type == "error" {
+			errorLog += "[" + item.Category + "]" + item.Message
+		}
+	}
+
+	w.Write([]byte("<script>var dmtime={ 'total': " + strconv.Itoa(debugger.GetDebugger(r.Context()).Timers["request"].Duration) +
 		", 'query':" +
-		strconv.Itoa(int(queryDuration/1000000)) + ", 'template':" +
-		strconv.Itoa(int(period/1000000)) + "};</script>"))
+		strconv.Itoa(queryDuration) + ", 'template':" +
+		strconv.Itoa(templateDuration) + "};" +
+		"var errorLog='" + errorLog + "';" +
+		"</script>" +
+		"<link href='/static/css/debug.css' rel='stylesheet'>" +
+		"<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js'></script>" +
+		"<script src='/static/javascript/dmdebug.js'></script>"))
 }
 
 func New(w http.ResponseWriter, r *http.Request) {
@@ -148,6 +182,13 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func Test(w http.ResponseWriter, r *http.Request) {
+	debugger.AddDebug(r.Context(), "This is wrong..", "")
+	debugger.AddDebug(r.Context(), "This is wrong2", "")
+	debugger := debugger.GetDebugger(r.Context())
+	w.Write([]byte(debugger.List[0].Message))
+}
+
 func Publish(w http.ResponseWriter, r *http.Request) {
 
 }
@@ -164,10 +205,14 @@ func main() {
 	BootStrap()
 	r := mux.NewRouter()
 	r.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
+		ctx := debugger.Init(r.Context())
+		r = r.WithContext(ctx)
 		vars := mux.Vars(r)
 		Display(w, r, vars)
 	})
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ctx := debugger.Init(r.Context())
+		r = r.WithContext(ctx)
 		Display(w, r, map[string]string{"id": "1"})
 	})
 	// http.HandleFunc("/content/view/", func(w http.ResponseWriter, r *http.Request) {
@@ -175,19 +220,33 @@ func main() {
 	// })
 
 	r.HandleFunc("/content/new/{type}/{id}", func(w http.ResponseWriter, r *http.Request) {
+		ctx := debugger.Init(r.Context())
+		r = r.WithContext(ctx)
 		New(w, r)
 	})
 
 	r.HandleFunc("/content/delete/{id}", func(w http.ResponseWriter, r *http.Request) {
+		ctx := debugger.Init(r.Context())
+		r = r.WithContext(ctx)
 		Delete(w, r)
 	})
 
 	r.HandleFunc("/content/publish", func(w http.ResponseWriter, r *http.Request) {
+		ctx := debugger.Init(r.Context())
+		r = r.WithContext(ctx)
 		Publish(w, r)
 	})
 
 	r.HandleFunc("/console/list", func(w http.ResponseWriter, r *http.Request) {
+		ctx := debugger.Init(r.Context())
+		r = r.WithContext(ctx)
 		ModelList(w, r)
+	})
+
+	r.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		ctx := debugger.Init(r.Context())
+		r = r.WithContext(ctx)
+		Test(w, r)
 	})
 
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
