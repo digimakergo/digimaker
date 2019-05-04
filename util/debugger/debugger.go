@@ -20,12 +20,13 @@ type DebugMessage struct {
 }
 
 type DebugTimer struct {
-	Identifier string
+	Tag        string
 	StartPoint int64
 	EndPoint   int64
 	Duration   int
 }
 
+//Debugger Stores all debug information
 type Debugger struct {
 	List   []DebugMessage
 	Timers map[string]*DebugTimer
@@ -60,18 +61,42 @@ func AddError(ctx context.Context, message string, category string) {
 	debugger.Add("error", message, category)
 }
 
-func StartTiming(ctx context.Context, category string, identifier string) {
+//start timing
+//eg. integration with crm where io: 10ms, rest-request: 200ms, logic handle: 20ms )
+//so crm-io, crm-rest,crm-logic are the categories and crm-module is the tag
+//They can be the same, or tag can be empty("").
+func StartTiming(ctx context.Context, category string, tag string) {
 	debugger := GetDebugger(ctx)
 	now := time.Now().UnixNano()
-	debugger.Timers[category] = &DebugTimer{Identifier: identifier, StartPoint: now}
+	debugger.Timers[category] = &DebugTimer{Tag: tag, StartPoint: now}
 }
 
-func EndTiming(ctx context.Context, category string, identifier string) {
+func EndTiming(ctx context.Context, category string, tag string) {
 	debugger := GetDebugger(ctx)
 	now := time.Now().UnixNano()
 	timer := debugger.Timers[category]
 	timer.EndPoint = now
 	timer.Duration = int((now - timer.StartPoint) / 1000000)
+}
+
+func GetDuration(ctx context.Context, category string) int {
+	debugger := GetDebugger(ctx)
+	return debugger.Timers[category].Duration
+}
+
+//Get duration based on tag.
+//Return total and details
+func GetDurationByTag(ctx context.Context, tagName string) (int, map[string]int) {
+	debugger := GetDebugger(ctx)
+	total := 0
+	detail := map[string]int{}
+	for category, timer := range debugger.Timers {
+		if timer.Tag == tagName {
+			detail[category] = timer.Duration
+			total += timer.Duration
+		}
+	}
+	return total, detail
 }
 
 //Initialize Debug from context.

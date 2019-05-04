@@ -33,7 +33,7 @@ func BootStrap() {
 //This is a initial try which use template to do basic feature.
 func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	//start request timing
-	debugger.StartTiming(r.Context(), "request", "request")
+	debugger.StartTiming(r.Context(), "request", "kernel")
 	parser, err := template.ParseFiles("../web/template/view.html")
 	queryDuration := 0
 	templateDuration := 0
@@ -111,7 +111,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	}
 
 	//system timing end
-	debugger.EndTiming(r.Context(), "request", "request")
+	debugger.EndTiming(r.Context(), "request", "kernel")
 
 	errorLog := ""
 	for _, item := range debugger.GetDebugger(r.Context()).List {
