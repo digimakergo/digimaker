@@ -7,7 +7,11 @@
     width: 100%;
     left:0px;
     background: #f1f1f1;
-    border-top: 1px dotted #bdbdbd;
+    cursor: default;
+}
+
+.debug .time, .debug .error{
+     border-top: 1px dotted #bdbdbd;
 }
 
 .debug > div{
@@ -31,5 +35,7 @@
 
 .error{
     font-family: monospace;
-    color: red
+    color: red;
+    background: white;
+    padding: 3px;
 }
