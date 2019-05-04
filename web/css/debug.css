@@ -6,11 +6,14 @@
     bottom: 0px;
     width: 100%;
     left:0px;
-    background: #f1f1f1;
     cursor: default;
 }
 
-.debug .time, .debug .error{
+.debug .time{
+    background: #f1f1f1;
+}
+
+.debug .time, .debug .info{
      border-top: 1px dotted #bdbdbd;
 }
 
@@ -33,9 +36,17 @@
 .debug table{
 }
 
-.error{
+.info-debug{
+    color: green;
+}
+
+.info{
     font-family: monospace;
     color: red;
-    background: white;
     padding: 3px;
+    background: white;
+}
+
+.info-debug >span, .info-error >span{
+    margin-right: 4px;
 }

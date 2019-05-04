@@ -1,7 +1,7 @@
 //Author xc, Created on 2019-05-04 14:26
 //{COPYRIGHTS}
 //This is a debug based on context.
-package debugger
+package debug
 
 import (
 	"context"
