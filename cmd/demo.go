@@ -116,6 +116,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 	//system timing end
 	debug.EndTiming(r.Context(), "request", "kernel")
+	debug.Debug(ctx, "Request ends.", "")
 
 	errorLog := ""
 	for _, item := range debug.GetDebugger(r.Context()).List {
