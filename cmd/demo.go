@@ -38,7 +38,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	queryDuration := 0
 	templateDuration := 0
 	if err != nil {
-		debugger.AddError(r.Context(), err.Error(), "template")
+		debugger.Error(r.Context(), err.Error(), "template")
 	} else {
 		tpl := template.Must(parser, err)
 
@@ -102,7 +102,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		variables["folder_list"] = folderList
 		err = tpl.Execute(w, variables)
 		if err != nil {
-			debugger.AddError(r.Context(), err.Error(), "template")
+			debugger.Error(r.Context(), err.Error(), "template")
 		}
 
 		//template timing end
@@ -183,8 +183,8 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func Test(w http.ResponseWriter, r *http.Request) {
-	debugger.AddDebug(r.Context(), "This is wrong..", "")
-	debugger.AddDebug(r.Context(), "This is wrong2", "")
+	debugger.Debug(r.Context(), "This is wrong..", "")
+	debugger.Debug(r.Context(), "This is wrong2", "")
 	debugger := debugger.GetDebugger(r.Context())
 	w.Write([]byte(debugger.List[0].Message))
 }
