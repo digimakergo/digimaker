@@ -10,3 +10,4 @@ debug:
   timespent: true
   category: db, action, template
   levels: error, warning, info
+  ip: ["127.0.0.1"]

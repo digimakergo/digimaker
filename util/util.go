@@ -6,62 +6,12 @@ package util
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
 
 	"github.com/rs/xid"
 )
-
-func Error(message ...interface{}) {
-	Log("error", message...)
-}
-
-func Warning(message ...interface{}) {
-	Log("warning", message...)
-}
-
-func Notice(message ...interface{}) {
-	Log("notice", message...)
-}
-
-func Debug(category string, message ...interface{}) {
-	Log("debug,"+category, message...)
-}
-
-/*
-Log message
-*/
-func Log(level string, message ...interface{}) {
-	/*
-		logDirectory := "log"
-		path := logDirectory + level
-
-		logMessage := "[<ip>]" + message
-
-		file, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND, 0644)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		defer file.Close()
-
-		log.SetOutput(file)
-		log.Printf(logMessage)
-	*/
-	//todo: log into files
-	//todo: for into client screen in debug mode.
-	//todo: include cagetory as parameter
-	fmt.Println("["+level+"]", fmt.Sprint(message...))
-}
-
-//Add time point for calcuate how much time takes for operations.
-//Typical type include: database, operation, template
-//Typical identifier include: layout.tpl when comes to template, add when it comes to operation
-func AddTimePoint(category string, identifier string) {
-
-}
 
 //UnmarshalData Load json and unmall into variable
 func UnmarshalData(filepath string, v interface{}) error {

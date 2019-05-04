@@ -1,9 +1,11 @@
 //Author xc, Created on 2019-05-04 14:26
 //{COPYRIGHTS}
+//This is a debug based on context.
 package debugger
 
 import (
 	"context"
+	"dm/util"
 	"time"
 )
 
@@ -35,8 +37,8 @@ type Debugger struct {
 //Add debug into debug struct
 func (d *Debugger) Add(debugType string, message string, category string) {
 	d.List = append(d.List, DebugMessage{category, debugType, message})
-	if debugType == "error" || debugType == "warning" {
-		//todo: log into log file
+	if debugType == "error" {
+		util.Error("[" + category + "]" + message)
 	}
 }
 
@@ -46,17 +48,12 @@ func GetDebugger(ctx context.Context) *Debugger {
 }
 
 //Add debug into context
-func AddDebug(ctx context.Context, message string, category string) {
+func Debug(ctx context.Context, message string, category string) {
 	debugger := GetDebugger(ctx)
 	debugger.Add("debug", message, category)
 }
 
-func AddWarning(ctx context.Context, message string, category string) {
-	debugger := GetDebugger(ctx)
-	debugger.Add("warning", message, category)
-}
-
-func AddError(ctx context.Context, message string, category string) {
+func Error(ctx context.Context, message string, category string) {
 	debugger := GetDebugger(ctx)
 	debugger.Add("error", message, category)
 }

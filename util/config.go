@@ -3,7 +3,9 @@
 
 package util
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+)
 
 //DefaultSettingsType and DefaultSettings set all the default,
 // including which config folder it is.
