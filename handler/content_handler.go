@@ -34,6 +34,7 @@ type Contenter interface {
 }
 
 type ContentHandler struct {
+	Context context.Context
 }
 
 func (content ContentHandler) CreateLocation(parentID int) {

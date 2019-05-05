@@ -6,8 +6,11 @@ package debug
 import (
 	"context"
 	"dm/util"
+	"errors"
 	"time"
 )
+
+//This is debug with context
 
 //Key type to main unique
 type DebugKey struct{}
@@ -76,9 +79,13 @@ func EndTiming(ctx context.Context, category string, tag string) {
 	timer.Duration = int((now - timer.StartPoint) / 1000000)
 }
 
-func GetDuration(ctx context.Context, category string) int {
+func GetDuration(ctx context.Context, category string) (int, error) {
 	debugger := GetDebugger(ctx)
-	return debugger.Timers[category].Duration
+	if result, ok := debugger.Timers[category]; ok {
+		return result.Duration, nil
+	} else {
+		return 0, errors.New("category " + category + "doesn't exist.")
+	}
 }
 
 //Get duration based on tag.

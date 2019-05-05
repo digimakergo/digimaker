@@ -34,11 +34,8 @@ func BootStrap() {
 func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	//start request timing
 	ctx := r.Context()
-	debug.Debug(ctx, "Request started", "")
-	debug.StartTiming(r.Context(), "request", "kernel")
 	parser, err := template.ParseFiles("../web/template/view.html")
-	queryDuration := 0
-	templateDuration := 0
+
 	if err != nil {
 		debug.Error(r.Context(), err.Error(), "template")
 	} else {
@@ -58,7 +55,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 		//List of folder
 		folders, _ := handler.Querier().List("folder", query.Cond("parent_id", 0))
-		debug.Debug(ctx, "Got list of folder", "")
+		debug.Debug(ctx, "Got list of folder", "system")
 
 		//Get current Folder
 		currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("location.id", id))
@@ -68,7 +65,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		if c.ID != 0 {
 			//Folder. Get list of article
 
-			debug.Debug(ctx, "The folder is not empty. Trying to get folders and articles under.", "")
+			debug.Debug(ctx, "It is a folder. Trying to get folders and articles under.", "system")
 			variables = map[string]interface{}{"current": currentFolder,
 				"current_def": contenttype.GetContentDefinition("folder"),
 				"folders":     folders}
@@ -86,7 +83,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			}
 
 		} else {
-			debug.Debug(ctx, "The folder is empty. Trying to get folders under.", "")
+			debug.Debug(ctx, "Not a folder. Trying to get folders under.", "system")
 			currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
 
 			variables = map[string]interface{}{"current": currentArticle,
@@ -97,7 +94,6 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 		//end Logic timing
 		debug.EndTiming(r.Context(), "logic", "logic")
-		queryDuration = debug.GetDebugger(r.Context()).Timers["logic"].Duration
 
 		//template timing
 		debug.StartTiming(r.Context(), "template", "all")
@@ -111,33 +107,12 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 		//template timing end
 		debug.EndTiming(r.Context(), "template", "all")
-		templateDuration = debug.GetDebugger(r.Context()).Timers["template"].Duration
 	}
 
-	//system timing end
-	debug.EndTiming(r.Context(), "request", "kernel")
-	debug.Debug(ctx, "Request ends.", "")
-
-	errorLog := ""
-	for _, item := range debug.GetDebugger(r.Context()).List {
-		errorLog += "<div class=info-" + item.Type + "><span class=category>[" + item.Category + "]</span><span>" + item.Type + "</span><span>" + item.Message + "</span></div>"
-	}
-
-	w.Write([]byte("<script>var dmtime={ 'total': " + strconv.Itoa(debug.GetDebugger(r.Context()).Timers["request"].Duration) +
-		", 'query':" +
-		strconv.Itoa(queryDuration) + ", 'template':" +
-		strconv.Itoa(templateDuration) + "};" +
-		"var errorLog='" + errorLog + "';" +
-		"</script>" +
-		"<link href='/static/css/debug.css' rel='stylesheet'>" +
-		"<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js'></script>" +
-		"<script src='/static/javascript/dmdebug.js'></script>"))
 }
 
-func New(w http.ResponseWriter, r *http.Request) {
+func New(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	// handler := handler.ContentHandler{}
-
-	vars := mux.Vars(r)
 
 	variables := map[string]interface{}{}
 	variables["id"] = vars["id"]
@@ -168,13 +143,14 @@ func New(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
+	debug.StartTiming(r.Context(), "template", "kernel")
 	tpl := template.Must(template.ParseFiles("../web/template/new_" + vars["type"] + ".html"))
 	//variables := map[string]interface{}{}
 	tpl.Execute(w, variables)
+	debug.EndTiming(r.Context(), "template", "kernel")
 }
 
-func Delete(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
+func Delete(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	handler := handler.ContentHandler{}
 	id, _ := strconv.Atoi(vars["id"])
 	err := handler.DeleteByID(id, false)
@@ -197,10 +173,56 @@ func Publish(w http.ResponseWriter, r *http.Request) {
 }
 
 func ModelList(w http.ResponseWriter, r *http.Request) {
+	debug.StartTiming(r.Context(), "template", "kernel")
 	tpl := template.Must(template.ParseFiles("../web/template/console/list.html"))
 	variables := map[string]interface{}{}
 	variables["definition"] = contenttype.GetDefinition()
 	tpl.Execute(w, variables)
+	debug.EndTiming(r.Context(), "template", "kernel")
+}
+
+func DMHandle(w http.ResponseWriter, r *http.Request, functionHandler func(http.ResponseWriter, *http.Request, map[string]string)) {
+	ctx := debug.Init(r.Context())
+	r = r.WithContext(ctx)
+
+	debug.StartTiming(r.Context(), "request", "kernel")
+	debug.Debug(ctx, "Request started", "request")
+
+	vars := mux.Vars(r)
+	functionHandler(w, r, vars)
+
+	debug.Debug(ctx, "Request ended", "request")
+	debug.EndTiming(ctx, "request", "kernel")
+
+	errorLog := ""
+	for _, item := range debug.GetDebugger(r.Context()).List {
+		errorLog += "<div class=info-" + item.Type + "><span class=category>[" + item.Category + "]</span><span>" + item.Type + "</span><span>" + item.Message + "</span></div>"
+	}
+
+	queryDuration, err := debug.GetDuration(ctx, "logic")
+	queryStr := "'query': "
+	if err == nil {
+		queryStr += strconv.Itoa(queryDuration)
+	} else {
+		queryStr += "null"
+	}
+	templateDuration, err := debug.GetDuration(ctx, "template")
+	templateStr := "'template': "
+	if err == nil {
+		templateStr += strconv.Itoa(templateDuration)
+	} else {
+		templateStr += "null"
+	}
+	total, _ := debug.GetDuration(ctx, "request")
+
+	w.Write([]byte("<script>var dmtime={ 'total': " + strconv.Itoa(total) +
+		", " + queryStr +
+		"," + templateStr + "};" +
+		"var errorLog='" + errorLog + "';" +
+		"</script>" +
+		"<link href='/static/css/debug.css' rel='stylesheet'>" +
+		"<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js'></script>" +
+		"<script src='/static/javascript/dmdebug.js'></script>"))
 }
 
 func main() {
@@ -208,30 +230,29 @@ func main() {
 	BootStrap()
 	r := mux.NewRouter()
 	r.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
-		ctx := debug.Init(r.Context())
-		r = r.WithContext(ctx)
-		vars := mux.Vars(r)
-		Display(w, r, vars)
+		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+			Display(w, r, vars)
+		})
 	})
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		ctx := debug.Init(r.Context())
-		r = r.WithContext(ctx)
-		Display(w, r, map[string]string{"id": "1"})
+		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+			Display(w, r, map[string]string{"id": "1"})
+		})
 	})
 	// http.HandleFunc("/content/view/", func(w http.ResponseWriter, r *http.Request) {
 	// 	Display(w, r)
 	// })
 
 	r.HandleFunc("/content/new/{type}/{id}", func(w http.ResponseWriter, r *http.Request) {
-		ctx := debug.Init(r.Context())
-		r = r.WithContext(ctx)
-		New(w, r)
+		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+			New(w, r, vars)
+		})
 	})
 
 	r.HandleFunc("/content/delete/{id}", func(w http.ResponseWriter, r *http.Request) {
-		ctx := debug.Init(r.Context())
-		r = r.WithContext(ctx)
-		Delete(w, r)
+		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+			Delete(w, r, vars)
+		})
 	})
 
 	r.HandleFunc("/content/publish", func(w http.ResponseWriter, r *http.Request) {
@@ -241,9 +262,9 @@ func main() {
 	})
 
 	r.HandleFunc("/console/list", func(w http.ResponseWriter, r *http.Request) {
-		ctx := debug.Init(r.Context())
-		r = r.WithContext(ctx)
-		ModelList(w, r)
+		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+			ModelList(w, r)
+		})
 	})
 
 	r.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
