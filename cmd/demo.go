@@ -72,7 +72,9 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 			folderType := currentFolder.Value("folder_type").(fieldtype.TextField)
 			if folderType.Data == "image" {
+				debug.Debug(ctx, "Trying to get images", "system")
 				images := &[]entity.Image{}
+				fmt.Println(currentFolder.GetLocation().ID)
 				handler := db.DBHanlder()
 				handler.GetEnity("dm_image", query.Cond("attached_location", currentFolder.GetLocation().ID), images)
 				variables["list"] = images
