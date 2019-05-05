@@ -15,7 +15,6 @@ import (
 
 	"dm/db"
 	. "dm/query"
-
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -26,13 +25,15 @@ import (
 // Version is an object representing the database table.
 // Implement dm.contenttype.ContentTyper interface
 type Version struct {
-	ID        int    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	Type      string `boil:"type" json:"type" toml:"type" yaml:"type"`
-	ContentID int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
-	Version   int    `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Status    int8   `boil:"status" json:"status" toml:"status" yaml:"status"`
-	Author    int    `boil:"author" json:"author" toml:"author" yaml:"author"`
-	Data      string `boil:"data" json:"data" toml:"data" yaml:"data"`
+	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ContentType string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
+	ContentID   int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
+	Version     int    `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Status      int8   `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Author      int    `boil:"author" json:"author" toml:"author" yaml:"author"`
+	Data        string `boil:"data" json:"data" toml:"data" yaml:"data"`
+	LocationID  int    `boil:"location_id" json:"location_id" toml:"location_id" yaml:"location_id"`
+	Created     int    `boil:"created" json:"created" toml:"created" yaml:"created"`
 
 	R        *versionR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L        versionL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -42,12 +43,14 @@ type Version struct {
 func (c *Version) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.ID
-	result["type"] = c.Type
+	result["content_type"] = c.ContentType
 	result["content_id"] = c.ContentID
 	result["version"] = c.Version
 	result["status"] = c.Status
 	result["author"] = c.Author
 	result["data"] = c.Data
+	result["location_id"] = c.LocationID
+	result["created"] = c.Created
 	return result
 }
 
@@ -60,8 +63,8 @@ func (c *Version) Field(name string) interface{} {
 	switch name {
 	case "id", "ID":
 		result = c.ID
-	case "type", "Type":
-		result = c.Type
+	case "content_type", "ContentType":
+		result = c.ContentType
 	case "content_id", "ContentID":
 		result = c.ContentID
 	case "version", "Version":
@@ -72,6 +75,10 @@ func (c *Version) Field(name string) interface{} {
 		result = c.Author
 	case "data", "Data":
 		result = c.Data
+	case "location_id", "LocationID":
+		result = c.LocationID
+	case "created", "Created":
+		result = c.Created
 	default:
 	}
 	return result
@@ -93,21 +100,25 @@ func (c Version) Store(transaction ...*sql.Tx) error {
 }
 
 var VersionColumns = struct {
-	ID        string
-	Type      string
-	ContentID string
-	Version   string
-	Status    string
-	Author    string
-	Data      string
+	ID          string
+	ContentType string
+	ContentID   string
+	Version     string
+	Status      string
+	Author      string
+	Data        string
+	LocationID  string
+	Created     string
 }{
-	ID:        "id",
-	Type:      "type",
-	ContentID: "content_id",
-	Version:   "version",
-	Status:    "status",
-	Author:    "author",
-	Data:      "data",
+	ID:          "id",
+	ContentType: "content_type",
+	ContentID:   "content_id",
+	Version:     "version",
+	Status:      "status",
+	Author:      "author",
+	Data:        "data",
+	LocationID:  "location_id",
+	Created:     "created",
 }
 
 // VersionRels is where relationship names are stored.
@@ -127,9 +138,9 @@ func (*versionR) NewStruct() *versionR {
 type versionL struct{}
 
 var (
-	versionColumns               = []string{"id", "type", "content_id", "version", "status", "author", "data"}
-	versionColumnsWithoutDefault = []string{"type", "content_id", "version", "data"}
-	versionColumnsWithDefault    = []string{"id", "status", "author"}
+	versionColumns               = []string{"id", "content_type", "content_id", "version", "status", "author", "data", "location_id", "created"}
+	versionColumnsWithoutDefault = []string{"content_type", "content_id", "version", "data", "created"}
+	versionColumnsWithDefault    = []string{"id", "status", "author", "location_id"}
 	versionPrimaryKeyColumns     = []string{"id"}
 )
 

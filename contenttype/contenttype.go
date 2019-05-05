@@ -3,6 +3,8 @@
 
 package contenttype
 
+import "encoding/json"
+
 type ContentType struct {
 	DataID    int
 	Published int
@@ -37,3 +39,16 @@ type ContentType struct {
 //Style5:
 //Content.GetByID().Subtree( []Cond{ CondLocation("12"), CondModifiedLT( 123123130 ) ] } ).SortBy( "id" )
 //
+
+//Content to json, used for internal content storing(eg. version data, draft data )
+func ContentToJson(content ContentTyper) (string, error) {
+	//todo: use a new tag instead of json(eg. version: 'summary', version: '-' to ignore that.)
+	result, err := json.Marshal(content)
+	return string(result), err
+}
+
+//Json to Content, used for internal content recoving. (eg. versioning, draft)
+func JsonToContent(contentJson string, content ContentTyper) error {
+	err := json.Unmarshal([]byte(contentJson), content)
+	return err
+}

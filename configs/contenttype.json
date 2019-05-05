@@ -11,8 +11,8 @@
                }
    },
 
-   "media_folder":{
-      "table_name": "dm_resource",
+   "folder_resource":{
+      "table_name": "dm_folder_resource",
       "versioning": false,
       "has_location": true,
       "fields_display":["title", "summary"],

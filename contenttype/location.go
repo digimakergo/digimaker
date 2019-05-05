@@ -21,7 +21,7 @@ type Location struct {
 	ContentType string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID   int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	Language    string `boil:"language" json:"language" toml:"language" yaml:"language"`
-	Author      string `boil:"author" json:"author" toml:"author" yaml:"author"`
+	Author      int    `boil:"author" json:"author" toml:"author" yaml:"author"`
 	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
 	IsHidden    bool   `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
 	IsInvisible bool   `boil:"is_invisible" json:"is_invisible" toml:"is_invisible" yaml:"is_invisible"`

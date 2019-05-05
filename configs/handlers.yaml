@@ -1,0 +1,8 @@
+##events format: <before|after>_<action>
+##
+- type:"folder"
+  event:"before_create"
+  execute: "fff"
+- type: ["article"]
+  event:"after_create"
+  execute: "dd"

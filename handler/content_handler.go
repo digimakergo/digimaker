@@ -75,6 +75,8 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	return true, ValidationResult{}
 }
 
+//Save content as draft. It can be when creating or edit.
+//It insert a draft version into dm_version.
 func (content ContentHandler) Draft(contentType string, parentID int) error {
 	//create empty
 	now := int(time.Now().Unix())
@@ -165,10 +167,35 @@ func (handler *ContentHandler) Create(parentID int, contentType string, inputs m
 		return false, ValidationResult{}, err
 	}
 
+	//Save version 1
+
 	tx.Commit()
 	//todo: update other things in location like main_id, hierarchy
 
 	return true, ValidationResult{}, nil
+}
+
+//Create a new version.
+//It doesn't validate version number is increment
+func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, versionNumber int, tx *sql.Tx) (int, error) {
+	id := content.GetCID()
+	data, err := contenttype.ContentToJson(content)
+	if err != nil {
+		return 0, errors.Wrap(err, "Can not create version data on content id: "+strconv.Itoa(id))
+	}
+	version := contenttype.Version{}
+	version.ContentType = content.ContentType()
+	version.ContentID = content.GetCID()
+	version.Author = content.Value("author").(int)
+	version.Version = versionNumber
+	version.Data = data
+	//version.Created = content.Value("created").(int)
+	err = version.Store(tx)
+	if err != nil {
+		tx.Rollback()
+		return 0, errors.Wrap(err, "Can not save version on contetent id: "+strconv.Itoa(id))
+	}
+	return version.ID, nil
 }
 
 //Update content.

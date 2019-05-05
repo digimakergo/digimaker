@@ -55,3 +55,13 @@ func TestImage(t *testing.T) {
 	fmt.Println("images", err)
 	fmt.Println(images)
 }
+
+func TestVersion(t *testing.T) {
+	// handler := ContentHandler{}
+	// article, _ := querier.FetchByID(6)
+	// dbHanlder, _ := db.DB()
+	// tx, _ := dbHanlder.Begin()
+	// _, err := handler.CreateVersion(article, 1, tx)
+	// tx.Commit()
+	// assert.Equal( t, nil, err )
+}

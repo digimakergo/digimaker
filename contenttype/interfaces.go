@@ -21,6 +21,8 @@ type ContentTyper interface {
 	//Return all fields
 	//Fields() map[string]fieldtype.Fieldtyper
 
+	GetCID() int
+
 	ToMap() map[string]interface{}
 
 	SetValue(identifier string, value interface{}) error

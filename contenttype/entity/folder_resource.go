@@ -14,17 +14,17 @@ import (
 
 
 
-type Image struct{
+type FolderResource struct{
      ContentCommon `boil:",bind"`
     
      
      
-        AttachedLocation fieldtype.TextField `boil:"attached_location" json:"attached_location" toml:"attached_location" yaml:"attached_location"`
+        ResourceType fieldtype.TextField `boil:"resource_type" json:"resource_type" toml:"resource_type" yaml:"resource_type"`
      
     
      
      
-        Path fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
+        Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
      
     
      
@@ -32,45 +32,36 @@ type Image struct{
         Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
      
     
-     
-     
-        Type fieldtype.TextField `boil:"type" json:"type" toml:"type" yaml:"type"`
-     
-    
      contenttype.Location `boil:"location,bind"`
 }
 
-func ( *Image ) TableName() string{
-	 return "dm_image"
+func ( *FolderResource ) TableName() string{
+	 return "dm_folder_resource"
 }
 
-func ( *Image ) ContentType() string{
-	 return "image"
+func ( *FolderResource ) ContentType() string{
+	 return "folder_resource"
 }
 
-func (c *Image) GetLocation() *contenttype.Location{
+func (c *FolderResource) GetLocation() *contenttype.Location{
     return &c.Location
 }
 
 
 //todo: cache this? (then you need a reload?)
-func (c *Image) ToMap() map[string]interface{} {
+func (c *FolderResource) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         
-        result["attached_location"]=c.AttachedLocation
+        result["resource_type"]=c.ResourceType
         
     
         
-        result["path"]=c.Path
+        result["summary"]=c.Summary
         
     
         
         result["title"]=c.Title
-        
-    
-        
-        result["type"]=c.Type
         
     
 	for key, value := range c.ContentCommon.Values() {
@@ -79,39 +70,34 @@ func (c *Image) ToMap() map[string]interface{} {
 	return result
 }
 
-func (c *Image) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "attached_location","path","title","type",}...)
+func (c *FolderResource) IdentifierList() []string {
+	return append(c.ContentCommon.IdentifierList(),[]string{ "resource_type","summary","title",}...)
 }
 
-func (c *Image) DisplayIdentifierList() []string {
-	return []string{ "firstname","lastname","login","password",}
+func (c *FolderResource) DisplayIdentifierList() []string {
+	return []string{ "title","summary",}
 }
 
-func (c *Image) Value(identifier string) interface{} {
+func (c *FolderResource) Value(identifier string) interface{} {
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )
     }
     var result interface{}
 	switch identifier {
     
-    case "attached_location":
+    case "resource_type":
         
-            result = c.AttachedLocation
+            result = c.ResourceType
         
     
-    case "path":
+    case "summary":
         
-            result = c.Path
+            result = c.Summary
         
     
     case "title":
         
             result = c.Title
-        
-    
-    case "type":
-        
-            result = c.Type
         
     
 	case "cid":
@@ -123,31 +109,25 @@ func (c *Image) Value(identifier string) interface{} {
 }
 
 
-func (c *Image) SetValue(identifier string, value interface{}) error {
+func (c *FolderResource) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
             
             
-            case "attached_location":
-            c.AttachedLocation = value.(fieldtype.TextField)
+            case "resource_type":
+            c.ResourceType = value.(fieldtype.TextField)
             
         
             
             
-            case "path":
-            c.Path = value.(fieldtype.TextField)
+            case "summary":
+            c.Summary = value.(fieldtype.RichTextField)
             
         
             
             
             case "title":
             c.Title = value.(fieldtype.TextField)
-            
-        
-            
-            
-            case "type":
-            c.Type = value.(fieldtype.TextField)
             
         
 	default:
@@ -162,7 +142,7 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
 
 //Store content.
 //Note: it will set id to CID after success
-func (c *Image) Store(transaction ...*sql.Tx) error {
+func (c *FolderResource) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
 		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
@@ -178,7 +158,7 @@ func (c *Image) Store(transaction ...*sql.Tx) error {
 }
 
 //Delete content only
-func (c *Image) Delete(transaction ...*sql.Tx) error {
+func (c *FolderResource) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	contentError := handler.Delete(c.TableName(), Cond("id", c.CID), transaction...)
 	return contentError
@@ -186,14 +166,14 @@ func (c *Image) Delete(transaction ...*sql.Tx) error {
 
 func init() {
 	new := func() contenttype.ContentTyper {
-		return &Image{}
+		return &FolderResource{}
 	}
 
 	newList := func() interface{} {
-		return &[]Image{}
+		return &[]FolderResource{}
 	}
 
-	Register("image",
+	Register("folder_resource",
 		ContentTypeRegister{
 			New:            new,
 			NewList:        newList})
