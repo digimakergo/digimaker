@@ -78,11 +78,6 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	return true, ValidationResult{}
 }
 
-//Publish a draft
-func (content ContentHandler) Publish() {
-
-}
-
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
 func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
@@ -231,8 +226,12 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 //Update content.
 //The inputs doesn't need to include all required fields. However if it's there,
 // it will check if it's required&empty
-func (content ContentHandler) Update(id int, inputs map[string]interface{}) {
+func (content ContentHandler) Update(contentID int, contentType string, inputs map[string]interface{}) {
+	//Validate
 
+	//Save to new version
+
+	//Save update content.
 }
 
 //Delete content by location id
@@ -282,10 +281,13 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTra
 			}
 		}
 
+		//Delete location
 		err = content.GetLocation().Delete(tx)
 		if err != nil {
 			tx.Rollback()
 		} else {
+			//TODO: delete version if there is.
+
 			//Delete content
 			err = content.Delete(tx)
 			if err != nil {
