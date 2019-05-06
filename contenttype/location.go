@@ -14,21 +14,22 @@ import (
 // Location is an object representing the database table.
 // Implement dm.contenttype.ContentTyper interface
 type Location struct {
-	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	ParentID    int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
-	MainID      int    `boil:"main_id" json:"main_id" toml:"main_id" yaml:"main_id"`
-	Hierarchy   string `boil:"hierarchy" json:"hierarchy" toml:"hierarchy" yaml:"hierarchy"`
-	ContentType string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
-	ContentID   int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
-	Language    string `boil:"language" json:"language" toml:"language" yaml:"language"`
-	Author      int    `boil:"author" json:"author" toml:"author" yaml:"author"`
-	Name        string `boil:"name" json:"name" toml:"name" yaml:"name"`
-	IsHidden    bool   `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
-	IsInvisible bool   `boil:"is_invisible" json:"is_invisible" toml:"is_invisible" yaml:"is_invisible"`
-	Priority    int    `boil:"priority" json:"priority" toml:"priority" yaml:"priority"`
-	UID         string `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
-	Section     string `boil:"section" json:"section" toml:"section" yaml:"section"`
-	P           string `boil:"p" json:"p" toml:"p" yaml:"p"`
+	ID             int    `boil:"id" json:"id" toml:"id" yaml:"id"`
+	ParentID       int    `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
+	MainID         int    `boil:"main_id" json:"main_id" toml:"main_id" yaml:"main_id"`
+	IdentifierPath string `boil:"identifier_path" json:"identifier_path" toml:"identifier_path" yaml:"identifier_path"`
+	Hierarchy      string `boil:"hierarchy" json:"hierarchy" toml:"hierarchy" yaml:"hierarchy"`
+	ContentType    string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
+	ContentID      int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
+	Language       string `boil:"language" json:"language" toml:"language" yaml:"language"`
+	Author         int    `boil:"author" json:"author" toml:"author" yaml:"author"`
+	Name           string `boil:"name" json:"name" toml:"name" yaml:"name"`
+	IsHidden       bool   `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
+	IsInvisible    bool   `boil:"is_invisible" json:"is_invisible" toml:"is_invisible" yaml:"is_invisible"`
+	Priority       int    `boil:"priority" json:"priority" toml:"priority" yaml:"priority"`
+	UID            string `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
+	Section        string `boil:"section" json:"section" toml:"section" yaml:"section"`
+	P              string `boil:"p" json:"p" toml:"p" yaml:"p"`
 }
 
 func (c *Location) Fields() map[string]fieldtype.Fieldtyper {
@@ -39,6 +40,7 @@ func (c *Location) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.ID
 	result["parent_id"] = c.ParentID
+	result["identifier_path"] = c.IdentifierPath
 	result["main_id"] = c.MainID
 	result["hierarchy"] = c.Hierarchy
 	result["content_type"] = c.ContentType
@@ -59,7 +61,7 @@ func (c *Location) TableName() string {
 }
 
 func (c *Location) IdentifierList() []string {
-	return []string{"id", "parent_id", "main_id", "hierarchy", "content_id", "author"}
+	return []string{"id", "identifier_path", "parent_id", "main_id", "hierarchy", "content_id", "author"}
 }
 
 func (c *Location) Field(name string) interface{} {
@@ -142,4 +144,14 @@ func (l *Location) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	contentError := handler.Delete(l.TableName(), Cond("id", l.ID), transaction...)
 	return contentError
+}
+
+func GetLocationByID(locationID int) (*Location, error) {
+	handler := db.DBHanlder()
+	location := &Location{}
+	err := handler.GetEnity("dm_location", Cond("id", locationID), location)
+	if err != nil {
+		return nil, err
+	}
+	return location, nil
 }

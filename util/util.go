@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"strings"
 
 	"github.com/rs/xid"
@@ -50,5 +51,8 @@ func UpperName(input string) string {
 
 //convert name lie "Hello world.?" to "hello-world"
 func NameToIdentifier(input string) string {
-	return strings.ToLower(input)
+	lowerStr := strings.ToLower(strings.TrimSpace(input))
+	reg, _ := regexp.Compile("[^a-z0-9]+")
+	result := reg.ReplaceAllString(lowerStr, "-")
+	return result
 }

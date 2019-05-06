@@ -83,7 +83,7 @@ func (content ContentHandler) Publish() {
 
 }
 
-//Store content.
+//Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
 func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
 	if content.GetCID() == 0 {
@@ -91,7 +91,6 @@ func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql
 	}
 	err := content.Store(tx)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
@@ -99,36 +98,43 @@ func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql
 	contentType := content.ContentType()
 	contentDefinition := contenttype.GetContentDefinition(contentType)
 	if contentDefinition.HasLocation {
+		if len(parentID) == 0 {
+			return errors.New("Need parent location id.")
+		}
+		parentIDInt := parentID[0]
+		parent, err := contenttype.GetLocationByID(parentIDInt)
+		if err != nil {
+			return errors.Wrap(err, "Can not get parent location with "+strconv.Itoa(parentIDInt))
+		}
+
 		//Save location
 		location := contenttype.Location{}
-		location.ParentID = parentID[0]
+		location.ParentID = parentIDInt
 		location.ContentID = content.GetCID()
 		location.ContentType = contentType
 		location.UID = util.GenerateUID()
-		//todo: set name based on rules. Now it's all based on title.
 		contentName := content.Value("title").(fieldtype.TextField).Data
+		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(contentName)
 		location.Name = contentName
 
 		err = location.Store(tx)
-		if err != nil {
-			tx.Rollback()
-			return errors.Wrap(err, "Transaction failed in location saving content.")
-		}
 
+		if err != nil {
+			return errors.Wrap(err, "Transaction failed in location when saving new location.")
+		}
+		location.Hierarchy = parent.Hierarchy + "/" + strconv.Itoa(location.ID)
 		location.MainID = location.ID
 		err = location.Store(tx)
 		if err != nil {
-			tx.Rollback()
-			return errors.Wrap(err, "Transaction failed in location saving location.")
+			return errors.Wrap(err, "Transaction failed in location when saving location for main_id and hierarchy.")
 		}
 		debug.Debug(ch.Context, "Location is saved. location id :"+strconv.Itoa(location.ID)+". ", "contenthandler.StoreContent")
 	}
-	//todo: update other things in location like main_id, hierarchy which need to query parent location.
 	return nil
 }
 
 //Create a content(same behavior as Draft&Publish but store published version directly)
-func (ch *ContentHandler) Create(parentID int, contentType string, inputs map[string]interface{}) (bool, ValidationResult, error) {
+func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (bool, ValidationResult, error) {
 	//Validate
 	valid, validationResult := ch.Validate(contentType, inputs)
 	if !valid {
@@ -170,8 +176,9 @@ func (ch *ContentHandler) Create(parentID int, contentType string, inputs map[st
 	if contentDefinition.HasVersion {
 		content.SetValue("version", versionIfNeeded)
 	}
-	err = ch.StoreContent(content, tx, parentID)
+	err = ch.StoreContent(content, tx, parentID...)
 	if err != nil {
+		tx.Rollback()
 		debug.Error(ch.Context, err.Error(), "contenthandler.Create")
 		return false, ValidationResult{}, errors.Wrap(err, "Create content error")
 	}
