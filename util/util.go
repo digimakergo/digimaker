@@ -47,3 +47,8 @@ func UpperName(input string) string {
 	}
 	return strings.Join(arr, "")
 }
+
+//convert name lie "Hello world.?" to "hello-world"
+func NameToIdentifier(input string) string {
+	return strings.ToLower(input)
+}

@@ -1,13 +1,16 @@
 package handler
 
 import (
+	"context"
 	"dm/contenttype"
 	"dm/contenttype/entity"
 	"dm/db"
 	"dm/fieldtype"
 	"dm/query"
+	"dm/util/debug"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -30,15 +33,16 @@ func TestValidtion(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	// handler := ContentHandler{}
-	// params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "body": "Hello"}
-	// _, result, err := handler.Create(4, "article", params)
+	ctx := debug.Init(context.Background())
+	handler := ContentHandler{Context: ctx}
+	params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "body": "Hello"}
+	_, result, err := handler.Create(4, "article", params)
 
 	// params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "summary": "Hello"}
 	// _, result, err := handler.Create(4, "folder", params)
-	//
-	// fmt.Println(result)
-	// fmt.Println(err)
+
+	fmt.Println(result)
+	fmt.Println(err)
 }
 
 func TestDelete(t *testing.T) {

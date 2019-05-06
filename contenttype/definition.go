@@ -12,7 +12,7 @@ type ContentTypeSettings map[string]ContentTypeSetting
 
 type ContentTypeSetting struct {
 	TableName     string                  `json:"table_name"`
-	Versioning    bool                    `json:"versioning"`
+	HasVersion    bool                    `json:"has_version"`
 	HasLocation   bool                    `json:"has_location"`
 	FieldsDisplay []string                `json:"fields_display"`
 	Fields        map[string]ContentField `json:"fields"`

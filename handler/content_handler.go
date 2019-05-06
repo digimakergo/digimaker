@@ -15,6 +15,7 @@ import (
 	"dm/db"
 	"dm/fieldtype"
 	"dm/util"
+	"dm/util/debug"
 	"strconv"
 	"time"
 
@@ -47,6 +48,8 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	definition := contenttype.GetContentDefinition(contentType)
 	//todo: check there is no extra field in the inputs
 	//todo: check max length
+	//todo: check all kind of validation
+
 	//check required
 	fieldsDef := definition.Fields
 	result := ValidationResult{}
@@ -75,68 +78,84 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	return true, ValidationResult{}
 }
 
-//Save content as draft. It can be when creating or edit.
-//It insert a draft version into dm_version.
-func (content ContentHandler) Draft(contentType string, parentID int) error {
-	//create empty
-	now := int(time.Now().Unix())
-	article := entity.Article{ContentCommon: entity.ContentCommon{Published: now, Modified: now}}
-	err := article.Store()
-	if err != nil {
-		return errors.Wrap(err, "[Handler.Draft]Error when creating article with parent id:"+
-			strconv.Itoa(parentID)+". No location crreated.")
-	}
-	//Save location
-	location := contenttype.Location{ParentID: -parentID,
-		ContentType: contentType,
-		ContentID:   article.CID,
-		UID:         util.GenerateUID()}
-	err = location.Store()
-	if err != nil {
-		return errors.Wrap(err, "[Handler.Draft]Error when creating location with content type -"+
-			contentType+", content id -"+strconv.Itoa(article.CID)+", parent id - "+strconv.Itoa(parentID))
-	}
-	return nil
-}
-
 //Publish a draft
 func (content ContentHandler) Publish() {
 
 }
 
-//Create a content(same behavior as Draft&Publish but store published version directly)
-func (handler *ContentHandler) Create(parentID int, contentType string, inputs map[string]interface{}) (bool, ValidationResult, error) {
-	//Validate
-	valid, validationResult := handler.Validate(contentType, inputs)
+//Store content.
+//If it's no-location content, ingore the parentID.
+func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
+	if content.GetCID() == 0 {
+		debug.Debug(ch.Context, "Content is new.", "contenthandler.StoreContent")
+	}
+	err := content.Store(tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
 
+	debug.Debug(ch.Context, "Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "handler")
+	contentType := content.ContentType()
+	contentDefinition := contenttype.GetContentDefinition(contentType)
+	if contentDefinition.HasLocation {
+		//Save location
+		location := contenttype.Location{}
+		location.ParentID = parentID[0]
+		location.ContentID = content.GetCID()
+		location.ContentType = contentType
+		location.UID = util.GenerateUID()
+		//todo: set name based on rules. Now it's all based on title.
+		contentName := content.Value("title").(fieldtype.TextField).Data
+		location.Name = contentName
+
+		err = location.Store(tx)
+		if err != nil {
+			tx.Rollback()
+			return errors.Wrap(err, "Transaction failed in location saving content.")
+		}
+
+		location.MainID = location.ID
+		err = location.Store(tx)
+		if err != nil {
+			tx.Rollback()
+			return errors.Wrap(err, "Transaction failed in location saving location.")
+		}
+		debug.Debug(ch.Context, "Location is saved. location id :"+strconv.Itoa(location.ID)+". ", "contenthandler.StoreContent")
+	}
+	//todo: update other things in location like main_id, hierarchy which need to query parent location.
+	return nil
+}
+
+//Create a content(same behavior as Draft&Publish but store published version directly)
+func (ch *ContentHandler) Create(parentID int, contentType string, inputs map[string]interface{}) (bool, ValidationResult, error) {
+	//Validate
+	valid, validationResult := ch.Validate(contentType, inputs)
 	if !valid {
 		return false, validationResult, nil
 	}
 
-	content := entity.NewInstance(contentType)
-
 	contentDefinition := contenttype.GetContentDefinition(contentType)
 	fieldsDefinition := contentDefinition.Fields
 
-	//todo: check if all the inputs are needed.
-
-	//todo: check all kind of validation
-
+	//Create empty content instance and set value
+	content := entity.NewInstance(contentType)
 	for identifier, input := range inputs {
 		fieldType := fieldsDefinition[identifier].FieldType
 		fieldtypeHandler := fieldtype.GetHandler(fieldType)
 		fieldValue := fieldtypeHandler.ToStorage(input)
 		err := content.SetValue(identifier, fieldValue)
 		if err != nil {
-			return false, ValidationResult{}, errors.Wrap(err, "[Create]Can not set input to "+identifier)
+			return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
 		}
 	}
-
 	now := int(time.Now().Unix())
 	content.SetValue("published", now)
 	content.SetValue("modified", now)
 	content.SetValue("cuid", util.GenerateUID())
 
+	debug.StartTiming(ch.Context, "database", "contenthandler.create")
+	//Create transaction
 	database, err := db.DB()
 	if err != nil {
 		return false, ValidationResult{}, errors.New("Can't get db connection.")
@@ -146,38 +165,40 @@ func (handler *ContentHandler) Create(parentID int, contentType string, inputs m
 		return false, ValidationResult{}, errors.New("Can't get transaction.")
 	}
 
-	err = content.Store(tx)
-	if err != nil {
-		tx.Rollback()
-		return false, ValidationResult{}, err
+	//Save content and location if needed
+	versionIfNeeded := 1
+	if contentDefinition.HasVersion {
+		content.SetValue("version", versionIfNeeded)
 	}
-	//todo: add commit and rollback for the whole saving
-
-	//Save location
-	location := contenttype.Location{ParentID: parentID,
-		ContentID:   content.Value("cid").(int),
-		ContentType: contentType,
-		UID:         util.GenerateUID()}
-	//todo: set name based on rules. Now it's all based on title.
-	contentName := content.Value("title").(fieldtype.TextField).Data
-	location.Name = contentName
-	err = location.Store(tx)
+	err = ch.StoreContent(content, tx, parentID)
 	if err != nil {
-		tx.Rollback()
-		return false, ValidationResult{}, err
+		debug.Error(ch.Context, err.Error(), "contenthandler.Create")
+		return false, ValidationResult{}, errors.Wrap(err, "Create content error")
 	}
 
-	//Save version 1
+	//Save version if needed
+	if contentDefinition.HasVersion {
+		debug.Debug(ch.Context, "creating version", "contenthandler.Create")
+		_, err = ch.CreateVersion(content, versionIfNeeded, tx)
+		if err != nil {
+			debug.Error(ch.Context, err.Error(), "contenthandler.Create")
+			return false, ValidationResult{}, errors.Wrap(err, "Create version error.")
+		}
+		debug.Debug(ch.Context, "Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create")
+	}
 
+	//Commit all operations
 	tx.Commit()
-	//todo: update other things in location like main_id, hierarchy
+	debug.Debug(ch.Context, "Finshed creating and committed.", "contenthandler.Create")
 
+	debug.EndTiming(ch.Context, "database", "contenthandler.create")
 	return true, ValidationResult{}, nil
 }
 
 //Create a new version.
 //It doesn't validate version number is increment
 func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, versionNumber int, tx *sql.Tx) (int, error) {
+	debug.Debug(ch.Context, "Creating version: "+strconv.Itoa(versionNumber), "contenthandler.CreateVersion")
 	id := content.GetCID()
 	data, err := contenttype.ContentToJson(content)
 	if err != nil {
@@ -195,6 +216,7 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 		tx.Rollback()
 		return 0, errors.Wrap(err, "Can not save version on contetent id: "+strconv.Itoa(id))
 	}
+	debug.Debug(ch.Context, "Version created.", "contenthandler.CreateVersion")
 	return version.ID, nil
 }
 

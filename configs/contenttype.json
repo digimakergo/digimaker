@@ -1,7 +1,7 @@
 {
   "folder":{
      "table_name": "dm_folder",
-     "versioning": false,
+     "has_version": false,
      "has_location": true,
      "fields_display":["title", "summary"],
      "sub_types":["folder","article"],
@@ -13,7 +13,7 @@
 
    "folder_resource":{
       "table_name": "dm_folder_resource",
-      "versioning": false,
+      "has_version": false,
       "has_location": true,
       "fields_display":["title", "summary"],
       "fields": { "title"  : {"type":"text", "name":"Title", "required":true},
@@ -24,7 +24,7 @@
 
   "article":{
       "table_name": "dm_article",
-      "versioning": true,
+      "has_version": true,
       "has_location": true,
       "fields_display":["title", "editors", "coverimage", "summary", "body", "related_articles", "useful_resources"],
       "fields": { "title"  : {"type":"text", "name":"Title", "required":true},
@@ -46,7 +46,7 @@
    },
   "user":{
       "table_name": "dm_user",
-      "versioning": true,
+      "has_version": true,
       "has_location": true,
       "fields_display":["firstname", "lastname", "login", "password"],
       "fields":{ "login": {"type":"text", "name":"Username","required":false},
@@ -57,10 +57,10 @@
 
  "image":{
      "table_name": "dm_image",
-     "versioning": false,
+     "has_version": false,
      "has_location": false,
      "fields_display":["firstname", "lastname", "login", "password"],
-     "fields":{ "type": {"type":"text", "name":"Type","required":false},
+     "fields":{ "content_type": {"type":"text", "name":"Type","required":false},
                 "title": {"type":"text", "name":"Title", "required":false},
                 "path": {"type":"text", "name":"Image path", "required":false},
                 "attached_location": {"type":"text", "name":"Location", "required":false} }

@@ -12,12 +12,13 @@ type ContentCommon struct {
 }
 
 func (c ContentCommon) IdentifierList() []string {
-	return []string{"cid", "published", "modified", "cuid"}
+	return []string{"cid", "version", "published", "modified", "cuid"}
 }
 
 func (c ContentCommon) Values() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.CID
+	result["version"] = c.Version
 	result["published"] = c.Published
 	result["modified"] = c.Modified
 	result["cuid"] = c.CUID
@@ -32,6 +33,8 @@ func (c *ContentCommon) Value(identifier string) interface{} {
 	switch identifier {
 	case "cid":
 		result = c.CID
+	case "version":
+		result = c.Version
 	case "modified":
 		result = c.Modified
 	case "published":
@@ -46,8 +49,10 @@ func (c *ContentCommon) Value(identifier string) interface{} {
 
 func (c *ContentCommon) SetValue(identifier string, value interface{}) error {
 	switch identifier {
-	case "id":
+	case "cid":
 		c.CID = value.(int)
+	case "version":
+		c.Version = value.(int)
 	case "published":
 		c.Published = value.(int)
 	case "modified":

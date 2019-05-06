@@ -97,6 +97,7 @@
             {{else}}
                     <div>
                 <a href="/content/view/{{$content.ID}}">{{$content.ID}}. {{$content.Name}}</a>
+                                <a href="/content/version/{{$content.ID}}" class="action" title="Version history(current version: {{$content.Version}})"><i class="fas fa-history"></i></a>
                 <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
                 <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
                 </div>
