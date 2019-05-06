@@ -94,7 +94,7 @@ func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql
 		return err
 	}
 
-	debug.Debug(ch.Context, "Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "handler")
+	debug.Debug(ch.Context, "Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "contenthandler.StoreContent")
 	contentType := content.ContentType()
 	contentDefinition := contenttype.GetContentDefinition(contentType)
 	if contentDefinition.HasLocation {
@@ -161,6 +161,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	content.SetValue("cuid", util.GenerateUID())
 
 	debug.StartTiming(ch.Context, "database", "contenthandler.create")
+	debug.Debug(ch.Context, "Validation passed. Start saving content.", "contenthandler.Create")
 	//Create transaction
 	database, err := db.DB()
 	if err != nil {
