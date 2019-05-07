@@ -11,6 +11,10 @@ body > div, body > form{
     float: right;
 }
 
+td{
+    padding: 3px;
+}
+
 a{
     color: #326e94
 }
