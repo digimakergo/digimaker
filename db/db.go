@@ -4,6 +4,7 @@
 package db
 
 import (
+	"context"
 	"database/sql"
 	"dm/util"
 
@@ -37,6 +38,20 @@ func DB() (*sql.DB, error) {
 		}
 	*/
 	return db, nil
+}
+
+//Create transaction.
+//todo: maybe some pararmeters for options
+func CreateTx() (*sql.Tx, error) {
+	database, err := DB()
+	if err != nil {
+		return nil, errors.New("Can't get db connection.")
+	}
+	tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if err != nil {
+		return nil, errors.New("Can't get transaction.")
+	}
+	return tx, nil
 }
 
 type DBer interface {

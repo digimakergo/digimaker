@@ -12,6 +12,7 @@
 </head>
 
 <body>
+   <a href="/content/edit/{{.current.ID}}" class="action" title="Edit" style="position:absolute; left: 200px; top: 10px"><i class="far fa-edit"></i></a>
   <h2>{{.current.Name}}</h2>
   <div class="tool">
       <div>
@@ -28,8 +29,9 @@
         </div>
 
       <div>
-          <a href="/content/new/folder/{{.current.ID}}" class="btn btn-primary btn-sm">New Folder</a> <br />
-          <a href="/content/new/article/{{.current.ID}}" class="btn btn-primary btn-sm">New article</a>
+          {{range $index, $type := .current_def.AllowedTypes}}
+            <a href="/content/new/{{$type}}/{{$.current.ID}}" class="btn btn-primary btn-sm">New {{$type}}</a> <br />
+          {{end}}
       </div>
   </div>
 
@@ -73,6 +75,7 @@
 
 {{end}}
 
+ {{if( gt (len .folder_list) 0 ) }}
   <h3>Folder under</h3>
   <div>
       {{range $index,$content := .folder_list}}
@@ -83,7 +86,9 @@
         </div>
       {{end}}
   </div>
+  {{end}}
 
+{{if( gt (len .list) 0 ) }}
   <h3>Contents under</h3>
   <div>
       {{range $index,$content := .list}}
@@ -105,6 +110,7 @@
 
       {{end}}
   </div>
+{{end}}
 
   </div>
 

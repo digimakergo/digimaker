@@ -146,7 +146,56 @@ func New(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 	}
 	debug.StartTiming(r.Context(), "template", "kernel")
-	tpl := template.Must(template.ParseFiles("../web/template/new_" + vars["type"] + ".html"))
+	contentType := vars["type"]
+	def := contenttype.GetContentDefinition(contentType)
+	variables["definition"] = def
+	variables["contenttype"] = contentType
+	tpl := template.Must(template.ParseFiles("../web/template/new.html"))
+	//variables := map[string]interface{}{}
+	tpl.Execute(w, variables)
+	debug.EndTiming(r.Context(), "template", "kernel")
+}
+
+func Edit(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+	// handler := handler.ContentHandler{}
+
+	variables := map[string]interface{}{}
+	id, _ := strconv.Atoi(vars["id"])
+	variables["id"] = id
+	content, _ := handler.Querier().FetchByID(id)
+	variables["content"] = content
+	variables["posted"] = false
+	if r.Method == "POST" {
+		variables["posted"] = true
+		parentID, _ := strconv.Atoi(vars["id"])
+		params := map[string]interface{}{}
+		r.ParseForm()
+		for key, value := range r.PostForm {
+			if key != "id" && key != "type" {
+				params[key] = value[0]
+			}
+		}
+		contentType := r.PostFormValue("type")
+		handler := handler.ContentHandler{Context: r.Context()}
+		success, result, error := handler.Create(contentType, params, parentID)
+		fmt.Println(success, result, error)
+		if !success {
+			variables["success"] = false
+			if error != nil {
+				variables["error"] = error.Error()
+			}
+			variables["validation"] = result
+		} else {
+			variables["success"] = true
+		}
+
+	}
+	debug.StartTiming(r.Context(), "template", "kernel")
+	contentType := content.ContentType()
+	def := contenttype.GetContentDefinition(contentType)
+	variables["definition"] = def
+	variables["contenttype"] = contentType
+	tpl := template.Must(template.ParseFiles("../web/template/edit.html"))
 	//variables := map[string]interface{}{}
 	tpl.Execute(w, variables)
 	debug.EndTiming(r.Context(), "template", "kernel")
@@ -241,13 +290,16 @@ func main() {
 			Display(w, r, map[string]string{"id": "1"})
 		})
 	})
-	// http.HandleFunc("/content/view/", func(w http.ResponseWriter, r *http.Request) {
-	// 	Display(w, r)
-	// })
 
 	r.HandleFunc("/content/new/{type}/{id}", func(w http.ResponseWriter, r *http.Request) {
 		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			New(w, r, vars)
+		})
+	})
+
+	r.HandleFunc("/content/edit/{id}", func(w http.ResponseWriter, r *http.Request) {
+		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+			Edit(w, r, vars)
 		})
 	})
 

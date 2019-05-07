@@ -16,6 +16,7 @@ import (
 	"dm/fieldtype"
 	"dm/util"
 	"dm/util/debug"
+	"encoding/json"
 	"strconv"
 	"time"
 
@@ -38,21 +39,27 @@ type ContentHandler struct {
 	Context context.Context
 }
 
-func (content ContentHandler) CreateLocation(parentID int) {
-	location := contenttype.Location{ParentID: parentID}
-	location.Store()
-}
-
 //Validate and Return a validation result
 func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
 	definition := contenttype.GetContentDefinition(contentType)
-	//todo: check there is no extra field in the inputs
 	//todo: check max length
 	//todo: check all kind of validation
+	fieldsDef := definition.Fields
+
+	result := ValidationResult{}
+
+	//Check if there are more fields than defined
+	for identifier, _ := range inputs {
+		_, exist := fieldsDef[identifier]
+		if !exist {
+			result.Fields = append(result.Fields, FieldValidationResult{Identifier: identifier, Detail: "2"}) //not needed
+		}
+	}
+	if !result.Passed() {
+		return false, result
+	}
 
 	//check required
-	fieldsDef := definition.Fields
-	result := ValidationResult{}
 	for identifier, fieldDef := range fieldsDef {
 		fieldHandler := fieldtype.GetHandler(fieldsDef[identifier].FieldType)
 		_, fieldExists := inputs[identifier]
@@ -90,6 +97,9 @@ func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql
 	}
 
 	debug.Debug(ch.Context, "Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "contenthandler.StoreContent")
+
+	//todo: deal with relations
+
 	contentType := content.ContentType()
 	contentDefinition := contenttype.GetContentDefinition(contentType)
 	if contentDefinition.HasLocation {
@@ -128,14 +138,54 @@ func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql
 	return nil
 }
 
+//Import, based on json
+func (ch *ContentHandler) Import(contentType string, contentData string) error {
+	content := entity.NewInstance(contentType)
+	contentDef := contenttype.GetContentDefinition(contentType)
+	tx, err := db.CreateTx()
+	if err != nil {
+		return errors.Wrap(err, "Error in getting transaction.")
+	}
+	json.Unmarshal([]byte(contentData), content)
+	content.SetValue("cid", 0)
+	util.Log("import", "Saving content first.")
+	err = content.Store(tx)
+	if err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "Can not saved. Rolled back.")
+	}
+	util.Log("contenthandler.import", "Content saved. cuid: "+content.Value("cuid").(string)+", id: "+strconv.Itoa(content.GetCID()))
+
+	if contentDef.HasLocation {
+		location := content.GetLocation()
+		location.ID = 0
+		location.ContentID = content.GetCID()
+		err = location.Store(tx)
+		util.Log("contenthandler.import", "Saving location.")
+		if err != nil {
+			tx.Rollback()
+			return errors.Wrap(err, "Can not save location")
+		}
+		util.Log("contenthandler.import", "Location saved. uid: "+location.UID+", new id:"+strconv.Itoa(location.ID))
+	}
+
+	//TODO: things with relations.
+
+	tx.Commit()
+	util.Log("contenthandler.import", "Committed")
+	return nil
+}
+
 //Create a content(same behavior as Draft&Publish but store published version directly)
 func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (bool, ValidationResult, error) {
+	//todo: permission check.
 	//Validate
 	valid, validationResult := ch.Validate(contentType, inputs)
 	if !valid {
 		return false, validationResult, nil
 	}
 
+	//todo: add validation callback.
 	contentDefinition := contenttype.GetContentDefinition(contentType)
 	fieldsDefinition := contentDefinition.Fields
 

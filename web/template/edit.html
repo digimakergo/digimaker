@@ -1,0 +1,51 @@
+<html>
+<header>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/static/css/site.css" rel="stylesheet">
+</header>
+
+
+<body>
+    <h2>Edit {{.content.Name}}</h2>
+    <form method="post">
+        <input type="hidden" name="type" value="{{.contenttype}}" />
+        {{if .posted}}
+            {{if $.success}}
+                <div class="alert-info">Success.</div>
+             {{else}}
+                {{range $index,$field := $.validation.Fields}}
+                    <div>{{$field.Identifier}}: {{$field.Detail}}</div>
+                {{end}}
+             {{end}}
+        {{end}}
+        {{.error}}
+        <div class="editarea">
+            {{range $identifier := .definition.FieldsDisplay}}
+                {{$fieldDef := index $.definition.Fields $identifier }}
+                <div>
+                <label>{{$fieldDef.Name}}:</label>
+                {{if( eq $fieldDef.FieldType "text" )}}
+                    <input type="text" class="form-control" name="{{$identifier}}" value="{{($.content.Value $identifier).Value}}" />
+                {{else if ( eq $fieldDef.FieldType "richtext" )}}
+                    <textarea name="{{$identifier}}" class="form-control" rows="5" cols="80">{{($.content.Value $identifier).Value}}</textarea>
+                {{else}}
+                    <span style="font-size: 70%">TO BE SUPPORTED - {{$fieldDef.FieldType}}</span>
+                {{end}}
+                </div>
+            {{end}}
+            <div> <br />
+                <input type="submit" class="btn btn-primary btn-sm" value="Submit" />
+                <input type="submit" class="btn btn-secondary btn-sm" value="Save as draft" />
+                <input type="reset" class="btn btn-light btn-sm" value="Reset" />
+            </div>
+        </div>
+        </form>
+        <div><a href="/content/view/{{.id}}">Back to list</a></div>
+
+        <div class="admin">
+            Powered by <a href="#" class="dm-name">DM Content framework</a>
+            <a href="/console/list" title="Go to DM administration console" class="admin-console"><i class="fas fa-tools"></i></a>
+        </div>
+</body>
+</html>

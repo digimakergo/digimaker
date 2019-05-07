@@ -15,6 +15,7 @@ type ContentTypeSetting struct {
 	HasVersion    bool                    `json:"has_version"`
 	HasLocation   bool                    `json:"has_location"`
 	FieldsDisplay []string                `json:"fields_display"`
+	AllowedTypes  []string                `json:"allowed_types"`
 	Fields        map[string]ContentField `json:"fields"`
 }
 
