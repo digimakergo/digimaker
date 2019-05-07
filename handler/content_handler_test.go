@@ -1,13 +1,11 @@
 package handler
 
 import (
-	"context"
 	"dm/contenttype"
 	"dm/contenttype/entity"
 	"dm/db"
 	"dm/fieldtype"
 	"dm/query"
-	"dm/util/debug"
 	"fmt"
 	"testing"
 
@@ -60,12 +58,12 @@ func TestImage(t *testing.T) {
 }
 
 func TestUpdate(t *testing.T) {
-	ctx := debug.Init(context.Background())
-	handler := ContentHandler{Context: ctx}
-	article, _ := querier.FetchByID(76)
-	inputs := map[string]interface{}{"summary": "updated"}
-	pass, _, err := handler.Update(article, inputs)
-	fmt.Println(pass, err)
+	// ctx := debug.Init(context.Background())
+	// handler := ContentHandler{Context: ctx}
+	// article, _ := querier.FetchByID(76)
+	// inputs := map[string]interface{}{"summary": "updated"}
+	// pass, _, err := handler.Update(article, inputs)
+	// fmt.Println(pass, err)
 }
 
 func TestVersion(t *testing.T) {

@@ -55,7 +55,14 @@
   <div>
   <table>
       <tr><td>ID: </td><td>{{.current.ID}}</td></tr>
+      <tr><td>UID: </td><td>{{.current.UID}}</td></tr>
       <tr><td>CID: </td><td>{{.current.CID}}</td></tr>
+      {{if .current_def.HasVersion}}
+            <tr><td>Version: </td><td>{{.current.Version}}</td></tr>
+      {{end}}
+      <tr><td>Published: </td><td>{{call .format_time .current.Published}}</td></tr>
+      <tr><td>Modified: </td><td>{{call .format_time .current.Modified}}</td></tr>
+      <tr><td colspan="2"><hr /></td></tr>
   {{range $i, $identifier := $fields}}
   {{$value := $.current.Value $identifier }}
   <tr><td style="width: 150px">{{(index $.current_def.Fields $identifier).Name}}:</td>
@@ -119,6 +126,7 @@
                         {{$content.ID}}. {{$content.Name}}
                     </a>
                 </span>
+                <span>{{call $.format_time $content.Published}}</span> &nbsp;&nbsp;&nbsp;
                 <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
                 <a href="/content/version/{{$content.ID}}" class="action" title="Version history(current version: {{$content.Version}})"><i class="fas fa-history"></i></a>
                 <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>

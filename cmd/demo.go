@@ -14,6 +14,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"time"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -102,6 +103,11 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 		folderList, _ := handler.Querier().List("folder", query.Cond("parent_id", id))
 		variables["folder_list"] = folderList
+
+		variables["format_time"] = func(unix int) string {
+			return time.Unix(int64(unix), 0).Format("02.01.2006 15:04:05")
+		}
+
 		err = tpl.Execute(w, variables)
 		if err != nil {
 			debug.Error(r.Context(), err.Error(), "template")
