@@ -20,7 +20,7 @@
              {{end}}
         {{end}}
         {{.error}}
-        
+
         <div class="editarea">
             {{range $identifier := .definition.FieldsDisplay}}
                 {{$fieldDef := index $.definition.Fields $identifier }}
@@ -42,7 +42,7 @@
             </div>
         </div>
         </form>
-        <div><a href="/content/view/{{.id}}">Back to list</a></div>
+        <div><a href="/content/view/{{.id}}">Back to content</a></div>
 
         <div class="admin">
             Powered by <a href="#" class="dm-name">DM Content framework</a>

@@ -85,18 +85,22 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 	return true, ValidationResult{}
 }
 
+func GenerateName(content contenttype.ContentTyper) string {
+	return content.Value("title").(fieldtype.TextField).Data //todo: make it patter based.
+}
+
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
-func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
+func (ch *ContentHandler) StoreCreatedContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
 	if content.GetCID() == 0 {
-		debug.Debug(ch.Context, "Content is new.", "contenthandler.StoreContent")
+		debug.Debug(ch.Context, "Content is new.", "contenthandler.StoreCreatedContent")
 	}
 	err := content.Store(tx)
 	if err != nil {
 		return err
 	}
 
-	debug.Debug(ch.Context, "Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "contenthandler.StoreContent")
+	debug.Debug(ch.Context, "Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "contenthandler.StoreCreatedContent")
 
 	//todo: deal with relations
 
@@ -118,7 +122,7 @@ func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql
 		location.ContentID = content.GetCID()
 		location.ContentType = contentType
 		location.UID = util.GenerateUID()
-		contentName := content.Value("title").(fieldtype.TextField).Data
+		contentName := GenerateName(content)
 		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(contentName)
 		location.Name = contentName
 
@@ -133,7 +137,7 @@ func (ch *ContentHandler) StoreContent(content contenttype.ContentTyper, tx *sql
 		if err != nil {
 			return errors.Wrap(err, "Transaction failed in location when saving location for main_id and hierarchy.")
 		}
-		debug.Debug(ch.Context, "Location is saved. location id :"+strconv.Itoa(location.ID)+". ", "contenthandler.StoreContent")
+		debug.Debug(ch.Context, "Location is saved. location id :"+strconv.Itoa(location.ID)+". ", "contenthandler.StoreCreatedContent")
 	}
 	return nil
 }
@@ -222,7 +226,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if contentDefinition.HasVersion {
 		content.SetValue("version", versionIfNeeded)
 	}
-	err = ch.StoreContent(content, tx, parentID...)
+	err = ch.StoreCreatedContent(content, tx, parentID...)
 	if err != nil {
 		tx.Rollback()
 		debug.Error(ch.Context, err.Error(), "contenthandler.Create")
@@ -356,8 +360,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	if contentDef.HasLocation {
 		//todo: update all locations to this content.
 		location := content.GetLocation()
-		title := content.Value("title").(fieldtype.TextField).Data //todo: use a centralize way with pattern
-		location.Name = title
+		location.Name = GenerateName(content)
 		//todo: location.IdentifierPath =
 		debug.Debug(ch.Context, "Updating location info", "contenthandler.update")
 		err := location.Store(tx)
