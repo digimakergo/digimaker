@@ -11,6 +11,12 @@ body > div, body > form{
     float: right;
 }
 
+.inline-tool{
+position:absolute; 
+left: 400px; 
+top: 10px
+}
+
 td{
     padding: 3px;
 }
@@ -137,6 +143,11 @@ img.line{
     width: 70%;
 }
 
+.content-title{
+  width: 250px;
+  display: inline-block;
+}
+
 @media only screen and (max-width: 600px) {
     .tool{
         float: none
@@ -145,4 +156,14 @@ img.line{
     .admin{
 
     }
+ 
+   .content-title{
+   width: auto;
+ }
+   .inline-tool{
+   position: relative;
+   left: 0px;
+   margin-bottom: 10px;
+}
+
 }

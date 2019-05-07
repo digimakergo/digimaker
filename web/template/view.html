@@ -13,7 +13,7 @@
 
 <body>
   <h2>{{.current.Name}}</h2>
-  <div style="position:absolute; left: 400px; top: 10px">
+  <div class="inline-tool">
      <span>
          <a href="/content/edit/{{.current.ID}}" class="action" title="Edit">
              <i class="far fa-edit"></i>
@@ -121,7 +121,7 @@
                 </div>
             {{else}}
                 <div style="border-bottom: 1px dotted #cccccc;">
-                <span style="display:inline-block; width: 250px;padding:2px">
+                <span class="content-title">
                     <a href="/content/view/{{$content.ID}}">
                         {{$content.ID}}. {{$content.Name}}
                     </a>
