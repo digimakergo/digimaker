@@ -105,7 +105,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		variables["folder_list"] = folderList
 
 		variables["format_time"] = func(unix int) string {
-			return time.Unix(int64(unix), 0).Format("02.01.2006 15:04:05")
+			return time.Unix(int64(unix), 0).Format("02.01.2006 15:04")
 		}
 
 		err = tpl.Execute(w, variables)
