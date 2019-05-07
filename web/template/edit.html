@@ -20,6 +20,7 @@
              {{end}}
         {{end}}
         {{.error}}
+        
         <div class="editarea">
             {{range $identifier := .definition.FieldsDisplay}}
                 {{$fieldDef := index $.definition.Fields $identifier }}

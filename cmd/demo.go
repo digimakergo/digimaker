@@ -167,7 +167,7 @@ func Edit(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	variables["posted"] = false
 	if r.Method == "POST" {
 		variables["posted"] = true
-		parentID, _ := strconv.Atoi(vars["id"])
+		id, _ := strconv.Atoi(vars["id"])
 		params := map[string]interface{}{}
 		r.ParseForm()
 		for key, value := range r.PostForm {
@@ -175,9 +175,9 @@ func Edit(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 				params[key] = value[0]
 			}
 		}
-		contentType := r.PostFormValue("type")
-		handler := handler.ContentHandler{Context: r.Context()}
-		success, result, error := handler.Create(contentType, params, parentID)
+		// contentType := r.PostFormValue("type")
+		cHandler := handler.ContentHandler{Context: r.Context()}
+		success, result, error := cHandler.UpdateByID(id, params)
 		fmt.Println(success, result, error)
 		if !success {
 			variables["success"] = false
@@ -188,7 +188,8 @@ func Edit(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		} else {
 			variables["success"] = true
 		}
-
+		content, _ = handler.Querier().FetchByID(id)
+		variables["content"] = content
 	}
 	debug.StartTiming(r.Context(), "template", "kernel")
 	contentType := content.ContentType()

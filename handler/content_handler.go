@@ -273,15 +273,111 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 	return version.ID, nil
 }
 
+func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, inputs map[string]interface{}) (bool, ValidationResult, error) {
+	content, err := Querier().FetchByContentID(contentType, contentID)
+	if err != nil {
+		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via content id.")
+	}
+	if content.GetCID() == 0 {
+		return false, ValidationResult{}, errors.Wrap(err, "Got empty content.")
+	}
+
+	return ch.Update(content, inputs)
+}
+
+func (ch ContentHandler) UpdateByID(id int, inputs map[string]interface{}) (bool, ValidationResult, error) {
+	content, err := Querier().FetchByID(id)
+	if err != nil {
+		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via id.")
+	}
+	if content.GetCID() == 0 {
+		return false, ValidationResult{}, errors.Wrap(err, "Got empty content.")
+	}
+
+	return ch.Update(content, inputs)
+}
+
 //Update content.
 //The inputs doesn't need to include all required fields. However if it's there,
 // it will check if it's required&empty
-func (content ContentHandler) Update(contentID int, contentType string, inputs map[string]interface{}) {
+func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[string]interface{}) (bool, ValidationResult, error) {
 	//Validate
-
+	debug.Debug(ch.Context, "Validating", "contenthandler.update")
+	contentType := content.ContentType()
+	ch.Validate(contentType, inputs)
 	//Save to new version
+	contentDef := contenttype.GetContentDefinition(contentType)
+
+	tx, err := db.CreateTx()
+	if err != nil {
+		return false, ValidationResult{}, errors.Wrap(err, "Create transaction error.")
+	}
+
+	//todo: update relations
+
+	//Set content.
+	fieldsDefinition := contentDef.Fields
+	for identifier, input := range inputs {
+		fieldType := fieldsDefinition[identifier].FieldType
+		fieldtypeHandler := fieldtype.GetHandler(fieldType)
+		fieldValue := fieldtypeHandler.ToStorage(input)
+		err := content.SetValue(identifier, fieldValue)
+		if err != nil {
+			return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
+		}
+	}
+
+	//Save new version and set to content
+	if contentDef.HasVersion {
+		version := content.Value("version").(int) + 1
+		debug.Debug(ch.Context, "Creating new version: "+strconv.Itoa(version), "contenthandler.update")
+		_, err := ch.CreateVersion(content, version, tx)
+		if err != nil {
+			//todo: rollback here not inside.
+			debug.Debug(ch.Context, "Create new version failed: "+err.Error(), "contenthandler.update")
+			return false, ValidationResult{}, errors.Wrap(err, "Can not save version.")
+		}
+		debug.Debug(ch.Context, "New version created", "contenthandler.update")
+		content.SetValue("version", version)
+	}
+	now := int(time.Now().Unix())
+	content.SetValue("modified", now)
 
 	//Save update content.
+	debug.Debug(ch.Context, "Saving content", "contenthandler.update")
+	err = content.Store(tx)
+	if err != nil {
+		tx.Rollback()
+		debug.Debug(ch.Context, "Saving content failed: "+err.Error(), "contenthandler.update")
+		return false, ValidationResult{}, errors.Wrap(err, "Saving content error. ")
+	}
+
+	//Updated location related
+	if contentDef.HasLocation {
+		//todo: update all locations to this content.
+		location := content.GetLocation()
+		title := content.Value("title").(fieldtype.TextField).Data //todo: use a centralize way with pattern
+		location.Name = title
+		//todo: location.IdentifierPath =
+		debug.Debug(ch.Context, "Updating location info", "contenthandler.update")
+		err := location.Store(tx)
+		if err != nil {
+			tx.Rollback()
+			debug.Debug(ch.Context, "Updating location failed: "+err.Error(), "contenthandler.update")
+			return false, ValidationResult{}, errors.Wrap(err, "Updating location info error.")
+		}
+		debug.Debug(ch.Context, "Location updated", "contenthandler.update")
+	}
+
+	debug.Debug(ch.Context, "All done. Commitinng.", "contenthandler.update")
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		debug.Debug(ch.Context, "Commit error: "+err.Error(), "contenthandler.update")
+		return false, ValidationResult{}, errors.Wrap(err, "Commit error.")
+	}
+
+	return true, ValidationResult{}, nil
 }
 
 //Delete content by location id
