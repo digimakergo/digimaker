@@ -114,8 +114,8 @@
       {{range $index,$content := .list}}
             {{if eq $content.ContentType "image" }}
                 <div class="blockview">
-                    <a href="/static/images/{{$content.Path.Value}}">
-                    <img src="/static/images/{{$content.Path.Value}}" />
+                    <a href="/static/var/uploaded/{{$content.Path.Value}}">
+                    <img src="/static/var/uploaded/{{$content.Path.Value}}" /> {{/* TODO: generate alias instantly */}}
                     <div>{{$content.ID}}. {{$content.Title.Value}}</div>
                     </a>
                 </div>
@@ -128,6 +128,7 @@
                 </span>
                 <span>{{call $.format_time $content.Published}}</span> &nbsp;&nbsp;&nbsp;
                 <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
+                <a href="#" class="action" title="Move"><i class="fas fa-file-export"></i></a>
                 <a href="/content/version/{{$content.ID}}" class="action" title="Version history(current version: {{$content.Version}})"><i class="fas fa-history"></i></a>
                 <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
                 </div>

@@ -91,7 +91,7 @@ func GenerateName(content contenttype.ContentTyper) string {
 
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
-func (ch *ContentHandler) StoreCreatedContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
+func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
 	if content.GetCID() == 0 {
 		debug.Debug(ch.Context, "Content is new.", "contenthandler.StoreCreatedContent")
 	}
@@ -226,7 +226,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if contentDefinition.HasVersion {
 		content.SetValue("version", versionIfNeeded)
 	}
-	err = ch.StoreCreatedContent(content, tx, parentID...)
+	err = ch.storeCreatedContent(content, tx, parentID...)
 	if err != nil {
 		tx.Rollback()
 		debug.Error(ch.Context, err.Error(), "contenthandler.Create")

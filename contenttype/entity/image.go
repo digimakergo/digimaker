@@ -4,52 +4,66 @@
 package entity
 
 import (
-	"database/sql"
-	"dm/contenttype"
-	"dm/db"
+    "database/sql"
+    "dm/db"
+    "dm/contenttype"
 	"dm/fieldtype"
+    "dm/util"
 	. "dm/query"
-	"dm/util"
 )
 
-type Image struct {
-	ContentCommon `boil:",bind"`
 
-	AttachedLocation int `boil:"attached_location" json:"attached_location" toml:"attached_location" yaml:"attached_location"`
 
-	Path fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
-
-	Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-
-	Type fieldtype.TextField `boil:"type" json:"type" toml:"type" yaml:"type"`
-
-	contenttype.Location `boil:"location,bind"`
+type Image struct{
+     ContentCommon `boil:",bind"`
+    
+     
+     
+        Imagetype fieldtype.TextField `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
+     
+    
+     
+     
+        Path fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
+     
+    
+     
+     
+        Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+     
+    
+     contenttype.Location `boil:"location,bind"`
 }
 
-func (*Image) TableName() string {
-	return "dm_image"
+func ( *Image ) TableName() string{
+	 return "dm_image"
 }
 
-func (*Image) ContentType() string {
-	return "image"
+func ( *Image ) ContentType() string{
+	 return "image"
 }
 
-func (c *Image) GetLocation() *contenttype.Location {
-	return &c.Location
+func (c *Image) GetLocation() *contenttype.Location{
+    return &c.Location
 }
+
 
 //todo: cache this? (then you need a reload?)
 func (c *Image) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
-
-	result["attached_location"] = c.AttachedLocation
-
-	result["path"] = c.Path
-
-	result["title"] = c.Title
-
-	result["type"] = c.Type
-
+    
+        
+        result["imagetype"]=c.Imagetype
+        
+    
+        
+        result["path"]=c.Path
+        
+    
+        
+        result["title"]=c.Title
+        
+    
 	for key, value := range c.ContentCommon.Values() {
 		result[key] = value
 	}
@@ -57,64 +71,70 @@ func (c *Image) ToMap() map[string]interface{} {
 }
 
 func (c *Image) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(), []string{"attached_location", "path", "title", "type"}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ "imagetype","path","title",}...)
 }
 
 func (c *Image) DisplayIdentifierList() []string {
-	return []string{"firstname", "lastname", "login", "password"}
+	return []string{ "imagetype","title","path",}
 }
 
 func (c *Image) Value(identifier string) interface{} {
-	if util.Contains(c.Location.IdentifierList(), identifier) {
-		return c.Location.Field(identifier)
-	}
-	var result interface{}
+    if util.Contains( c.Location.IdentifierList(), identifier ) {
+        return c.Location.Field( identifier )
+    }
+    var result interface{}
 	switch identifier {
-
-	case "attached_location":
-
-		result = c.AttachedLocation
-
-	case "path":
-
-		result = c.Path
-
-	case "title":
-
-		result = c.Title
-
-	case "type":
-
-		result = c.Type
-
+    
+    case "imagetype":
+        
+            result = c.Imagetype
+        
+    
+    case "path":
+        
+            result = c.Path
+        
+    
+    case "title":
+        
+            result = c.Title
+        
+    
 	case "cid":
 		result = c.ContentCommon.CID
-	default:
-		result = c.ContentCommon.Value(identifier)
-	}
+    default:
+    	result = c.ContentCommon.Value( identifier )
+    }
 	return result
 }
 
+
 func (c *Image) SetValue(identifier string, value interface{}) error {
 	switch identifier {
-
-	case "attached_location":
-		c.AttachedLocation = value.(int)
-
-	case "path":
-		c.Path = value.(fieldtype.TextField)
-
-	case "title":
-		c.Title = value.(fieldtype.TextField)
-
-	case "type":
-		c.Type = value.(fieldtype.TextField)
-
+        
+            
+            
+            case "imagetype":
+            c.Imagetype = value.(fieldtype.TextField)
+            
+        
+            
+            
+            case "path":
+            c.Path = value.(fieldtype.TextField)
+            
+        
+            
+            
+            case "title":
+            c.Title = value.(fieldtype.TextField)
+            
+        
 	default:
 		err := c.ContentCommon.SetValue(identifier, value)
-		if err != nil {
-			return err
-		}
+        if err != nil{
+            return err
+        }
 	}
 	//todo: check if identifier exist
 	return nil
@@ -155,6 +175,6 @@ func init() {
 
 	Register("image",
 		ContentTypeRegister{
-			New:     new,
-			NewList: newList})
+			New:            new,
+			NewList:        newList})
 }
