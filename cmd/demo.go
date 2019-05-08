@@ -253,7 +253,11 @@ func DMHandle(w http.ResponseWriter, r *http.Request, functionHandler func(http.
 	debug.EndTiming(ctx, "request", "kernel")
 
 	errorLog := ""
+	errorCount := 0
 	for _, item := range debug.GetDebugger(r.Context()).List {
+		if item.Type == "error" {
+			errorCount++
+		}
 		errorLog += "<div class=info-" + item.Type + "><span class=category>[" + item.Category + "]</span><span>" + item.Type + "</span><span>" + item.Message + "</span></div>"
 	}
 
@@ -275,7 +279,9 @@ func DMHandle(w http.ResponseWriter, r *http.Request, functionHandler func(http.
 
 	w.Write([]byte("<script>var dmtime={ 'total': " + strconv.Itoa(total) +
 		", " + queryStr +
-		"," + templateStr + "};" +
+		"," + templateStr +
+		", errors:" + strconv.Itoa(errorCount) +
+		"};" +
 		"var errorLog='" + errorLog + "';" +
 		"</script>" +
 		"<link href='/static/css/debug.css' rel='stylesheet'>" +

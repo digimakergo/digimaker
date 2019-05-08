@@ -4,7 +4,7 @@ function load(){
     {
         html += "<div class='info hide'>"+errorLog+"</div>";
     }
-    html += "<div class='time'><a href='javascript:switchLog();' class='title' title='More debug info'><i class='fas fa-chevron-up'></i> <span>Time Spent</span></a>"+
+    html += "<div class='time'><a href='javascript:switchLog();' class='title' title='More debug info'><i class='fas fa-chevron-up'></i>"+ (dmtime.errors == 0?"":("<span class='error-count'>"+dmtime.errors+"</span>"))+"<span>Time Spent</span></a>"+
             "<span>Total: </span><span>"+dmtime.total+"ms</span> "+
             "<span>Query: </span><span>"+dmtime.query+"ms</span> "+
             "<span>Template: </span><span>"+dmtime.template+"ms</span></div>";

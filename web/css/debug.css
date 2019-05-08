@@ -50,3 +50,15 @@
 .info-debug >span, .info-error >span{
     margin-right: 4px;
 }
+
+
+.error-count{display: inline-block;
+    border-radius: 10px;
+    color: red;
+    width: 18px;
+    margin-right: 3px;
+    height: 18px;
+    text-align: center;
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+}
