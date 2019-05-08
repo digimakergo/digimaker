@@ -108,7 +108,7 @@
   </div>
   {{end}}
 
-{{if( gt (len .list) 0 ) }}
+{{if .list }}
   <h3>Contents under</h3>
   <div>
       {{range $index,$content := .list}}
