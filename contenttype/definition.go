@@ -11,6 +11,7 @@ import (
 type ContentTypeSettings map[string]ContentTypeSetting
 
 type ContentTypeSetting struct {
+	Name          string                  `json:"name"`
 	TableName     string                  `json:"table_name"`
 	HasVersion    bool                    `json:"has_version"`
 	HasLocation   bool                    `json:"has_location"`

@@ -1,17 +1,35 @@
 {
   "folder":{
+     "name": "Folder",
      "table_name": "dm_folder",
      "has_version": false,
      "has_location": true,
      "fields_display":["title", "summary"],
-     "allowed_types":["folder","article", "image"],
+     "allowed_types":["folder","frontpage","article", "image", "file"],
      "fields": { "title"  : {"type":"text", "name":"Title", "required":true},
                  "folder_type"  : {"type":"text", "name":"Folder Type", "required":false},
                  "summary": {"type":"richtext", "name":"Summary", "required":false}
                }
    },
 
+   "frontpage":{
+      "name": "Frontpage",
+      "table_name": "dm_frontpage",
+      "has_version": false,
+      "has_location": true,
+      "fields_display":["title", "slideshow", "mainarea", "mainarea_blocks", "sidearea", "sidearea_blocks"],
+      "allowed_types":["folder","article", "image", "file"],
+      "fields": { "title": {"type":"text", "name":"Title", "required":true},
+                  "slideshow": {"type":"relationlist", "name":"Slide show", "required":false},
+                  "mainarea": {"type":"text", "name":"Main container", "required":true},
+                  "mainarea_blocks": {"type":"relationlist", "name":"Main area blocks", "required":true},
+                  "sidearea": {"type":"text", "name":"Side container", "required":true},
+                  "sidearea_blocks": {"type":"relationlist", "name":"Side blocks", "required":false}
+                }
+    },
+
    "folder_resource":{
+      "name": "Media",
       "table_name": "dm_folder_resource",
       "has_version": false,
       "has_location": true,
@@ -23,6 +41,7 @@
     },
 
   "article":{
+      "Name": "Article",
       "table_name": "dm_article",
       "has_version": true,
       "has_location": true,
@@ -45,6 +64,7 @@
                 }
    },
   "user":{
+      "name": "User",
       "table_name": "dm_user",
       "has_version": true,
       "has_location": true,
@@ -56,6 +76,7 @@
              },
 
  "image":{
+     "name": "Image",
      "table_name": "dm_image",
      "has_version": false,
      "has_location": false,
@@ -63,5 +84,15 @@
      "fields":{ "imagetype": {"type":"text", "name":"Type","required":false},
                 "title": {"type":"text", "name":"Title", "required":true},
                 "path": {"type":"text", "name":"Image path", "required":true} }
-            }
+            },
+"file":{
+    "name": "File",
+    "table_name": "dm_file",
+    "has_version": false,
+    "has_location": false,
+    "fields_display":["filetype", "title", "path"],
+    "fields":{ "filetype": {"type":"text", "name":"Type","required":false},
+               "title": {"type":"text", "name":"Title", "required":true},
+               "path": {"type":"text", "name":"Image path", "required":true} }
+           }
 }

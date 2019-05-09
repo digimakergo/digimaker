@@ -30,7 +30,7 @@
                 {{else if ( eq $fieldDef.FieldType "richtext" )}}
                     <textarea name="{{$identifier}}" class="form-control" rows="5" cols="80"></textarea>
                 {{else}}
-                    <span style="font-size: 70%">TO BE SUPPORTED - {{$fieldDef.FieldType}}</span>
+                    <span style="font-size: 70%" class="field-{{$fieldDef.FieldType}}">TO BE SUPPORTED - {{$fieldDef.FieldType}}</span>
                 {{end}}
                 </div>
             {{end}}

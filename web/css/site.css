@@ -12,8 +12,8 @@ body > div, body > form{
 }
 
 .inline-tool{
-position:absolute; 
-left: 400px; 
+position:absolute;
+left: 400px;
 top: 10px
 }
 
@@ -148,6 +148,12 @@ img.line{
   display: inline-block;
 }
 
+.field-relationlist{
+    display: block;
+    background: #f7f7f7;
+    height: 100px;
+}
+
 @media only screen and (max-width: 600px) {
     .tool{
         float: none
@@ -156,7 +162,7 @@ img.line{
     .admin{
 
     }
- 
+
    .content-title{
    width: auto;
  }
