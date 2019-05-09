@@ -97,7 +97,7 @@
 {{end}}
 
  {{if( gt (len .folder_list) 0 ) }}
-  <h3>Folder under</h3>
+  <h3>Folders</h3>
   <div>
       {{range $index,$content := .folder_list}}
         <div style="padding:2px">
@@ -110,8 +110,10 @@
   {{end}}
 
 {{if .list }}
+{{if gt (len .list) 0}}
   <h3>Contents under</h3>
   <div>
+      <table>
       {{range $index,$content := .list}}
             {{if eq $content.ContentType "image" }}
                 <div class="blockview">
@@ -121,22 +123,27 @@
                     </a>
                 </div>
             {{else}}
-                <div style="border-bottom: 1px dotted #cccccc;">
-                <span class="content-title">
+                <tr style="border-bottom: 1px dotted #cccccc;">
+                <td class="content-title">
                     <a href="/content/view/{{$content.ID}}">
                         {{$content.ID}}. {{$content.Name}}
                     </a>
-                </span>
-                <span>{{call $.format_time $content.Published}}</span> &nbsp;&nbsp;&nbsp;
-                <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
-                <a href="#" class="action" title="Move"><i class="fas fa-file-export"></i></a>
-                <a href="/content/version/{{$content.ID}}" class="action" title="Version history(current version: {{$content.Version}})"><i class="fas fa-history"></i></a>
-                <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
-                </div>
+                </td>
+                <td>{{call $.format_time $content.Published}}</td>
+                <td>{{call $.format_time $content.Modified}}</td>
+                <td>
+                    <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
+                    <a href="#" class="action" title="Move"><i class="fas fa-file-export"></i></a>
+                    <a href="/content/version/{{$content.ID}}" class="action" title="Version history(current version: {{$content.Version}})"><i class="fas fa-history"></i></a>
+                    <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
+                </td>
+            </tr>
              {{end}}
 
       {{end}}
+    </table>
   </div>
+  {{end}}
 {{end}}
 
   </div>

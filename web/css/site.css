@@ -7,6 +7,12 @@ body > div, body > form{
     padding-right: 5px;
 }
 
+h3{
+    font-weight: 400;
+    margin-top: 10px;
+    font-size: 1.4em;
+}
+
 .tool{
     float: right;
 }
