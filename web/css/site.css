@@ -64,6 +64,11 @@ a.action:hover{
     content: '\f302';
 }
 
+.type-article::before{
+    content: '\f15c';
+    font-weight: 400;     
+}
+
 .type-file::before{
 
 }
@@ -165,6 +170,11 @@ img.line{
     color: #666666;
     font-style: italic;
     cursor: default;
+    background: #f7f7f7;
+    display: inline-block;
+    padding: 5px;
+    border-radius: 5px;
+    margin-left: 2px;
 }
 
 .meta-content label{

@@ -133,7 +133,7 @@
                 <tr class="content-row">
                 <td class="content-title">
                     <a href="/content/view/{{$content.ID}}">
-                        {{$content.ID}}. {{$content.Name}}
+                        <i class="icon-type type-{{$content.ContentType}}"></i>{{$content.Name}}
                     </a>
                 </td>
                 <td>{{call $.format_time $content.Published}}</td>
