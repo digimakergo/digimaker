@@ -64,9 +64,13 @@ a.action:hover{
     content: '\f302';
 }
 
+.type-folder-link::before{
+    content: '\f0c1';
+}
+
 .type-article::before{
     content: '\f15c';
-    font-weight: 400;     
+    font-weight: 400;
 }
 
 .type-file::before{
