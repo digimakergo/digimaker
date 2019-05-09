@@ -13,6 +13,36 @@
 
 <body>
   <h2>{{.current.Name}}</h2>
+
+   <div class="tool">
+       <div>
+           <ul>
+           {{range $index,$folder := .folders}}
+             <div>
+                 <li>
+                 <a href="/content/view/{{$folder.ID}}">
+                     <i class="icon-type  type-{{$folder.FolderType.Value}}"></i>{{$folder.Name}}</a>
+                 </li>
+                 </div>
+           {{end}}
+           </ul>
+         </div>
+
+       <div>
+           {{range $index, $type := .current_def.AllowedTypes}}
+             <a href="/content/new/{{$type}}/{{$.current.ID}}" class="btn btn-primary btn-sm">New {{$type}}</a> <br />
+           {{end}}
+       </div>
+   </div>
+  <div class="meta-content">
+      <span><label>Published: </label>{{call .format_time .current.Published}}</span>
+      <span><label>Modified: </label>{{call .format_time .current.Modified}}</span> <br />
+      <span><label>CID: </label>{{.current.CID}}</span>
+      <span><label>UID: </label>{{.current.UID}}</span>
+      {{if .current_def.HasVersion}}
+             <span><label>Version: </label>{{.current.Version}}</span>
+      {{end}}
+  </div>
   <div class="inline-tool">
      <span>
          <a href="/content/edit/{{.current.ID}}" class="action" title="Edit">
@@ -27,42 +57,13 @@
      </span>
      {{end}}
  </div>
-  <div class="tool">
-      <div>
-          <ul>
-          {{range $index,$folder := .folders}}
-            <div>
-                <li>
-                <a href="/content/view/{{$folder.ID}}">
-                    <i class="icon-type  type-{{$folder.FolderType.Value}}"></i>{{$folder.Name}}</a>
-                </li>
-                </div>
-          {{end}}
-          </ul>
-        </div>
 
-      <div>
-          {{range $index, $type := .current_def.AllowedTypes}}
-            <a href="/content/new/{{$type}}/{{$.current.ID}}" class="btn btn-primary btn-sm">New {{$type}}</a> <br />
-          {{end}}
-      </div>
-  </div>
-
-  <div class="block">
+  <div>
 
   {{$fields := .current.DisplayIdentifierList}}
 
-  <div>
+  <div class="block">
   <table>
-      <tr><td>ID: </td><td>{{.current.ID}}</td></tr>
-      <tr><td>UID: </td><td>{{.current.UID}}</td></tr>
-      <tr><td>CID: </td><td>{{.current.CID}}</td></tr>
-      {{if .current_def.HasVersion}}
-            <tr><td>Version: </td><td>{{.current.Version}}</td></tr>
-      {{end}}
-      <tr><td>Published: </td><td>{{call .format_time .current.Published}}</td></tr>
-      <tr><td>Modified: </td><td>{{call .format_time .current.Modified}}</td></tr>
-      <tr><td colspan="2"><hr /></td></tr>
   {{range $i, $identifier := $fields}}
   {{$value := $.current.Value $identifier }}
   <tr><td style="width: 150px">{{(index $.current_def.Fields $identifier).Name}}:</td>
