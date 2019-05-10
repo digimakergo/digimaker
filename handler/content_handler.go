@@ -208,6 +208,15 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	content.SetValue("published", now)
 	content.SetValue("modified", now)
 	content.SetValue("cuid", util.GenerateUID())
+	callback := GetHandler(contentType)
+	if callback != nil {
+		debug.Debug(ch.Context, "Calling callback for "+contentType, "contenthandler.create")
+		err := callback.SetContent(content, parentID...)
+		if err != nil {
+			debug.Error(ch.Context, "Error from callback: "+err.Error(), "contenthandler.create")
+			return false, ValidationResult{}, err
+		}
+	}
 
 	debug.StartTiming(ch.Context, "database", "contenthandler.create")
 	debug.Debug(ch.Context, "Validation passed. Start saving content.", "contenthandler.Create")

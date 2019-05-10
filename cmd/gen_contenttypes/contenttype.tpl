@@ -21,7 +21,7 @@ type {{$struct_name}} struct{
     {{range $identifier, $fieldtype := .settings.Fields}}
      {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
      {{if not $type_settings.IsRelation }}
-        {{$identifier|UpperName}}  {{if eq $fieldtype.FieldType "string" }}string{{else}}fieldtype.{{$type_settings.Value}}{{end}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+        {{$identifier|UpperName}}  {{if eq $fieldtype.FieldType "string" }}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
      {{end}}
     {{end}}
     {{if .settings.HasLocation}}
@@ -99,7 +99,7 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
             {{if not $type_settings.IsRelation}}
             case "{{$identifier}}":
-            c.{{$identifier|UpperName}} = value.({{if eq $fieldtype.FieldType "string"}}string{{else}}fieldtype.{{$type_settings.Value}}{{end}})
+            c.{{$identifier|UpperName}} = value.({{if eq $fieldtype.FieldType "string"}}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}})
             {{end}}
         {{end}}
 	default:

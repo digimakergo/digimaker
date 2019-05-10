@@ -80,10 +80,12 @@
      "table_name": "dm_image",
      "has_version": false,
      "has_location": false,
-     "fields_display":["imagetype", "title", "path"],
+     "fields_display":["title", "path"],
      "fields":{ "imagetype": {"type":"string", "name":"Type","required":false},
                 "title": {"type":"text", "name":"Title", "required":true},
-                "path": {"type":"text", "name":"Image path", "required":true} }
+                "path": {"type":"text", "name":"Image path", "required":true},
+                "menu_id": {"type":"int", "name":"Menu ID", "required":false}
+                }
             },
 "file":{
     "name": "File",

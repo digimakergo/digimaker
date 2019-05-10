@@ -6,6 +6,7 @@ import (
 	"dm/db"
 	"dm/fieldtype"
 	"dm/handler"
+	_ "dm/handler/handlers"
 	"dm/query"
 	"dm/util"
 	"dm/util/debug"
@@ -77,7 +78,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 				images := &[]entity.Image{}
 				fmt.Println(currentFolder.GetLocation().ID)
 				handler := db.DBHanlder()
-				handler.GetEnity("dm_image", query.Cond("attached_location", currentFolder.GetLocation().ID), images)
+				handler.GetEnity("dm_image", query.Cond("menu_id", currentFolder.GetLocation().ID), images)
 				variables["list"] = images
 				fmt.Println(images)
 			} else {
