@@ -8,7 +8,9 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
+    
     "dm/util"
+    
 	. "dm/query"
 )
 
@@ -19,7 +21,7 @@ type Frontpage struct{
     
      
      
-        Mainarea fieldtype.TextField `boil:"mainarea" json:"mainarea" toml:"mainarea" yaml:"mainarea"`
+        Mainarea  fieldtype.TextField `boil:"mainarea" json:"mainarea" toml:"mainarea" yaml:"mainarea"`
      
     
      
@@ -27,7 +29,7 @@ type Frontpage struct{
     
      
      
-        Sidearea fieldtype.TextField `boil:"sidearea" json:"sidearea" toml:"sidearea" yaml:"sidearea"`
+        Sidearea  fieldtype.TextField `boil:"sidearea" json:"sidearea" toml:"sidearea" yaml:"sidearea"`
      
     
      
@@ -38,10 +40,12 @@ type Frontpage struct{
     
      
      
-        Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
      
+    
     
      contenttype.Location `boil:"location,bind"`
+    
 }
 
 func ( *Frontpage ) TableName() string{
@@ -53,7 +57,9 @@ func ( *Frontpage ) ContentType() string{
 }
 
 func (c *Frontpage) GetLocation() *contenttype.Location{
+    
     return &c.Location
+    
 }
 
 
@@ -89,14 +95,16 @@ func (c *Frontpage) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "mainarea","mainarea_blocks","sidearea","sidearea_blocks","slideshow","title",}...)
 }
 
-func (c *Frontpage) DisplayIdentifierList() []string {
-	return []string{ "title","slideshow","mainarea","sidearea",}
+func (c *Frontpage) Definition() contenttype.ContentTypeSetting {
+	return contenttype.GetContentDefinition( c.ContentType() )
 }
 
 func (c *Frontpage) Value(identifier string) interface{} {
+    
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )
     }
+    
     var result interface{}
 	switch identifier {
     

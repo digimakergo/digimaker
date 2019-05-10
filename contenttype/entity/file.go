@@ -8,7 +8,7 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
-    "dm/util"
+    
 	. "dm/query"
 )
 
@@ -19,20 +19,20 @@ type File struct{
     
      
      
-        Filetype fieldtype.TextField `boil:"filetype" json:"filetype" toml:"filetype" yaml:"filetype"`
+        Filetype  fieldtype.TextField `boil:"filetype" json:"filetype" toml:"filetype" yaml:"filetype"`
      
     
      
      
-        Path fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
+        Path  fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
      
     
      
      
-        Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
      
     
-     contenttype.Location `boil:"location,bind"`
+    
 }
 
 func ( *File ) TableName() string{
@@ -44,7 +44,9 @@ func ( *File ) ContentType() string{
 }
 
 func (c *File) GetLocation() *contenttype.Location{
-    return &c.Location
+    
+    return nil
+    
 }
 
 
@@ -74,14 +76,12 @@ func (c *File) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "filetype","path","title",}...)
 }
 
-func (c *File) DisplayIdentifierList() []string {
-	return []string{ "filetype","title","path",}
+func (c *File) Definition() contenttype.ContentTypeSetting {
+	return contenttype.GetContentDefinition( c.ContentType() )
 }
 
 func (c *File) Value(identifier string) interface{} {
-    if util.Contains( c.Location.IdentifierList(), identifier ) {
-        return c.Location.Field( identifier )
-    }
+    
     var result interface{}
 	switch identifier {
     

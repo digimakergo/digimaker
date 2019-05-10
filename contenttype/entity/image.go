@@ -8,7 +8,7 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
-    "dm/util"
+    
 	. "dm/query"
 )
 
@@ -19,20 +19,20 @@ type Image struct{
     
      
      
-        Imagetype fieldtype.TextField `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
+        Imagetype  string `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
      
     
      
      
-        Path fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
+        Path  fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
      
     
      
      
-        Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
      
     
-     contenttype.Location `boil:"location,bind"`
+    
 }
 
 func ( *Image ) TableName() string{
@@ -44,7 +44,9 @@ func ( *Image ) ContentType() string{
 }
 
 func (c *Image) GetLocation() *contenttype.Location{
-    return &c.Location
+    
+    return nil
+    
 }
 
 
@@ -74,14 +76,12 @@ func (c *Image) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "imagetype","path","title",}...)
 }
 
-func (c *Image) DisplayIdentifierList() []string {
-	return []string{ "imagetype","title","path",}
+func (c *Image) Definition() contenttype.ContentTypeSetting {
+	return contenttype.GetContentDefinition( c.ContentType() )
 }
 
 func (c *Image) Value(identifier string) interface{} {
-    if util.Contains( c.Location.IdentifierList(), identifier ) {
-        return c.Location.Field( identifier )
-    }
+    
     var result interface{}
 	switch identifier {
     
@@ -115,7 +115,7 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
             
             
             case "imagetype":
-            c.Imagetype = value.(fieldtype.TextField)
+            c.Imagetype = value.(string)
             
         
             

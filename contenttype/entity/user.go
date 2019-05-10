@@ -8,7 +8,9 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
+    
     "dm/util"
+    
 	. "dm/query"
 )
 
@@ -19,25 +21,27 @@ type User struct{
     
      
      
-        Firstname fieldtype.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
+        Firstname  fieldtype.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
      
     
      
      
-        Lastname fieldtype.TextField `boil:"lastname" json:"lastname" toml:"lastname" yaml:"lastname"`
+        Lastname  fieldtype.TextField `boil:"lastname" json:"lastname" toml:"lastname" yaml:"lastname"`
      
     
      
      
-        Login fieldtype.TextField `boil:"login" json:"login" toml:"login" yaml:"login"`
+        Login  fieldtype.TextField `boil:"login" json:"login" toml:"login" yaml:"login"`
      
     
      
      
-        Password fieldtype.TextField `boil:"password" json:"password" toml:"password" yaml:"password"`
+        Password  fieldtype.TextField `boil:"password" json:"password" toml:"password" yaml:"password"`
      
+    
     
      contenttype.Location `boil:"location,bind"`
+    
 }
 
 func ( *User ) TableName() string{
@@ -49,7 +53,9 @@ func ( *User ) ContentType() string{
 }
 
 func (c *User) GetLocation() *contenttype.Location{
+    
     return &c.Location
+    
 }
 
 
@@ -83,14 +89,16 @@ func (c *User) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "firstname","lastname","login","password",}...)
 }
 
-func (c *User) DisplayIdentifierList() []string {
-	return []string{ "firstname","lastname","login","password",}
+func (c *User) Definition() contenttype.ContentTypeSetting {
+	return contenttype.GetContentDefinition( c.ContentType() )
 }
 
 func (c *User) Value(identifier string) interface{} {
+    
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )
     }
+    
     var result interface{}
 	switch identifier {
     

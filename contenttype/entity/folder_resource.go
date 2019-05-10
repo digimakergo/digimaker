@@ -8,7 +8,9 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
+    
     "dm/util"
+    
 	. "dm/query"
 )
 
@@ -19,20 +21,22 @@ type FolderResource struct{
     
      
      
-        ResourceType fieldtype.TextField `boil:"resource_type" json:"resource_type" toml:"resource_type" yaml:"resource_type"`
+        ResourceType  fieldtype.TextField `boil:"resource_type" json:"resource_type" toml:"resource_type" yaml:"resource_type"`
      
     
      
      
-        Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
      
     
      
      
-        Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
      
+    
     
      contenttype.Location `boil:"location,bind"`
+    
 }
 
 func ( *FolderResource ) TableName() string{
@@ -44,7 +48,9 @@ func ( *FolderResource ) ContentType() string{
 }
 
 func (c *FolderResource) GetLocation() *contenttype.Location{
+    
     return &c.Location
+    
 }
 
 
@@ -74,14 +80,16 @@ func (c *FolderResource) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "resource_type","summary","title",}...)
 }
 
-func (c *FolderResource) DisplayIdentifierList() []string {
-	return []string{ "title","summary",}
+func (c *FolderResource) Definition() contenttype.ContentTypeSetting {
+	return contenttype.GetContentDefinition( c.ContentType() )
 }
 
 func (c *FolderResource) Value(identifier string) interface{} {
+    
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )
     }
+    
     var result interface{}
 	switch identifier {
     

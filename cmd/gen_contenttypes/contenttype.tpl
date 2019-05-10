@@ -8,7 +8,9 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
+    {{if .settings.HasLocation}}
     "dm/util"
+    {{end}}
 	. "dm/query"
 )
 
@@ -19,10 +21,12 @@ type {{$struct_name}} struct{
     {{range $identifier, $fieldtype := .settings.Fields}}
      {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
      {{if not $type_settings.IsRelation }}
-        {{$identifier|UpperName}} fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+        {{$identifier|UpperName}}  {{if eq $fieldtype.FieldType "string" }}string{{else}}fieldtype.{{$type_settings.Value}}{{end}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
      {{end}}
     {{end}}
+    {{if .settings.HasLocation}}
      contenttype.Location `boil:"location,bind"`
+    {{end}}
 }
 
 func ( *{{$struct_name}} ) TableName() string{
@@ -34,7 +38,11 @@ func ( *{{$struct_name}} ) ContentType() string{
 }
 
 func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
+    {{if .settings.HasLocation}}
     return &c.Location
+    {{else}}
+    return nil
+    {{end}}
 }
 
 
@@ -56,14 +64,16 @@ func (c *{{$struct_name}}) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .settings.Fields}}"{{$identifier}}",{{end}}}...)
 }
 
-func (c *{{$struct_name}}) DisplayIdentifierList() []string {
-	return []string{ {{range $,$identifier := .settings.FieldsDisplay}}"{{$identifier}}",{{end}}}
+func (c *{{$struct_name}}) Definition() contenttype.ContentTypeSetting {
+	return contenttype.GetContentDefinition( c.ContentType() )
 }
 
 func (c *{{$struct_name}}) Value(identifier string) interface{} {
+    {{if .settings.HasLocation}}
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )
     }
+    {{end}}
     var result interface{}
 	switch identifier {
     {{range $identifier, $fieldtype := .settings.Fields}}
@@ -89,7 +99,7 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
             {{if not $type_settings.IsRelation}}
             case "{{$identifier}}":
-            c.{{$identifier|UpperName}} = value.(fieldtype.{{$type_settings.Value}})
+            c.{{$identifier|UpperName}} = value.({{if eq $fieldtype.FieldType "string"}}string{{else}}fieldtype.{{$type_settings.Value}}{{end}})
             {{end}}
         {{end}}
 	default:

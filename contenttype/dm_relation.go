@@ -35,7 +35,7 @@ type Relation struct {
 	Identifier    string `boil:"identifier" json:"identifier" toml:"identifier" yaml:"identifier"`
 	Description   string `boil:"description" json:"description" toml:"description" yaml:"description"`
 	Data          string `boil:"data" json:"data" toml:"data" yaml:"data"`
-	RemoteID      string `boil:"remote_id" json:"remote_id" toml:"remote_id" yaml:"remote_id"`
+	UID           string `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
 
 	R        *relationR `boil:"-" json:"-" toml:"-" yaml:"-"`
 	L        relationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
@@ -54,7 +54,7 @@ func (c *Relation) ToMap() map[string]interface{} {
 	result["identifier"] = c.Identifier
 	result["description"] = c.Description
 	result["data"] = c.Data
-	result["remote_id"] = c.RemoteID
+	result["uid"] = c.UID
 	return result
 }
 
@@ -85,8 +85,8 @@ func (c *Relation) Field(name string) interface{} {
 		result = c.Description
 	case "data", "Data":
 		result = c.Data
-	case "remote_id", "RemoteID":
-		result = c.RemoteID
+	case "uid", "UID":
+		result = c.UID
 	default:
 	}
 	return result
@@ -118,7 +118,7 @@ var RelationColumns = struct {
 	Identifier    string
 	Description   string
 	Data          string
-	RemoteID      string
+	UID           string
 }{
 	ID:            "id",
 	ToContentID:   "to_content_id",
@@ -130,7 +130,7 @@ var RelationColumns = struct {
 	Identifier:    "identifier",
 	Description:   "description",
 	Data:          "data",
-	RemoteID:      "remote_id",
+	UID:           "uid",
 }
 
 // RelationRels is where relationship names are stored.
@@ -150,8 +150,8 @@ func (*relationR) NewStruct() *relationR {
 type relationL struct{}
 
 var (
-	relationColumns               = []string{"id", "to_content_id", "to_type", "from_content_id", "from_type", "from_location", "priority", "identifier", "description", "data", "remote_id"}
-	relationColumnsWithoutDefault = []string{"to_type", "from_type", "identifier", "description", "data", "remote_id"}
+	relationColumns               = []string{"id", "to_content_id", "to_type", "from_content_id", "from_type", "from_location", "priority", "identifier", "description", "data", "uid"}
+	relationColumnsWithoutDefault = []string{"to_type", "from_type", "identifier", "description", "data", "uid"}
 	relationColumnsWithDefault    = []string{"id", "to_content_id", "from_content_id", "from_location", "priority"}
 	relationPrimaryKeyColumns     = []string{"id"}
 )

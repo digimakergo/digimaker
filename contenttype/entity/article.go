@@ -8,7 +8,9 @@ import (
     "dm/db"
     "dm/contenttype"
 	"dm/fieldtype"
+    
     "dm/util"
+    
 	. "dm/query"
 )
 
@@ -19,7 +21,7 @@ type Article struct{
     
      
      
-        Body fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
+        Body  fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
      
     
      
@@ -27,7 +29,7 @@ type Article struct{
     
      
      
-        Editors fieldtype.EditorList `boil:"editors" json:"editors" toml:"editors" yaml:"editors"`
+        Editors  fieldtype.EditorList `boil:"editors" json:"editors" toml:"editors" yaml:"editors"`
      
     
      
@@ -35,18 +37,20 @@ type Article struct{
     
      
      
-        Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
      
     
      
      
-        Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
      
     
      
      
+    
     
      contenttype.Location `boil:"location,bind"`
+    
 }
 
 func ( *Article ) TableName() string{
@@ -58,7 +62,9 @@ func ( *Article ) ContentType() string{
 }
 
 func (c *Article) GetLocation() *contenttype.Location{
+    
     return &c.Location
+    
 }
 
 
@@ -98,14 +104,16 @@ func (c *Article) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "body","coverimage","editors","related_articles","summary","title","useful_resources",}...)
 }
 
-func (c *Article) DisplayIdentifierList() []string {
-	return []string{ "title","editors","coverimage","summary","body","related_articles","useful_resources",}
+func (c *Article) Definition() contenttype.ContentTypeSetting {
+	return contenttype.GetContentDefinition( c.ContentType() )
 }
 
 func (c *Article) Value(identifier string) interface{} {
+    
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )
     }
+    
     var result interface{}
 	switch identifier {
     
