@@ -299,7 +299,7 @@ func (ch ContentHandler) InvokeCallback(event string, stopOnError bool, matchDat
 	count := len(operationHandlerList)
 	for i, operationHandler := range operationHandlerList {
 		debug.Debug(ch.Context, strconv.Itoa(i+1)+"/"+strconv.Itoa(count)+
-			"Invoking operation "+operationHandler.Identifier, "contehandler.invoke_callback")
+			"Invoking operation "+operationHandler.Identifier+" on "+event, "contehandler.invoke_callback")
 		err := operationHandler.Execute(event, params...)
 		if err != nil && stopOnError {
 			debug.Error(ch.Context, "Error when invoking operation handler "+operationHandler.Identifier+":"+err.Error(), "contehandler.invoke_callback")

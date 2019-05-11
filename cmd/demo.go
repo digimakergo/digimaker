@@ -15,6 +15,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -283,7 +284,7 @@ func DMHandle(w http.ResponseWriter, r *http.Request, functionHandler func(http.
 		"," + templateStr +
 		", errors:" + strconv.Itoa(errorCount) +
 		"};" +
-		"var errorLog='" + errorLog + "';" +
+		"var errorLog=\"" + strings.ReplaceAll(errorLog, "\"", "'") + "\";" +
 		"</script>" +
 		"<link href='/static/css/debug.css' rel='stylesheet'>" +
 		"<script src='https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js'></script>" +
