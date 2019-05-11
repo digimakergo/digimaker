@@ -1,15 +1,13 @@
 package handlers
 
 import (
-	"dm/contenttype"
-	"dm/fieldtype"
 	"testing"
 )
 
 func TestCreateImage(t *testing.T) {
-	contenttype.LoadDefinition()
-	fieldtype.LoadDefinition()
-
+	// contenttype.LoadDefinition()
+	// fieldtype.LoadDefinition()
+	//
 	// ctx := debug.Init(context.Background())
 	// handler := handler.ContentHandler{Context: ctx}
 	//

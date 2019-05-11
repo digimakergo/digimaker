@@ -16,6 +16,10 @@ func (ih ImageHandler) Create(content contenttype.ContentTyper, tx *sql.Tx, pare
 	return nil
 }
 
+func (ih ImageHandler) Validate(inputs map[string]interface{}, result *handler.ValidationResult) {
+
+}
+
 func init() {
 	handler.RegisterContentTypeHandler("image", ImageHandler{})
 }

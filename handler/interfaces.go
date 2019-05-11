@@ -14,6 +14,8 @@ type ContentTypeHandler interface {
 	//When creating on server side
 	Create(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error
 
+	Validate(inputs map[string]interface{}, result *ValidationResult)
+
 	// //When created
 	// Created()
 

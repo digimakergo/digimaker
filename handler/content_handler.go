@@ -40,7 +40,7 @@ type ContentHandler struct {
 }
 
 //Validate and Return a validation result
-func (handler *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
+func (ch *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
 	definition := contenttype.GetContentDefinition(contentType)
 	//todo: check max length
 	//todo: check all kind of validation
@@ -81,8 +81,12 @@ func (handler *ContentHandler) Validate(contentType string, inputs map[string]in
 		}
 	}
 
-	//todo: add more custom validation based on type
-	return true, ValidationResult{}
+	contentTypeHanlder := GetContentTypeHandler(contentType)
+	if contentTypeHanlder != nil {
+		debug.Debug(ch.Context, "Validating from content type handler", "contenthandler.validate")
+		contentTypeHanlder.Validate(inputs, &result)
+	}
+	return result.Passed(), result
 }
 
 func GenerateName(content contenttype.ContentTyper) string {
