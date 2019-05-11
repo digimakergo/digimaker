@@ -13,7 +13,7 @@ type TestOperationHandler struct {
 func TestRegistry(t *testing.T) {
 	condition := map[string]interface{}{"id": 12, "type": "image"}
 	testHandler := OperationHandler{Identifier: "test_handler",
-		Event: "change", Execute: func(params ...interface{}) error {
+		Execute: func(event string, params ...interface{}) error {
 			return nil
 		}}
 	RegisterOperationHandler(testHandler)

@@ -32,6 +32,5 @@ type ContentTypeHandler interface {
 //Callback struct
 type OperationHandler struct {
 	Identifier string //Identifier for handler matching. see operation_handler.json/yaml
-	Event      string //event type
-	Execute    func(params ...interface{}) error
+	Execute    func(triggedEvent string, params ...interface{}) error
 }
