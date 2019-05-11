@@ -1,0 +1,9 @@
+{
+    "handlers":{
+        "dm_clear_cache":{
+                "type":["folder", "article"],
+                "scope": "site1",
+                "under": 12
+            }
+        }
+}

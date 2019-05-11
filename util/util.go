@@ -6,6 +6,7 @@ package util
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -55,4 +56,33 @@ func NameToIdentifier(input string) string {
 	reg, _ := regexp.Compile("[^a-z0-9]+")
 	result := reg.ReplaceAllString(lowerStr, "-")
 	return result
+}
+
+//Iternate condition rules to see if all are matching.
+//If there are keys in condition rules but not in realValues, match fails.
+//eg. conditions: {id: 12, type:"image"}
+func MatchCondition(conditions map[string]interface{}, target map[string]interface{}) (bool, []string) {
+	matchResult := true
+	matchingLog := []string{}
+	for key, conditionValue := range conditions {
+		realValue, ok := target[key]
+		if ok {
+			switch conditionValue.(type) {
+			case int, string:
+				matchResult = matchResult && conditionValue == conditionValue
+			case []int, []string:
+				matchResult = matchResult && Contains(conditionValue.([]string), realValue.(string))
+			}
+			if !matchResult {
+				matchingLog = append(matchingLog, "mismatch on "+key+",expecting: "+fmt.Sprint(conditionValue)+", real: "+fmt.Sprint(realValue))
+			}
+		} else {
+			matchResult = false
+			matchingLog = append(matchingLog, "mismatch since "+key+"doesn't exist in target.")
+		}
+		if !matchResult {
+			break
+		}
+	}
+	return matchResult, matchingLog
 }
