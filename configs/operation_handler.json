@@ -1,5 +1,7 @@
 {
+    "__":"todo: remove handlers",
     "handlers":{
+        "test_handler":{ "event":"change", "id": 12  },
         "dm_clear_cache":{
                 "type":["folder", "article"],
                 "scope": "site1",

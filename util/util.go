@@ -63,26 +63,30 @@ func NameToIdentifier(input string) string {
 //eg. conditions: {id: 12, type:"image"}
 func MatchCondition(conditions map[string]interface{}, target map[string]interface{}) (bool, []string) {
 	matchResult := true
-	matchingLog := []string{}
+	matchLog := []string{}
 	for key, conditionValue := range conditions {
 		realValue, ok := target[key]
 		if ok {
 			switch conditionValue.(type) {
 			case int, string:
-				matchResult = matchResult && conditionValue == conditionValue
-			case []int, []string:
+				matchResult = matchResult && conditionValue == realValue
+			case []int:
+				//todo: support this.
+			case []string:
 				matchResult = matchResult && Contains(conditionValue.([]string), realValue.(string))
 			}
 			if !matchResult {
-				matchingLog = append(matchingLog, "mismatch on "+key+",expecting: "+fmt.Sprint(conditionValue)+", real: "+fmt.Sprint(realValue))
+				matchLog = append(matchLog, "Mismatch on "+key+", expecting: "+fmt.Sprint(conditionValue)+", real: "+fmt.Sprint(realValue))
+			} else {
+				matchLog = append(matchLog, "Matched on "+key)
 			}
 		} else {
 			matchResult = false
-			matchingLog = append(matchingLog, "mismatch since "+key+"doesn't exist in target.")
+			matchLog = append(matchLog, "Mismatch since key "+key+" doesn't exist in target.")
 		}
 		if !matchResult {
 			break
 		}
 	}
-	return matchResult, matchingLog
+	return matchResult, matchLog
 }

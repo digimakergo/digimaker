@@ -70,3 +70,7 @@ func GetConfigSectionI(section string, config ...string) map[string]interface{} 
 	}
 	return result
 }
+
+func GetAll(config string) {
+
+}

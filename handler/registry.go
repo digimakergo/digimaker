@@ -5,8 +5,8 @@ package handler
 
 import (
 	"dm/util"
-	"fmt"
 	"strconv"
+	"strings"
 )
 
 //Content type handler registeration list
@@ -33,20 +33,36 @@ func GetOperationHandlerList() []OperationHandler {
 
 //Get operation handler list based on rules defined in operation_handler.json/yaml
 //target is the real vaule the condition matches to
-func GetOperationHandlerByCondition(target map[string]interface{}) ([]OperationHandler, []string) {
+func GetOperationHandlerByCondition(event string, target map[string]interface{}) ([]OperationHandler, []string) {
+	//todo: preserve order in the config so matched event will be called from top to down
 	handlers := util.GetConfigSectionI("handlers", "operation_handler")
+	target["event"] = event
 	matchLog := []string{}
+	keys := []string{}
+	for key, _ := range target {
+		keys = append(keys, key)
+	}
+	matchLog = append(matchLog, "Matching with target with keys: "+strings.Join(keys, ", "))
 	result := []OperationHandler{}
 	for identifier, conditions := range handlers {
-		matchLog = append(matchLog, "matching "+identifier)
-		//match
-		matchResult, currentMatchLog := util.MatchCondition(conditions.(map[string]interface{}), target)
-		matchLog = append(matchLog, "matching result: "+
+		conditionMap := conditions.(map[string]interface{})
+		var (
+			matchResult     bool
+			currentMatchLog []string
+		)
+
+		if _, ok := conditionMap["event"]; !ok {
+			matchResult = false
+			currentMatchLog = []string{"No 'event' defined in the condition."}
+		} else {
+			matchResult, currentMatchLog = util.MatchCondition(conditionMap, target)
+		}
+		matchLog = append(matchLog, "Match "+identifier+": "+
 			strconv.FormatBool(matchResult)+
-			"matching detail:"+fmt.Sprint(currentMatchLog))
+			". Matching detail: "+strings.Join(currentMatchLog, ", "))
 		if matchResult {
 			for _, handler := range operationHandlerList {
-				if handler.Identifer() == identifier {
+				if handler.Identifier == identifier {
 					result = append(result, handler)
 				}
 			}

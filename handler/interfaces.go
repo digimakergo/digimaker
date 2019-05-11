@@ -26,14 +26,9 @@ type ContentTypeHandler interface {
 	Delete()
 }
 
-//This is a callback interface for general purpose.
-//Todo:use a nice way for condition(eg. config file). eg. based on type, sub location, scope,
-type OperationHandler interface {
-	Identifer() string
-
-	AfterCreate()
-
-	AfterUpdate()
-
-	AfterDelete()
+//Callback struct
+type OperationHandler struct {
+	Identifier string //Identifier for handler matching. see operation_handler.json/yaml
+	Event      string //event type
+	Execute    func(content contenttype.ContentTyper) error
 }
