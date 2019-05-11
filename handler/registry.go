@@ -27,12 +27,9 @@ func RegisterOperationHandler(handler OperationHandler) {
 	operationHandlerList = append(operationHandlerList, handler)
 }
 
-func GetOperationHandlerList() []OperationHandler {
-	return operationHandlerList
-}
-
 //Get operation handler list based on rules defined in operation_handler.json/yaml
 //target is the real vaule the condition matches to
+//target should not include 'event' key since it's in the parameter already.
 func GetOperationHandlerByCondition(event string, target map[string]interface{}) ([]OperationHandler, []string) {
 	//todo: preserve order in the config so matched event will be called from top to down
 	handlers := util.GetConfigSectionI("handlers", "operation_handler")
