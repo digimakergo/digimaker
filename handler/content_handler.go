@@ -436,6 +436,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		hierachy := content.GetLocation().Hierarchy
 		matchData["under"] = strings.Split(hierachy, "/")
 	}
+	//todo: maybe old content need to pass to callback.
 	err = ch.InvokeCallback("update", true, matchData, content, tx)
 	if err != nil {
 		tx.Rollback()
