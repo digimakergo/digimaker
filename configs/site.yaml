@@ -7,6 +7,7 @@ database:
 
 debug:
   enabled: true #false will disable all below
+  #types: ["callback_match"]
   timespent: true
   category: db, action, template
   levels: error, warning, info

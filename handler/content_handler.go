@@ -18,6 +18,7 @@ import (
 	"dm/util/debug"
 	"encoding/json"
 	"strconv"
+	"strings"
 	"time"
 
 	. "dm/query"
@@ -225,6 +226,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		return false, ValidationResult{}, errors.New("Can't get transaction.")
 	}
 
+	//call content type handler
 	handler := GetContentTypeHandler(contentType)
 	if handler != nil {
 		debug.Debug(ch.Context, "Calling handler for "+contentType, "contenthandler.create")
@@ -259,12 +261,53 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		debug.Debug(ch.Context, "Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create")
 	}
 
-	//Commit all operations
-	tx.Commit()
-	debug.Debug(ch.Context, "Finshed creating and committed.", "contenthandler.Create")
+	//Invoke callback
+	matchData := map[string]interface{}{"parent_id": parentID[0], //todo: maybe set parent id as mandatory parameter in Create
+		"type": contentType}
+	if contentDefinition.HasLocation {
+		hierachy := content.GetLocation().Hierarchy
+		matchData["under"] = strings.Split(hierachy, "/")
+	}
+	err = ch.InvokeCallback("create", true, matchData, content, tx)
+	if err != nil {
+		tx.Rollback()
+		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+	}
 
+	//Commit all operations
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		debug.Error(ch.Context, "Commit error: "+err.Error(), "contenthandler.create")
+		return false, ValidationResult{}, errors.Wrap(err, "Commit error.")
+	}
+
+	debug.Debug(ch.Context, "Data committed.", "contenthandler.create")
+
+	ch.InvokeCallback("created", false, matchData, content) //continue if there is error
+
+	debug.Debug(ch.Context, "Create finished.", "contenthandler.create")
 	debug.EndTiming(ch.Context, "database", "contenthandler.create")
 	return true, ValidationResult{}, nil
+}
+
+func (ch ContentHandler) InvokeCallback(event string, stopOnError bool, matchData map[string]interface{}, params ...interface{}) error {
+	operationHandlerList, matchInfo := GetOperationHandlerByCondition(event, matchData)
+	for _, info := range matchInfo {
+		debug.Debug(ch.Context, info, "callback_match")
+	}
+	count := len(operationHandlerList)
+	for i, operationHandler := range operationHandlerList {
+		debug.Debug(ch.Context, strconv.Itoa(i)+"/"+strconv.Itoa(count)+
+			"Invoking operation "+operationHandler.Identifier, "contehandler.invoke_callback")
+		err := operationHandler.Execute(params)
+		if err != nil && stopOnError {
+			debug.Error(ch.Context, "Error when invoking operation handler "+operationHandler.Identifier+":"+err.Error(), "contehandler.invoke_callback")
+			return err
+		}
+		debug.Debug(ch.Context, "Invoking ended on "+operationHandler.Identifier, "contehandler.invoke_callback")
+	}
+	return nil
 }
 
 //Create a new version.
@@ -387,13 +430,27 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		debug.Debug(ch.Context, "Location updated", "contenthandler.update")
 	}
 
+	//Invoke callback
+	matchData := map[string]interface{}{"type": contentType}
+	if content.Definition().HasLocation {
+		hierachy := content.GetLocation().Hierarchy
+		matchData["under"] = strings.Split(hierachy, "/")
+	}
+	err = ch.InvokeCallback("update", true, matchData, content, tx)
+	if err != nil {
+		tx.Rollback()
+		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+	}
+
 	debug.Debug(ch.Context, "All done. Commitinng.", "contenthandler.update")
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
-		debug.Debug(ch.Context, "Commit error: "+err.Error(), "contenthandler.update")
+		debug.Error(ch.Context, "Commit error: "+err.Error(), "contenthandler.update")
 		return false, ValidationResult{}, errors.Wrap(err, "Commit error.")
 	}
+
+	ch.InvokeCallback("updated", false, matchData, content)
 
 	return true, ValidationResult{}, nil
 }

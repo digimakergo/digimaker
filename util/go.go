@@ -25,3 +25,12 @@ func Contains(strings []string, element string) bool {
 	}
 	return false
 }
+
+func ContainsInt(ints []int, i int) bool {
+	for _, j := range ints {
+		if j == i {
+			return true
+		}
+	}
+	return false
+}

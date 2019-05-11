@@ -68,12 +68,33 @@ func MatchCondition(conditions map[string]interface{}, target map[string]interfa
 		realValue, ok := target[key]
 		if ok {
 			switch conditionValue.(type) {
-			case int, string:
-				matchResult = matchResult && conditionValue == realValue
+			case int:
+				switch realValue.(type) {
+				case int:
+					matchResult = conditionValue == realValue
+				case []int: //real value contains condition int
+					matchResult = ContainsInt(realValue.([]int), conditionValue.(int))
+				default:
+					matchResult = false
+				}
+			case string:
+				switch realValue.(type) {
+				case string:
+					matchResult = conditionValue == realValue
+				case []string:
+					matchResult = Contains(realValue.([]string), conditionValue.(string))
+				default:
+					matchResult = false
+				}
 			case []int:
-				//todo: support this.
+				switch realValue.(type) {
+				case int: //conidtion ints contain real int
+					matchResult = ContainsInt(conditionValue.([]int), realValue.(int))
+				default:
+					matchResult = false
+				}
 			case []string:
-				matchResult = matchResult && Contains(conditionValue.([]string), realValue.(string))
+				matchResult = Contains(conditionValue.([]string), realValue.(string))
 			}
 			if !matchResult {
 				matchLog = append(matchLog, "Mismatch on "+key+", expecting: "+fmt.Sprint(conditionValue)+", real: "+fmt.Sprint(realValue))
