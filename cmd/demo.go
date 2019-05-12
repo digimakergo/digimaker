@@ -211,7 +211,7 @@ func Edit(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request, vars map[string]string) {
-	handler := handler.ContentHandler{}
+	handler := handler.ContentHandler{Context: r.Context()}
 	id, _ := strconv.Atoi(vars["id"])
 	err := handler.DeleteByID(id, false)
 	if err != nil {
