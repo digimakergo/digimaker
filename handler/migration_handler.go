@@ -22,10 +22,7 @@ type MigrationHandler struct{}
 //- update main_id where location is not the main_id.
 //- update relations content/location id
 //
-func (mh *MigrationHandler) ImportAContent(contentType string, contentData string) error {
-	contentMap := map[string]interface{}{}
-	json.Unmarshal([]byte(contentData), &contentMap)
-	cuid := contentMap["cuid"].(string)
+func (mh *MigrationHandler) ImportAContent(contentType string, cuid string, parentUID string, contentData []byte) error {
 	existing, _ := Querier().FetchByCUID(contentType, cuid)
 	if existing != nil {
 		//todo: for existing, maybe just update - need an option.
@@ -38,7 +35,7 @@ func (mh *MigrationHandler) ImportAContent(contentType string, contentData strin
 	if err != nil {
 		return errors.Wrap(err, "Error in getting transaction.")
 	}
-	json.Unmarshal([]byte(contentData), content)
+	json.Unmarshal(contentData, content)
 
 	content.SetValue("cid", 0)
 	util.Log("import", "Saving content first.")
@@ -49,7 +46,6 @@ func (mh *MigrationHandler) ImportAContent(contentType string, contentData strin
 	}
 	util.Log("contenthandler.import", "Content saved. cuid: "+content.Value("cuid").(string)+", id: "+strconv.Itoa(content.GetCID()))
 
-	parentUID := contentMap["parent_uid"].(string)
 	parent, err := Querier().FetchByUID(parentUID)
 	if parent == nil {
 		return errors.Wrap(err, "Can not find parent.")
@@ -87,17 +83,12 @@ func (mh *MigrationHandler) ImportAContent(contentType string, contentData strin
 func (mh *MigrationHandler) ImportALine(data []byte) error {
 	dataMap := map[string]interface{}{}
 	json.Unmarshal(data, &dataMap)
-	contentType := ""
-	for key, _ := range dataMap {
-		contentType = key
-		break
-	}
+	contentType := dataMap["content_type"].(string)
+	cuid := dataMap["cuid"].(string)
+	parentUID := dataMap["parent_uid"].(string)
+	contentData, _ := json.Marshal(dataMap["data"])
 
-	contentData, err := json.Marshal(dataMap[contentType])
-	if err != nil {
-		return err
-	}
-	err = mh.ImportAContent(contentType, string(contentData))
+	err := mh.ImportAContent(contentType, cuid, parentUID, contentData)
 	return err
 }
 
@@ -118,7 +109,6 @@ func (mh *MigrationHandler) Export(content contenttype.ContentTyper, parent cont
 	delete(contentMap, "id")
 	if content.Definition().HasLocation {
 		location := contentMap["location"].(map[string]interface{})
-		location["content_uid"] = content.Value("cuid")
 		delete(location, "content_id")
 		delete(location, "parent_id")
 		//todo: replace main_id with main_uid
@@ -127,9 +117,12 @@ func (mh *MigrationHandler) Export(content contenttype.ContentTyper, parent cont
 		delete(location, "hierarchy")
 	}
 
-	contentMap["parent_uid"] = parent.GetLocation().UID
-
-	jsonObject := map[string]interface{}{content.ContentType(): contentMap}
+	jsonObject := map[string]interface{}{
+		"content_type": content.ContentType(),
+		"parent_uid":   parent.GetLocation().UID,
+		"cuid":         content.Value("cuid").(string),
+		"data":         contentMap,
+	}
 	data, err = json.Marshal(jsonObject)
 	return string(data), err
 }

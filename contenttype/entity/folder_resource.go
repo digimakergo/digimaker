@@ -35,7 +35,7 @@ type FolderResource struct{
      
     
     
-     contenttype.Location `boil:"location,bind"`
+     contenttype.Location `boil:"location,bind"  json:"location"`
     
 }
 
