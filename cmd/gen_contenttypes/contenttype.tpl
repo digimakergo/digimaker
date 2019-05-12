@@ -129,6 +129,10 @@ func (c *{{$struct_name}}) Store(transaction ...*sql.Tx) error {
 	return nil
 }
 
+func (c *{{$struct_name}})StoreWithLocation(){
+
+}
+
 //Delete content only
 func (c *{{$struct_name}}) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()

@@ -185,6 +185,10 @@ func (c *User) Store(transaction ...*sql.Tx) error {
 	return nil
 }
 
+func (c *User)StoreWithLocation(){
+
+}
+
 //Delete content only
 func (c *User) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()

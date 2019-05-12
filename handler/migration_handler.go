@@ -33,7 +33,6 @@ func (mh *MigrationHandler) ImportAContent(contentType string, contentData strin
 	}
 
 	content := entity.NewInstance(contentType)
-
 	contentDef := content.Definition()
 	tx, err := db.CreateTx()
 	if err != nil {
@@ -119,12 +118,9 @@ func (mh *MigrationHandler) Export(content contenttype.ContentTyper, parent cont
 	delete(contentMap, "id")
 	if content.Definition().HasLocation {
 		location := contentMap["location"].(map[string]interface{})
-
 		location["content_uid"] = content.Value("cuid")
 		delete(location, "content_id")
-
 		delete(location, "parent_id")
-
 		//todo: replace main_id with main_uid
 
 		delete(location, "id")

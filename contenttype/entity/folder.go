@@ -165,6 +165,10 @@ func (c *Folder) Store(transaction ...*sql.Tx) error {
 	return nil
 }
 
+func (c *Folder)StoreWithLocation(){
+
+}
+
 //Delete content only
 func (c *Folder) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()

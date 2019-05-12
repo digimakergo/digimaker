@@ -25,7 +25,7 @@ type Article struct {
 
 	Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
 
-	contenttype.Location `boil:"location,bind" json:"location"`
+	contenttype.Location `boil:"location,bind"`
 }
 
 func (*Article) TableName() string {
@@ -153,6 +153,10 @@ func (c *Article) Store(transaction ...*sql.Tx) error {
 		return err
 	}
 	return nil
+}
+
+func (c *Article) StoreWithLocation() {
+
 }
 
 //Delete content only

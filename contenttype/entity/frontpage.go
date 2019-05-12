@@ -204,6 +204,10 @@ func (c *Frontpage) Store(transaction ...*sql.Tx) error {
 	return nil
 }
 
+func (c *Frontpage)StoreWithLocation(){
+
+}
+
 //Delete content only
 func (c *Frontpage) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
