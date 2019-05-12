@@ -15,7 +15,13 @@ import (
 
 type MigrationHandler struct{}
 
-//Import, based on json
+//Import line by line. The imported file should be "up do down" in the tree structure.
+// Options about: main location, relations, version.
+//
+//In the end of import the import do below:
+//- update main_id where location is not the main_id.
+//- update relations content/location id
+//
 func (mh *MigrationHandler) Import(contentType string, contentData string) error {
 	content := entity.NewInstance(contentType)
 	contentDef := content.Definition()
@@ -48,6 +54,8 @@ func (mh *MigrationHandler) Import(contentType string, contentData string) error
 
 	//TODO: things with relations.
 
+	//TODO: udpate main id where main_uid is not the same as uid
+
 	tx.Commit()
 	util.Log("contenthandler.import", "Committed")
 	return nil
@@ -73,6 +81,7 @@ func (mh *MigrationHandler) Export(content contenttype.ContentTyper, parent cont
 	delete(location, "id")
 	delete(location, "hierarchy")
 
-	data, err = json.Marshal(contentMap)
+	jsonObject := map[string]interface{}{content.ContentType(): contentMap}
+	data, err = json.Marshal(jsonObject)
 	return string(data), err
 }
