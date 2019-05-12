@@ -11,10 +11,11 @@ import (
 //This is a callback based on type.
 //It's used for customzed content type. eg. image to set parent_id
 type ContentTypeHandler interface {
-	//When creating on server side
-	Create(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error
-
 	Validate(inputs map[string]interface{}, result *ValidationResult)
+
+	//When creating on server side, or import.
+	// This is low level and should be used for eg. set parent_id when new record is inserted.
+	New(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error
 
 	// //When created
 	// Created()

@@ -108,8 +108,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 
 	//todo: deal with relations
 
-	contentType := content.ContentType()
-	contentDefinition := contenttype.GetContentDefinition(contentType)
+	contentDefinition := content.Definition()
 	if contentDefinition.HasLocation {
 		if len(parentID) == 0 {
 			return errors.New("Need parent location id.")
@@ -124,7 +123,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		location := contenttype.Location{}
 		location.ParentID = parentIDInt
 		location.ContentID = content.GetCID()
-		location.ContentType = contentType
+		location.ContentType = content.ContentType()
 		location.UID = util.GenerateUID()
 		contentName := GenerateName(content)
 		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(contentName)
@@ -188,10 +187,10 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	}
 
 	//call content type handler
-	handler := GetContentTypeHandler(contentType)
-	if handler != nil {
+	contentTypeHandler := GetContentTypeHandler(contentType)
+	if contentTypeHandler != nil {
 		debug.Debug(ch.Context, "Calling handler for "+contentType, "contenthandler.create")
-		err := handler.Create(content, tx, parentID...)
+		err := contentTypeHandler.New(content, tx, parentID...)
 		if err != nil {
 			tx.Rollback()
 			debug.Error(ch.Context, "Error from callback: "+err.Error(), "contenthandler.create")
