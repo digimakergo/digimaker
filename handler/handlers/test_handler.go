@@ -3,13 +3,14 @@
 package handlers
 
 import (
+	"dm/contenttype"
 	"dm/handler"
 	"fmt"
 )
 
 func init() {
 	oHandller := handler.OperationHandler{Identifier: "test_handler",
-		Execute: func(triggedEvent string, params ...interface{}) error {
+		Execute: func(triggedEvent string, content contenttype.ContentTyper, params ...interface{}) error {
 			fmt.Println("test handler invoked. trigger: " + triggedEvent)
 			return nil
 		}}

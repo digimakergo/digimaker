@@ -62,7 +62,7 @@ func NameToIdentifier(input string) string {
 //If there are keys in condition rules but not in realValues, match fails.
 //eg. conditions: {id: 12, type:"image"}
 func MatchCondition(conditions map[string]interface{}, target map[string]interface{}) (bool, []string) {
-	matchResult := true
+	matchResult := false
 	matchLog := []string{}
 	for key, conditionValue := range conditions {
 		realValue, ok := target[key]
@@ -74,8 +74,6 @@ func MatchCondition(conditions map[string]interface{}, target map[string]interfa
 					matchResult = conditionValue == realValue
 				case []int: //real value contains condition int
 					matchResult = ContainsInt(realValue.([]int), conditionValue.(int))
-				default:
-					matchResult = false
 				}
 			case string:
 				switch realValue.(type) {
@@ -83,19 +81,29 @@ func MatchCondition(conditions map[string]interface{}, target map[string]interfa
 					matchResult = conditionValue == realValue
 				case []string:
 					matchResult = Contains(realValue.([]string), conditionValue.(string))
-				default:
-					matchResult = false
 				}
-			case []int:
-				switch realValue.(type) {
-				case int: //conidtion ints contain real int
-					matchResult = ContainsInt(conditionValue.([]int), realValue.(int))
-				default:
-					matchResult = false
+			case []interface{}:
+				for _, item := range conditionValue.([]interface{}) {
+					if _, ok := item.(string); ok {
+						if _, ok := realValue.(string); ok {
+							matchResult = item.(string) == realValue.(string)
+						} else {
+							matchLog = append(matchLog, "Target value should be string.")
+						}
+					}
+					if _, ok := item.(int); ok {
+						if _, ok := realValue.(int); ok {
+							matchResult = item.(int) == realValue.(int)
+						} else {
+							matchLog = append(matchLog, "Target value should be int")
+						}
+					}
+					if matchResult {
+						break
+					}
 				}
-			case []string:
-				matchResult = Contains(conditionValue.([]string), realValue.(string))
 			}
+
 			if !matchResult {
 				matchLog = append(matchLog, "Mismatch on "+key+", expecting: "+fmt.Sprint(conditionValue)+", real: "+fmt.Sprint(realValue))
 			} else {

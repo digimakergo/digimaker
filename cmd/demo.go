@@ -210,7 +210,7 @@ func Edit(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request, vars map[string]string) {
-	handler := handler.ContentHandler{}
+	handler := handler.ContentHandler{Context: r.Context()}
 	id, _ := strconv.Atoi(vars["id"])
 	err := handler.DeleteByID(id, false)
 	if err != nil {
@@ -259,7 +259,7 @@ func DMHandle(w http.ResponseWriter, r *http.Request, functionHandler func(http.
 		if item.Type == "error" {
 			errorCount++
 		}
-		errorLog += "<div class=info-" + item.Type + "><span class=category>[" + item.Category + "]</span><span>" + item.Type + "</span><span>" + item.Message + "</span></div>"
+		errorLog += "<div class=info-" + item.Type + "><span class=category>[" + item.Category + "]</span><span>" + item.Message + "</span></div>"
 	}
 
 	queryDuration, err := debug.GetDuration(ctx, "logic")

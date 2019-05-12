@@ -1,9 +1,9 @@
 {
     "__":"todo: remove handlers",
     "handlers":{
-        "test_handler":{ "event":["create", "update"], "type": ["article", "folder"]  },
+        "test_handler":{ "event":["create", "update"], "content_type": ["article", "folder"]  },
         "dm_clear_cache":{
-                "type":["folder", "article"],
+                "content_type":["folder", "article"],
                 "scope": "site1",
                 "under": 12
             }

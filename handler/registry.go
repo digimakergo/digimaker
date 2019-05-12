@@ -32,7 +32,7 @@ func RegisterOperationHandler(handler OperationHandler) {
 //target should not include 'event' key since it's in the parameter already.
 func GetOperationHandlerByCondition(event string, target map[string]interface{}) ([]OperationHandler, []string) {
 	//todo: preserve order in the config so matched event will be called from top to down
-	handlers := util.GetConfigSectionI("handlers", "operation_handler")
+	handlers := util.GetConfigSectionI("handlers", "handler")
 	target["event"] = event
 	matchLog := []string{}
 	keys := []string{}
