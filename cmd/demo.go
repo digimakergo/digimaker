@@ -220,6 +220,17 @@ func Delete(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	}
 }
 
+func Export(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+	debug.StartTiming(r.Context(), "query", "kernel")
+	id, _ := strconv.Atoi(vars["id"])
+	mh := handler.MigrationHandler{}
+	content, _ := handler.Querier().FetchByID(id)
+	parent, _ := handler.Querier().FetchByID(content.Value("parent_id").(int))
+	data, _ := mh.Export(content, parent)
+	w.Write([]byte("<html><body style=\"font-family: monospace\">" + data + "</body></html>"))
+	debug.EndTiming(r.Context(), "query", "kernel")
+}
+
 func Test(w http.ResponseWriter, r *http.Request) {
 	debug.Debug(r.Context(), "This is wrong..", "")
 	debug.Debug(r.Context(), "This is wrong2", "")
@@ -327,6 +338,12 @@ func main() {
 		ctx := debug.Init(r.Context())
 		r = r.WithContext(ctx)
 		Publish(w, r)
+	})
+
+	r.HandleFunc("/content/export/{id}", func(w http.ResponseWriter, r *http.Request) {
+		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+			Export(w, r, vars)
+		})
 	})
 
 	r.HandleFunc("/console/list", func(w http.ResponseWriter, r *http.Request) {

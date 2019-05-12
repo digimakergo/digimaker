@@ -141,7 +141,8 @@
                 <td>{{$content.Priority}}</td>
                 <td>
                     <a href="/content/edit/{{$content.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
-                    <a href="#" class="action" title="Move"><i class="fas fa-file-export"></i></a>
+                    <a href="/content/export/{{$content.ID}}" class="action" title="Export"><i class="fas fa-file-export"></i></a>
+                    <a href="#" class="action" title="Move"><i class="fas fa-cut"></i></a>
                     <a href="/content/version/{{$content.ID}}" class="action" title="Version history(current version: {{$content.Version}})"><i class="fas fa-history"></i></a>
                     <a href="/content/delete/{{$content.ID}}" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
                 </td>
