@@ -4,96 +4,56 @@
 package entity
 
 import (
-    "database/sql"
-    "dm/db"
-    "dm/contenttype"
+	"database/sql"
+	"dm/contenttype"
+	"dm/db"
 	"dm/fieldtype"
-    
-    "dm/util"
-    
+
+	"dm/util"
+
 	. "dm/query"
 )
 
+type Article struct {
+	ContentCommon `boil:",bind"`
 
+	Body fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
 
-type Article struct{
-     ContentCommon `boil:",bind"`
-    
-     
-     
-        Body  fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
-     
-    
-     
-     
-    
-     
-     
-        Editors  fieldtype.EditorList `boil:"editors" json:"editors" toml:"editors" yaml:"editors"`
-     
-    
-     
-     
-    
-     
-     
-        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-     
-    
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
-    
-     
-     
-    
-    
-     contenttype.Location `boil:"location,bind"`
-    
+	Editors fieldtype.EditorList `boil:"editors" json:"editors" toml:"editors" yaml:"editors"`
+
+	Summary fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+
+	Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+
+	contenttype.Location `boil:"location,bind" json:"location"`
 }
 
-func ( *Article ) TableName() string{
-	 return "dm_article"
+func (*Article) TableName() string {
+	return "dm_article"
 }
 
-func ( *Article ) ContentType() string{
-	 return "article"
+func (*Article) ContentType() string {
+	return "article"
 }
 
-func (c *Article) GetLocation() *contenttype.Location{
-    
-    return &c.Location
-    
-}
+func (c *Article) GetLocation() *contenttype.Location {
 
+	return &c.Location
+
+}
 
 //todo: cache this? (then you need a reload?)
 func (c *Article) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
-    
-        
-        result["body"]=c.Body
-        
-    
-        
-    
-        
-        result["editors"]=c.Editors
-        
-    
-        
-    
-        
-        result["summary"]=c.Summary
-        
-    
-        
-        result["title"]=c.Title
-        
-    
-        
-    
+
+	result["body"] = c.Body
+
+	result["editors"] = c.Editors
+
+	result["summary"] = c.Summary
+
+	result["title"] = c.Title
+
 	for key, value := range c.ContentCommon.Values() {
 		result[key] = value
 	}
@@ -101,107 +61,78 @@ func (c *Article) ToMap() map[string]interface{} {
 }
 
 func (c *Article) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "body","coverimage","editors","related_articles","summary","title","useful_resources",}...)
+	return append(c.ContentCommon.IdentifierList(), []string{"body", "coverimage", "editors", "related_articles", "summary", "title", "useful_resources"}...)
 }
 
 func (c *Article) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	return contenttype.GetContentDefinition(c.ContentType())
 }
 
 func (c *Article) Value(identifier string) interface{} {
-    
-    if util.Contains( c.Location.IdentifierList(), identifier ) {
-        return c.Location.Field( identifier )
-    }
-    
-    var result interface{}
+
+	if util.Contains(c.Location.IdentifierList(), identifier) {
+		return c.Location.Field(identifier)
+	}
+
+	var result interface{}
 	switch identifier {
-    
-    case "body":
-        
-            result = c.Body
-        
-    
-    case "coverimage":
-        
-            result = c.Relations.Value["coverimage"]
-        
-    
-    case "editors":
-        
-            result = c.Editors
-        
-    
-    case "related_articles":
-        
-            result = c.Relations.Value["related_articles"]
-        
-    
-    case "summary":
-        
-            result = c.Summary
-        
-    
-    case "title":
-        
-            result = c.Title
-        
-    
-    case "useful_resources":
-        
-            result = c.Relations.Value["useful_resources"]
-        
-    
+
+	case "body":
+
+		result = c.Body
+
+	case "coverimage":
+
+		result = c.Relations.Value["coverimage"]
+
+	case "editors":
+
+		result = c.Editors
+
+	case "related_articles":
+
+		result = c.Relations.Value["related_articles"]
+
+	case "summary":
+
+		result = c.Summary
+
+	case "title":
+
+		result = c.Title
+
+	case "useful_resources":
+
+		result = c.Relations.Value["useful_resources"]
+
 	case "cid":
 		result = c.ContentCommon.CID
-    default:
-    	result = c.ContentCommon.Value( identifier )
-    }
+	default:
+		result = c.ContentCommon.Value(identifier)
+	}
 	return result
 }
 
-
 func (c *Article) SetValue(identifier string, value interface{}) error {
 	switch identifier {
-        
-            
-            
-            case "body":
-            c.Body = value.(fieldtype.RichTextField)
-            
-        
-            
-            
-        
-            
-            
-            case "editors":
-            c.Editors = value.(fieldtype.EditorList)
-            
-        
-            
-            
-        
-            
-            
-            case "summary":
-            c.Summary = value.(fieldtype.RichTextField)
-            
-        
-            
-            
-            case "title":
-            c.Title = value.(fieldtype.TextField)
-            
-        
-            
-            
-        
+
+	case "body":
+		c.Body = value.(fieldtype.RichTextField)
+
+	case "editors":
+		c.Editors = value.(fieldtype.EditorList)
+
+	case "summary":
+		c.Summary = value.(fieldtype.RichTextField)
+
+	case "title":
+		c.Title = value.(fieldtype.TextField)
+
 	default:
 		err := c.ContentCommon.SetValue(identifier, value)
-        if err != nil{
-            return err
-        }
+		if err != nil {
+			return err
+		}
 	}
 	//todo: check if identifier exist
 	return nil
@@ -242,6 +173,6 @@ func init() {
 
 	Register("article",
 		ContentTypeRegister{
-			New:            new,
-			NewList:        newList})
+			New:     new,
+			NewList: newList})
 }

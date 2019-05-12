@@ -146,6 +146,11 @@ func (l *Location) Delete(transaction ...*sql.Tx) error {
 	return contentError
 }
 
+//Get parent id. no cache for now.
+func (l *Location) GetParentLocation() (*Location, error) {
+	return GetLocationByID(l.ParentID)
+}
+
 func GetLocationByID(locationID int) (*Location, error) {
 	handler := db.DBHanlder()
 	location := &Location{}

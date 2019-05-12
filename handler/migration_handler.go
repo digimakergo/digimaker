@@ -18,7 +18,7 @@ type MigrationHandler struct{}
 //Import, based on json
 func (mh *MigrationHandler) Import(contentType string, contentData string) error {
 	content := entity.NewInstance(contentType)
-	contentDef := contenttype.GetContentDefinition(contentType)
+	contentDef := content.Definition()
 	tx, err := db.CreateTx()
 	if err != nil {
 		return errors.Wrap(err, "Error in getting transaction.")
@@ -54,6 +54,30 @@ func (mh *MigrationHandler) Import(contentType string, contentData string) error
 }
 
 //Export to json
-func (mh *MigrationHandler) Export() {
+func (mh *MigrationHandler) Export(content contenttype.ContentTyper) (string, error) {
+	data, err := json.Marshal(content)
+	contentMap := map[string]interface{}{}
+	json.Unmarshal(data, &contentMap)
+	delete(contentMap, "id")
+	location := contentMap["location"].(map[string]interface{})
 
+	location["content_uid"] = content.Value("cuid")
+	delete(location, "content_id")
+
+	parent, err := content.GetLocation().GetParentLocation()
+	if err != nil {
+		parentIDStr := strconv.Itoa(location["parent_id"].(int))
+		return "", errors.Wrap(err, "No parent location found for parent_id:"+parentIDStr)
+	}
+	location["parent_uid"] = parent.UID
+
+	delete(location, "parent_id")
+
+	//todo: replace main_id with main_uid
+
+	delete(location, "id")
+	delete(location, "hierarchy")
+
+	data, err = json.Marshal(contentMap)
+	return string(data), err
 }
