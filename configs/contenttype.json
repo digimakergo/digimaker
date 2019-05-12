@@ -84,7 +84,7 @@
      "fields":{ "imagetype": {"type":"string", "name":"Type","required":false},
                 "title": {"type":"text", "name":"Title", "required":true},
                 "path": {"type":"text", "name":"Image path", "required":true},
-                "menu_id": {"type":"int", "name":"Menu ID", "required":false}
+                "parent_id": {"type":"int", "name":"Parent ID", "required":false}
                 }
             },
 "file":{

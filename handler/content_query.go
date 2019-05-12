@@ -34,9 +34,33 @@ func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, erro
 	return result, err
 }
 
+func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) {
+	//get type first by location.
+	dbhandler := db.DBHanlder()
+	location := contenttype.Location{}
+	err := dbhandler.GetEnity("dm_location", query.Cond("uid", uid), &location)
+	if err != nil {
+		return nil, errors.Wrap(err, "[contentquery.fetchbyuid]Can not fetch location by uid "+uid)
+	}
+	if location.ID == 0 {
+		return nil, errors.New("[contentquery.fetchbyid]Location is empty.")
+	}
+
+	//fetch by content id.
+	contentID := location.ContentID
+	contentType := location.ContentType
+	result, err := cq.FetchByContentID(contentType, contentID)
+	return result, err
+}
+
 //Fetch a content by content id.
 func (cq ContentQuery) FetchByContentID(contentType string, contentID int) (contenttype.ContentTyper, error) {
 	return cq.Fetch(contentType, query.Cond("content.id", contentID))
+}
+
+//Fetch a content by content's uid(cuid)
+func (cq ContentQuery) FetchByCUID(contentType string, cuid string) (contenttype.ContentTyper, error) {
+	return cq.Fetch(contentType, query.Cond("content.cuid", cuid))
 }
 
 //Fetch one content
@@ -46,6 +70,9 @@ func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (con
 	err := cq.Fill(contentType, condition, content)
 	if err != nil {
 		return nil, err
+	}
+	if content.GetCID() == 0 {
+		return nil, nil
 	}
 	return content, err
 }

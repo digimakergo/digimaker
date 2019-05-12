@@ -17,7 +17,7 @@ type Image struct {
 
 	Imagetype string `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
 
-	MenuId int `boil:"menu_id" json:"menu_id" toml:"menu_id" yaml:"menu_id"`
+	ParentId int `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
 
 	Path fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
 
@@ -44,7 +44,7 @@ func (c *Image) ToMap() map[string]interface{} {
 
 	result["imagetype"] = c.Imagetype
 
-	result["menu_id"] = c.MenuId
+	result["parent_id"] = c.ParentId
 
 	result["path"] = c.Path
 
@@ -57,7 +57,7 @@ func (c *Image) ToMap() map[string]interface{} {
 }
 
 func (c *Image) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(), []string{"imagetype", "menu_id", "path", "title"}...)
+	return append(c.ContentCommon.IdentifierList(), []string{"imagetype", "parent_id", "path", "title"}...)
 }
 
 func (c *Image) Definition() contenttype.ContentTypeSetting {
@@ -73,9 +73,9 @@ func (c *Image) Value(identifier string) interface{} {
 
 		result = c.Imagetype
 
-	case "menu_id":
+	case "parent_id":
 
-		result = c.MenuId
+		result = c.ParentId
 
 	case "path":
 
@@ -99,8 +99,8 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
 	case "imagetype":
 		c.Imagetype = value.(string)
 
-	case "menu_id":
-		c.MenuId = value.(int)
+	case "parent_id":
+		c.ParentId = value.(int)
 
 	case "path":
 		c.Path = value.(fieldtype.TextField)

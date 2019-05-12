@@ -12,7 +12,7 @@ type ImageHandler struct {
 }
 
 func (ih ImageHandler) New(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
-	content.SetValue("menu_id", parentID[0]) //todo: validate more
+	content.SetValue("parent_id", parentID[0]) //todo: validate more
 	return nil
 }
 
