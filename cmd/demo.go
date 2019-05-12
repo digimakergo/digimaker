@@ -63,7 +63,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("location.id", id))
 
 		var variables map[string]interface{}
-		if currentFolder == nil {
+		if currentFolder != nil {
 			//Folder. Get list of article
 
 			debug.Debug(ctx, "It is a folder. Trying to get folders and articles under.", "system")
