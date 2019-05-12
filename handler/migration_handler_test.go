@@ -16,7 +16,8 @@ func TestExport(t *testing.T) {
 	content, _ := Querier().FetchByID(76)
 
 	mh := MigrationHandler{}
-	str, _ := mh.Export(content)
+	parent, _ := Querier().FetchByID(content.Value("parent_id").(int))
+	str, _ := mh.Export(content, parent)
 	fmt.Println("hello")
 	fmt.Println(str)
 }

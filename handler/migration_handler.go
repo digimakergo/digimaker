@@ -54,7 +54,7 @@ func (mh *MigrationHandler) Import(contentType string, contentData string) error
 }
 
 //Export to json
-func (mh *MigrationHandler) Export(content contenttype.ContentTyper) (string, error) {
+func (mh *MigrationHandler) Export(content contenttype.ContentTyper, parent contenttype.ContentTyper) (string, error) {
 	data, err := json.Marshal(content)
 	contentMap := map[string]interface{}{}
 	json.Unmarshal(data, &contentMap)
@@ -64,12 +64,7 @@ func (mh *MigrationHandler) Export(content contenttype.ContentTyper) (string, er
 	location["content_uid"] = content.Value("cuid")
 	delete(location, "content_id")
 
-	parent, err := content.GetLocation().GetParentLocation()
-	if err != nil {
-		parentIDStr := strconv.Itoa(location["parent_id"].(int))
-		return "", errors.Wrap(err, "No parent location found for parent_id:"+parentIDStr)
-	}
-	location["parent_uid"] = parent.UID
+	location["parent_uid"] = parent.GetLocation().UID
 
 	delete(location, "parent_id")
 
