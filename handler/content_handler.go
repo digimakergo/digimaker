@@ -16,7 +16,6 @@ import (
 	"dm/fieldtype"
 	"dm/util"
 	"dm/util/debug"
-	"encoding/json"
 	"strconv"
 	"strings"
 	"time"
@@ -147,44 +146,6 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 	return nil
 }
 
-//Import, based on json
-func (ch *ContentHandler) Import(contentType string, contentData string) error {
-	content := entity.NewInstance(contentType)
-	contentDef := contenttype.GetContentDefinition(contentType)
-	tx, err := db.CreateTx()
-	if err != nil {
-		return errors.Wrap(err, "Error in getting transaction.")
-	}
-	json.Unmarshal([]byte(contentData), content)
-	content.SetValue("cid", 0)
-	util.Log("import", "Saving content first.")
-	err = content.Store(tx)
-	if err != nil {
-		tx.Rollback()
-		return errors.Wrap(err, "Can not saved. Rolled back.")
-	}
-	util.Log("contenthandler.import", "Content saved. cuid: "+content.Value("cuid").(string)+", id: "+strconv.Itoa(content.GetCID()))
-
-	if contentDef.HasLocation {
-		location := content.GetLocation()
-		location.ID = 0
-		location.ContentID = content.GetCID()
-		err = location.Store(tx)
-		util.Log("contenthandler.import", "Saving location.")
-		if err != nil {
-			tx.Rollback()
-			return errors.Wrap(err, "Can not save location")
-		}
-		util.Log("contenthandler.import", "Location saved. uid: "+location.UID+", new id:"+strconv.Itoa(location.ID))
-	}
-
-	//TODO: things with relations.
-
-	tx.Commit()
-	util.Log("contenthandler.import", "Committed")
-	return nil
-}
-
 //Create a content(same behavior as Draft&Publish but store published version directly)
 func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (bool, ValidationResult, error) {
 	//todo: permission check.
@@ -263,7 +224,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 
 	//Invoke callback
 	matchData := map[string]interface{}{"parent_id": parentID[0], //todo: maybe set parent id as mandatory parameter in Create
-		"type": contentType}
+		"content_type": contentType}
 	if contentDefinition.HasLocation {
 		hierachy := content.GetLocation().Hierarchy
 		matchData["under"] = strings.Split(hierachy, "/")
@@ -291,16 +252,28 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	return true, ValidationResult{}, nil
 }
 
-func (ch ContentHandler) InvokeCallback(event string, stopOnError bool, matchData map[string]interface{}, params ...interface{}) error {
+//Invoke callbacks based on condition match result
+//see content_handler.json/yaml for conditions.
+func (ch ContentHandler) InvokeCallback(event string, stopOnError bool, matchData map[string]interface{}, content contenttype.ContentTyper, params ...interface{}) error {
 	operationHandlerList, matchInfo := GetOperationHandlerByCondition(event, matchData)
+	count := len(operationHandlerList)
+	if count > 0 {
+		identifierList := []string{}
+		for _, operationHandler := range operationHandlerList {
+			identifierList = append(identifierList, operationHandler.Identifier)
+		}
+		debug.Debug(ch.Context, "Matched callbacks: "+strings.Join(identifierList, ","), "contenthandler.invoke_callback")
+	} else {
+		debug.Debug(ch.Context, "No callbacks matched.", "contenthandler.invoke_callback")
+	}
+
 	for _, info := range matchInfo {
 		debug.Debug(ch.Context, info, "callback_match")
 	}
-	count := len(operationHandlerList)
 	for i, operationHandler := range operationHandlerList {
 		debug.Debug(ch.Context, strconv.Itoa(i+1)+"/"+strconv.Itoa(count)+
 			"Invoking operation "+operationHandler.Identifier+" on "+event, "contehandler.invoke_callback")
-		err := operationHandler.Execute(event, params...)
+		err := operationHandler.Execute(event, content, params...)
 		if err != nil && stopOnError {
 			debug.Error(ch.Context, "Error when invoking operation handler "+operationHandler.Identifier+":"+err.Error(), "contehandler.invoke_callback")
 			return err
@@ -431,7 +404,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	}
 
 	//Invoke callback
-	matchData := map[string]interface{}{"type": contentType}
+	matchData := map[string]interface{}{"content_type": contentType}
 	if content.Definition().HasLocation {
 		hierachy := content.GetLocation().Hierarchy
 		matchData["under"] = strings.Split(hierachy, "/")
@@ -517,12 +490,28 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTra
 			}
 		}
 
+		//Invoke callback
+		matchData := map[string]interface{}{"content_type": content.ContentType()}
+		if content.Definition().HasLocation {
+			hierachy := content.GetLocation().Hierarchy
+			matchData["under"] = strings.Split(hierachy, "/")
+		}
+		err = ch.InvokeCallback("delete", true, matchData, content, tx)
+		if err != nil {
+			tx.Rollback()
+			return errors.Wrap(err, "Invoking callback error.")
+		}
+
 		err = tx.Commit()
 		if err != nil {
 			message := "[handler.deleteByContent]Can not commit."
 			util.Error(message + err.Error())
 			return errors.New(message)
 		}
+
+		//invoke callback
+		err = ch.InvokeCallback("deleted", false, matchData, content)
+
 	}
 	return nil
 }

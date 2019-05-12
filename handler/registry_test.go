@@ -3,6 +3,7 @@
 package handler
 
 import (
+	"dm/contenttype"
 	"fmt"
 	"testing"
 )
@@ -13,7 +14,7 @@ type TestOperationHandler struct {
 func TestRegistry(t *testing.T) {
 	condition := map[string]interface{}{"id": 12, "type": "image"}
 	testHandler := OperationHandler{Identifier: "test_handler",
-		Execute: func(event string, params ...interface{}) error {
+		Execute: func(event string, content contenttype.ContentTyper, params ...interface{}) error {
 			return nil
 		}}
 	RegisterOperationHandler(testHandler)
