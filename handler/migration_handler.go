@@ -61,6 +61,15 @@ func (mh *MigrationHandler) Import(contentType string, contentData string) error
 	return nil
 }
 
+func (mh *MigrationHandler) RevertImport() {
+
+}
+
+//Verify if the target has need model(contenttype and fields) to import.
+func (mh *MigrationHandler) VerifyModel() {
+
+}
+
 //Export to json
 func (mh *MigrationHandler) Export(content contenttype.ContentTyper, parent contenttype.ContentTyper) (string, error) {
 	data, err := json.Marshal(content)
