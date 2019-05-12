@@ -260,7 +260,7 @@ func DMHandle(w http.ResponseWriter, r *http.Request, functionHandler func(http.
 		if item.Type == "error" {
 			errorCount++
 		}
-		errorLog += "<div class=info-" + item.Type + "><span class=category>[" + item.Category + "]</span><span>" + item.Type + "</span><span>" + item.Message + "</span></div>"
+		errorLog += "<div class=info-" + item.Type + "><span class=category>[" + item.Category + "]</span><span>" + item.Message + "</span></div>"
 	}
 
 	queryDuration, err := debug.GetDuration(ctx, "logic")
