@@ -41,7 +41,7 @@ type ContentTyper interface {
 
 	Definition() ContentTypeSetting
 
-	GetRelations() *ContentRelationsValue
+	GetRelations() *ContentRelationList
 }
 
 type ContentList []ContentTyper

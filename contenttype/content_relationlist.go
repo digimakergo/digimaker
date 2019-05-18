@@ -13,11 +13,11 @@ import (
 
 //ContentRelations as a struct which is linked into a content.
 //The purpose is for binding & access.
-type ContentRelationsValue struct {
-	Value map[string][]fieldtype.RelationField
+type ContentRelationList struct {
+	Value map[string][]fieldtype.RelationField `json:"value"`
 }
 
-func (relations *ContentRelationsValue) Scan(src interface{}) error {
+func (relations *ContentRelationList) Scan(src interface{}) error {
 	var source string
 	switch src.(type) {
 	case string:

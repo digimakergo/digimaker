@@ -3,12 +3,12 @@ package entity
 import "dm/contenttype"
 
 type ContentCommon struct {
-	CID       int                               `boil:"cid" json:"id" toml:"cid" yaml:"cid"`
-	Version   int                               `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Published int                               `boil:"published" json:"published" toml:"published" yaml:"published"`
-	Modified  int                               `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
-	CUID      string                            `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
-	Relations contenttype.ContentRelationsValue `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
+	CID       int                             `boil:"cid" json:"id" toml:"cid" yaml:"cid"`
+	Version   int                             `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Published int                             `boil:"published" json:"published" toml:"published" yaml:"published"`
+	Modified  int                             `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
+	CUID      string                          `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	Relations contenttype.ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
 func (c ContentCommon) IdentifierList() []string {
@@ -67,7 +67,7 @@ func (c *ContentCommon) GetCID() int {
 	return c.CID
 }
 
-func (c *ContentCommon) GetRelations() *contenttype.ContentRelationsValue {
+func (c *ContentCommon) GetRelations() *contenttype.ContentRelationList {
 	return &c.Relations
 }
 
