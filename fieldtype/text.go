@@ -10,7 +10,7 @@ import (
 
 //TextField is a field for normal text line. It implements Datatyper
 type TextField struct {
-	Data     string
+	Data     string `json:"data"`
 	viewData interface{}
 }
 

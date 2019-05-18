@@ -9,7 +9,7 @@ import (
 )
 
 type EditorList struct {
-	Data string
+	Data string `json:"data"`
 }
 
 func (t *EditorList) Scan(src interface{}) error {

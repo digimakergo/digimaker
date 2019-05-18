@@ -9,7 +9,7 @@ import (
 )
 
 type RichTextField struct {
-	Data string
+	Data string `json:"data"`
 }
 
 //when update db
