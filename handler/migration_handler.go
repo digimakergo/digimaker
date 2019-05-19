@@ -141,8 +141,8 @@ func (mh *MigrationHandler) Export(content contenttype.ContentTyper, parent cont
 			}
 			relationsMap := contentMap["relations"].(map[string]interface{})
 			currentRelation := relationsMap["list"].([]interface{})[i].(map[string]interface{})
-			currentRelation["from_location_uid"] = fromLocationUID
-			currentRelation["from_content_uid"] = fromContentUID
+			currentRelation["from_uid"] = fromLocationUID
+			currentRelation["from_cuid"] = fromContentUID
 		}
 	}
 
