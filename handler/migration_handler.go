@@ -115,6 +115,35 @@ func (mh *MigrationHandler) Export(content contenttype.ContentTyper, parent cont
 
 		delete(location, "id")
 		delete(location, "hierarchy")
+
+	}
+
+	//relations.
+	relationList := content.GetRelations().List
+	if len(relationList) > 0 {
+		for i, relation := range relationList {
+			var (
+				fromLocationUID string
+				fromContentUID  string
+			)
+			if fromLocationID := relation.FromLocation; fromLocationID != 0 {
+				fromContent, err := Querier().FetchByID(fromLocationID)
+				if err != nil {
+					return "", errors.Wrap(err, "From location not found in content relation. from_location_id: "+strconv.Itoa(relation.FromLocation))
+				}
+				fromLocationUID = fromContent.GetLocation().UID
+			} else if fromContentID := relation.FromContentID; fromContentID != 0 {
+				fromContent, err := Querier().FetchByContentID(relation.FromType, fromContentID)
+				if err != nil {
+					return "", errors.Wrap(err, "From content not found in content relation. from_content_id: "+strconv.Itoa(relation.FromContentID))
+				}
+				fromContentUID = fromContent.Value("cuid").(string)
+			}
+			relationsMap := contentMap["relations"].(map[string]interface{})
+			currentRelation := relationsMap["list"].([]interface{})[i].(map[string]interface{})
+			currentRelation["from_location_uid"] = fromLocationUID
+			currentRelation["from_content_uid"] = fromContentUID
+		}
 	}
 
 	jsonObject := map[string]interface{}{
