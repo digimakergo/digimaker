@@ -222,7 +222,7 @@ func Delete(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 func Export(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	debug.StartTiming(r.Context(), "query", "kernel")
 	id, _ := strconv.Atoi(vars["id"])
-	mh := handler.MigrationHandler{}
+	mh := handler.ExportHandler{}
 	content, _ := handler.Querier().FetchByID(id)
 	parent, _ := handler.Querier().FetchByID(content.Value("parent_id").(int))
 	data, _ := mh.Export(content, parent)
