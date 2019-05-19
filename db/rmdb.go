@@ -50,7 +50,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
 	locationColumns = locationColumns[:len(locationColumns)-1]
 
 	relationQuery := ` ,
-                    GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
+                    CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
                                       'to_content_id', relation.to_content_id,
                                       'to_type', relation.to_type,
                                       'from_content_id', relation.from_content_id,
@@ -60,7 +60,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
                                       'uid', relation.uid,
                                       'description',relation.description,
                                       'data' ,relation.data )
-                         ORDER BY relation.priority ) as relations`
+                         ORDER BY relation.priority ), ']') as relations`
 
 	sqlStr := `SELECT content.*, content.id AS cid, ` + locationColumns + relationQuery + `
                    FROM ( ` + tableName + ` content

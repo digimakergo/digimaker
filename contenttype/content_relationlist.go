@@ -27,12 +27,12 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 		return errors.New("Unknow scan value.")
 	}
 
-	relationData := "[" + source + "]"
+	//relationData := "[" + source + "]"
 
 	var relationList []Relation
-	err := json.Unmarshal([]byte(relationData), &relationList)
+	err := json.Unmarshal([]byte(source), &relationList)
 	if err != nil {
-		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+relationData)
+		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+source)
 	}
 
 	relations.List = relationList
