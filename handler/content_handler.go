@@ -464,7 +464,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTra
 
 		//Delete relation first.
 		relations := content.GetRelations()
-		if len(relations.Value) > 0 {
+		if len(relations.Map) > 0 {
 			dbHandler := db.DBHanlder()
 			err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
 			if err != nil {

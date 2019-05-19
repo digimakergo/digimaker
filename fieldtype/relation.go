@@ -3,7 +3,11 @@
 
 package fieldtype
 
-type RelationField map[string]interface{}
+type RelationField struct {
+	Priority    int
+	Description string
+	Data        string
+}
 
 //restrcuture data to make it as real map instead of embeding data into.
 func (r *RelationField) Restructure() {

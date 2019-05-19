@@ -22,7 +22,7 @@ func (c ContentCommon) Values() map[string]interface{} {
 	result["published"] = c.Published
 	result["modified"] = c.Modified
 	result["cuid"] = c.CUID
-	for identifier, relationValue := range c.Relations.Value {
+	for identifier, relationValue := range c.Relations.Map {
 		result[identifier] = relationValue
 	}
 	return result

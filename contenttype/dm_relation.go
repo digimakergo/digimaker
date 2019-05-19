@@ -15,6 +15,7 @@ import (
 
 	"dm/db"
 	. "dm/query"
+
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -37,9 +38,8 @@ type Relation struct {
 	Data          string `boil:"data" json:"data" toml:"data" yaml:"data"`
 	UID           string `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
 
-	R        *relationR `boil:"-" json:"-" toml:"-" yaml:"-"`
-	L        relationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
-	Location `boil:"dm_location,bind"`
+	R *relationR `boil:"-" json:"-" toml:"-" yaml:"-"`
+	L relationL  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 func (c *Relation) ToMap() map[string]interface{} {

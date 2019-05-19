@@ -83,8 +83,8 @@
 {{if eq .current.ContentType "article"}}
 <h4>Related articles</h4>
 <ul>
-    {{range $i, $article := .current.Value "related_articles"}}
-        <li><a href="{{$article.from_location}}">{{index $article "data"}} <i>{{index $article "description"}}</i></a></li>
+    {{range $i, $related_article := .current.Value "related_articles"}}
+        <li><a href="{{$related_article.FromLocation}}">{{$related_article.Data}} <i>{{$related_article.Description}}</i></a></li>
     {{end}}
     <li>
         <a href="#" class="action" title="Add related articles">

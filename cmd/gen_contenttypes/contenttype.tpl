@@ -81,7 +81,7 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
             result = c.{{$identifier|UpperName}}
         {{else}}
-            result = c.Relations.Value["{{$identifier}}"]
+            result = c.Relations.Map["{{$identifier}}"]
         {{end}}
     {{end}}
 	case "cid":

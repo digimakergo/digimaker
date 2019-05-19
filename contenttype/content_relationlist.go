@@ -4,9 +4,7 @@
 package contenttype
 
 import (
-	"dm/fieldtype"
 	"encoding/json"
-	"fmt"
 
 	"github.com/pkg/errors"
 )
@@ -14,7 +12,8 @@ import (
 //ContentRelations as a struct which is linked into a content.
 //The purpose is for binding & access.
 type ContentRelationList struct {
-	Value map[string][]fieldtype.RelationField `json:"value"`
+	Map  map[string][]Relation `json:"-"`
+	List []Relation            `json:"list"`
 }
 
 func (relations *ContentRelationList) Scan(src interface{}) error {
@@ -30,29 +29,30 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 
 	relationData := "[" + source + "]"
 
-	fmt.Println(relationData)
-
-	var mapObject []map[string]interface{}
-	err := json.Unmarshal([]byte(relationData), &mapObject)
+	var relationList []Relation
+	err := json.Unmarshal([]byte(relationData), &relationList)
 	if err != nil {
-		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+source)
+		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+relationData)
 	}
 
+	relations.List = relationList
+	relations.groupRelations()
+	return nil
+}
+
+//Convert list into Map
+func (relations *ContentRelationList) groupRelations() {
 	//todo: validate keys and make sure it's pre defined
-	value := map[string][]fieldtype.RelationField{}
-	for _, item := range mapObject {
-		if item["identifier"] != nil {
-			identifier := item["identifier"].(string)
-			if _, ok := value[identifier]; ok {
-				value[identifier] = append(value[identifier], item)
+	groupedList := map[string][]Relation{}
+	for _, relation := range relations.List {
+		if relation.Identifier != "" {
+			identifier := relation.Identifier
+			if _, ok := groupedList[identifier]; ok {
+				groupedList[identifier] = append(groupedList[identifier], relation)
 			} else {
-				var fieldValue fieldtype.RelationField = item
-				fieldValue.Restructure()
-				value[identifier] = []fieldtype.RelationField{fieldValue}
+				groupedList[identifier] = []Relation{relation}
 			}
 		}
 	}
-	relations.Value = value
-
-	return nil
+	relations.Map = groupedList
 }

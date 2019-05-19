@@ -124,7 +124,7 @@ func (c *Article) Value(identifier string) interface{} {
     
     case "coverimage":
         
-            result = c.Relations.Value["coverimage"]
+            result = c.Relations.Map["coverimage"]
         
     
     case "editors":
@@ -134,7 +134,7 @@ func (c *Article) Value(identifier string) interface{} {
     
     case "related_articles":
         
-            result = c.Relations.Value["related_articles"]
+            result = c.Relations.Map["related_articles"]
         
     
     case "summary":
@@ -149,7 +149,7 @@ func (c *Article) Value(identifier string) interface{} {
     
     case "useful_resources":
         
-            result = c.Relations.Value["useful_resources"]
+            result = c.Relations.Map["useful_resources"]
         
     
 	case "cid":

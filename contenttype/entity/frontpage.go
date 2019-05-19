@@ -115,7 +115,7 @@ func (c *Frontpage) Value(identifier string) interface{} {
     
     case "mainarea_blocks":
         
-            result = c.Relations.Value["mainarea_blocks"]
+            result = c.Relations.Map["mainarea_blocks"]
         
     
     case "sidearea":
@@ -125,12 +125,12 @@ func (c *Frontpage) Value(identifier string) interface{} {
     
     case "sidearea_blocks":
         
-            result = c.Relations.Value["sidearea_blocks"]
+            result = c.Relations.Map["sidearea_blocks"]
         
     
     case "slideshow":
         
-            result = c.Relations.Value["slideshow"]
+            result = c.Relations.Map["slideshow"]
         
     
     case "title":

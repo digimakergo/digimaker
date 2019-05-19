@@ -51,8 +51,13 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
 
 	relationQuery := ` ,
                     GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
+                                      'to_content_id', relation.to_content_id,
                                       'to_type', relation.to_type,
+                                      'from_content_id', relation.from_content_id,
+                                      'from_type', relation.from_type,
                                       'from_location', relation.from_location,
+                                      'priority', relation.priority,
+                                      'uid', relation.uid,
                                       'description',relation.description,
                                       'data' ,relation.data )
                          ORDER BY relation.priority ) as relations`
