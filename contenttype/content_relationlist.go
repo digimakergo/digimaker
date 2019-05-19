@@ -35,8 +35,11 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+source)
 	}
 
-	relations.List = relationList
-	relations.groupRelations()
+	//If not empty relation(only one record by everything is null/"")
+	if !(len(relationList) == 1 && relationList[0].Identifier == "") {
+		relations.List = relationList
+		relations.groupRelations()
+	}
 	return nil
 }
 
