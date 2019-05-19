@@ -70,6 +70,11 @@ func (mh *ImportHandler) ImportAContent(contentType string, cuid string, parentU
 	}
 
 	//TODO: things with relations.
+	//Relations should be an option, some relation identifiers can be imported(eg. useful links, related images),
+	//while others can be just ignored(only keep relation but ignore the orginal content. eg. uesful articles)
+	//So there should be option for this.
+	//And what if related article also has relations?
+	// - recursive relation can be crazy, so thinking more about senario might be better.
 
 	//TODO: udpate main id where main_uid is not the same as uid
 
