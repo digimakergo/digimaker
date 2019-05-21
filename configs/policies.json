@@ -1,0 +1,18 @@
+{
+    "basic_edit":{
+        "name": "Basic edit",
+        "permissions": [{"module":"content",
+                    "action":"create, edit, delete",
+                    "limitation":{}}
+                ],
+        "limited_to": ["subtree","scope"]
+    },
+"basic_operation":{
+        "name": "Basic operation",
+        "permissions": [{"module":"content",
+                    "action":"move",
+                    "limitation":{}}
+                ],
+         "limited_to": []
+    }
+}

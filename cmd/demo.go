@@ -80,19 +80,31 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 				handler.GetEnity("dm_image", query.Cond("parent_id", currentFolder.GetLocation().ID), images)
 				variables["list"] = images
 				fmt.Println(images)
+			} else if folderType.Data == "user" {
+				users, err := handler.Querier().List("user", query.Cond("parent_id", id))
+				fmt.Println(err)
+				variables["list"] = users
 			} else {
 				articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
 				variables["list"] = articles
 			}
 
 		} else {
-			debug.Debug(ctx, "Not a folder. Trying to get folders under.", "system")
+			debug.Debug(ctx, "Not a folder. Trying to get articles under.", "system")
 			currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
+			if currentArticle != nil {
+				variables = map[string]interface{}{"current": currentArticle,
+					"list":        nil,
+					"current_def": currentArticle.Definition(),
+					"folders":     folders}
+			} else {
+				currentUser, _ := handler.Querier().Fetch("user", query.Cond("location.id", id))
+				variables = map[string]interface{}{"current": currentUser,
+					"list":        nil,
+					"current_def": currentUser.Definition(),
+					"folders":     folders}
 
-			variables = map[string]interface{}{"current": currentArticle,
-				"list":        nil,
-				"current_def": contenttype.GetContentDefinition("article"),
-				"folders":     folders}
+			}
 		}
 
 		//end Logic timing
