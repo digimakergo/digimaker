@@ -18,4 +18,7 @@ func TestBuildQuery(t *testing.T) {
 
 	cond2 := Cond("id", 2).Or("id", 4).And("modified>=", 1111111)
 	fmt.Println(BuildCondition(cond2))
+
+	cond3 := Cond("id", []string{"1", "2"})
+	fmt.Println(BuildCondition(cond3))
 }

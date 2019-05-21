@@ -12,8 +12,35 @@ func BuildCondition(cond Condition) (string, []interface{}) {
 	logic := cond.Logic
 	if logic == "" {
 		expression := cond.Children.(Expression)
-		value := []interface{}{expression.Value}
-		return expression.Field + " " + expression.Operator + "?", value
+		value := []interface{}{}
+		operatorStr := ""
+		switch expression.Value.(type) {
+		//when value is string slice
+		case []string:
+			for _, item := range expression.Value.([]string) {
+				value = append(value, item)
+			}
+			operatorArr := []string{}
+			for _ = range value {
+				operatorArr = append(operatorArr, "?")
+			}
+			operatorStr = " (" + strings.Join(operatorArr, ",") + ")"
+			//when value is int slice
+		case []int:
+			for _, item := range expression.Value.([]int) {
+				value = append(value, item)
+			}
+			operatorArr := []string{}
+			for _ = range value {
+				operatorArr = append(operatorArr, "?")
+			}
+			operatorStr = " (" + strings.Join(operatorArr, ",") + ")"
+			//when value is string/int
+		default:
+			value = []interface{}{expression.Value}
+			operatorStr = " ?"
+		}
+		return expression.Field + " " + expression.Operator + operatorStr, value
 	} else {
 		childrenArr := cond.Children.([]Condition)
 		var list []string

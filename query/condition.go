@@ -112,7 +112,7 @@ func separateFieldString(input string, value interface{}) [2]string {
 			result[1] = "="
 		case []string, []int:
 			result[0] = input
-			result[1] = "in"
+			result[1] = "IN"
 		}
 	}
 
