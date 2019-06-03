@@ -1,9 +1,9 @@
 {
     "read":{
         "permissions": [{"module":"content",
-                    "action":"read",
-                    "limitation":{}}
-                ],
+                            "action":"read",
+                            "limitation":{}}
+                        ],
         "limited_to": ["subtree","scope"]
     },
     "editing":{
