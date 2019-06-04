@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestMain(m *testing.M) {
+func TestMain(m *testing.T) {
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 	err := LoadPolicies()
