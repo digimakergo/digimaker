@@ -13,5 +13,6 @@ func TestMain(m *testing.M) {
 	err := LoadPolicies()
 	fmt.Println(err)
 
-	GetPermissions(90)
+	policyList, err := GetPermissions(90)
+	fmt.Println(policyList)
 }
