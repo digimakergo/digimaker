@@ -48,7 +48,7 @@ func GetPermissions(usergroupID int) ([]UsergroupPolicy, error) {
 		usergroupIDs = append(usergroupIDs, itemInt)
 	}
 	policyList := []UsergroupPolicy{}
-	err = dbHandler.GetEnity("dm_usergroup_policy", query.Cond("usergroup_id", usergroupIDs), &policyList)
+	err = dbHandler.GetEntity("dm_usergroup_policy", query.Cond("usergroup_id", usergroupIDs), &policyList)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not fetch dm_usergroup_policy. usergroup_id :"+strings.Join(ids, ","))
 	}

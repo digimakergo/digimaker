@@ -22,7 +22,7 @@ func GetUserPermission(userID int) ([]UsergroupPolicy, error) {
 	dbHandler := db.DBHanlder()
 
 	list := []UserUsergroup{}
-	err := dbHandler.GetEnity("dm_user_usergroup", query.Cond("user_id", userID), &list)
+	err := dbHandler.GetEntity("dm_user_usergroup", query.Cond("user_id", userID), &list)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user group by user id: "+strconv.Itoa(userID))
 	}

@@ -77,7 +77,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 				images := &[]entity.Image{}
 				fmt.Println(currentFolder.GetLocation().ID)
 				handler := db.DBHanlder()
-				handler.GetEnity("dm_image", query.Cond("parent_id", currentFolder.GetLocation().ID), images)
+				handler.GetEntity("dm_image", query.Cond("parent_id", currentFolder.GetLocation().ID), images)
 				variables["list"] = images
 				fmt.Println(images)
 			} else if folderType.Data == "user" {

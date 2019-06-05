@@ -14,7 +14,6 @@ type Permission struct {
 }
 
 type Policy struct {
-	Name        string       `json:"name"`
 	LimitedTo   []string     `json:"limited_to"`
 	Permissions []Permission `json:"permissions"`
 }
@@ -38,6 +37,6 @@ func GetPolicy(identifier string) Policy {
 func init() {
 	err := LoadPolicies()
 	if err != nil {
-
+		//todo: handle this when starting.
 	}
 }
