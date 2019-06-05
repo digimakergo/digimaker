@@ -34,3 +34,10 @@ func LoadPolicies() error {
 func GetPolicy(identifier string) Policy {
 	return policyDefinition[identifier]
 }
+
+func init() {
+	err := LoadPolicies()
+	if err != nil {
+
+	}
+}

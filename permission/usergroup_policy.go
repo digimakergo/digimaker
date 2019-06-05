@@ -20,11 +20,20 @@ type UsergroupPolicy struct {
 	Policy      string `boil:"policy" json:"policy" toml:"policy" yaml:"policy"`
 	Subtree     string `boil:"subtree" json:"subtree" toml:"subtree" yaml:"subtree"`
 	Scope       string `boil:"scope" json:"scope" toml:"scope" yaml:"scope"`
+	policy      Policy `boil:"-"` //cache for Policy instance
+}
+
+//Get policy detail of current usergroup policy.
+func (ugPolicy UsergroupPolicy) GetPolicy() Policy {
+	if len(ugPolicy.policy.Permissions) == 0 {
+		ugPolicy.policy = GetPolicy(ugPolicy.Policy)
+	}
+	return ugPolicy.policy
 }
 
 //Get UsergroupPolicy slice based on usergroupID including inhertated permissions.
 func GetPermissions(usergroupID int) ([]UsergroupPolicy, error) {
-	content, err := handler.Querier().FetchByID(usergroupID)
+	content, err := handler.Querier().FetchByID(usergroupID) //todo: maybe better to
 
 	if err != nil {
 		fmt.Println(err) //todo: make it generic
