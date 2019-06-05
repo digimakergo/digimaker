@@ -10,9 +10,7 @@ import (
 func TestMain(m *testing.T) {
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
-	err := LoadPolicies()
-	fmt.Println(err)
 
-	policyList, err := GetPermissions(90)
+	policyList, _ := GetPermissions(90)
 	fmt.Println(policyList)
 }

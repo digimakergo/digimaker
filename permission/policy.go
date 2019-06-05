@@ -8,13 +8,13 @@ import (
 )
 
 type Permission struct {
-	Module     string      `json:"module"`
-	Action     string      `json:"action"`
-	Limitation interface{} `json:"limitation"`
+	Module    string                 `json:"module"`
+	Action    string                 `json:"action"`
+	LimitedTo map[string]interface{} `json:"limited_to"`
 }
 
 type Policy struct {
-	LimitedTo   []string     `json:"limited_to"`
+	AssignType  []string     `json:"limited_to"`
 	Permissions []Permission `json:"permissions"`
 }
 

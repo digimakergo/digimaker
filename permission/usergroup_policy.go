@@ -4,8 +4,8 @@
 package permission
 
 import (
+	"dm/contenttype"
 	"dm/db"
-	"dm/handler"
 	"dm/query"
 	"fmt"
 	"strconv"
@@ -18,7 +18,7 @@ type UsergroupPolicy struct {
 	ID          int    `boil:"id" json:"id" toml:"id" yaml:"id"`
 	UsergroupID string `boil:"usergroup_id" json:"usergroup_id" toml:"usergroup_id" yaml:"usergroup_id"`
 	Policy      string `boil:"policy" json:"policy" toml:"policy" yaml:"policy"`
-	Subtree     string `boil:"subtree" json:"subtree" toml:"subtree" yaml:"subtree"`
+	Under       string `boil:"under" json:"under" toml:"under" yaml:"under"`
 	Scope       string `boil:"scope" json:"scope" toml:"scope" yaml:"scope"`
 	policy      Policy `boil:"-"` //cache for Policy instance
 }
@@ -33,14 +33,16 @@ func (ugPolicy UsergroupPolicy) GetPolicy() Policy {
 
 //Get UsergroupPolicy slice based on usergroupID including inhertated permissions.
 func GetPermissions(usergroupID int) ([]UsergroupPolicy, error) {
-	content, err := handler.Querier().FetchByID(usergroupID) //todo: maybe better to
-
+	dbHandler := db.DBHanlder()
+	location := contenttype.Location{}
+	//todo: maybe better to use content id
+	err := dbHandler.GetEntity("dm_location", query.Cond("id", usergroupID), &location) //note: use this instead of handler.Querier() to avoid cycle dependency because handler package rely on permission
 	if err != nil {
 		fmt.Println(err) //todo: make it generic
 	}
-	hierarchy := content.GetLocation().Hierarchy
+
+	hierarchy := location.Hierarchy
 	ids := strings.Split(hierarchy, "/")
-	dbHandler := db.DBHanlder()
 
 	usergroupIDs := []int{}
 	for _, item := range ids {

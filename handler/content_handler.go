@@ -14,6 +14,7 @@ import (
 	"dm/contenttype/entity"
 	"dm/db"
 	"dm/fieldtype"
+	"dm/permission"
 	"dm/util"
 	"dm/util/debug"
 	"strconv"
@@ -38,6 +39,8 @@ type Contenter interface {
 type ContentHandler struct {
 	Context context.Context
 }
+
+var ErrorNoPermission = errors.New("The user doesn't have access to the action.")
 
 //Validate and Return a validation result
 func (ch *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
@@ -151,6 +154,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 //Create a content(same behavior as Draft&Publish but store published version directly)
 func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (bool, ValidationResult, error) {
 	//todo: permission check.
+
 	//Validate
 	valid, validationResult := ch.Validate(contentType, inputs)
 	if !valid {
@@ -525,4 +529,30 @@ func (handler *ContentHandler) store(parentID int, contentType string, fields ma
 
 func (handler *ContentHandler) UpdateRelation(content contenttype.ContentTyper) {
 
+}
+
+//Check if module & action & data is under given policy list
+//data: {scope: "site1", hierachy: "1/2/3/4/5", contenttype: "folder" }
+func HasAccessTo(ugPolicyList []permission.UsergroupPolicy, module string, action string, data map[string]string, context Context) bool {
+	result := false
+	for _, ugPolicy := range ugPolicyList {
+		policyResult := true
+		policy := ugPolicy.GetPolicy()
+		if ugPolicy.Under != "" {
+
+		}
+		if ugPolicy.Scope != "" {
+
+		}
+		for _, permission := range policy.Permissions {
+			if permission.Action != action || permission.Module != module {
+				policyResult = false
+				break
+			} else {
+				for defKey, defValue := range permission.LimitedTo {
+					//data should contains key and "in the value"(eg. defValue is 1 data is 1, defValue is 1,2, data is 1, defValue is 1 data is 1,2)
+				}
+			}
+		}
+	}
 }

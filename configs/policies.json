@@ -2,22 +2,26 @@
     "read":{
         "permissions": [{"module":"content",
                             "action":"read",
-                            "limitation":{}}
+                            "limited_to":{
+                                "contenttype": ["folder", "article"],
+                                "field":["folder/name", "article/name"]
+                                }
+                         }
                         ],
-        "limited_to": ["subtree","scope"]
+        "assign_type": ["subtree","scope"]
     },
     "editing":{
         "permissions": [{"module":"content",
                     "action":"create, edit, delete",
-                    "limitation":{}}
+                    "limited_to":{}}
                 ],
-        "limited_to": ["subtree","scope"]
+        "assign_type": ["subtree","scope"]
     },
     "organize":{
             "permissions": [{"module":"content",
                         "action":"move,delete_subtree, copy",
-                        "limitation":{}}
+                        "limited_to":{}}
                     ],
-             "limited_to": []
+             "assign_type": []
         }
 }
