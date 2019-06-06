@@ -17,6 +17,7 @@ import (
 	"dm/permission"
 	"dm/util"
 	"dm/util/debug"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -532,27 +533,40 @@ func (handler *ContentHandler) UpdateRelation(content contenttype.ContentTyper) 
 }
 
 //Check if module & action & data is under given policy list
-//data: {scope: "site1", hierachy: "1/2/3/4/5", contenttype: "folder" }
-func HasAccessTo(ugPolicyList []permission.UsergroupPolicy, module string, action string, data map[string]string, context Context) bool {
+//currentData: {scope: "site1", under: [1,2,3,4,5], contenttype: "folder" }
+func HasAccessTo(ugPolicyList []permission.UsergroupPolicy, module string, action string, currentData map[string]interface{}, context context.Context) bool {
 	result := false
-	for _, ugPolicy := range ugPolicyList {
+	for index, ugPolicy := range ugPolicyList {
+		debug.Debug(context, "Matching policy "+strconv.Itoa(index+1)+"/"+strconv.Itoa(len(ugPolicyList))+" "+ugPolicy.Policy+" with module:"+module+", action:"+action+", data: "+fmt.Sprintln(currentData), "permission")
 		policyResult := true
 		policy := ugPolicy.GetPolicy()
-		if ugPolicy.Under != "" {
+		if ugPolicy.Under != "" { //if under is not "" and data doesn't match go to next policy
 
 		}
-		if ugPolicy.Scope != "" {
+		if ugPolicy.Scope != "" { //if scope is not "" and data doesn't match go to next policy
 
 		}
-		for _, permission := range policy.Permissions {
+		for i, permission := range policy.Permissions {
+			debug.Debug(context, "Matching permission "+strconv.Itoa(i+1)+"/"+strconv.Itoa(len(policy.Permissions)), "permission")
 			if permission.Action != action || permission.Module != module {
 				policyResult = false
-				break
+				debug.Debug(context, "Module or action doesn't match. expected module:"+permission.Module+", action:"+permission.Action, "permission")
 			} else {
-				for defKey, defValue := range permission.LimitedTo {
-					//data should contains key and "in the value"(eg. defValue is 1 data is 1, defValue is 1,2, data is 1, defValue is 1 data is 1,2)
+				var matchLog []string
+				policyResult, matchLog = util.MatchCondition(permission.LimitedTo, currentData)
+				for _, item := range matchLog {
+					debug.Debug(context, item, "permission")
 				}
 			}
+			if policyResult {
+				result = true
+				debug.Debug(context, "Policy matched.", "permission")
+				break
+			}
+		}
+		if result {
+			break
 		}
 	}
+	return result
 }
