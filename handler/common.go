@@ -5,11 +5,14 @@ package handler
 
 import (
 	"context"
+	"dm/contenttype"
 	"dm/permission"
 	"dm/util"
 	"dm/util/debug"
 	"fmt"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 //Check if module & action & data is under given policy list
@@ -49,4 +52,19 @@ func HasAccessTo(ugPolicyList []permission.UsergroupPolicy, module string, actio
 		}
 	}
 	return result
+}
+
+func CanRead(userID int, content contenttype.ContentTyper, context context.Context) (bool, error) {
+	ugPolicyList, err := permission.GetUserPermission(userID)
+	if err != nil {
+		return false, errors.Wrap(err, "Error when fetching policy.")
+	}
+	location := content.GetLocation()
+	data := map[string]interface{}{
+		"id":          location.ID,
+		"contenttype": content.ContentType(),
+		"under":       location.Path(),
+	}
+	result := HasAccessTo(ugPolicyList, "content", "read", data, context)
+	return result, nil
 }

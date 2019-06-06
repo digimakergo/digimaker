@@ -8,6 +8,7 @@ import (
 	"dm/db"
 	"dm/fieldtype"
 	. "dm/query"
+	"dm/util"
 	"strings"
 )
 
@@ -30,6 +31,7 @@ type Location struct {
 	UID            string `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
 	Section        string `boil:"section" json:"section" toml:"section" yaml:"section"`
 	P              string `boil:"p" json:"p" toml:"p" yaml:"p"`
+	path           []int  `boil:"-" json:"-" toml:"-" yaml:"-"`
 }
 
 func (c *Location) Fields() map[string]fieldtype.Fieldtyper {
@@ -102,10 +104,13 @@ func (c *Location) Field(name string) interface{} {
 	return result
 }
 
-//Get path array from hierarchy. eg{"1", "2"}
-func (c Location) Path() []string {
-	path := strings.Split(c.Hierarchy, "/")
-	return path
+//Get path array from hierarchy. eg[1, 2]
+func (c *Location) Path() []int {
+	if len(c.path) == 0 {
+		path := strings.Split(c.Hierarchy, "/")
+		c.path = util.ArrayStrToInt(path)
+	}
+	return c.path
 }
 
 func (c *Location) Store(transaction ...*sql.Tx) error {
