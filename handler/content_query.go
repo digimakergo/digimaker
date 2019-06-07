@@ -87,6 +87,11 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) (inte
 	return contentList, err
 }
 
+//Get subtree with permission considered.
+func (cq ContentQuery) Subtree(rootID int, level int, userID int) {
+
+}
+
 //Fill all data into content which is a pointer
 func (cq ContentQuery) Fill(contentType string, condition query.Condition, content interface{}) error {
 	dbhandler := db.DBHanlder()
