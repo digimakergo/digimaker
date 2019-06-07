@@ -11,8 +11,8 @@
     },
     "editing":{
         "permissions": [{"module":"content",
-                    "action":"create, edit, delete",
-                    "limited_to":{}}
+                         "action":"create, edit, delete",
+                         "limited_to":{}}
                 ],
         "assign_type": ["subtree","scope"]
     },

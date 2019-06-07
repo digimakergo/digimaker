@@ -20,6 +20,7 @@ type Location struct {
 	MainID         int    `boil:"main_id" json:"main_id" toml:"main_id" yaml:"main_id"`
 	IdentifierPath string `boil:"identifier_path" json:"identifier_path" toml:"identifier_path" yaml:"identifier_path"`
 	Hierarchy      string `boil:"hierarchy" json:"hierarchy" toml:"hierarchy" yaml:"hierarchy"`
+	Depth          int    `boil:"depth" json:"depth" toml:"depth" yaml:"depth"`
 	ContentType    string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID      int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	Language       string `boil:"language" json:"language" toml:"language" yaml:"language"`
@@ -31,7 +32,7 @@ type Location struct {
 	UID            string `boil:"uid" json:"uid" toml:"uid" yaml:"uid"`
 	Section        string `boil:"section" json:"section" toml:"section" yaml:"section"`
 	P              string `boil:"p" json:"p" toml:"p" yaml:"p"`
-	path           []int  `boil:"-" json:"-" toml:"-" yaml:"-"`
+	path           []int  `boil:"-"`
 }
 
 func (c *Location) Fields() map[string]fieldtype.Fieldtyper {

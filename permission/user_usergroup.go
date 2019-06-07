@@ -39,3 +39,28 @@ func GetUserPermission(userID int) ([]UsergroupPolicy, error) {
 	}
 	return policyList, nil
 }
+
+func GetPermissionByAction(module string, action string, userID int) []map[string]interface{} {
+	policyList, err := GetUserPermission(userID)
+	if err != nil {
+		//todo: handle
+	}
+	result := []map[string]interface{}{}
+	for _, ugPolicy := range policyList {
+		policy := ugPolicy.GetPolicy()
+		for _, permission := range policy.Permissions {
+			if permission.Module == module && permission.Action == action {
+				limit := permission.LimitedTo
+				if ugPolicy.Scope != "" {
+					limit["scope"] = ugPolicy.Scope
+				}
+				if ugPolicy.Under != "" {
+					limit["under"] = ugPolicy.Under
+				}
+				result = append(result, limit)
+			}
+		}
+	}
+	//todo: CanAccessTo can use this instead of all check.
+	return result
+}

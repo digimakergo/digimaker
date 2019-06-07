@@ -88,7 +88,7 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) (inte
 }
 
 //Get subtree with permission considered.
-func (cq ContentQuery) Subtree(rootID int, level int, userID int) {
+func (cq ContentQuery) Subtree(rootID int, depth int, userID int) {
 
 }
 
