@@ -11,20 +11,17 @@ import (
 	"dm/util/debug"
 	"fmt"
 	"strconv"
-
-	"github.com/pkg/errors"
 )
 
 //If the user has acccess given matchedData(realData here)
 func HasAccessTo(userID int, module string, action string, realData map[string]interface{}, context context.Context) (bool, error) {
 	//get permission limits
-	policyList, err := permission.GetUserPolicies(userID)
-	debug.Debug(context, "Policy list: "+fmt.Sprintln(policyList), "permission")
-	if err != nil {
-		return false, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
-	}
-	limits := permission.GetLimitsFromPolicy(policyList, module, action)
+	limits, err := permission.GetUserLimits(userID, module, action, context)
 	debug.Debug(context, "Limits: "+fmt.Sprintln(limits), "permission")
+
+	if err != nil {
+		return false, err
+	}
 
 	//match limits
 	result := false

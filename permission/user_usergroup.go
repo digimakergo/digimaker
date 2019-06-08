@@ -4,8 +4,11 @@
 package permission
 
 import (
+	"context"
 	"dm/db"
 	"dm/query"
+	"dm/util/debug"
+	"fmt"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -38,6 +41,17 @@ func GetUserPolicies(userID int) ([]UsergroupPolicy, error) {
 		}
 	}
 	return policyList, nil
+}
+
+//Get user's limits
+func GetUserLimits(userID int, module string, action string, context context.Context) ([]map[string]interface{}, error) {
+	policyList, err := GetUserPolicies(userID)
+	debug.Debug(context, "Got policy list: "+fmt.Sprintln(policyList), "permission")
+	if err != nil {
+		return nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
+	}
+	result := GetLimitsFromPolicy(policyList, module, action)
+	return result, nil
 }
 
 func GetLimitsFromPolicy(policyList []UsergroupPolicy, module string, action string) []map[string]interface{} {
