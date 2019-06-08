@@ -10,11 +10,12 @@ import (
 
 func TestHasAccessTo(t *testing.T) {
 	context := debug.Init(context.Background())
-	policyList, err := permission.GetUserPermission(7)
+	policyList, err := permission.GetUserPolicies(7)
+	fmt.Println(policyList)
 	fmt.Println(err)
 	fmt.Println("Permission")
 	currentData := map[string]interface{}{"contenttype": "folder1"}
-	result := HasAccessTo(policyList, "content", "read", currentData, context)
+	result, _ := HasAccessTo(7, "content", "read", currentData, context)
 	for _, item := range debug.GetDebugger(context).List {
 		fmt.Print(item)
 	}

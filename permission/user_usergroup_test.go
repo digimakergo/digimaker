@@ -11,7 +11,7 @@ func TestUserPermission(m *testing.T) {
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 
-	policyList, err := GetUserPermission(7)
+	policyList, err := GetUserPolicies(7)
 	fmt.Println(policyList)
 	fmt.Println(err)
 	fmt.Println(policyList[0].GetPolicy())

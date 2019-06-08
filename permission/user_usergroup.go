@@ -17,7 +17,7 @@ type UserUsergroup struct {
 	UsergroupID int `boil:"usergroup_id" json:"usergroup_id" toml:"usergroup_id" yaml:"usergroup_id"`
 }
 
-func GetUserPermission(userID int) ([]UsergroupPolicy, error) {
+func GetUserPolicies(userID int) ([]UsergroupPolicy, error) {
 	//get usergroups
 	dbHandler := db.DBHanlder()
 
@@ -40,11 +40,7 @@ func GetUserPermission(userID int) ([]UsergroupPolicy, error) {
 	return policyList, nil
 }
 
-func GetPermissionByAction(module string, action string, userID int) []map[string]interface{} {
-	policyList, err := GetUserPermission(userID)
-	if err != nil {
-		//todo: handle
-	}
+func GetLimitsFromPolicy(policyList []UsergroupPolicy, module string, action string) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	for _, ugPolicy := range policyList {
 		policy := ugPolicy.GetPolicy()
@@ -61,6 +57,5 @@ func GetPermissionByAction(module string, action string, userID int) []map[strin
 			}
 		}
 	}
-	//todo: CanAccessTo can use this instead of all check.
 	return result
 }
