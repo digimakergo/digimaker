@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"context"
 	"dm/contenttype"
 	"dm/contenttype/entity"
 	"dm/db"
+	"dm/permission"
 	"dm/query"
 	"dm/util"
 	"strconv"
@@ -88,8 +90,28 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) (inte
 }
 
 //Get subtree with permission considered.
-func (cq ContentQuery) Subtree(rootID int, depth int, userID int) {
+func (cq ContentQuery) Subtree(rootID int, depth int, userID int, context context.Context) {
+	limits, err := permission.GetUserLimits(userID, "content", "read", context)
+	if err != nil {
+		//
+	}
+	contenttype := []string{}
+	subtree := []int{}
+	for _, limit := range limits {
+		if ctype, ok := limit["contenttype"]; ok {
+			list := ctype.([]string)
+			for _, item := range list {
+				contenttype = append(contenttype, item)
+			}
+		}
 
+		if sTree, ok := limit["subtree"]; ok {
+			item := sTree.(string) //todo: support array
+			itemInt, _ := strconv.Atoi(item)
+			subtree = append(subtree, itemInt)
+		}
+	}
+	//fetch
 }
 
 //Fill all data into content which is a pointer
