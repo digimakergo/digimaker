@@ -9,11 +9,18 @@ import (
 	"dm/query"
 	"dm/util"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 type ContentQuery struct{}
+
+//TreeNode is a query result when querying SubTree
+type TreeNode struct {
+	Current  contenttype.ContentTyper
+	Children []contenttype.ContentTyper
+}
 
 //Fetch content by location id.
 //If no location found. it will return nil and error message.
@@ -89,14 +96,27 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) (inte
 	return contentList, err
 }
 
+//Get sub tree under rootContent, permission considered.
+func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, contentTypes string, userID int, context context.Context) (TreeNode, error) {
+	contentTypeList := strings.Split(contentTypes, ",")
+	for _, contentType := range contentTypeList {
+		list, err := cq.SubList(rootContent, contentType, depth, userID, context)
+		if err != nil {
+			return TreeNode{}, err
+		}
+	}
+	//todo: loop all the item and compose a tree
+	return TreeNode{}, nil
+}
+
 //Get subtree with permission considered.
-func (cq ContentQuery) Subtree(content contenttype.ContentTyper, contentType string, depth int, userID int, context context.Context) (interface{}, error) {
+func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, context context.Context) (interface{}, error) {
 	limits, err := permission.GetUserLimits(userID, "content", "read", context)
 	if err != nil {
-		//
+		return nil, errors.Wrap(err, "Can not fetch permission.")
 	}
 
-	rootLocation := content.GetLocation()
+	rootLocation := rootContent.GetLocation()
 	rootHierarchy := rootLocation.Hierarchy
 	rootDepth := rootLocation.Depth
 	condition := query.Cond("hierarchy LIKE", rootHierarchy+"/%").Cond("depth <=", rootDepth+depth)
