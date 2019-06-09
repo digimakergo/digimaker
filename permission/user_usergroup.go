@@ -52,6 +52,7 @@ func GetUserLimits(userID int, module string, action string, context context.Con
 	}
 	//todo: cache limits to user, and cache anoymous globally.
 	result := GetLimitsFromPolicy(policyList, module, action)
+	debug.Debug(context, "Got limits:"+fmt.Sprintln(result), "permission")
 	return result, nil
 }
 

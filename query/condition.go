@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var Operators = []string{">", ">=", "<", "<=", "=", "in"} //todo: make it extendable in loading
+var Operators = []string{">", ">=", "<", "<=", "=", "in", "like"} //todo: make it extendable in loading
 
 type Expression struct {
 	Field    string

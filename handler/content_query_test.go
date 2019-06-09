@@ -4,9 +4,13 @@
 package handler
 
 import (
+	"context"
 	"dm/contenttype"
+	"dm/contenttype/entity"
 	"dm/fieldtype"
+	"dm/util/debug"
 	"fmt"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -24,4 +28,17 @@ func TestFetchByContent(t *testing.T) {
 
 	content, err = querier.FetchByID(1)
 	assert.Equal(t, 1, content.Value("id"))
+}
+
+func TestSubList(t *testing.T) {
+	querier := Querier()
+	rootContent, _ := querier.FetchByID(1)
+	context := debug.Init(context.Background())
+	fmt.Println("=========")
+	content, _ := querier.SubList(rootContent, "article", 2, 7, context)
+	list := content.(*[]entity.Article)
+	for _, item := range *list {
+		fmt.Println(strconv.Itoa(item.ID) + ":" + item.Name)
+	}
+	fmt.Println(debug.GetDebugger(context).List)
 }

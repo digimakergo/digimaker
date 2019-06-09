@@ -3,7 +3,8 @@
         "permissions": [{"module":"content",
                             "action":"read",
                             "limited_to":{
-                                "contenttype": ["folder", "article"]
+                                "contenttype": ["folder", "article"],
+                                "section":"public"
                                 }
                          }
                         ],

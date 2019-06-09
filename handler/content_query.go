@@ -8,6 +8,7 @@ import (
 	"dm/permission"
 	"dm/query"
 	"dm/util"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -109,6 +110,7 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 		if err != nil {
 			return TreeNode{}, err
 		}
+		fmt.Println(list)
 	}
 	//todo: loop all the item and compose a tree
 	return TreeNode{}, nil
@@ -124,22 +126,29 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 	rootLocation := rootContent.GetLocation()
 	rootHierarchy := rootLocation.Hierarchy
 	rootDepth := rootLocation.Depth
-	condition := query.Cond("hierarchy LIKE", rootHierarchy+"/%").Cond("depth <=", rootDepth+depth)
+	condition := query.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
 
-	//add condition based on limits
-	var permissionCondition = query.Cond("1", "1")
+	//add conditions based on limits
+	var permissionCondition query.Condition
 	for _, limit := range limits {
 		var currentCondition query.Condition
 		if ctype, ok := limit["contenttype"]; ok {
-			ctypeList := ctype.([]string)
+			ctypeList := ctype.([]interface{})
+			ctypeMatched := false
+			for _, value := range ctypeList {
+				if value.(string) == contentType {
+					ctypeMatched = true
+					break
+				}
+			}
 			//if the limit doesn't include the type, get next limit.
-			if !util.Contains(ctypeList, contentType) {
+			if !ctypeMatched {
 				continue
 			}
 		}
 
 		if section, ok := limit["section"]; ok {
-			currentCondition = query.Cond("section", section.(string))
+			currentCondition = query.Cond("location.section", section.(string))
 		}
 
 		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
@@ -149,7 +158,11 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 		// 	subtree = append(subtree, itemInt)
 		// }
 		if currentCondition.Children != nil {
-			permissionCondition = permissionCondition.Or(currentCondition)
+			if permissionCondition.Children == nil {
+				permissionCondition = currentCondition
+			} else {
+				permissionCondition = permissionCondition.Or(currentCondition)
+			}
 		}
 	}
 	condition = condition.And(permissionCondition)
