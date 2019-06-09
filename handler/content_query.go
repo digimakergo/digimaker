@@ -90,28 +90,48 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) (inte
 }
 
 //Get subtree with permission considered.
-func (cq ContentQuery) Subtree(rootID int, depth int, userID int, context context.Context) {
+func (cq ContentQuery) Subtree(content contenttype.ContentTyper, contentType string, depth int, userID int, context context.Context) (interface{}, error) {
 	limits, err := permission.GetUserLimits(userID, "content", "read", context)
 	if err != nil {
 		//
 	}
-	contenttype := []string{}
-	subtree := []int{}
+
+	rootLocation := content.GetLocation()
+	rootHierarchy := rootLocation.Hierarchy
+	rootDepth := rootLocation.Depth
+	condition := query.Cond("hierarchy LIKE", rootHierarchy+"/%").Cond("depth <=", rootDepth+depth)
+
+	//add condition based on limits
+	var permissionCondition = query.Cond("1", "1")
 	for _, limit := range limits {
+		var currentCondition query.Condition
 		if ctype, ok := limit["contenttype"]; ok {
-			list := ctype.([]string)
-			for _, item := range list {
-				contenttype = append(contenttype, item)
+			ctypeList := ctype.([]string)
+			//if the limit doesn't include the type, get next limit.
+			if !util.Contains(ctypeList, contentType) {
+				continue
 			}
 		}
 
-		if sTree, ok := limit["subtree"]; ok {
-			item := sTree.(string) //todo: support array
-			itemInt, _ := strconv.Atoi(item)
-			subtree = append(subtree, itemInt)
+		if section, ok := limit["section"]; ok {
+			currentCondition = query.Cond("section", section.(string))
+		}
+
+		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
+		// if sTree, ok := limit["subtree"]; ok {
+		// 	item := sTree.(string) //todo: support array
+		// 	itemInt, _ := strconv.Atoi(item)
+		// 	subtree = append(subtree, itemInt)
+		// }
+		if currentCondition.Children != nil {
+			permissionCondition = permissionCondition.Or(currentCondition)
 		}
 	}
+	condition = condition.And(permissionCondition)
+
 	//fetch
+	list, err := cq.List(contentType, condition)
+	return list, err
 }
 
 //Fill all data into content which is a pointer
