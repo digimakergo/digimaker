@@ -86,7 +86,7 @@ func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (con
 	return content, err
 }
 
-//Fetch a list of content, return eg. *[]Article
+//Fetch a list of content based on conditions. This is a database level 'list'. Return eg. *[]Article
 func (cq ContentQuery) List(contentType string, condition query.Condition) (interface{}, error) {
 	contentList := entity.NewList(contentType)
 	err := cq.Fill(contentType, condition, contentList)
@@ -94,6 +94,11 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) (inte
 		return nil, err
 	}
 	return contentList, err
+}
+
+//Fetch children
+func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, childrenType string, userID int) {
+
 }
 
 //Get sub tree under rootContent, permission considered.

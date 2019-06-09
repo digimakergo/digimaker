@@ -50,6 +50,7 @@ func GetUserLimits(userID int, module string, action string, context context.Con
 	if err != nil {
 		return nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
 	}
+	//todo: cache limits to user, and cache anoymous globally.
 	result := GetLimitsFromPolicy(policyList, module, action)
 	return result, nil
 }
