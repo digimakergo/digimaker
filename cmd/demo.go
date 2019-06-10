@@ -61,24 +61,24 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		debug.Debug(ctx, "Got list of folder", "system")
 
 		//Get current Folder
-		currentFolder, _ := handler.Querier().Fetch("folder", query.Cond("location.id", id))
+		current, _ := handler.Querier().FetchByID(id)
 
 		var variables map[string]interface{}
-		if currentFolder != nil {
+		if current.ContentType() == "folder" {
 			//Folder. Get list of article
 
 			debug.Debug(ctx, "It is a folder. Trying to get folders and articles under.", "system")
-			variables = map[string]interface{}{"current": currentFolder,
+			variables = map[string]interface{}{"current": current,
 				"current_def": contenttype.GetContentDefinition("folder"),
 				"folders":     folders}
 
-			folderType := currentFolder.Value("folder_type").(fieldtype.TextField)
+			folderType := current.Value("folder_type").(fieldtype.TextField)
 			if folderType.Data == "image" {
 				debug.Debug(ctx, "Trying to get images", "system")
 				images := &[]entity.Image{}
-				fmt.Println(currentFolder.GetLocation().ID)
+				fmt.Println(current.GetLocation().ID)
 				handler := db.DBHanlder()
-				handler.GetEntity("dm_image", query.Cond("parent_id", currentFolder.GetLocation().ID), images)
+				handler.GetEntity("dm_image", query.Cond("parent_id", current.GetLocation().ID), images)
 				variables["list"] = images
 				fmt.Println(images)
 			} else if folderType.Data == "user" {
@@ -108,7 +108,8 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			}
 		}
 
-		rootContent, err := handler.Querier().FetchByID(1)
+		rootID := current.GetLocation().Path()[0]
+		rootContent, err := handler.Querier().FetchByID(rootID)
 		tree, err := handler.Querier().SubTree(rootContent, 4, "folder", 7, r.Context())
 		variables["tree"] = tree
 
