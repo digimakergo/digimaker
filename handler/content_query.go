@@ -121,6 +121,8 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 	return treenode, nil
 }
 
+//build tree from list. Internal use.
+//If there are items not in the tree(parent id is NOT equal to anyone in the list), they will not be attached to the tree.
 func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentTyper) {
 	//Add current level contents
 	parentLocation := treenode.Content.GetLocation()
