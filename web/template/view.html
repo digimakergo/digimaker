@@ -13,7 +13,7 @@
 
 <body>
   <div class="left">
-      <a href="/content/view/{{.tree.Content.ID}}">
+      <a href="/content/view/{{.tree.Content.ID}}"{{if eq .current.ID .tree.Content.ID}} class="current" {{end}}>
           <i class="icon-type type-{{.tree.Content.ContentType}}"></i>
           {{.tree.Content.GetName}}</a>
       <ul>
@@ -28,7 +28,7 @@
                     <ul>
                     {{range $index, $child2 := $child.Children}}
                             <li>
-                                <a href="/content/view/{{$child2.Content.ID}}">
+                                <a href="/content/view/{{$child2.Content.ID}}"{{if eq $.current.ID $child2.Content.ID}} class="current" {{end}}>
                                     <i class="icon-type type-{{$child2.Content.ContentType}}"></i>{{$child2.Content.GetName}}
                                 </a>
                             </li>
