@@ -98,8 +98,8 @@ func (cq ContentQuery) List(contentType string, condition query.Condition) ([]co
 }
 
 //Fetch children
-func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, childrenType string, userID int) {
-
+func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, childrenType string, userID int, context context.Context) ([]contenttype.ContentTyper, error) {
+	return cq.SubList(parentContent, childrenType, 1, userID, context)
 }
 
 //Get sub tree under rootContent, permission considered.
