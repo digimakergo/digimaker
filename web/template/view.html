@@ -50,7 +50,7 @@
                                       {{else}}
                                         <span class="icon-toggle space"></span>
                                       {{end}}
-                                      <a href="/content/view/{{$child2.Content.ID}}"{{if eq $.current.ID $child3.Content.ID}} class="current" {{end}}>
+                                      <a href="/content/view/{{$child3.Content.ID}}"{{if eq $.current.ID $child3.Content.ID}} class="current" {{end}}>
                                           <i class="icon-type type-folder-{{$child3.Content.FolderType.Value}}"></i>{{$child3.Content.GetName}}
                                       </a>
                                     <li>
