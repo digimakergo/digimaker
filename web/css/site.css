@@ -201,6 +201,15 @@ img.line{
     color: #022e56;
 }
 
+.treemenu ul{
+    margin-left: 5px;
+}
+
+.nav{
+    border-top: 1px solid #cccccc;
+    padding-top: 5px;
+}
+
 .main{
     width: 78%;
     display: inline-block;
@@ -224,6 +233,14 @@ img.line{
    position: relative;
    left: 0px;
    margin-bottom: 10px;
-}
+    }
+
+    .left{
+        display: none;
+    }
+
+    .main{
+        width: 100%;
+    }
 
 }

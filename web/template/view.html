@@ -13,49 +13,50 @@
 
 <body>
   <div class="left">
-      <a href="/content/view/{{.tree.Content.ID}}"{{if eq .current.ID .tree.Content.ID}} class="current" {{end}}>
-          <i class="icon-type type-{{.tree.Content.ContentType}}"></i>
-          {{.tree.Content.GetName}}</a>
-      <ul>
-      {{range $index, $child := .tree.Children}}
-          <li>
-              <a href="/content/view/{{$child.Content.ID}}"{{if eq $.current.ID $child.Content.ID}} class="current" {{end}}>
+      <div class="treemenu">
+          <a href="/content/view/{{.tree.Content.ID}}"{{if eq .current.ID .tree.Content.ID}} class="current" {{end}}>
+              <i class="icon-type type-{{.tree.Content.ContentType}}"></i>
+              {{.tree.Content.GetName}}</a>
+          <ul>
+          {{range $index, $child := .tree.Children}}
+              <li>
+                  <a href="/content/view/{{$child.Content.ID}}"{{if eq $.current.ID $child.Content.ID}} class="current" {{end}}>
 
-                  <i class="icon-type type-{{$child.Content.ContentType}}"></i>{{$child.Content.GetName}}
-              </a>
-          </li>
-                {{if $child.Children}}
-                    <ul>
-                    {{range $index, $child2 := $child.Children}}
-                            <li>
-                                <a href="/content/view/{{$child2.Content.ID}}"{{if eq $.current.ID $child2.Content.ID}} class="current" {{end}}>
-                                    <i class="icon-type type-{{$child2.Content.ContentType}}"></i>{{$child2.Content.GetName}}
-                                </a>
-                            </li>
+                      <i class="icon-type type-{{$child.Content.ContentType}}"></i>{{$child.Content.GetName}}
+                  </a>
+              </li>
+                    {{if $child.Children}}
+                        <ul>
+                        {{range $index, $child2 := $child.Children}}
+                                <li>
+                                    <a href="/content/view/{{$child2.Content.ID}}"{{if eq $.current.ID $child2.Content.ID}} class="current" {{end}}>
+                                        <i class="icon-type type-{{$child2.Content.ContentType}}"></i>{{$child2.Content.GetName}}
+                                    </a>
+                                </li>
+                        {{end}}
+                        </ul>
                     {{end}}
-                    </ul>
-                {{end}}
-      {{end}}
-    </ul>
+          {{end}}
+        </ul>
+    </div>
+    <div class="nav">
+        <ul>
+        {{range $index,$folder := .folders}}
+          <div>
+              <li>
+              <a href="/content/view/{{$folder.ID}}">
+                  <i class="icon-type  type-{{$folder.FolderType.Value}}"></i>{{$folder.Name}}</a>
+              </li>
+              </div>
+        {{end}}
+        </ul>
+      </div>
   </div>
 
   <div class="main">
   <h2>{{.current.Name}}</h2>
 
    <div class="tool">
-       <div>
-           <ul>
-           {{range $index,$folder := .folders}}
-             <div>
-                 <li>
-                 <a href="/content/view/{{$folder.ID}}">
-                     <i class="icon-type  type-{{$folder.FolderType.Value}}"></i>{{$folder.Name}}</a>
-                 </li>
-                 </div>
-           {{end}}
-           </ul>
-         </div>
-
        <div>
            {{range $index, $type := .current_def.AllowedTypes}}
              <a href="/content/new/{{$type}}/{{$.current.ID}}" class="btn btn-primary btn-sm">New {{$type}}</a> <br />
