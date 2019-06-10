@@ -224,8 +224,18 @@ func init() {
 		return &[]Frontpage{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]Frontpage)
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("frontpage",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }

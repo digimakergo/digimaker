@@ -4,9 +4,9 @@ import "dm/contenttype"
 
 //todo: use a better name. eg. ContentTypeMethod
 type ContentTypeRegister struct {
-	New                func() contenttype.ContentTyper
-	NewList            func() interface{}
-	ListToContentTyper func(obj interface{}) []contenttype.ContentTyper
+	New     func() contenttype.ContentTyper
+	NewList func() interface{}
+	ToList  func(obj interface{}) []contenttype.ContentTyper
 }
 
 var contenttypeList = map[string]ContentTypeRegister{}
@@ -21,12 +21,11 @@ func NewList(contentType string) interface{} {
 	return contenttypeList[contentType].NewList()
 }
 
+func ToList(contentType string, obj interface{}) []contenttype.ContentTyper {
+	return contenttypeList[contentType].ToList(obj)
+}
+
 //Create new content instance, eg. &Article{}
 func NewInstance(contentType string) contenttype.ContentTyper {
 	return contenttypeList[contentType].New()
-}
-
-//Convert a list of content to contenttyper interface list since go doesn't do it automatically
-func ToContentTyper(contentType string, obj interface{}) []contenttype.ContentTyper {
-	return contenttypeList[contentType].ListToContentTyper(obj)
 }

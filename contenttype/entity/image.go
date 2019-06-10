@@ -197,8 +197,18 @@ func init() {
 		return &[]Image{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]Image)
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("image",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }

@@ -88,13 +88,14 @@ func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (con
 }
 
 //Fetch a list of content based on conditions. This is a database level 'list'. Return eg. *[]Article
-func (cq ContentQuery) List(contentType string, condition query.Condition) (interface{}, error) {
+func (cq ContentQuery) List(contentType string, condition query.Condition) ([]contenttype.ContentTyper, error) {
 	contentList := entity.NewList(contentType)
 	err := cq.Fill(contentType, condition, contentList)
 	if err != nil {
 		return nil, err
 	}
-	return contentList, err
+	result := entity.ToList(contentType, contentList)
+	return result, err
 }
 
 //Fetch children
@@ -110,6 +111,7 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 		if err != nil {
 			return TreeNode{}, err
 		}
+
 		fmt.Println(list)
 	}
 	//todo: loop all the item and compose a tree
@@ -117,7 +119,7 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 }
 
 //Get subtree with permission considered.
-func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, context context.Context) (interface{}, error) {
+func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, context context.Context) ([]contenttype.ContentTyper, error) {
 	limits, err := permission.GetUserLimits(userID, "content", "read", context)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not fetch permission.")

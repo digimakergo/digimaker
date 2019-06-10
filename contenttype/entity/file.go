@@ -177,8 +177,18 @@ func init() {
 		return &[]File{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]File)
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("file",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }

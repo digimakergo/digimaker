@@ -35,10 +35,12 @@ func TestSubList(t *testing.T) {
 	rootContent, _ := querier.FetchByID(1)
 	context := debug.Init(context.Background())
 	fmt.Println("=========")
-	content, _ := querier.SubList(rootContent, "article", 2, 7, context)
-	list := content.(*[]entity.Article)
-	for _, item := range *list {
-		fmt.Println(strconv.Itoa(item.ID) + ":" + item.Name)
+	list, _ := querier.SubList(rootContent, "article", 2, 7, context)
+
+	//
+	for _, item := range list {
+		article := item.(*entity.Article)
+		fmt.Println(strconv.Itoa(article.ID) + ":" + article.Name)
 	}
 	fmt.Println(debug.GetDebugger(context).List)
 }

@@ -149,8 +149,18 @@ func init() {
 		return &[]{{$struct_name}}{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]{{$struct_name}})
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("{{.name}}",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }

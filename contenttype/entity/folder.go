@@ -185,8 +185,18 @@ func init() {
 		return &[]Folder{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]Folder)
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("folder",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }
