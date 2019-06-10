@@ -33,7 +33,7 @@ func (handler *RelationHandler) AddContent(to contenttype.ContentTyper, from con
 	//Check if it's added already.
 	dbHandler := db.DBHanlder()
 	currentRelation := contenttype.Relation{}
-	dbHandler.GetEnity("dm_relation", Cond("to_content_id", contentID).
+	dbHandler.GetEntity("dm_relation", Cond("to_content_id", contentID).
 		Cond("from_location", fromLocationID).
 		Cond("identifier", identifier),
 		&currentRelation)

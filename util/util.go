@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/rs/xid"
@@ -39,6 +40,16 @@ func GenerateUID() string {
 	guid := xid.New()
 	guidStr := guid.String()
 	return guidStr
+}
+
+//Convert a string array to int array
+func ArrayStrToInt(strArray []string) []int {
+	size := len(strArray)
+	var result = make([]int, size)
+	for i, str := range strArray {
+		result[i], _ = strconv.Atoi(str)
+	}
+	return result
 }
 
 //Convert like "hello_world" to "HelloWorld"

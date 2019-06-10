@@ -47,6 +47,15 @@ func ( *Folder ) ContentType() string{
 	 return "folder"
 }
 
+func (c *Folder ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *Folder) GetLocation() *contenttype.Location{
     
     return &c.Location
@@ -185,8 +194,18 @@ func init() {
 		return &[]Folder{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]Folder)
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("folder",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }

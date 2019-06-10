@@ -39,7 +39,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
 	conditions, values := BuildCondition(condition)
 	//todo: get columns from either config or entities
 	columns := []string{"id", "parent_id", "main_id",
-		"hierarchy", "content_type",
+		"hierarchy", "depth", "content_type",
 		"content_id", "language",
 		"name", "is_hidden", "is_invisible",
 		"priority", "uid", "section", "p"}
@@ -106,7 +106,7 @@ func (*RMDB) Count(tablename string, condition query.Condition) (int, error) {
 }
 
 //todo: support limit.
-func (*RMDB) GetEnity(tablename string, condition query.Condition, entity interface{}) error {
+func (*RMDB) GetEntity(tablename string, condition query.Condition, entity interface{}) error {
 	conditions, values := BuildCondition(condition)
 	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions
 	util.Debug("db", sqlStr)
@@ -124,7 +124,7 @@ func (*RMDB) GetEnity(tablename string, condition query.Condition, entity interf
 }
 
 //Fetch multiple enities
-func (*RMDB) GetEntities() {
+func (*RMDB) GetMultiEntities(tablenames []string, condition query.Condition, entity interface{}) {
 
 }
 

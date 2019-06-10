@@ -3,19 +3,40 @@
 
 package permission
 
+import (
+	"dm/util"
+)
+
 type Permission struct {
-	Module     string
-	Action     []string
-	Limitation interface{}
+	Module    string                 `json:"module"`
+	Action    string                 `json:"action"`
+	LimitedTo map[string]interface{} `json:"limited_to"`
 }
 
 type Policy struct {
-	Identifier  string
-	Name        string
-	LimitedTo   []string
-	Permissions []Permission
+	AssignType  []string     `json:"limited_to"`
+	Permissions []Permission `json:"permissions"`
 }
 
-func GetUserPermissions(userID int) {
-	//
+var policyDefinition map[string]Policy
+
+func LoadPolicies() error {
+	policies := map[string]Policy{}
+	err := util.UnmarshalData(util.ConfigPath()+"/policies.json", &policies)
+	if err != nil {
+		return err
+	}
+	policyDefinition = policies
+	return nil
+}
+
+func GetPolicy(identifier string) Policy {
+	return policyDefinition[identifier]
+}
+
+func init() {
+	err := LoadPolicies()
+	if err != nil {
+		//todo: handle this when starting.
+	}
 }

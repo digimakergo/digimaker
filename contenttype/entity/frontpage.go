@@ -56,6 +56,15 @@ func ( *Frontpage ) ContentType() string{
 	 return "frontpage"
 }
 
+func (c *Frontpage ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *Frontpage) GetLocation() *contenttype.Location{
     
     return &c.Location
@@ -224,8 +233,18 @@ func init() {
 		return &[]Frontpage{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]Frontpage)
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("frontpage",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }

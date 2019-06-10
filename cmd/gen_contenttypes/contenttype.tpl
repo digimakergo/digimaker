@@ -37,6 +37,15 @@ func ( *{{$struct_name}} ) ContentType() string{
 	 return "{{.name}}"
 }
 
+func (c *{{$struct_name}} ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
     {{if .settings.HasLocation}}
     return &c.Location
@@ -149,8 +158,18 @@ func init() {
 		return &[]{{$struct_name}}{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]{{$struct_name}})
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("{{.name}}",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }

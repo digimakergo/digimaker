@@ -39,6 +39,8 @@ type ContentHandler struct {
 	Context context.Context
 }
 
+var ErrorNoPermission = errors.New("The user doesn't have access to the action.")
+
 //Validate and Return a validation result
 func (ch *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
 	definition := contenttype.GetContentDefinition(contentType)
@@ -151,6 +153,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 //Create a content(same behavior as Draft&Publish but store published version directly)
 func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (bool, ValidationResult, error) {
 	//todo: permission check.
+
 	//Validate
 	valid, validationResult := ch.Validate(contentType, inputs)
 	if !valid {

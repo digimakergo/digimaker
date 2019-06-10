@@ -52,6 +52,15 @@ func ( *User ) ContentType() string{
 	 return "user"
 }
 
+func (c *User ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *User) GetLocation() *contenttype.Location{
     
     return &c.Location
@@ -205,8 +214,18 @@ func init() {
 		return &[]User{}
 	}
 
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]User)
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
+
 	Register("user",
 		ContentTypeRegister{
 			New:            new,
-			NewList:        newList})
+			NewList:        newList,
+            ToList:         toList})
 }

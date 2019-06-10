@@ -23,6 +23,8 @@ type ContentTyper interface {
 
 	GetCID() int
 
+	GetName() string
+
 	ToMap() map[string]interface{}
 
 	SetValue(identifier string, value interface{}) error

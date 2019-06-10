@@ -1,17 +1,26 @@
 package handler
 
 import (
+	"context"
 	"dm/contenttype"
 	"dm/contenttype/entity"
 	"dm/db"
+	"dm/permission"
 	"dm/query"
 	"dm/util"
 	"strconv"
+	"strings"
 
 	"github.com/pkg/errors"
 )
 
 type ContentQuery struct{}
+
+//TreeNode is a query result when querying SubTree
+type TreeNode struct {
+	Content  contenttype.ContentTyper
+	Children []TreeNode
+}
 
 //Fetch content by location id.
 //If no location found. it will return nil and error message.
@@ -19,7 +28,7 @@ func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, erro
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEnity("dm_location", query.Cond("id", locationID), &location)
+	err := dbhandler.GetEntity("dm_location", query.Cond("id", locationID), &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
 	}
@@ -38,7 +47,7 @@ func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) 
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEnity("dm_location", query.Cond("uid", uid), &location)
+	err := dbhandler.GetEntity("dm_location", query.Cond("uid", uid), &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyuid]Can not fetch location by uid "+uid)
 	}
@@ -77,14 +86,113 @@ func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (con
 	return content, err
 }
 
-//Fetch a list of content, return eg. *[]Article
-func (cq ContentQuery) List(contentType string, condition query.Condition) (interface{}, error) {
+//Fetch a list of content based on conditions. This is a database level 'list'. Return eg. *[]Article
+func (cq ContentQuery) List(contentType string, condition query.Condition) ([]contenttype.ContentTyper, error) {
 	contentList := entity.NewList(contentType)
 	err := cq.Fill(contentType, condition, contentList)
 	if err != nil {
 		return nil, err
 	}
-	return contentList, err
+	result := entity.ToList(contentType, contentList)
+	return result, err
+}
+
+//Fetch children
+func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, childrenType string, userID int, context context.Context) ([]contenttype.ContentTyper, error) {
+	return cq.SubList(parentContent, childrenType, 1, userID, context)
+}
+
+//Get sub tree under rootContent, permission considered.
+func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, contentTypes string, userID int, context context.Context) (TreeNode, error) {
+	contentTypeList := strings.Split(contentTypes, ",")
+	var list []contenttype.ContentTyper
+	for _, contentType := range contentTypeList {
+		currentList, err := cq.SubList(rootContent, contentType, depth, userID, context)
+		if err != nil {
+			return TreeNode{}, err
+		}
+		for _, item := range currentList {
+			list = append(list, item)
+		}
+	}
+
+	treenode := TreeNode{Content: rootContent}
+	cq.buildTree(&treenode, list)
+	return treenode, nil
+}
+
+//build tree from list. Internal use.
+//If there are items not in the tree(parent id is NOT equal to anyone in the list), they will not be attached to the tree.
+func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentTyper) {
+	//Add current level contents
+	parentLocation := treenode.Content.GetLocation()
+	for _, item := range list {
+		location := item.GetLocation()
+		if location.Depth == parentLocation.Depth+1 && location.ParentID == parentLocation.ID {
+			treenode.Children = append(treenode.Children, TreeNode{Content: item})
+		}
+	}
+
+	//Add sub level. If it's leaf node it will not run the loop.
+	for i, _ := range treenode.Children {
+		cq.buildTree(&treenode.Children[i], list)
+	}
+}
+
+//Get subtree with permission considered.
+func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, context context.Context) ([]contenttype.ContentTyper, error) {
+	limits, err := permission.GetUserLimits(userID, "content", "read", context)
+	if err != nil {
+		return nil, errors.Wrap(err, "Can not fetch permission.")
+	}
+
+	rootLocation := rootContent.GetLocation()
+	rootHierarchy := rootLocation.Hierarchy
+	rootDepth := rootLocation.Depth
+	condition := query.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
+
+	//add conditions based on limits
+	var permissionCondition query.Condition
+	for _, limit := range limits {
+		var currentCondition query.Condition
+		if ctype, ok := limit["contenttype"]; ok {
+			ctypeList := ctype.([]interface{})
+			ctypeMatched := false
+			for _, value := range ctypeList {
+				if value.(string) == contentType {
+					ctypeMatched = true
+					break
+				}
+			}
+			//if the limit doesn't include the type, get next limit.
+			if !ctypeMatched {
+				continue
+			}
+		}
+
+		if section, ok := limit["section"]; ok {
+			currentCondition = query.Cond("location.section", section.(string))
+		}
+
+		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
+		// if sTree, ok := limit["subtree"]; ok {
+		// 	item := sTree.(string) //todo: support array
+		// 	itemInt, _ := strconv.Atoi(item)
+		// 	subtree = append(subtree, itemInt)
+		// }
+		if currentCondition.Children != nil {
+			if permissionCondition.Children == nil {
+				permissionCondition = currentCondition
+			} else {
+				permissionCondition = permissionCondition.Or(currentCondition)
+			}
+		}
+	}
+	condition = condition.And(permissionCondition)
+
+	//fetch
+	list, err := cq.List(contentType, condition)
+	return list, err
 }
 
 //Fill all data into content which is a pointer

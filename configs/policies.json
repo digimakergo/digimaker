@@ -1,18 +1,27 @@
 {
-    "basic_edit":{
-        "name": "Basic edit",
+    "read":{
         "permissions": [{"module":"content",
-                    "action":"create, edit, delete",
-                    "limitation":{}}
-                ],
-        "limited_to": ["subtree","scope"]
+                            "action":"read",
+                            "limited_to":{
+                                "contenttype": ["folder", "article"],
+                                "section":"public"
+                                }
+                         }
+                        ],
+        "assign_type": ["subtree","scope"]
     },
-"basic_operation":{
-        "name": "Basic operation",
+    "editing":{
         "permissions": [{"module":"content",
-                    "action":"move",
-                    "limitation":{}}
+                         "action":"create, edit, delete",
+                         "limited_to":{}}
                 ],
-         "limited_to": []
-    }
+        "assign_type": ["subtree","scope"]
+    },
+    "organize":{
+            "permissions": [{"module":"content",
+                        "action":"move,delete_subtree, copy",
+                        "limited_to":{}}
+                    ],
+             "assign_type": []
+        }
 }

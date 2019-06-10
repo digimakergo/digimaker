@@ -77,7 +77,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 				images := &[]entity.Image{}
 				fmt.Println(currentFolder.GetLocation().ID)
 				handler := db.DBHanlder()
-				handler.GetEnity("dm_image", query.Cond("parent_id", currentFolder.GetLocation().ID), images)
+				handler.GetEntity("dm_image", query.Cond("parent_id", currentFolder.GetLocation().ID), images)
 				variables["list"] = images
 				fmt.Println(images)
 			} else if folderType.Data == "user" {
@@ -106,6 +106,10 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 			}
 		}
+
+		rootContent, err := handler.Querier().FetchByID(1)
+		tree, err := handler.Querier().SubTree(rootContent, 3, "folder", 7, r.Context())
+		variables["tree"] = tree
 
 		//end Logic timing
 		debug.EndTiming(r.Context(), "logic", "logic")
