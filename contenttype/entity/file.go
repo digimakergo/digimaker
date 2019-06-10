@@ -43,6 +43,15 @@ func ( *File ) ContentType() string{
 	 return "file"
 }
 
+func (c *File ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *File) GetLocation() *contenttype.Location{
     
     return nil

@@ -52,6 +52,15 @@ func ( *User ) ContentType() string{
 	 return "user"
 }
 
+func (c *User ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *User) GetLocation() *contenttype.Location{
     
     return &c.Location

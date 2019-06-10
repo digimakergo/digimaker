@@ -37,6 +37,15 @@ func ( *{{$struct_name}} ) ContentType() string{
 	 return "{{.name}}"
 }
 
+func (c *{{$struct_name}} ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
     {{if .settings.HasLocation}}
     return &c.Location

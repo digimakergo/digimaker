@@ -47,6 +47,15 @@ func ( *FolderResource ) ContentType() string{
 	 return "folder_resource"
 }
 
+func (c *FolderResource ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *FolderResource) GetLocation() *contenttype.Location{
     
     return &c.Location

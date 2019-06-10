@@ -40,7 +40,28 @@ func TestSubList(t *testing.T) {
 	//
 	for _, item := range list {
 		article := item.(*entity.Article)
-		fmt.Println(strconv.Itoa(article.ID) + ":" + article.Name)
+		fmt.Println(strconv.Itoa(article.ID) + ":" + article.GetName())
 	}
 	fmt.Println(debug.GetDebugger(context).List)
+}
+
+func TestSubTree(t *testing.T) {
+	querier := Querier()
+	rootContent, _ := querier.FetchByID(1)
+	context := debug.Init(context.Background())
+	fmt.Println("TREEEEEEEEEEEEE")
+	treenode, _ := querier.SubTree(rootContent, 3, "folder,article", 7, context)
+
+	fmt.Println(treenode.Content.GetName())
+	children := treenode.Children
+	for _, child := range children {
+		fmt.Println(child.Content.GetName())
+		for _, child2 := range child.Children {
+			fmt.Println("- " + child2.Content.GetName())
+			for _, child3 := range child2.Children {
+				fmt.Println("-- " + child3.Content.GetName())
+			}
+		}
+	}
+
 }

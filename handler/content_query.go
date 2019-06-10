@@ -8,7 +8,6 @@ import (
 	"dm/permission"
 	"dm/query"
 	"dm/util"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -19,8 +18,8 @@ type ContentQuery struct{}
 
 //TreeNode is a query result when querying SubTree
 type TreeNode struct {
-	Current  contenttype.ContentTyper
-	Children []contenttype.ContentTyper
+	Content  contenttype.ContentTyper
+	Children []TreeNode
 }
 
 //Fetch content by location id.
@@ -106,16 +105,36 @@ func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, children
 //Get sub tree under rootContent, permission considered.
 func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, contentTypes string, userID int, context context.Context) (TreeNode, error) {
 	contentTypeList := strings.Split(contentTypes, ",")
+	var list []contenttype.ContentTyper
 	for _, contentType := range contentTypeList {
-		list, err := cq.SubList(rootContent, contentType, depth, userID, context)
+		currentList, err := cq.SubList(rootContent, contentType, depth, userID, context)
 		if err != nil {
 			return TreeNode{}, err
 		}
-
-		fmt.Println(list)
+		for _, item := range currentList {
+			list = append(list, item)
+		}
 	}
-	//todo: loop all the item and compose a tree
-	return TreeNode{}, nil
+
+	treenode := TreeNode{Content: rootContent}
+	cq.buildTree(&treenode, list)
+	return treenode, nil
+}
+
+func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentTyper) {
+	//Add current level contents
+	parentLocation := treenode.Content.GetLocation()
+	for _, item := range list {
+		location := item.GetLocation()
+		if location.Depth == parentLocation.Depth+1 && location.ParentID == parentLocation.ID {
+			treenode.Children = append(treenode.Children, TreeNode{Content: item})
+		}
+	}
+
+	//Add sub level. If it's leaf node it will not run the loop.
+	for i, _ := range treenode.Children {
+		cq.buildTree(&treenode.Children[i], list)
+	}
 }
 
 //Get subtree with permission considered.

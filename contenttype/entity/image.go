@@ -48,6 +48,15 @@ func ( *Image ) ContentType() string{
 	 return "image"
 }
 
+func (c *Image ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *Image) GetLocation() *contenttype.Location{
     
     return nil

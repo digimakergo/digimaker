@@ -56,6 +56,15 @@ func ( *Frontpage ) ContentType() string{
 	 return "frontpage"
 }
 
+func (c *Frontpage ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
+}
+
 func (c *Frontpage) GetLocation() *contenttype.Location{
     
     return &c.Location
