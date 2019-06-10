@@ -27,7 +27,7 @@ func UnmarshalData(filepath string, v interface{}) error {
 
 	err = json.Unmarshal(byteValue, v)
 	if err != nil {
-		Error("Error when loading datatype definition: " + err.Error())
+		Error("Error when loading definition " + filepath + ": " + err.Error())
 		return err
 	}
 
@@ -59,6 +59,14 @@ func UpperName(input string) string {
 		arr[i] = strings.Title(arr[i])
 	}
 	return strings.Join(arr, "")
+}
+
+func InterfaceToStringArray(input []interface{}) []string {
+	result := make([]string, len(input))
+	for i, value := range input {
+		result[i] = value.(string)
+	}
+	return result
 }
 
 //convert name lie "Hello world.?" to "hello-world"

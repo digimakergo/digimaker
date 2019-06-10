@@ -171,7 +171,7 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 		}
 
 		if section, ok := limit["section"]; ok {
-			currentCondition = query.Cond("location.section", section.(string))
+			currentCondition = query.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
 		}
 
 		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.

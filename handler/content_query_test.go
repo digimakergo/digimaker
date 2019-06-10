@@ -8,6 +8,7 @@ import (
 	"dm/contenttype"
 	"dm/contenttype/entity"
 	"dm/fieldtype"
+	"dm/permission"
 	"dm/util/debug"
 	"fmt"
 	"strconv"
@@ -19,6 +20,7 @@ import (
 func TestFetchByContent(t *testing.T) {
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
+	permission.LoadPolicies()
 
 	querier := Querier()
 	content, err := querier.FetchByContentID("article", 2)

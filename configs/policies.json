@@ -4,8 +4,7 @@
                             "action":"read",
                             "limited_to":{
                                 "contenttype": ["folder", "article"],
-                                "section":"public"
-                                }
+                                "section":["public","asset"]}
                          }
                         ],
         "assign_type": ["subtree","scope"]
