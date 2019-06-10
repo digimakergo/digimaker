@@ -21,6 +21,7 @@ func NewList(contentType string) interface{} {
 	return contenttypeList[contentType].NewList()
 }
 
+//Convert a *[]Article type(used for binding) to a slice of ContentTyper(use for more generic handling)
 func ToList(contentType string, obj interface{}) []contenttype.ContentTyper {
 	return contenttypeList[contentType].ToList(obj)
 }
