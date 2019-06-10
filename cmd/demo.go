@@ -7,6 +7,7 @@ import (
 	"dm/fieldtype"
 	"dm/handler"
 	_ "dm/handler/handlers"
+	"dm/permission"
 	"dm/query"
 	"dm/util"
 	"dm/util/debug"
@@ -29,7 +30,7 @@ func BootStrap() {
 	}
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
-
+	permission.LoadPolicies()
 }
 
 //This is a initial try which use template to do basic feature.
