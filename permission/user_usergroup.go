@@ -46,13 +46,13 @@ func GetUserPolicies(userID int) ([]UsergroupPolicy, error) {
 //Get user's limits
 func GetUserLimits(userID int, module string, action string, context context.Context) ([]map[string]interface{}, error) {
 	policyList, err := GetUserPolicies(userID)
-	debug.Debug(context, "Got policy list: "+fmt.Sprintln(policyList), "permission")
+	debug.Debug(context, "Got policy list: "+fmt.Sprint(policyList), "permission")
 	if err != nil {
 		return nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
 	}
 	//todo: cache limits to user, and cache anoymous globally.
 	result := GetLimitsFromPolicy(policyList, module, action)
-	debug.Debug(context, "Got limits:"+fmt.Sprintln(result), "permission")
+	debug.Debug(context, "Got limits:"+fmt.Sprint(result), "permission")
 	return result, nil
 }
 

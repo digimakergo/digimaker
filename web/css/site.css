@@ -81,7 +81,7 @@ a.action:hover{
     content: '\f0c0';
 }
 
-.type-folder-::before{
+.type-folder-::before, .type-folder::before{
     content: '\f07b';
     font-weight: 400;
 }
@@ -188,6 +188,25 @@ img.line{
 
 .content-row{
     border-bottom: 1px dotted #cccccc;
+}
+
+.left{
+    width: 20%;
+    display: inline-block;
+    vertical-align:top;
+    border-right: 2px solid #dadada;
+    min-height: 100%;
+}
+
+.left .current{
+    color: #022e56;
+}
+
+.main{
+    width: 78%;
+    display: inline-block;
+    position: relative;
+    vertical-align:top;
 }
 
 @media only screen and (max-width: 600px) {

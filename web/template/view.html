@@ -12,6 +12,34 @@
 </head>
 
 <body>
+  <div class="left">
+      <a href="/content/view/{{.tree.Content.ID}}">
+          <i class="icon-type type-{{.tree.Content.ContentType}}"></i>
+          {{.tree.Content.GetName}}</a>
+      <ul>
+      {{range $index, $child := .tree.Children}}
+          <li>
+              <a href="/content/view/{{$child.Content.ID}}"{{if eq $.current.ID $child.Content.ID}} class="current" {{end}}>
+
+                  <i class="icon-type type-{{$child.Content.ContentType}}"></i>{{$child.Content.GetName}}
+              </a>
+          </li>
+                {{if $child.Children}}
+                    <ul>
+                    {{range $index, $child2 := $child.Children}}
+                            <li>
+                                <a href="/content/view/{{$child2.Content.ID}}">
+                                    <i class="icon-type type-{{$child2.Content.ContentType}}"></i>{{$child2.Content.GetName}}
+                                </a>
+                            </li>
+                    {{end}}
+                    </ul>
+                {{end}}
+      {{end}}
+    </ul>
+  </div>
+
+  <div class="main">
   <h2>{{.current.Name}}</h2>
 
    <div class="tool">
@@ -156,7 +184,7 @@
 {{end}}
 
   </div>
-
+</div>
   <div class="admin">
       Powered by <a href="#" class="dm-name">DM Content framework</a>
       <a href="/console/list" title="Go to DM administration console" class="admin-console"><i class="fas fa-tools"></i></a>

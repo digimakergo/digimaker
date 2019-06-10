@@ -107,6 +107,10 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			}
 		}
 
+		rootContent, err := handler.Querier().FetchByID(1)
+		tree, err := handler.Querier().SubTree(rootContent, 3, "folder", 7, r.Context())
+		variables["tree"] = tree
+
 		//end Logic timing
 		debug.EndTiming(r.Context(), "logic", "logic")
 
