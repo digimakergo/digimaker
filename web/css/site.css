@@ -201,8 +201,26 @@ img.line{
     color: #022e56;
 }
 
-.treemenu ul{
+.treemenu ul ul{
     margin-left: 5px;
+}
+
+span.icon-toggle{
+    font-family: fontawesome;
+    font-size: 12px;
+}
+
+span.icon-toggle.open::before {
+    content: "\f078"
+
+}
+
+span.icon-toggle.closed::before {
+    content: "\f054";
+}
+
+span.icon-toggle.space {
+    margin-left: 14px
 }
 
 .nav{
