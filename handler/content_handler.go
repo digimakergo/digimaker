@@ -132,6 +132,8 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		location.UID = util.GenerateUID()
 		contentName := GenerateName(content)
 		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(contentName)
+		location.Depth = parent.Depth + 1
+		location.Section = parent.Section
 		location.Name = contentName
 
 		err = location.Store(tx)

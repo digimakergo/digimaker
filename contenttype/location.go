@@ -46,6 +46,7 @@ func (c *Location) Values() map[string]interface{} {
 	result["identifier_path"] = c.IdentifierPath
 	result["main_id"] = c.MainID
 	result["hierarchy"] = c.Hierarchy
+	result["depth"] = c.Depth
 	result["content_type"] = c.ContentType
 	result["content_id"] = c.ContentID
 	result["language"] = c.Language
@@ -78,6 +79,8 @@ func (c *Location) Field(name string) interface{} {
 		result = c.MainID
 	case "hierarchy", "Hierarchy":
 		result = c.Hierarchy
+	case "depth", "Depth":
+		result = c.Depth
 	case "content_type", "ContentType":
 		result = c.ContentType
 	case "content_id", "ContentID":
