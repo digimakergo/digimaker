@@ -6,7 +6,7 @@ package db
 import (
 	"context"
 	"database/sql"
-	"dm/util"
+	"dm/dm/util"
 
 	"github.com/pkg/errors"
 )

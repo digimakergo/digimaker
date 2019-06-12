@@ -4,8 +4,8 @@
 package contenttype
 
 import (
-	"dm/fieldtype"
-	"dm/util"
+	"dm/dm/fieldtype"
+	"dm/dm/util"
 )
 
 type ContentTypeSettings map[string]ContentTypeSetting

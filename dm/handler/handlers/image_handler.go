@@ -4,8 +4,8 @@ package handlers
 
 import (
 	"database/sql"
-	"dm/contenttype"
-	"dm/handler"
+	"dm/dm/contenttype"
+	"dm/dm/handler"
 )
 
 type ImageHandler struct {

@@ -1,13 +1,13 @@
 package dm
 
 import (
-	"dm/contenttype"
-	"dm/contenttype/entity"
-	"dm/db"
-	"dm/fieldtype"
-	"dm/handler"
-	. "dm/query"
-	"dm/util"
+	"dm/dm/contenttype"
+	"dm/dm/contenttype/entity"
+	"dm/dm/db"
+	"dm/dm/fieldtype"
+	"dm/dm/handler"
+	. "dm/dm/query"
+	"dm/dm/util"
 	"fmt"
 	"testing"
 	"time"

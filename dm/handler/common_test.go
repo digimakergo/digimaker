@@ -2,8 +2,8 @@ package handler
 
 import (
 	"context"
-	"dm/permission"
-	"dm/util/debug"
+	"dm/dm/permission"
+	"dm/dm/util/debug"
 	"fmt"
 	"testing"
 )

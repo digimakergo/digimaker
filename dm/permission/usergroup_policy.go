@@ -4,9 +4,9 @@
 package permission
 
 import (
-	"dm/contenttype"
-	"dm/db"
-	"dm/query"
+	"dm/dm/contenttype"
+	"dm/dm/db"
+	"dm/dm/query"
 	"fmt"
 	"strconv"
 	"strings"

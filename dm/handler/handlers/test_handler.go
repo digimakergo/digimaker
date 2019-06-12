@@ -3,8 +3,8 @@
 package handlers
 
 import (
-	"dm/contenttype"
-	"dm/handler"
+	"dm/dm/contenttype"
+	"dm/dm/handler"
 	"fmt"
 )
 

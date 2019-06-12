@@ -24,9 +24,9 @@ third_party = ['"github.com/volatiletech/sqlboiler/boil"',
                 '"github.com/volatiletech/sqlboiler/strmangle"',
                 '"github.com/pkg/errors"',
                '"github.com/volatiletech/sqlboiler/queries"',
-               '"dm/fieldtype"',
-               '. "dm/query"',
-               '"dm/db"']
+               '"dm/dm/fieldtype"',
+               '. "dm/dm/query"',
+               '"dm/dm/db"']
 
 ##TODO: use a better mechanism to diffenticate fields between:
 ##1) preserved: eg. id, published.

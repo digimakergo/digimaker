@@ -27,8 +27,8 @@ third_party = ['"github.com/volatiletech/sqlboiler/boil"',
                 '"github.com/volatiletech/sqlboiler/strmangle"',
                 '"github.com/pkg/errors"',
                '"github.com/volatiletech/sqlboiler/queries"',
-               '. "dm/query"',
-               '"dm/db"']
+               '. "dm/dm/query"',
+               '"dm/dm/db"']
 
 [aliases.tables.dm_relation]
 up_plural = "Relations"

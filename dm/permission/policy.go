@@ -4,7 +4,7 @@
 package permission
 
 import (
-	"dm/util"
+	"dm/dm/util"
 )
 
 type Permission struct {

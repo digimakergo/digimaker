@@ -5,9 +5,9 @@ package permission
 
 import (
 	"context"
-	"dm/db"
-	"dm/query"
-	"dm/util/debug"
+	"dm/dm/db"
+	"dm/dm/query"
+	"dm/dm/util/debug"
 	"fmt"
 	"strconv"
 

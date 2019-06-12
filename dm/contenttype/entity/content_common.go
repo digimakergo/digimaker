@@ -1,6 +1,6 @@
 package entity
 
-import "dm/contenttype"
+import "dm/dm/contenttype"
 
 type ContentCommon struct {
 	CID       int                             `boil:"cid" json:"id" toml:"cid" yaml:"cid"`

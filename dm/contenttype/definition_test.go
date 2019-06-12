@@ -4,7 +4,7 @@
 package contenttype
 
 import (
-	"dm/util"
+	"dm/dm/util"
 	"fmt"
 	"testing"
 )

@@ -5,10 +5,10 @@ package contenttype
 
 import (
 	"database/sql"
-	"dm/db"
-	"dm/fieldtype"
-	. "dm/query"
-	"dm/util"
+	"dm/dm/db"
+	"dm/dm/fieldtype"
+	. "dm/dm/query"
+	"dm/dm/util"
 	"strings"
 )
 

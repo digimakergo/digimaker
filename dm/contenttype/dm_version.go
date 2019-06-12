@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"dm/db"
-	. "dm/query"
+	"dm/dm/db"
+	. "dm/dm/query"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"

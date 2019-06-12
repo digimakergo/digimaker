@@ -3,7 +3,7 @@
 package handler
 
 import (
-	"dm/contenttype"
+	"dm/dm/contenttype"
 	"fmt"
 	"testing"
 )

@@ -3,8 +3,8 @@
 package handler
 
 import (
-	"dm/contenttype"
-	"dm/fieldtype"
+	"dm/dm/contenttype"
+	"dm/dm/fieldtype"
 	"fmt"
 	"testing"
 )

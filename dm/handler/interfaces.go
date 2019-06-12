@@ -4,7 +4,7 @@ package handler
 
 import (
 	"database/sql"
-	"dm/contenttype"
+	"dm/dm/contenttype"
 )
 
 //todo: think it might be good to use "struct with callback method" instead of interface.

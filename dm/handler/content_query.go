@@ -2,12 +2,12 @@ package handler
 
 import (
 	"context"
-	"dm/contenttype"
-	"dm/contenttype/entity"
-	"dm/db"
-	"dm/permission"
-	"dm/query"
-	"dm/util"
+	"dm/dm/contenttype"
+	"dm/dm/contenttype/entity"
+	"dm/dm/db"
+	"dm/dm/permission"
+	"dm/dm/query"
+	"dm/dm/util"
 	"strconv"
 	"strings"
 

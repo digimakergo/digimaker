@@ -5,8 +5,8 @@ package db
 import (
 	"context"
 	"database/sql"
-	"dm/query"
-	"dm/util"
+	"dm/dm/query"
+	"dm/dm/util"
 	"strconv"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader

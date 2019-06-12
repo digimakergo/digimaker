@@ -1,11 +1,11 @@
 package handler
 
 import (
-	"dm/contenttype"
-	"dm/contenttype/entity"
-	"dm/db"
-	"dm/fieldtype"
-	"dm/query"
+	"dm/dm/contenttype"
+	"dm/dm/contenttype/entity"
+	"dm/dm/db"
+	"dm/dm/fieldtype"
+	"dm/dm/query"
 	"fmt"
 	"testing"
 

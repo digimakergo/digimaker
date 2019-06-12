@@ -5,11 +5,11 @@ package handler
 
 import (
 	"context"
-	"dm/contenttype"
-	"dm/contenttype/entity"
-	"dm/fieldtype"
-	"dm/permission"
-	"dm/util/debug"
+	"dm/dm/contenttype"
+	"dm/dm/contenttype/entity"
+	"dm/dm/fieldtype"
+	"dm/dm/permission"
+	"dm/dm/util/debug"
 	"fmt"
 	"strconv"
 	"testing"

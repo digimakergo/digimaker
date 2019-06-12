@@ -10,17 +10,17 @@ This is a parent struct which consits of location and the content itself(eg. art
 import (
 	"context"
 	"database/sql"
-	"dm/contenttype"
-	"dm/contenttype/entity"
-	"dm/db"
-	"dm/fieldtype"
-	"dm/util"
-	"dm/util/debug"
+	"dm/dm/contenttype"
+	"dm/dm/contenttype/entity"
+	"dm/dm/db"
+	"dm/dm/fieldtype"
+	"dm/dm/util"
+	"dm/dm/util/debug"
 	"strconv"
 	"strings"
 	"time"
 
-	. "dm/query"
+	. "dm/dm/query"
 
 	"github.com/pkg/errors"
 )

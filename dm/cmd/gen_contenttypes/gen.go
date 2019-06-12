@@ -1,9 +1,9 @@
 package main
 
 import (
-	"dm/contenttype"
-	"dm/fieldtype"
-	"dm/util"
+	"dm/dm/contenttype"
+	"dm/dm/fieldtype"
+	"dm/dm/util"
 	"fmt"
 	"os"
 	"text/template"

@@ -1,6 +1,6 @@
 package entity
 
-import "dm/contenttype"
+import "dm/dm/contenttype"
 
 //todo: use a better name. eg. ContentTypeMethod
 type ContentTypeRegister struct {

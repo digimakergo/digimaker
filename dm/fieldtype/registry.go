@@ -3,7 +3,7 @@
 
 package fieldtype
 
-import "dm/util"
+import "dm/dm/util"
 
 //TypeLoaderDefault implements FieldInstancer and ContentTypeInstancer
 type TypeLoaderDefault struct{}

@@ -5,10 +5,10 @@ package handler
 
 import (
 	"context"
-	"dm/contenttype"
-	"dm/permission"
-	"dm/util"
-	"dm/util/debug"
+	"dm/dm/contenttype"
+	"dm/dm/permission"
+	"dm/dm/util"
+	"dm/dm/util/debug"
 	"fmt"
 	"strconv"
 )

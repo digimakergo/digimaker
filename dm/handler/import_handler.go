@@ -3,9 +3,9 @@
 package handler
 
 import (
-	"dm/contenttype/entity"
-	"dm/db"
-	"dm/util"
+	"dm/dm/contenttype/entity"
+	"dm/dm/db"
+	"dm/dm/util"
 	"encoding/json"
 	"strconv"
 
