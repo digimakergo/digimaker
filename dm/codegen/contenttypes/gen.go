@@ -11,7 +11,7 @@ import (
 
 //Generate content types
 func main() {
-	baseFolder := "/Users/xc/go/caf-prototype/src/dm"
+	baseFolder := "/Users/xc/go/caf-prototype/src/dm/dm"
 
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
@@ -25,7 +25,7 @@ func main() {
 func Generate(baseFolder string) error {
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
-		ParseFiles(baseFolder + "/cmd/gen_contenttypes/contenttype.tpl"))
+		ParseFiles(baseFolder + "/codegen/contenttypes/contenttype.tpl"))
 
 	folder := baseFolder + "/contenttype/entity"
 	contentTypeDef := contenttype.GetDefinition()

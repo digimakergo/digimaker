@@ -1,8 +1,8 @@
 Doc
 --------
-See [doc](doc) for ideas detail and evolving.
+See [doc](dm/doc) for ideas detail and evolving.
 
-See [Progress](doc/9.Progress.md) for progresses.
+See [Progress](dm/doc/9.Progress.md) for progresses.
 
 
 Progress
