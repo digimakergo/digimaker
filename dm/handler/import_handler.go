@@ -3,7 +3,7 @@
 package handler
 
 import (
-	"dm/dm/contenttype/entity"
+	"dm/dm/contenttype"
 	"dm/dm/db"
 	"dm/dm/util"
 	"encoding/json"
@@ -28,7 +28,7 @@ func (mh *ImportHandler) ImportAContent(contentType string, cuid string, parentU
 		return errors.New("It's there already. cuid: " + cuid)
 	}
 
-	content := entity.NewInstance(contentType)
+	content := contenttype.NewInstance(contentType)
 	contentDef := content.Definition()
 	tx, err := db.CreateTx()
 	if err != nil {

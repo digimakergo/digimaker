@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"dm/dm/contenttype"
-	"dm/dm/contenttype/entity"
 	"dm/dm/db"
 	"dm/dm/permission"
 	"dm/dm/query"
@@ -75,7 +74,7 @@ func (cq ContentQuery) FetchByCUID(contentType string, cuid string) (contenttype
 //Fetch one content
 func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
 	//todo: use limit in this case so it doesn't fetch more into memory.
-	content := entity.NewInstance(contentType)
+	content := contenttype.NewInstance(contentType)
 	err := cq.Fill(contentType, condition, content)
 	if err != nil {
 		return nil, err
@@ -88,12 +87,12 @@ func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (con
 
 //Fetch a list of content based on conditions. This is a database level 'list'. Return eg. *[]Article
 func (cq ContentQuery) List(contentType string, condition query.Condition) ([]contenttype.ContentTyper, error) {
-	contentList := entity.NewList(contentType)
+	contentList := contenttype.NewList(contentType)
 	err := cq.Fill(contentType, condition, contentList)
 	if err != nil {
 		return nil, err
 	}
-	result := entity.ToList(contentType, contentList)
+	result := contenttype.ToList(contentType, contentList)
 	return result, err
 }
 

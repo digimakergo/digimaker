@@ -11,7 +11,6 @@ import (
 	"context"
 	"database/sql"
 	"dm/dm/contenttype"
-	"dm/dm/contenttype/entity"
 	"dm/dm/db"
 	"dm/dm/fieldtype"
 	"dm/dm/util"
@@ -167,7 +166,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	fieldsDefinition := contentDefinition.Fields
 
 	//Create empty content instance and set value
-	content := entity.NewInstance(contentType)
+	content := contenttype.NewInstance(contentType)
 	for identifier, input := range inputs {
 		fieldType := fieldsDefinition[identifier].FieldType
 		fieldtypeHandler := fieldtype.GetHandler(fieldType)

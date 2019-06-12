@@ -242,8 +242,8 @@ func init() {
         return list
     }
 
-	Register("frontpage",
-		ContentTypeRegister{
+	contenttype.Register("frontpage",
+		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
             ToList:         toList})

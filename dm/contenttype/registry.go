@@ -1,12 +1,10 @@
-package entity
-
-import "dm/dm/contenttype"
+package contenttype
 
 //todo: use a better name. eg. ContentTypeMethod
 type ContentTypeRegister struct {
-	New     func() contenttype.ContentTyper
+	New     func() ContentTyper
 	NewList func() interface{}
-	ToList  func(obj interface{}) []contenttype.ContentTyper
+	ToList  func(obj interface{}) []ContentTyper
 }
 
 var contenttypeList = map[string]ContentTypeRegister{}
@@ -22,11 +20,11 @@ func NewList(contentType string) interface{} {
 }
 
 //Convert a *[]Article type(used for binding) to a slice of ContentTyper(use for more generic handling)
-func ToList(contentType string, obj interface{}) []contenttype.ContentTyper {
+func ToList(contentType string, obj interface{}) []ContentTyper {
 	return contenttypeList[contentType].ToList(obj)
 }
 
 //Create new content instance, eg. &Article{}
-func NewInstance(contentType string) contenttype.ContentTyper {
+func NewInstance(contentType string) ContentTyper {
 	return contenttypeList[contentType].New()
 }

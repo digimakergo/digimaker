@@ -167,8 +167,8 @@ func init() {
         return list
     }
 
-	Register("{{.name}}",
-		ContentTypeRegister{
+	contenttype.Register("{{.name}}",
+		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
             ToList:         toList})

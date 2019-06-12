@@ -203,8 +203,8 @@ func init() {
         return list
     }
 
-	Register("folder_resource",
-		ContentTypeRegister{
+	contenttype.Register("folder_resource",
+		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
             ToList:         toList})

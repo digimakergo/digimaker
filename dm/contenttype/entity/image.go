@@ -215,8 +215,8 @@ func init() {
         return list
     }
 
-	Register("image",
-		ContentTypeRegister{
+	contenttype.Register("image",
+		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
             ToList:         toList})

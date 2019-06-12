@@ -195,8 +195,8 @@ func init() {
         return list
     }
 
-	Register("file",
-		ContentTypeRegister{
+	contenttype.Register("file",
+		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
             ToList:         toList})
