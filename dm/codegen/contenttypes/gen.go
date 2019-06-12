@@ -11,23 +11,24 @@ import (
 
 //Generate content types
 func main() {
-	baseFolder := "/Users/xc/go/caf-prototype/src/dm/dm"
+	baseFolder := "admin"
 
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 
 	err := Generate(baseFolder)
 	if err != nil {
-		fmt.Println(err.Error())
+		fmt.Println("Fail to generate: " + err.Error())
 	}
 }
 
 func Generate(baseFolder string) error {
+
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
-		ParseFiles(baseFolder + "/codegen/contenttypes/contenttype.tpl"))
+		ParseFiles("dm/codegen/contenttypes/contenttype.tpl"))
 
-	folder := baseFolder + "/contenttype/entity"
+	folder := baseFolder + "/entity"
 	contentTypeDef := contenttype.GetDefinition()
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}
