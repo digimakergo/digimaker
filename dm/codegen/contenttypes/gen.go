@@ -11,24 +11,27 @@ import (
 
 //Generate content types
 func main() {
-	baseFolder := "admin"
+	projectName := ""
+	if len(os.Args) >= 2 && os.Args[1] != "" {
+		projectName = os.Args[1]
+		util.SetConfigPath(projectName + "/configs")
+	}
 
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 
-	err := Generate(baseFolder)
+	err := Generate(projectName + "/entity")
 	if err != nil {
 		fmt.Println("Fail to generate: " + err.Error())
 	}
 }
 
-func Generate(baseFolder string) error {
+func Generate(outputFolder string) error {
 
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
 		ParseFiles("dm/codegen/contenttypes/contenttype.tpl"))
 
-	folder := baseFolder + "/entity"
 	contentTypeDef := contenttype.GetDefinition()
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}
@@ -36,7 +39,7 @@ func Generate(baseFolder string) error {
 		vars["name"] = name
 		vars["settings"] = settings
 
-		path := folder + "/" + name + ".go"
+		path := outputFolder + "/" + name + ".go"
 		//todo: genereate to a template folder first and then copy&override target,
 		//and if there is error remove that folder
 		file, _ := os.Create(path)
