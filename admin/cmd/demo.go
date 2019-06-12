@@ -1,8 +1,8 @@
 package main
 
 import (
+	"dm/admin/entity"
 	"dm/dm/contenttype"
-	"dm/dm/contenttype/entity"
 	"dm/dm/db"
 	"dm/dm/fieldtype"
 	"dm/dm/handler"
