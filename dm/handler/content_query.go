@@ -147,9 +147,15 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 	}
 
 	rootLocation := rootContent.GetLocation()
-	rootHierarchy := rootLocation.Hierarchy
-	rootDepth := rootLocation.Depth
-	condition := query.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
+	var condition query.Condition
+	if depth == 1 {
+		//Direct children
+		condition = query.Cond("location.parent_id", rootLocation.ID)
+	} else {
+		rootHierarchy := rootLocation.Hierarchy
+		rootDepth := rootLocation.Depth
+		condition = query.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
+	}
 
 	//add conditions based on limits
 	var permissionCondition query.Condition
