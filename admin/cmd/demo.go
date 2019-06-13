@@ -63,49 +63,41 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		//Get current Folder
 		current, _ := handler.Querier().FetchByID(id)
 
-		var variables map[string]interface{}
-		if current.ContentType() == "folder" {
-			//Folder. Get list of article
+		variables := map[string]interface{}{}
+		variables["current"] = current
+		variables["current_def"] = current.Definition()
+		variables["folders"] = folders
 
-			debug.Debug(ctx, "It is a folder. Trying to get folders and articles under.", "system")
-			variables = map[string]interface{}{"current": current,
-				"current_def": contenttype.GetContentDefinition("folder"),
-				"folders":     folders}
-
-			folderType := current.Value("folder_type").(fieldtype.TextField)
-			if folderType.Data == "image" {
+		switch current.ContentType() {
+		case "folder":
+			switch current.Value("folder_type").(fieldtype.TextField).Data {
+			//image folder
+			case "image":
 				debug.Debug(ctx, "Trying to get images", "system")
 				images := &[]entity.Image{}
 				fmt.Println(current.GetLocation().ID)
 				handler := db.DBHanlder()
 				handler.GetEntity("dm_image", query.Cond("parent_id", current.GetLocation().ID), images)
 				variables["list"] = images
-				fmt.Println(images)
-			} else if folderType.Data == "user" {
+			//user folder
+			case "user":
 				users, err := handler.Querier().List("user", query.Cond("parent_id", id))
 				fmt.Println(err)
 				variables["list"] = users
-			} else {
-				articles, _ := handler.Querier().List("article", query.Cond("parent_id", id))
-				variables["list"] = articles
 			}
+		}
 
-		} else {
-			debug.Debug(ctx, "Not a folder. Trying to get articles under.", "system")
-			currentArticle, _ := handler.Querier().Fetch("article", query.Cond("location.id", id))
-			if currentArticle != nil {
-				variables = map[string]interface{}{"current": currentArticle,
-					"list":        nil,
-					"current_def": currentArticle.Definition(),
-					"folders":     folders}
-			} else {
-				currentUser, _ := handler.Querier().Fetch("user", query.Cond("location.id", id))
-				variables = map[string]interface{}{"current": currentUser,
-					"list":        nil,
-					"current_def": currentUser.Definition(),
-					"folders":     folders}
-
+		if _, ok := variables["list"]; !ok {
+			allowedTypes := []string{"article"}
+			if current.ContentType() != "folder" {
+				allowedTypes = current.Definition().AllowedTypes
 			}
+			list := []contenttype.ContentTyper{}
+			for _, allowedType := range allowedTypes {
+				currentList, _ := handler.Querier().Children(current, allowedType, 7, r.Context())
+				list = append(list, currentList...)
+			}
+			variables["list"] = list
 		}
 
 		rootID := current.GetLocation().Path()[0]

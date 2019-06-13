@@ -7,6 +7,7 @@ import (
 	"dm/dm/permission"
 	"dm/dm/query"
 	"dm/dm/util"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -187,8 +188,12 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 			}
 		}
 	}
-	condition = condition.And(permissionCondition)
 
+	if permissionCondition.Children != nil {
+		condition = condition.And(permissionCondition)
+	}
+
+	fmt.Println(condition)
 	//fetch
 	list, err := cq.List(contentType, condition)
 	return list, err
