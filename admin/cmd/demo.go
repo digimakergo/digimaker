@@ -2,14 +2,13 @@ package main
 
 import (
 	"dm/admin/entity"
+	"dm/dm"
 	"dm/dm/contenttype"
 	"dm/dm/db"
 	"dm/dm/fieldtype"
 	"dm/dm/handler"
 	_ "dm/dm/handler/handlers"
-	"dm/dm/permission"
 	"dm/dm/query"
-	"dm/dm/util"
 	"dm/dm/util/debug"
 	"fmt"
 	"html/template"
@@ -26,11 +25,16 @@ import (
 func BootStrap() {
 	if len(os.Args) >= 2 && os.Args[1] != "" {
 		path := os.Args[1]
-		util.SetConfigPath(path + "/configs")
+		bootstrap := dm.Bootstrap{}
+		success := bootstrap.Boot(path)
+		if !success {
+			fmt.Println("Failed to start. Exiting.")
+			os.Exit(1)
+		}
+	} else {
+		fmt.Println("Need a path parameter. Exiting.")
+		os.Exit(1)
 	}
-	contenttype.LoadDefinition()
-	fieldtype.LoadDefinition()
-	permission.LoadPolicies()
 }
 
 //This is a initial try which use template to do basic feature.

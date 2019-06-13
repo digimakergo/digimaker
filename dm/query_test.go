@@ -1,8 +1,8 @@
 package dm
 
 import (
+	"dm/admin/entity"
 	"dm/dm/contenttype"
-	"dm/dm/contenttype/entity"
 	"dm/dm/db"
 	"dm/dm/fieldtype"
 	"dm/dm/handler"
@@ -35,7 +35,7 @@ func TestQuery(t *testing.T) {
 
 	folders, _ := handler.Querier().List("folder", Cond("1", "1"))
 	fmt.Println("HELLO")
-	fmt.Println(folders.(*[]entity.Folder))
+	fmt.Println(folders)
 }
 
 func TestUpdate(t *testing.T) {
