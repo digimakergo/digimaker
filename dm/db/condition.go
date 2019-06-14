@@ -79,16 +79,6 @@ func Cond(fieldString string, value interface{}) Condition {
 	return *condition
 }
 
-/*
-func And(input ...Condition) *Condition {
-	return nil
-}
-
-func Or(input ...Condition) *Condition {
-	return nil
-}
-*/
-
 //Parentheses
 func Par(input ...Condition) *[]Condition {
 	return &input
