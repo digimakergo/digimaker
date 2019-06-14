@@ -6,7 +6,6 @@ package permission
 import (
 	"dm/dm/contenttype"
 	"dm/dm/db"
-	"dm/dm/query"
 	"fmt"
 	"strconv"
 	"strings"
@@ -36,7 +35,7 @@ func GetPermissions(usergroupID int) ([]UsergroupPolicy, error) {
 	dbHandler := db.DBHanlder()
 	location := contenttype.Location{}
 	//todo: maybe better to use content id
-	err := dbHandler.GetEntity("dm_location", query.Cond("id", usergroupID), &location) //note: use this instead of handler.Querier() to avoid cycle dependency because handler package rely on permission
+	err := dbHandler.GetEntity("dm_location", db.Cond("id", usergroupID), &location) //note: use this instead of handler.Querier() to avoid cycle dependency because handler package rely on permission
 	if err != nil {
 		fmt.Println(err) //todo: make it generic
 	}
@@ -50,7 +49,7 @@ func GetPermissions(usergroupID int) ([]UsergroupPolicy, error) {
 		usergroupIDs = append(usergroupIDs, itemInt)
 	}
 	policyList := []UsergroupPolicy{}
-	err = dbHandler.GetEntity("dm_usergroup_policy", query.Cond("usergroup_id", usergroupIDs), &policyList)
+	err = dbHandler.GetEntity("dm_usergroup_policy", db.Cond("usergroup_id", usergroupIDs), &policyList)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not fetch dm_usergroup_policy. usergroup_id :"+strings.Join(ids, ","))
 	}

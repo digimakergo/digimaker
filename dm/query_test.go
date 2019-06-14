@@ -6,7 +6,7 @@ import (
 	"dm/dm/db"
 	"dm/dm/fieldtype"
 	"dm/dm/handler"
-	. "dm/dm/query"
+	. "dm/dm/db"
 	"dm/dm/util"
 	"fmt"
 	"testing"

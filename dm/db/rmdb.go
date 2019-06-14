@@ -5,7 +5,6 @@ package db
 import (
 	"context"
 	"database/sql"
-	"dm/dm/query"
 	"dm/dm/util"
 	"strconv"
 
@@ -21,7 +20,7 @@ type RMDB struct {
 
 //Query by ID
 func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content interface{}) error {
-	return rmdb.GetByFields(contentType, tableName, query.Cond("location.id", id), content) //todo: use table name as parameter
+	return rmdb.GetByFields(contentType, tableName, Cond("location.id", id), content) //todo: use table name as parameter
 }
 
 //Query to fill in contentTyper. Use reference in content parameter.
@@ -29,7 +28,7 @@ func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content 
 //  var content contenttype.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, content)
 //
-func (*RMDB) GetByFields(contentType string, tableName string, condition query.Condition, content interface{}) error {
+func (*RMDB) GetByFields(contentType string, tableName string, condition Condition, content interface{}) error {
 	db, err := DB()
 	if err != nil {
 		return errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
@@ -87,7 +86,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition query.C
 }
 
 // Count based on condition
-func (*RMDB) Count(tablename string, condition query.Condition) (int, error) {
+func (*RMDB) Count(tablename string, condition Condition) (int, error) {
 	conditions, values := BuildCondition(condition)
 	sqlStr := "SELECT COUNT(*) AS count FROM " + tablename + " WHERE " + conditions
 	util.Debug("db", sqlStr)
@@ -106,7 +105,7 @@ func (*RMDB) Count(tablename string, condition query.Condition) (int, error) {
 }
 
 //todo: support limit.
-func (*RMDB) GetEntity(tablename string, condition query.Condition, entity interface{}) error {
+func (*RMDB) GetEntity(tablename string, condition Condition, entity interface{}) error {
 	conditions, values := BuildCondition(condition)
 	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions
 	util.Debug("db", sqlStr)
@@ -124,7 +123,7 @@ func (*RMDB) GetEntity(tablename string, condition query.Condition, entity inter
 }
 
 //Fetch multiple enities
-func (*RMDB) GetMultiEntities(tablenames []string, condition query.Condition, entity interface{}) {
+func (*RMDB) GetMultiEntities(tablenames []string, condition Condition, entity interface{}) {
 
 }
 
@@ -177,7 +176,7 @@ func (RMDB) Insert(tablename string, values map[string]interface{}, transation .
 }
 
 //Generic update an entity
-func (RMDB) Update(tablename string, values map[string]interface{}, condition query.Condition, transation ...*sql.Tx) error {
+func (RMDB) Update(tablename string, values map[string]interface{}, condition Condition, transation ...*sql.Tx) error {
 	sqlStr := "UPDATE " + tablename + " SET "
 	var valueParameters []interface{}
 	for name, value := range values {
@@ -213,7 +212,7 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition qu
 }
 
 //Delete based on condition
-func (*RMDB) Delete(tableName string, condition query.Condition, transation ...*sql.Tx) error {
+func (*RMDB) Delete(tableName string, condition Condition, transation ...*sql.Tx) error {
 	conditionString, conditionValues := BuildCondition(condition)
 	sqlStr := "DELETE FROM " + tableName + " WHERE " + conditionString
 

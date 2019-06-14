@@ -9,9 +9,9 @@ func TestCreateRelation(t *testing.T) {
 	// fieldtype.LoadDefinition()
 	//
 	// handler := RelationHandler{}
-	// currentArticle, _ := Querier().Fetch("article", query.Cond("location.id", 6))
+	// currentArticle, _ := Querier().Fetch("article", db.Cond("location.id", 6))
 	//
-	// article, _ := Querier().Fetch("article", query.Cond("location.id", 42))
+	// article, _ := Querier().Fetch("article", db.Cond("location.id", 42))
 	//
 	// priority, _ := strconv.Atoi(time.Now().Format("0102150405"))
 	// err := handler.AddContent(currentArticle, article, "related_articles", priority, time.Now().String())

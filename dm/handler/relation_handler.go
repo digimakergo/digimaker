@@ -3,7 +3,7 @@ package handler
 import (
 	"dm/dm/contenttype"
 	"dm/dm/db"
-	. "dm/dm/query"
+	. "dm/dm/db"
 	"fmt"
 	"strconv"
 	"strings"

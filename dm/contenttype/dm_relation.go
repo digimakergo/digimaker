@@ -14,7 +14,7 @@ import (
 	"time"
 
 	"dm/dm/db"
-	. "dm/dm/query"
+	. "dm/dm/db"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"

@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	. "dm/dm/query"
+	. "dm/dm/db"
 
 	"github.com/pkg/errors"
 )

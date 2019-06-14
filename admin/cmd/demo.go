@@ -8,7 +8,6 @@ import (
 	"dm/dm/fieldtype"
 	"dm/dm/handler"
 	_ "dm/dm/handler/handlers"
-	"dm/dm/query"
 	"dm/dm/util/debug"
 	"fmt"
 	"html/template"
@@ -61,7 +60,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		}
 
 		//List of folder
-		folders, _ := handler.Querier().List("folder", query.Cond("parent_id", 0))
+		folders, _ := handler.Querier().List("folder", db.Cond("parent_id", 0))
 		debug.Debug(ctx, "Got list of folder", "system")
 
 		//Get current Folder
@@ -81,11 +80,11 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 				images := &[]entity.Image{}
 				fmt.Println(current.GetLocation().ID)
 				handler := db.DBHanlder()
-				handler.GetEntity("dm_image", query.Cond("parent_id", current.GetLocation().ID), images)
+				handler.GetEntity("dm_image", db.Cond("parent_id", current.GetLocation().ID), images)
 				variables["list"] = images
 			//user folder
 			case "user":
-				users, err := handler.Querier().List("user", query.Cond("parent_id", id))
+				users, err := handler.Querier().List("user", db.Cond("parent_id", id))
 				fmt.Println(err)
 				variables["list"] = users
 			}
@@ -115,7 +114,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		//template timing
 		debug.StartTiming(r.Context(), "template", "all")
 
-		folderList, _ := handler.Querier().List("folder", query.Cond("parent_id", id))
+		folderList, _ := handler.Querier().List("folder", db.Cond("parent_id", id))
 		variables["folder_list"] = folderList
 
 		variables["format_time"] = func(unix int) string {

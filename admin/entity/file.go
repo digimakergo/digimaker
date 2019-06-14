@@ -9,7 +9,7 @@ import (
     "dm/dm/contenttype"
 	"dm/dm/fieldtype"
     
-	. "dm/dm/query"
+	. "dm/dm/db"
 )
 
 

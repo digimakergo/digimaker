@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"dm/dm/db"
 	"dm/dm/fieldtype"
-	. "dm/dm/query"
+	. "dm/dm/db"
 	"dm/dm/util"
 	"strings"
 )

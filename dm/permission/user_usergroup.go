@@ -6,7 +6,6 @@ package permission
 import (
 	"context"
 	"dm/dm/db"
-	"dm/dm/query"
 	"dm/dm/util/debug"
 	"fmt"
 	"strconv"
@@ -25,7 +24,7 @@ func GetUserPolicies(userID int) ([]UsergroupPolicy, error) {
 	dbHandler := db.DBHanlder()
 
 	list := []UserUsergroup{}
-	err := dbHandler.GetEntity("dm_user_usergroup", query.Cond("user_id", userID), &list)
+	err := dbHandler.GetEntity("dm_user_usergroup", db.Cond("user_id", userID), &list)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user group by user id: "+strconv.Itoa(userID))
 	}

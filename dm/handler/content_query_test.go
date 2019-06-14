@@ -5,8 +5,8 @@ package handler
 
 import (
 	"context"
+	"dm/admin/entity"
 	"dm/dm/contenttype"
-	"dm/dm/contenttype/entity"
 	"dm/dm/fieldtype"
 	"dm/dm/permission"
 	"dm/dm/util/debug"

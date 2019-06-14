@@ -5,7 +5,6 @@ import (
 	"dm/dm/contenttype"
 	"dm/dm/db"
 	"dm/dm/permission"
-	"dm/dm/query"
 	"dm/dm/util"
 	"fmt"
 	"strconv"
@@ -28,7 +27,7 @@ func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, erro
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEntity("dm_location", query.Cond("id", locationID), &location)
+	err := dbhandler.GetEntity("dm_location", db.Cond("id", locationID), &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
 	}
@@ -47,7 +46,7 @@ func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) 
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEntity("dm_location", query.Cond("uid", uid), &location)
+	err := dbhandler.GetEntity("dm_location", db.Cond("uid", uid), &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyuid]Can not fetch location by uid "+uid)
 	}
@@ -64,16 +63,16 @@ func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) 
 
 //Fetch a content by content id.
 func (cq ContentQuery) FetchByContentID(contentType string, contentID int) (contenttype.ContentTyper, error) {
-	return cq.Fetch(contentType, query.Cond("content.id", contentID))
+	return cq.Fetch(contentType, db.Cond("content.id", contentID))
 }
 
 //Fetch a content by content's uid(cuid)
 func (cq ContentQuery) FetchByCUID(contentType string, cuid string) (contenttype.ContentTyper, error) {
-	return cq.Fetch(contentType, query.Cond("content.cuid", cuid))
+	return cq.Fetch(contentType, db.Cond("content.cuid", cuid))
 }
 
 //Fetch one content
-func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (contenttype.ContentTyper, error) {
+func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (contenttype.ContentTyper, error) {
 	//todo: use limit in this case so it doesn't fetch more into memory.
 	content := contenttype.NewInstance(contentType)
 	err := cq.Fill(contentType, condition, content)
@@ -87,7 +86,7 @@ func (cq ContentQuery) Fetch(contentType string, condition query.Condition) (con
 }
 
 //Fetch a list of content based on conditions. This is a database level 'list'. Return eg. *[]Article
-func (cq ContentQuery) List(contentType string, condition query.Condition) ([]contenttype.ContentTyper, error) {
+func (cq ContentQuery) List(contentType string, condition db.Condition) ([]contenttype.ContentTyper, error) {
 	contentList := contenttype.NewList(contentType)
 	err := cq.Fill(contentType, condition, contentList)
 	if err != nil {
@@ -147,20 +146,20 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 	}
 
 	rootLocation := rootContent.GetLocation()
-	var condition query.Condition
+	var condition db.Condition
 	if depth == 1 {
 		//Direct children
-		condition = query.Cond("location.parent_id", rootLocation.ID)
+		condition = db.Cond("location.parent_id", rootLocation.ID)
 	} else {
 		rootHierarchy := rootLocation.Hierarchy
 		rootDepth := rootLocation.Depth
-		condition = query.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
+		condition = db.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
 	}
 
 	//add conditions based on limits
-	var permissionCondition query.Condition
+	var permissionCondition db.Condition
 	for _, limit := range limits {
-		var currentCondition query.Condition
+		var currentCondition db.Condition
 		if ctype, ok := limit["contenttype"]; ok {
 			ctypeList := ctype.([]interface{})
 			ctypeMatched := false
@@ -177,7 +176,7 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 		}
 
 		if section, ok := limit["section"]; ok {
-			currentCondition = query.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
+			currentCondition = db.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
 		}
 
 		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
@@ -206,7 +205,7 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 }
 
 //Fill all data into content which is a pointer
-func (cq ContentQuery) Fill(contentType string, condition query.Condition, content interface{}) error {
+func (cq ContentQuery) Fill(contentType string, condition db.Condition, content interface{}) error {
 	dbhandler := db.DBHanlder()
 	tableName := contenttype.GetContentDefinition(contentType).TableName
 	err := dbhandler.GetByFields(contentType, tableName, condition, content)

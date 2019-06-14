@@ -1,11 +1,10 @@
 package handler
 
 import (
+	"dm/admin/entity"
 	"dm/dm/contenttype"
-	"dm/dm/contenttype/entity"
 	"dm/dm/db"
 	"dm/dm/fieldtype"
-	"dm/dm/query"
 	"fmt"
 	"testing"
 
@@ -63,7 +62,7 @@ func TestDelete(t *testing.T) {
 func TestImage(t *testing.T) {
 	images := &[]entity.Image{}
 	handler := db.DBHanlder()
-	err := handler.GetEntity("dm_image", query.Cond("1", 1), images)
+	err := handler.GetEntity("dm_image", db.Cond("1", 1), images)
 	fmt.Println("images", err)
 	fmt.Println(images)
 }

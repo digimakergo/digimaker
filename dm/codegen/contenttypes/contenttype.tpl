@@ -11,7 +11,7 @@ import (
     {{if .settings.HasLocation}}
     "dm/dm/util"
     {{end}}
-	. "dm/dm/query"
+	. "dm/dm/db"
 )
 
 {{$struct_name :=.name|UpperName}}

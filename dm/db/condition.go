@@ -1,6 +1,6 @@
 //Author xc, Created on 2019-04-07 20:36
 //{COPYRIGHTS}
-package query
+package db
 
 import (
 	"strings"

@@ -25,7 +25,7 @@ third_party = ['"github.com/volatiletech/sqlboiler/boil"',
                 '"github.com/pkg/errors"',
                '"github.com/volatiletech/sqlboiler/queries"',
                '"dm/dm/fieldtype"',
-               '. "dm/dm/query"',
+               '. "dm/dm/db"',
                '"dm/dm/db"']
 
 ##TODO: use a better mechanism to diffenticate fields between:

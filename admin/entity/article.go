@@ -11,7 +11,7 @@ import (
     
     "dm/dm/util"
     
-	. "dm/dm/query"
+	. "dm/dm/db"
 )
 
 

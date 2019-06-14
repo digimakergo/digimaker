@@ -3,7 +3,6 @@
 package db
 
 import (
-	. "dm/dm/query"
 	"strings"
 )
 

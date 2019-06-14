@@ -1,7 +1,7 @@
 package db
 
 import (
-	. "dm/dm/query"
+	. "dm/dm/db"
 	"fmt"
 	"testing"
 )
