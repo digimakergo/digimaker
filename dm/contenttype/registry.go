@@ -1,5 +1,9 @@
 package contenttype
 
+import (
+	"dm/dm/util"
+)
+
 //todo: use a better name. eg. ContentTypeMethod
 type ContentTypeRegister struct {
 	New     func() ContentTyper
@@ -11,6 +15,7 @@ var contenttypeList = map[string]ContentTypeRegister{}
 
 //Register a content type and store in global variable
 func Register(contentType string, register ContentTypeRegister) {
+	util.Debug("Registering " + contentType)
 	contenttypeList[contentType] = register
 }
 

@@ -26,7 +26,7 @@
               <li>
                   <a href="javascipt:void;"><span class="icon-toggle open"></span></a>
                   <a href="/content/view/{{$child.Content.ID}}"{{if eq $.current.ID $child.Content.ID}} class="current" {{end}}>
-                      <i class="icon-type type-folder-{{$child.Content.FolderType.Value}}"></i>{{$child.Content.GetName}}
+                      <i class="icon-type type-folder-{{if eq $child.Content.ContentType "folder"}}{{$child.Content.FolderType.Value}}{{end}}"></i>{{$child.Content.GetName}}
                   </a>
                   {{if $child.Children}}
                       <ul>
@@ -38,7 +38,7 @@
                                         <span class="icon-toggle space"></span>
                                   {{end}}
                                   <a href="/content/view/{{$child2.Content.ID}}"{{if eq $.current.ID $child2.Content.ID}} class="current" {{end}}>
-                                      <i class="icon-type type-folder-{{$child2.Content.FolderType.Value}}"></i>{{$child2.Content.GetName}}
+                                      <i class="icon-type type-folder-{{if eq $child2.Content.ContentType "folder"}}{{$child2.Content.FolderType.Value}}{{end}}"></i>{{$child2.Content.GetName}}
                                   </a>
 
                                   {{if $child2.Children}}
@@ -51,7 +51,7 @@
                                         <span class="icon-toggle space"></span>
                                       {{end}}
                                       <a href="/content/view/{{$child3.Content.ID}}"{{if eq $.current.ID $child3.Content.ID}} class="current" {{end}}>
-                                          <i class="icon-type type-folder-{{$child3.Content.FolderType.Value}}"></i>{{$child3.Content.GetName}}
+                                          <i class="icon-type type-folder-{{if eq $child3.Content.ContentType "folder"}}{{$child3.Content.FolderType.Value}}{{end}}"></i>{{$child3.Content.GetName}}
                                       </a>
                                     <li>
                                   {{end}}
