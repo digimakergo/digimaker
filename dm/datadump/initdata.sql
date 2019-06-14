@@ -164,7 +164,7 @@ CREATE TABLE `dm_location` (
   `section` varchar(50) NOT NULL DEFAULT '',
   `p` varchar(30) NOT NULL DEFAULT 'c',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -173,7 +173,7 @@ CREATE TABLE `dm_location` (
 
 LOCK TABLES `dm_location` WRITE;
 /*!40000 ALTER TABLE `dm_location` DISABLE KEYS */;
-INSERT INTO `dm_location` VALUES (1,0,1,'1',1,'content','folder',1,'',0,'Content',0,0,0,'bk1tpudi6ekibbmo2chg','','public',''),(2,0,2,'2',1,'users','folder',2,'',0,'Users',0,0,0,'bk1tq1di6ekibbmo2cig','','',''),(3,1,3,'1/3',2,'content/demosite','folder',3,'',0,'Demosite',0,0,0,'bk1trcli6ekibbmo2cjg','','public',''),(4,2,4,'2/4',2,'users/organization','folder',4,'',0,'Organization',0,0,0,'bk1ts4di6ekibbmo2ckg','','',''),(5,4,5,'2/4/5',3,'users/organization/administrator-admin','user',1,'',0,'Administrator Admin',0,0,0,'bk1tsc5i6ekibbmo2clg','','',''),(6,4,6,'2/4/6',3,'users/organization/anonymous-user','user',2,'',0,'Anonymous User',0,0,0,'bk1tstli6ekibbmo2cmg','','','');
+INSERT INTO `dm_location` VALUES (1,0,1,'1',1,'content','folder',1,'',0,'Content',0,0,0,'bk1tpudi6ekibbmo2chg','','public',''),(2,0,2,'2',1,'users','folder',2,'',0,'Users',0,0,0,'bk1tq1di6ekibbmo2cig','','',''),(3,1,3,'1/3',2,'content/demosite','folder',3,'',0,'Demosite',0,0,0,'bk1trcli6ekibbmo2cjg','','public',''),(4,2,4,'2/4',2,'users/organization','folder',4,'',0,'Organization',0,0,0,'bk1ts4di6ekibbmo2ckg','','',''),(5,4,5,'2/4/5',3,'users/organization/administrator-admin','user',1,'',0,'Administrator Admin',0,0,0,'bk1tsc5i6ekibbmo2clg','','',''),(6,4,6,'2/4/6',3,'users/organization/anonymous-user','user',2,'',0,'Anonymous User',0,0,0,'bk1tstli6ekibbmo2cmg','','',''),(7,2,7,'2/7',2,'users/anonymous','usergroup',1,'',0,'Anonymous',0,0,0,'bk1vutti6ekij1eq9sgg','','',''),(8,7,8,'2/7/8',3,'users/anonymous/editor','usergroup',2,'',0,'Editor',0,0,0,'bk2051di6ekislpnehu0','','','');
 /*!40000 ALTER TABLE `dm_location` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -279,7 +279,7 @@ CREATE TABLE `dm_user_usergroup` (
   `user_id` int(11) NOT NULL,
   `usergroup_id` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -288,7 +288,37 @@ CREATE TABLE `dm_user_usergroup` (
 
 LOCK TABLES `dm_user_usergroup` WRITE;
 /*!40000 ALTER TABLE `dm_user_usergroup` DISABLE KEYS */;
+INSERT INTO `dm_user_usergroup` VALUES (4,2,7);
 /*!40000 ALTER TABLE `dm_user_usergroup` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `dm_usergroup`
+--
+
+DROP TABLE IF EXISTS `dm_usergroup`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `dm_usergroup` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL DEFAULT '',
+  `summary` text NOT NULL,
+  `published` int(11) NOT NULL DEFAULT '0',
+  `modified` int(11) NOT NULL DEFAULT '0',
+  `cuid` varchar(30) NOT NULL DEFAULT '',
+  `version` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `dm_usergroup`
+--
+
+LOCK TABLES `dm_usergroup` WRITE;
+/*!40000 ALTER TABLE `dm_usergroup` DISABLE KEYS */;
+INSERT INTO `dm_usergroup` VALUES (1,'Anonymous','',1560543095,1560543095,'bk1vutti6ekij1eq9sg0',0),(2,'Editor','',1560543877,1560543877,'bk2051di6ekislpnehtg',0);
+/*!40000 ALTER TABLE `dm_usergroup` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -305,7 +335,7 @@ CREATE TABLE `dm_usergroup_policy` (
   `under` varchar(30) NOT NULL DEFAULT '',
   `scope` varchar(50) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -314,6 +344,7 @@ CREATE TABLE `dm_usergroup_policy` (
 
 LOCK TABLES `dm_usergroup_policy` WRITE;
 /*!40000 ALTER TABLE `dm_usergroup_policy` DISABLE KEYS */;
+INSERT INTO `dm_usergroup_policy` VALUES (1,7,'read','','');
 /*!40000 ALTER TABLE `dm_usergroup_policy` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -357,4 +388,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-14 19:55:06
+-- Dump completed on 2019-06-14 22:44:49
