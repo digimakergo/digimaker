@@ -17,7 +17,7 @@ import (
 
 
 type Article struct{
-     ContentCommon `boil:",bind"`
+     contenttype.ContentCommon `boil:",bind"`
     
      
      

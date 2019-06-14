@@ -17,7 +17,7 @@ import (
 
 
 type User struct{
-     ContentCommon `boil:",bind"`
+     contenttype.ContentCommon `boil:",bind"`
     
      
      

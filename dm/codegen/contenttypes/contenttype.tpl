@@ -17,7 +17,7 @@ import (
 {{$struct_name :=.name|UpperName}}
 
 type {{$struct_name}} struct{
-     ContentCommon `boil:",bind"`
+     contenttype.ContentCommon `boil:",bind"`
     {{range $identifier, $fieldtype := .settings.Fields}}
      {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
      {{if not $type_settings.IsRelation }}

@@ -17,7 +17,7 @@ import (
 
 
 type Folder struct{
-     ContentCommon `boil:",bind"`
+     contenttype.ContentCommon `boil:",bind"`
     
      
      

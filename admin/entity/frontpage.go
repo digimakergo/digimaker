@@ -17,7 +17,7 @@ import (
 
 
 type Frontpage struct{
-     ContentCommon `boil:",bind"`
+     contenttype.ContentCommon `boil:",bind"`
     
      
      

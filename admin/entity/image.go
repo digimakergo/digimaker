@@ -15,7 +15,7 @@ import (
 
 
 type Image struct{
-     ContentCommon `boil:",bind"`
+     contenttype.ContentCommon `boil:",bind"`
     
      
      
