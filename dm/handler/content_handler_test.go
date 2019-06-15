@@ -11,6 +11,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestMain(m *testing.M) {
+	contenttype.LoadDefinition()
+	fieldtype.LoadDefinition()
+	fmt.Println("Test starting..")
+	m.Run()
+}
+
 func TestValidtion(t *testing.T) {
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
