@@ -7,8 +7,8 @@ import (
 	"dm/dm/util"
 )
 
-func Boot(projectHome string) bool {
-	util.SetConfigPath(projectHome + "/configs")
+func Bootstrap(projectHome string) bool {
+	util.SetHomePath(projectHome)
 	err := contenttype.LoadDefinition()
 	if err != nil {
 		return false

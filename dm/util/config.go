@@ -7,17 +7,19 @@ import (
 	"github.com/spf13/viper"
 )
 
-//DefaultSettingsType and DefaultSettings set all the default,
-// including which config folder it is.
-type DefaultSettingsType struct {
+var defaultSettings = struct {
 	ConfigFile   string
 	ConfigFolder string
+	HomePath     string
+}{"site", "", ""}
+
+func SetHomePath(homePath string) {
+	defaultSettings.HomePath = homePath
+	defaultSettings.ConfigFolder = homePath + "/configs"
 }
 
-var defaultSettings = DefaultSettingsType{"site", "/Users/xc/go/caf-prototype/src/dm/admin/configs"}
-
-func SetConfigPath(folderPath string) {
-	defaultSettings.ConfigFolder = folderPath
+func HomePath() string {
+	return defaultSettings.HomePath
 }
 
 func ConfigPath() string {

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"dm/admin/entity"
+	"dm/dm"
 	"dm/dm/contenttype"
 	"dm/dm/db"
 	"dm/dm/fieldtype"
@@ -15,8 +16,7 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	contenttype.LoadDefinition()
-	fieldtype.LoadDefinition()
+	dm.Bootstrap("/Users/xc/go/caf-prototype/src/dm/test")
 	fmt.Println("Test starting..")
 	m.Run()
 }

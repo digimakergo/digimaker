@@ -20,10 +20,10 @@ func Logger() *log.Logger {
 }
 
 func Debug(message ...interface{}) {
-	debugEnabled := GetConfig("debug", "enabled") == "yes"
-	if debugEnabled {
-		Log("debug", message...)
-	}
+	//debugEnabled := GetConfig("debug", "enabled") == "yes"
+	//if debugEnabled {
+	Log("debug", message...)
+	//}
 }
 
 func Error(message ...interface{}) {

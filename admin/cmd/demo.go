@@ -24,8 +24,7 @@ import (
 func BootStrap() {
 	if len(os.Args) >= 2 && os.Args[1] != "" {
 		path := os.Args[1]
-		bootstrap := dm.Bootstrap{}
-		success := bootstrap.Boot(path)
+		success := dm.Bootstrap(path)
 		if !success {
 			fmt.Println("Failed to start. Exiting.")
 			os.Exit(1)
@@ -106,6 +105,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		rootID := current.GetLocation().Path()[0]
 		rootContent, err := handler.Querier().FetchByID(rootID)
 		tree, err := handler.Querier().SubTree(rootContent, 4, "folder,usergroup", 7, r.Context())
+		fmt.Println(tree)
 		variables["tree"] = tree
 
 		//end Logic timing
