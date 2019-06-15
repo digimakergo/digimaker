@@ -1,0 +1,26 @@
+{
+    "read":{
+        "permissions": [{"module":"content",
+                            "action":"read",
+                            "limited_to":{
+                                "contenttype": ["folder", "article"],
+                                "section":["public","asset"]}
+                         }
+                        ],
+        "assign_type": ["subtree","scope"]
+    },
+    "editing":{
+        "permissions": [{"module":"content",
+                         "action":"create, edit, delete",
+                         "limited_to":{}}
+                ],
+        "assign_type": ["subtree","scope"]
+    },
+    "organize":{
+            "permissions": [{"module":"content",
+                        "action":"move,delete_subtree, copy",
+                        "limited_to":{}}
+                    ],
+             "assign_type": []
+        }
+}
