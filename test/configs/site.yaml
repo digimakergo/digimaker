@@ -5,9 +5,8 @@ database:
    password: test123
    database: dm_test
 
-
 debug:
-  enabled: "yes" #false will disable all below
+  enabled: "no" #false will disable all below
   #types: ["callback_match"]
   timespent: "yes"
   category: db, action, template
