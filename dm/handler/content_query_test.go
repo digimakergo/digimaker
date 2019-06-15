@@ -6,10 +6,7 @@ package handler
 import (
 	"context"
 	"dm/admin/entity"
-	"dm/dm/contenttype"
 	"dm/dm/db"
-	"dm/dm/fieldtype"
-	"dm/dm/permission"
 	"dm/dm/util"
 	"dm/dm/util/debug"
 	"fmt"
@@ -21,12 +18,9 @@ import (
 )
 
 func TestFetchByContent(t *testing.T) {
-	contenttype.LoadDefinition()
-	fieldtype.LoadDefinition()
-	permission.LoadPolicies()
 
 	querier := Querier()
-	content, err := querier.FetchByContentID("article", 2)
+	content, err := querier.FetchByContentID("folder", 1)
 	assert.Equal(t, nil, err)
 	fmt.Println(content.ToMap()["content_id"])
 	// assert.Equal(t, 2, content.ToMap()["content_id"].(int))
@@ -120,7 +114,7 @@ func TestUpdate(t *testing.T) {
 	fmt.Println(articles)
 
 	fmt.Println("New article")
-	article4, err := Querier().Fetch("article", db.Cond("location.id", 43))
-	fmt.Println(article4.(*entity.Article).Editors)
+	// article4, err := Querier().Fetch("article", db.Cond("location.id", 43))
+	// fmt.Println(article4.(*entity.Article).Editors)
 
 }

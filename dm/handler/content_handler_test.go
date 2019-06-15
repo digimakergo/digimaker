@@ -6,7 +6,6 @@ import (
 	"dm/dm"
 	"dm/dm/contenttype"
 	"dm/dm/db"
-	"dm/dm/fieldtype"
 	"dm/dm/util/debug"
 	"fmt"
 	"testing"
@@ -15,15 +14,16 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var ctx context.Context
+
 func TestMain(m *testing.M) {
 	dm.Bootstrap("/Users/xc/go/caf-prototype/src/dm/test")
 	fmt.Println("Test starting..")
+	ctx = debug.Init(context.Background())
 	m.Run()
 }
 
 func TestValidtion(t *testing.T) {
-	contenttype.LoadDefinition()
-	fieldtype.LoadDefinition()
 
 	// Test validation1
 	handler := ContentHandler{}
@@ -38,6 +38,8 @@ func TestValidtion(t *testing.T) {
 
 }
 
+var contentCreated contenttype.ContentTyper
+
 func TestCreate(t *testing.T) {
 	ctx := debug.Init(context.Background())
 	handler := ContentHandler{Context: ctx}
@@ -45,10 +47,22 @@ func TestCreate(t *testing.T) {
 	// // _, result, err := handler.Create(4, "article", params)
 	//
 	params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "summary": "Hello"}
-	_, result, err := handler.Create("folder", params, 1)
+	result, validation, err := handler.Create("folder", params, 1)
 
-	fmt.Println(result)
-	fmt.Println(err)
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, true, validation.Passed())
+
+	contentCreated, _ = Querier().FetchByContentID("folder", result.GetCID())
+}
+
+func TestUpdate1(t *testing.T) {
+	handler := ContentHandler{Context: ctx}
+	folder, _ := querier.FetchByID(contentCreated.GetLocation().ID)
+	inputs := map[string]interface{}{"summary": "updated"}
+	pass, _, err := handler.Update(folder, inputs)
+	assert.Nil(t, err)
+	assert.Equal(t, true, pass)
 }
 
 func TestCreateImage(t *testing.T) {
@@ -56,34 +70,11 @@ func TestCreateImage(t *testing.T) {
 	handler := ContentHandler{Context: ctx}
 
 	params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "path": "Hello"}
-	_, result, err := handler.Create("image", params, 1)
+	result, validation, err := handler.Create("image", params, 1)
 
-	fmt.Println(result)
-	fmt.Println(err)
-}
-
-func TestDelete(t *testing.T) {
-	handler := ContentHandler{}
-	err := handler.DeleteByID(40, false)
-	fmt.Println(err)
-	assert.Equal(t, nil, err)
-}
-
-func TestImage(t *testing.T) {
-	images := &[]entity.Image{}
-	handler := db.DBHanlder()
-	err := handler.GetEntity("dm_image", db.Cond("1", 1), images)
-	fmt.Println("images", err)
-	fmt.Println(images)
-}
-
-func TestUpdate1(t *testing.T) {
-	// ctx := debug.Init(context.Background())
-	// handler := ContentHandler{Context: ctx}
-	// article, _ := querier.FetchByID(76)
-	// inputs := map[string]interface{}{"summary": "updated"}
-	// pass, _, err := handler.Update(article, inputs)
-	// fmt.Println(pass, err)
+	assert.Nil(t, err)
+	assert.NotNil(t, result)
+	assert.Equal(t, true, validation.Passed())
 }
 
 func TestVersion(t *testing.T) {
@@ -94,4 +85,21 @@ func TestVersion(t *testing.T) {
 	// _, err := handler.CreateVersion(article, 1, tx)
 	// tx.Commit()
 	// assert.Equal( t, nil, err )
+}
+
+func TestDelete(t *testing.T) {
+	handler := ContentHandler{}
+	handler.Context = ctx
+	id := contentCreated.GetLocation().ID
+	fmt.Println(id)
+	err := handler.DeleteByID(id, false)
+	assert.Equal(t, nil, err)
+}
+
+func TestQueryImage(t *testing.T) {
+	images := &[]entity.Image{}
+	handler := db.DBHanlder()
+	err := handler.GetEntity("dm_image", db.Cond("1", 1), images)
+	assert.Nil(t, err)
+	assert.NotNil(t, images)
 }

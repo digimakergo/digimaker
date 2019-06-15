@@ -146,19 +146,20 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		if err != nil {
 			return errors.Wrap(err, "Transaction failed in location when saving location for main_id and hierarchy.")
 		}
+		//todo: set location to the content
 		debug.Debug(ch.Context, "Location is saved. location id :"+strconv.Itoa(location.ID)+". ", "contenthandler.StoreCreatedContent")
 	}
 	return nil
 }
 
 //Create a content(same behavior as Draft&Publish but store published version directly)
-func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (bool, ValidationResult, error) {
+func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (contenttype.ContentTyper, ValidationResult, error) {
 	//todo: permission check.
 
 	//Validate
 	valid, validationResult := ch.Validate(contentType, inputs)
 	if !valid {
-		return false, validationResult, nil
+		return nil, validationResult, nil
 	}
 
 	//todo: add validation callback.
@@ -173,7 +174,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		fieldValue := fieldtypeHandler.ToStorage(input)
 		err := content.SetValue(identifier, fieldValue)
 		if err != nil {
-			return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
+			return nil, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
 		}
 	}
 	now := int(time.Now().Unix())
@@ -186,11 +187,11 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	//Create transaction
 	database, err := db.DB()
 	if err != nil {
-		return false, ValidationResult{}, errors.New("Can't get db connection.")
+		return nil, ValidationResult{}, errors.New("Can't get db connection.")
 	}
 	tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
-		return false, ValidationResult{}, errors.New("Can't get transaction.")
+		return nil, ValidationResult{}, errors.New("Can't get transaction.")
 	}
 
 	//call content type handler
@@ -201,7 +202,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		if err != nil {
 			tx.Rollback()
 			debug.Error(ch.Context, "Error from callback: "+err.Error(), "contenthandler.create")
-			return false, ValidationResult{}, err
+			return nil, ValidationResult{}, err
 		}
 	}
 
@@ -214,7 +215,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if err != nil {
 		tx.Rollback()
 		debug.Error(ch.Context, err.Error(), "contenthandler.Create")
-		return false, ValidationResult{}, errors.Wrap(err, "Create content error")
+		return nil, ValidationResult{}, errors.Wrap(err, "Create content error")
 	}
 
 	//Save version if needed
@@ -223,7 +224,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		_, err = ch.CreateVersion(content, versionIfNeeded, tx)
 		if err != nil {
 			debug.Error(ch.Context, err.Error(), "contenthandler.Create")
-			return false, ValidationResult{}, errors.Wrap(err, "Create version error.")
+			return nil, ValidationResult{}, errors.Wrap(err, "Create version error.")
 		}
 		debug.Debug(ch.Context, "Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create")
 	}
@@ -238,7 +239,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	err = ch.InvokeCallback("create", true, matchData, content, tx)
 	if err != nil {
 		tx.Rollback()
-		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+		return nil, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
 	}
 
 	//Commit all operations
@@ -246,7 +247,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if err != nil {
 		tx.Rollback()
 		debug.Error(ch.Context, "Commit error: "+err.Error(), "contenthandler.create")
-		return false, ValidationResult{}, errors.Wrap(err, "Commit error.")
+		return nil, ValidationResult{}, errors.Wrap(err, "Commit error.")
 	}
 
 	debug.Debug(ch.Context, "Data committed.", "contenthandler.create")
@@ -255,7 +256,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 
 	debug.Debug(ch.Context, "Create finished.", "contenthandler.create")
 	debug.EndTiming(ch.Context, "database", "contenthandler.create")
-	return true, ValidationResult{}, nil
+	return content, ValidationResult{}, nil
 }
 
 //Invoke callbacks based on condition match result

@@ -6,18 +6,20 @@ import (
 	"dm/dm/util/debug"
 	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestHasAccessTo(t *testing.T) {
 	context := debug.Init(context.Background())
-	policyList, err := permission.GetUserPolicies(7)
-	fmt.Println(policyList)
-	fmt.Println(err)
-	fmt.Println("Permission")
+	policyList, err := permission.GetUserPolicies(2)
+	assert.NotNil(t, policyList)
+	assert.Nil(t, err)
 	currentData := map[string]interface{}{"contenttype": "folder1"}
-	result, _ := HasAccessTo(7, "content", "read", currentData, context)
+	result, err := HasAccessTo(2, "content", "read", currentData, context)
 	for _, item := range debug.GetDebugger(context).List {
-		fmt.Print(item)
+		fmt.Println(item)
 	}
-	fmt.Println(result)
+	assert.Nil(t, err)
+	assert.Equal(t, result, false)
 }
