@@ -1,12 +1,11 @@
-package dm
+package handler
 
 import (
 	"dm/admin/entity"
 	"dm/dm/contenttype"
 	"dm/dm/db"
-	"dm/dm/fieldtype"
-	"dm/dm/handler"
 	. "dm/dm/db"
+	"dm/dm/fieldtype"
 	"dm/dm/util"
 	"fmt"
 	"testing"
@@ -33,7 +32,7 @@ func TestQuery(t *testing.T) {
 
 	assert.NotNil(t, article)
 
-	folders, _ := handler.Querier().List("folder", Cond("1", "1"))
+	folders, _ := Querier().List("folder", Cond("1", "1"))
 	fmt.Println("HELLO")
 	fmt.Println(folders)
 }
@@ -70,11 +69,11 @@ func TestUpdate(t *testing.T) {
 	// article3.Modified = 5555555
 	// err = article3.Store()
 
-	articles, err := handler.Querier().List("article", Cond("1", "1"))
+	articles, err := Querier().List("article", Cond("1", "1"))
 	fmt.Println(articles)
 
 	fmt.Println("New article")
-	article4, err := handler.Querier().Fetch("article", Cond("location.id", 43))
+	article4, err := Querier().Fetch("article", Cond("location.id", 43))
 	fmt.Println(article4.(*entity.Article).Editors)
 
 }

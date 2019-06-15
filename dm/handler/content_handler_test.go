@@ -67,7 +67,7 @@ func TestImage(t *testing.T) {
 	fmt.Println(images)
 }
 
-func TestUpdate(t *testing.T) {
+func TestUpdate1(t *testing.T) {
 	// ctx := debug.Init(context.Background())
 	// handler := ContentHandler{Context: ctx}
 	// article, _ := querier.FetchByID(76)
