@@ -7,10 +7,8 @@ import (
 	"dm/dm/util"
 )
 
-type Bootstrap struct{}
-
-func (Bootstrap) Boot(home string) bool {
-	util.SetConfigPath(home + "/configs")
+func Boot(projectHome string) bool {
+	util.SetConfigPath(projectHome + "/configs")
 	err := contenttype.LoadDefinition()
 	if err != nil {
 		return false
@@ -26,6 +24,11 @@ func (Bootstrap) Boot(home string) bool {
 	return true
 }
 
-func (Bootstrap) Reload() {
+//Initialize db
+func InitDB() bool {
+	return true
+}
+
+func Reload() {
 
 }

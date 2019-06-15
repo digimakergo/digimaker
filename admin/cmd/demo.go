@@ -314,7 +314,6 @@ func DMHandle(w http.ResponseWriter, r *http.Request, functionHandler func(http.
 }
 
 func main() {
-
 	BootStrap()
 	r := mux.NewRouter()
 	r.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
