@@ -79,7 +79,7 @@ func TestQuery(t *testing.T) {
 
 	assert.NotNil(t, article)
 
-	folders, _ := Querier().List("folder", Cond("1", "1"))
+	folders, _ := Querier().List("folder", db.Cond("1", "1"))
 	fmt.Println("HELLO")
 	fmt.Println(folders)
 }
@@ -88,7 +88,7 @@ func TestUpdate(t *testing.T) {
 	rmdb := new(db.RMDB)
 
 	var article entity.Article
-	rmdb.GetByFields("article", "dm_article", Cond("content_id", 1), &article)
+	rmdb.GetByFields("article", "dm_article", db.Cond("content_id", 1), &article)
 	//Update remote id of the article
 	fmt.Println(article)
 	uid := util.GenerateUID()
@@ -104,10 +104,10 @@ func TestUpdate(t *testing.T) {
 		}
 	*/
 
-	err = rmdb.Update(article.TableName(), map[string]interface{}{"body": "test" + time.Now().String()}, Cond("id", 1))
+	err = rmdb.Update(article.TableName(), map[string]interface{}{"body": "test" + time.Now().String()}, db.Cond("id", 1))
 	assert.Nil(t, err)
 	var article2 entity.Article
-	rmdb.GetByFields("article", "dm_article", Cond("content_id", 1), &article2)
+	rmdb.GetByFields("article", "dm_article", db.Cond("content_id", 1), &article2)
 
 	//assert.Equal(t, article2.RemoteID, uid)
 
@@ -116,11 +116,11 @@ func TestUpdate(t *testing.T) {
 	// article3.Modified = 5555555
 	// err = article3.Store()
 
-	articles, err := Querier().List("article", Cond("1", "1"))
+	articles, err := Querier().List("article", db.Cond("1", "1"))
 	fmt.Println(articles)
 
 	fmt.Println("New article")
-	article4, err := Querier().Fetch("article", Cond("location.id", 43))
+	article4, err := Querier().Fetch("article", db.Cond("location.id", 43))
 	fmt.Println(article4.(*entity.Article).Editors)
 
 }
