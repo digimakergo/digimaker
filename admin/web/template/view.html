@@ -92,9 +92,9 @@
        </div>
    </div>
   <div class="meta-content">
-      <span><label>Type: </label>{{.current.ContentType}}</span>
       <span><label>Published: </label>{{call .format_time .current.Published}}</span>
       <span><label>Modified: </label>{{call .format_time .current.Modified}}</span> <br />
+      <span><label>Type: </label>{{.current.ContentType}}</span>
       <span><label>CID: </label>{{.current.CID}}</span>
       <span><label>UID: </label>{{.current.UID}}</span>
       {{if .current_def.HasVersion}}
