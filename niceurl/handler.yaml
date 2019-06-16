@@ -1,0 +1,9 @@
+handlers:
+  niceurl_handler:
+    event:
+    - create
+    - update
+    - delete
+    content_type:
+    - article
+    - folder
