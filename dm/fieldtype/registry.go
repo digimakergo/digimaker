@@ -34,6 +34,7 @@ func (TypeLoaderDefault) Instance(extendedType string, identifier string) interf
 var handlerRegistry = map[string]FieldtypeHandler{}
 
 func RegisterHanlder(fieldType string, handler FieldtypeHandler) {
+	util.Log("system", "Registering handler for field type "+fieldType)
 	handlerRegistry[fieldType] = handler
 }
 

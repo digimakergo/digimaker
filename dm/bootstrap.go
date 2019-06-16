@@ -8,7 +8,7 @@ import (
 )
 
 func Bootstrap(projectHome string) bool {
-	util.Log("Starting from " + projectHome)
+	util.Log("system", "Starting from "+projectHome)
 	util.SetHomePath(projectHome)
 	err := contenttype.LoadDefinition()
 	if err != nil {

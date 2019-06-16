@@ -24,6 +24,7 @@ func GetContentTypeHandler(contentType string) ContentTypeHandler {
 var operationHandlerList []OperationHandler = []OperationHandler{}
 
 func RegisterOperationHandler(handler OperationHandler) {
+	util.Log("system", "Registering operation handler "+handler.Identifier)
 	operationHandlerList = append(operationHandlerList, handler)
 }
 
