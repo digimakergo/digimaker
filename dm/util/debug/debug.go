@@ -1,6 +1,7 @@
 //Author xc, Created on 2019-05-04 14:26
 //{COPYRIGHTS}
-//This is a debug based on context.
+
+//Package debug provides debug info based on context so it can be user based and output to browser.
 package debug
 
 import (

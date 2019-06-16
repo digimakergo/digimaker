@@ -1,6 +1,7 @@
 //Author xc, Created on 2019-05-10 22:20
 //{COPYRIGHTS}
 
+//Package handler implements content related actions(eg.create/edit/delete/import) and callback mechanism while handling.
 package handler
 
 import (

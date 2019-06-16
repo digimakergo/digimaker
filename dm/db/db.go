@@ -1,6 +1,7 @@
 //Author xc, Created on 2019-03-27 21:00
 //{COPYRIGHTS}
 
+//Package db provides database operation and query building api.
 package db
 
 import (

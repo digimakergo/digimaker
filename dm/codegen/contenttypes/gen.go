@@ -1,3 +1,4 @@
+//Package dm/codegen/main generate content entity model based on contenttype.json
 package main
 
 import (

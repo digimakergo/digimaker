@@ -1,6 +1,7 @@
 //Author xc, Created on 2019-05-22 22:10
 //{COPYRIGHTS}
 
+// Package permission implements all the permission data malipulating and generic access matching
 package permission
 
 import (

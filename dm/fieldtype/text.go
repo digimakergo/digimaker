@@ -1,6 +1,7 @@
 //Author xc, Created on 2019-03-25 20:00
 //{COPYRIGHTS}
 
+//Package fieldtype implements build-in field types(value and fieldtype handler)
 package fieldtype
 
 import (

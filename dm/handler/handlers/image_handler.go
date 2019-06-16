@@ -1,5 +1,7 @@
 //Author xc, Created on 2019-05-10 22:48
 //{COPYRIGHTS}
+
+//Package handlers implements build-in action callbacks.
 package handlers
 
 import (

@@ -1,3 +1,4 @@
+//Package contenttype provides core interfaces and structs for content related model
 package contenttype
 
 import (
