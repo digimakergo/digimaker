@@ -1,4 +1,0 @@
-pattern: digit # digit - eg: cxzcz/xsd-xcx-10520, nameonly - eg: cxzcz/xsd-xcx
-nameonly:
- upper_case: false
- use_ascii: true

@@ -15,7 +15,6 @@ import (
 	"net/http"
 	"os"
 	"strconv"
-	"strings"
 	"time"
 
 	_ "github.com/go-sql-driver/mysql"
@@ -325,6 +324,13 @@ func main() {
 			Display(w, r, vars)
 		})
 	})
+
+	r.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
+			Display(w, r, vars)
+		})
+	})
+
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 			Display(w, r, map[string]string{"id": "1"})
@@ -378,27 +384,6 @@ func main() {
 	})
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../web"))))
-
-	viewContentMatcher := func(r *http.Request, rm *mux.RouteMatch) bool {
-		uri := r.RequestURI
-		index := strings.LastIndex(uri, "-")
-		result := false
-		if index != -1 {
-			str := uri[index+1:]
-			_, err := strconv.Atoi(str)
-			if err == nil {
-				rm.Vars = map[string]string{"id": str}
-				result = true
-			}
-		}
-		return result
-	}
-
-	r.MatcherFunc(viewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		DMHandle(w, r, func(w http.ResponseWriter, r *http.Request, vars map[string]string) {
-			Display(w, r, vars)
-		})
-	})
 
 	http.Handle("/", r)
 	http.ListenAndServe(":8089", nil)

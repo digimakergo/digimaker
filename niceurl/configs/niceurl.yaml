@@ -1,0 +1,8 @@
+#can support pattern based on content type. eg. folder will have full text, but article will have sfsd/fdfs/ewssa-1222 so it's quicker and
+pattern:
+    *:digit
+    folder:nameonly
+    # digit - eg: cxzcz/xsd-xcx-10520, nameonly - eg: cxzcz/xsd-xcx
+nameonly:
+ upper_case: false
+ use_ascii: true
