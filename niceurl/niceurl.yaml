@@ -1,3 +1,4 @@
-upper_case: false
-use_ascii: true
-append_id: false #if true, it will be like "news/this-is-article-3222" it will have better performance having id but less use friendly
+pattern: digit # digit - eg: cxzcz/xsd-xcx-10520, nameonly - eg: cxzcz/xsd-xcx
+nameonly:
+ upper_case: false
+ use_ascii: true

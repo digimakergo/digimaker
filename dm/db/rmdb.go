@@ -40,6 +40,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
 	columns := []string{"id", "parent_id", "main_id",
 		"hierarchy", "depth", "content_type",
 		"content_id", "language",
+		"identifier_path",
 		"name", "is_hidden", "is_invisible",
 		"priority", "uid", "section", "p"}
 	locationColumns := ""

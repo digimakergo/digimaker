@@ -190,7 +190,7 @@
             {{else}}
                 <tr class="content-row">
                 <td class="content-title">
-                    <a href="/content/view/{{$content.ID}}">
+                   <a href="/{{call $.generate_url $content}}">
                         <i class="icon-type type-{{$content.ContentType}}"></i>{{$content.Name}}
                     </a>
                 </td>
