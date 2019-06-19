@@ -1,0 +1,74 @@
+{
+   "text":{
+              "searchable": true,
+              "value": "TextField",
+              "name": "Text",
+              "translations": {"nor-no": "Tekst",
+                                "chi-cn": "文本"  }
+          },
+   "richtext":{ "searchable": true,
+                 "name": "Rich Text",
+                 "value": "RichTextField",
+                 "translations": {"nor-no": "Tekst",
+                                   "chi-cn": "文本"  }
+                },
+   "datetime":{  "searchable": true,
+                  "value": "TextField",
+                 "name": "Text",
+                 "translations": {"nor-no": "Tekst",
+                                   "chi-cn": "文本"  }
+             },
+   "author":{      "searchable": true,
+             "name": "Text",
+             "value": "TextField",
+             "translations": {"nor-no": "Tekst",
+                               "chi-cn": "文本"  }
+            },
+    "password":{      "searchable": true,
+                      "name": "Text",
+                      "value": "TextField",
+                      "translations": {"nor-no": "Tekst",
+                                        "chi-cn": "文本"  }
+                     },
+     "editorlist":{
+         "searchable": true,
+         "name": "Editors",
+         "value": "EditorList",
+         "translations": {"nor-no": "Tekst",
+                           "chi-cn": "文本"  }
+     },
+   "dmgooglemap":{       "searchable": true,
+         "name": "Text",
+         "value": "TextField",
+         "translations": {"nor-no": "Tekst",
+                           "chi-cn": "文本"  }
+         },
+     "relationlist":{
+         "searchable": false,
+         "name": "Relation list",
+         "value": "RelationList",
+         "is_relation": true,
+         "relation_settings": {"contenttype_from": "*",
+                               "data_fields":"cid,title",
+			       "embed_data": false,
+                               "data_pattern":"%[1]d %[2]s",
+                               "name": "Relation List"
+                         },
+         "translations": {"nor-no": "Tekst",
+                           "chi-cn": "文本"  }
+     },
+     "image_relation":{
+         "searchable": false,
+         "name": "Related Images",
+         "value": "RelationList",
+         "is_relation": true,
+         "relation_settings": {
+                     "contenttype_from": "image",
+                     "data_fields":"cuid,image_path",
+                     "embed_data":false,
+		     "data_pattern":"{cuid},{image_path}"
+                 },
+         "translations": {"nor-no": "Tekst",
+                           "chi-cn": "文本"  }
+     }
+}

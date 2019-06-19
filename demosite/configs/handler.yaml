@@ -1,0 +1,22 @@
+## conditions: event - handler event,
+## content_type - type hook into,
+## under - <location id>,
+## scope: <>
+
+##List of event: create/update/delete
+
+
+handlers:
+  test_handler:
+    event:
+    - create
+    - update
+    content_type:
+    - article
+    - folder
+  dm_clear_cache:
+    content_type:
+    - folder
+    - article
+    scope: site1
+    under: 12
