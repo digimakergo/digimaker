@@ -1,4 +1,61 @@
-{{ define "layout" }}
+<html>
+<head>
+    <title>{%block title%}Default title{% endblock %}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+    <style>
+        body{
+            font-family: Arial;
+            background: #f0f0f0;
+        }
 
-{{end}}
+        .header, .mainarea, .footer{
+            background: white;
+            width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .menu ul{
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .menu ul li{
+            display: inline-block
+        }
+
+        .menu ul a{
+            padding: 5px;
+        }
+
+        .mainarea > .full{
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="{{root|dm_niceurl}}">{{root.Location.Name}}</a> <br />
+        YOUR LOGO <br /> <br />
+        <div class="menu">
+            <ul>
+            {% for child in root|dm_children:"folder" %}
+                    {%if child.FolderType.Value == ""%}
+                    <li>
+                        <a href="/{{child|dm_niceurl}}">{{child.Location.Name}}</a>
+                    </li>
+                    {%endif%}
+            {%endfor%}
+            </ul>
+        </div>
+    </div>
+    <div class="mainarea">
+        {%block content%}Default body{% endblock %}
+    </div>
+    <div class="footer">
+ <br /> <br />
+        FOOTER <br /><br />
+    </div>
+</body>
+</html>

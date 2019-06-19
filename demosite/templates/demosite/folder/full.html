@@ -1,2 +1,17 @@
-fff
-fdsfsd
+{% extends "../base.html" %}
+
+{%block content%}
+<div class="{{content.ContentType}} full">
+    <h2>
+        {{content.Location.Name}}
+    </h2>
+    <div>
+        {% for child in content|dm_children:"article" %}
+                <div>
+                    <a href="/{{child|dm_niceurl}}">{{child.Location.Name}}</a>
+                </div>
+        {%endfor%}
+    </div>
+</div>
+
+{%endblock%}

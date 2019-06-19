@@ -1,3 +1,5 @@
 {#todo: Use condition here#}
-{% include "viewcontent_default.html" if_exists%}
-{% include "../demosite/folder/full.html" if_exists%}
+
+{% with "../demosite/"|add:content.ContentType|add:"/"|add:viewmode|add:".html" as template %}
+    {%include template if_exists%}
+{%endwith%}
