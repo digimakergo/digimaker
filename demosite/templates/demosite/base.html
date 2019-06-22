@@ -3,6 +3,7 @@
     <title>{%block title%}Default title{% endblock %}</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
+    <link rel="stylesheet" href="/static/css/site.css" />
     <style>
         body{
             font-family: Arial;
@@ -36,7 +37,7 @@
 </head>
 <body>
     <div class="header">
-        <a href="{{root|dm_niceurl}}">{{root.Location.Name}}</a> <br />
+        <a href="/{{root|dm_niceurl}}">{{root.Location.Name}}</a> <br />
         YOUR LOGO <br /> <br />
         <div class="menu">
             <ul>

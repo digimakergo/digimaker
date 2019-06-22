@@ -53,26 +53,28 @@ func GetConfigSectionI(section string, config ...string) map[string]interface{} 
 		filename = config[0]
 	}
 
-	viper.SetConfigName(filename)
-	viper.AddConfigPath(defaultSettings.ConfigFolder)
-	//todo: support override in section&setting level with order.
-	//todo: did viper cached all? need to verify.
+	sectionValue := GetConfigSectionAll(section, filename)
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		Error("Fatal error config file: ", err.Error())
-	}
 	var result map[string]interface{}
-	value := viper.Get(section)
-	if value == nil {
+	if sectionValue == nil {
 		Warning("Section ", section, " doesn't exist on ", filename)
 		result = nil
 	} else {
-		result = value.(map[string]interface{})
+		result = sectionValue.(map[string]interface{})
 	}
 	return result
 }
 
-func GetAll(config string) {
+func GetConfigSectionAll(section string, config string) interface{} {
+	viper.SetConfigName(config)
+	viper.AddConfigPath(defaultSettings.ConfigFolder)
+	//todo: support override in section&setting level with order.
+	//todo: did viper cached all? need to verify.
+	err := viper.ReadInConfig()
+	if err != nil {
+		Error("Fatal error config file: ", err.Error())
+	}
 
+	value := viper.Get(section)
+	return value
 }

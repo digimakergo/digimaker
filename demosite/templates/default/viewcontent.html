@@ -1,5 +1,3 @@
-{#todo: Use condition here#}
+{%import "../micro.html" include%}
 
-{% with "../demosite/"|add:content.ContentType|add:"/"|add:viewmode|add:".html" as template %}
-    {%include template if_exists%}
-{%endwith%}
+{{include( content, "full" )}}

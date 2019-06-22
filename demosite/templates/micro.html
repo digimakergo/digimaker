@@ -1,0 +1,12 @@
+{% macro include( content, viewmode) export%}
+
+{#todo: Use condition here#}
+
+{#dm_tplpath#}
+    {%with content|dm_tplpath:"full,demosite" as path%}
+        {% with "../"|add: path as template %}
+            <!-- include {{path}} -->
+            {%include template %}
+        {%endwith%}
+    {%endwith%}
+{% endmacro %}

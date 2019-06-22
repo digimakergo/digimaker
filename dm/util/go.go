@@ -3,6 +3,8 @@
 
 package util
 
+import "os"
+
 // This is utils for enhace go language.
 
 //IfElse implements ternary. Equvelant to <cond>?<trueV>:<falseV> in other language.
@@ -33,4 +35,11 @@ func ContainsInt(ints []int, i int) bool {
 		}
 	}
 	return false
+}
+
+func FileExists(path string) bool {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return false
+	}
+	return true
 }

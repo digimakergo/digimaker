@@ -14,6 +14,9 @@ debug:
   levels: error, warning, info
   ip: 127.0.0.1
 
+template:
+    folder: ["demosite"]
+
 # image:
 #     alias: {thumbnail:{width: 30}, large:{width: 800}}
 #     generated_when_upload: "thumbnail, large"

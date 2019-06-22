@@ -1,0 +1,37 @@
+a{
+    color: #e83030;
+}
+
+a:hover{
+    text-decoration: none;
+    color: red
+}
+
+h2{
+    font-size: 1.2em;
+}
+
+h2.title{
+    border-bottom: 1px solid #cccccc;
+    padding: 5px;
+}
+
+.summary{
+    font-size: 90%;
+    color: #333333;
+}
+
+.menu{
+    padding: 5px;
+    background: #e6e6e6;
+}
+
+.menu > ul{
+    float: right;
+}
+
+.menu::after{
+    content:"";
+    display: table;
+    clear: both;
+}
