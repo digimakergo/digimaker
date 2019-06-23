@@ -5,3 +5,6 @@ viewcontent:
 - contenttype: folder
   viewmode: full
   to: folder/full.html
+
+- viewmode: block
+  to: block.html

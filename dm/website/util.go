@@ -29,10 +29,12 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, siteI
 	result := ""
 	//get the match based on template folder order
 	for _, folder := range templateFolders {
-		pathWithTemplateFolder := folder + "/" + path
-		if util.FileExists(templateRootFolder + "/" + pathWithTemplateFolder) {
-			result = pathWithTemplateFolder
-			break
+		if path != "" {
+			pathWithTemplateFolder := folder + "/" + path
+			if util.FileExists(templateRootFolder + "/" + pathWithTemplateFolder) {
+				result = pathWithTemplateFolder
+				break
+			}
 		}
 	}
 	return result

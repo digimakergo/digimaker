@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+
 {%block content%}
 <div class="{{content.ContentType}} full">
     <h2>
@@ -12,5 +13,14 @@
                 </div>
         {%endfor%}
     </div>
+
+    <h3>Block view</h3>
+    <div>
+        {% for child in content|dm_children:"article" %}
+                {{include( child, "block" )}}
+        {%endfor%}
+    </div>
+
+
 </div>
 {%endblock%}

@@ -1,0 +1,16 @@
+{% macro include( content, viewmode) export%}
+
+{#dm_tplpath#}
+    {%with viewmode|add:",demosite" as params%}
+    {%with content|dm_tplpath:params as path%}
+        {% if path=="" %}
+            {PLEASE OVERRIDE. DEFAULT OUTPUT FOR {{content.ID}},{{content.Name}},{{viewmode}}}
+        {%else%}
+            {% with "../"|add: path as template %}
+                <!-- {{path}} -->
+                {%include template %}
+            {%endwith%}
+        {% endif %}
+    {%endwith%}
+    {%endwith%}
+{% endmacro %}

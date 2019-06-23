@@ -42,11 +42,11 @@
         <div class="menu">
             <ul>
             {% for child in root|dm_children:"folder" %}
-                    {%if child.FolderType.Value == ""%}
+                    {#if child.FolderType.Value == ""#}
                     <li>
                         <a href="/{{child|dm_niceurl}}">{{child.Location.Name}}</a>
                     </li>
-                    {%endif%}
+                    {#endif#}
             {%endfor%}
             </ul>
         </div>

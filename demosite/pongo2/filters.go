@@ -36,5 +36,4 @@ func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_tplpath", dmTplPath)
-
 }
