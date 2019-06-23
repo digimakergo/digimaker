@@ -1,4 +1,4 @@
-{% extends "../base.html" %}
+{% extends "base.html" %}
 
 {%block content%}
 <div class="{{content.ContentType}} full">
@@ -6,10 +6,10 @@
         {{content.Location.Name}}
     </h2>
     <div class="summary">
-        {{content.Summary.Value}}
+        {{content.Summary.Data}}
     </div>
     <div class="body">
-        {{content.Body.Value}}
+        {{content.Body.Data}}
     </div>
 </div>
 

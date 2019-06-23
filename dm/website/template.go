@@ -6,12 +6,16 @@ import (
 	"fmt"
 )
 
-var templateRootFolder = "/Users/xc/go/caf-prototype/src/dm/demosite/templates"
+var templateRootFolder = ""
 
 const templateViewContent = "viewcontent"
 
 //Get content view template.
 func GetContentTemplate(content contenttype.ContentTyper, viewmode string, siteIdentifier string) string {
+	if templateRootFolder == "" {
+		templateRootFolder = util.ConfigPath() + "/../templates" //todo: better way
+		fmt.Println(templateRootFolder)
+	}
 	matchData := map[string]interface{}{}
 	matchData["viewmode"] = viewmode
 	matchData["contenttype"] = content.ContentType()

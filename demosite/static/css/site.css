@@ -8,12 +8,16 @@ a:hover{
 }
 
 h2{
-    font-size: 1.2em;
+    font-size: 1.3em;
 }
 
 h2.title{
     border-bottom: 1px solid #cccccc;
     padding: 5px;
+}
+
+h3{
+    font-size: 1.2em
 }
 
 .summary{
@@ -34,4 +38,13 @@ h2.title{
     content:"";
     display: table;
     clear: both;
+}
+
+.block{
+    display:inline-block;
+    width: 30%;
+    border: 1px solid #cccccc;
+    margin: 5px;
+    padding: 10px;
+    background:#e8e8e8
 }

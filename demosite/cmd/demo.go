@@ -70,6 +70,8 @@ func viewContent(w http.ResponseWriter, r *http.Request, id int, templateFolder 
 	content, err := querier.FetchByID(id)
 	root, err := querier.FetchByID(55)
 	fmt.Println(err)
+	fmt.Println(content)
+	fmt.Println(root)
 	err = tplExample.ExecuteWriter(pongo2.Context{"content": content, "root": root, "test": "test.html", "viewmode": "full", "site": "demosite"}, w)
 	if err != nil {
 		fmt.Println(err)

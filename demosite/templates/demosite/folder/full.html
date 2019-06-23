@@ -17,7 +17,7 @@
     <h3>Block view</h3>
     <div>
         {% for child in content|dm_children:"article" %}
-                {{include( child, "block" )}}
+                {{viewcontent( child, "block" )}}
         {%endfor%}
     </div>
 
