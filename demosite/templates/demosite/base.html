@@ -1,38 +1,13 @@
 <html>
 <head>
     <title>{%block title%}Demosite - {{content.Name}}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <link rel="stylesheet" href="/static/css/site.css" />
     <style>
-        body{
-            font-family: Arial;
-            background: #f0f0f0;
-        }
 
-        .header, .mainarea, .footer{
-            background: white;
-            width: 1000px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .menu ul{
-            padding: 0px;
-            margin: 0px;
-        }
-
-        .menu ul li{
-            display: inline-block
-        }
-
-        .menu ul a{
-            padding: 5px;
-        }
-
-        .mainarea > .full{
-            padding: 10px;
-        }
     </style>
 </head>
 <body>
@@ -55,6 +30,7 @@
         {%block content%}Default body{% endblock %}
     </div>
     <div class="footer">
+        {{include( "facebook" )}}
  <br /> <br />
         FOOTER <br /><br />
     </div>

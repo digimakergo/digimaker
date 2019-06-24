@@ -20,5 +20,7 @@
 
 {#include path from override #}
 {% macro include( path ) export%}
-    path
+    {%with "../default/"|add:path|add:".html" as template%}
+        {%include template%}
+    {%endwith%}
 {% endmacro %}
