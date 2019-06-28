@@ -24,3 +24,5 @@
         {%include template%}
     {%endwith%}
 {% endmacro %}
+
+{% macro niceurl( content ) export%}/{{prefix}}/{{content|dm_niceurl}}{% endmacro %}

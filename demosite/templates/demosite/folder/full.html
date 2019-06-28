@@ -9,7 +9,7 @@
     <div>
         {% for child in content|dm_children:"article" %}
                 <div>
-                    <a href="/{{child|dm_niceurl}}">{{child.Location.Name}}</a>
+                    <a href="{{niceurl(child)}}">{{child.Location.Name}}</a>
                 </div>
         {%endfor%}
     </div>

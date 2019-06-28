@@ -40,31 +40,31 @@ func main() {
 	//route subsites
 	for _, site := range sitelist {
 		s := r.PathPrefix("/" + site + "/").Subrouter()
-		RouteContent(s, site)
+		RouteContent(s, site, site)
 	}
 	//route default site
-	RouteContent(r, defaultSite)
+	RouteContent(r, defaultSite, "")
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../static"))))
 	http.Handle("/", r)
 	http.ListenAndServe(":8089", nil)
 }
 
-func RouteContent(r *mux.Router, site string) {
+func RouteContent(r *mux.Router, site string, prefix string) {
 	r.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, _ := strconv.Atoi(vars["id"])
-		viewContent(w, r, id, site) //todo: use default site.
+		viewContent(w, r, id, site, prefix) //todo: use default site.
 	})
 
 	r.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, _ := strconv.Atoi(vars["id"])
-		viewContent(w, r, id, site)
+		viewContent(w, r, id, site, prefix)
 	})
 }
 
-func viewContent(w http.ResponseWriter, r *http.Request, id int, templateFolder string) {
+func viewContent(w http.ResponseWriter, r *http.Request, id int, templateFolder string, prefix string) {
 	// Execute the template per HTTP request
 	pongo2.DefaultSet.Debug = true
 	pongo2.DefaultSet.SetBaseDirectory("../templates/" + templateFolder)
@@ -75,7 +75,7 @@ func viewContent(w http.ResponseWriter, r *http.Request, id int, templateFolder 
 	fmt.Println(err)
 	fmt.Println(content)
 	fmt.Println(root)
-	err = tplExample.ExecuteWriter(pongo2.Context{"content": content, "root": root, "viewmode": "full", "site": "demosite"}, w)
+	err = tplExample.ExecuteWriter(pongo2.Context{"content": content, "root": root, "viewmode": "full", "site": "demosite", "prefix": prefix}, w)
 	if err != nil {
 		fmt.Println(err)
 		// http.Error(w, err.Error(), http.StatusInternalServerError)

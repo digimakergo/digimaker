@@ -19,7 +19,7 @@
             {% for child in root|dm_children:"folder" %}
                     {%if child.FolderType.Data == ""%}
                     <li>
-                        <a href="/{{child|dm_niceurl}}">{{child.Location.Name}}</a>
+                        <a href="{{niceurl(child)}}">{{child.Location.Name}}</a>
                     </li>
                     {%endif%}
             {%endfor%}
