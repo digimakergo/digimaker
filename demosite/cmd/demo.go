@@ -3,7 +3,6 @@ package main
 import (
 	"dm/dm"
 	"dm/dm/handler"
-	"dm/dm/website"
 	"dm/niceurl"
 	"fmt"
 	"net/http"
@@ -34,31 +33,35 @@ func BootStrap() {
 func main() {
 	BootStrap()
 
+	sitelist := []string{"demosite", "test"} //todo: load dynamically either from api or config file.
+	defaultSite := "demosite"
+
 	r := mux.NewRouter()
+	//route subsites
+	for _, site := range sitelist {
+		s := r.PathPrefix("/" + site + "/").Subrouter()
+		RouteContent(s, site)
+	}
+	//route default site
+	RouteContent(r, defaultSite)
 
-	r.HandleFunc("/{site}/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		id, _ := strconv.Atoi(vars["id"])
-		site, _ := vars["site"]
-		folders := website.TemplateFolders(site)
-		viewContent(w, r, id, folders[0])
-	})
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../static"))))
+	http.Handle("/", r)
+	http.ListenAndServe(":8089", nil)
+}
 
+func RouteContent(r *mux.Router, site string) {
 	r.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, _ := strconv.Atoi(vars["id"])
-		viewContent(w, r, id, "demosite") //todo: use default site.
+		viewContent(w, r, id, site) //todo: use default site.
 	})
 
 	r.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, _ := strconv.Atoi(vars["id"])
-		viewContent(w, r, id, "demosite")
+		viewContent(w, r, id, site)
 	})
-
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../static"))))
-	http.Handle("/", r)
-	http.ListenAndServe(":8089", nil)
 }
 
 func viewContent(w http.ResponseWriter, r *http.Request, id int, templateFolder string) {
@@ -72,7 +75,7 @@ func viewContent(w http.ResponseWriter, r *http.Request, id int, templateFolder 
 	fmt.Println(err)
 	fmt.Println(content)
 	fmt.Println(root)
-	err = tplExample.ExecuteWriter(pongo2.Context{"content": content, "root": root, "test": "test.html", "viewmode": "full", "site": "demosite"}, w)
+	err = tplExample.ExecuteWriter(pongo2.Context{"content": content, "root": root, "viewmode": "full", "site": "demosite"}, w)
 	if err != nil {
 		fmt.Println(err)
 		// http.Error(w, err.Error(), http.StatusInternalServerError)
