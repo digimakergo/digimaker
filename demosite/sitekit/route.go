@@ -3,6 +3,7 @@ package sitekit
 import (
 	"dm/dm/handler"
 	"dm/dm/util"
+	"dm/dm/website"
 	"dm/niceurl"
 	"errors"
 	"fmt"
@@ -13,19 +14,31 @@ import (
 	"gopkg.in/flosch/pongo2.v2"
 )
 
+func RouteFromFile(r *mux.Router, section string, configFile string) error {
+	config := util.GetConfigSectionAll(section, configFile).(map[string]interface{})
+	for siteIdentifier, siteConfig := range config {
+		fmt.Println(siteIdentifier)
+		err := RouteContent(r, siteIdentifier, siteConfig.(map[string]interface{}))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 //Route a site content with configuration.
 //Config includes:
 // route:
 // template_folder
 // root:
 // default:
-func RouteContent(r *mux.Router, config map[string]interface{}) error {
+func RouteContent(r *mux.Router, identifier string, config map[string]interface{}) error {
 	routesConfig := config["routes"].([]interface{})
 
 	if _, ok := config["template_folder"]; !ok {
 		return errors.New("Need template_folder setting.")
 	}
-	tempalteFolder := util.InterfaceToStringArray(config["template_folder"].([]interface{}))
+	templateFolder := util.InterfaceToStringArray(config["template_folder"].([]interface{}))
 
 	if _, ok := config["root"]; !ok {
 		return errors.New("Need root setting.")
@@ -36,6 +49,9 @@ func RouteContent(r *mux.Router, config map[string]interface{}) error {
 		return errors.New("Need default setting.")
 	}
 	defaultContent := config["default"].(int)
+	siteSettings := website.SiteSettings{TemplateBase: templateFolder[0],
+		TemplateFolders: templateFolder}
+	website.InitSiteSettings(identifier, siteSettings)
 	//go through all routes.
 	for _, routeConfig := range routesConfig {
 		var hosts []string
@@ -67,7 +83,7 @@ func RouteContent(r *mux.Router, config map[string]interface{}) error {
 				} else {
 					s = r.Host(host).Subrouter()
 				}
-				routeContent(s, tempalteFolder[0], path, root, defaultContent)
+				routeContent(s, templateFolder[0], path, root, defaultContent)
 			}
 		}
 	}
@@ -94,7 +110,7 @@ func renderContent(w http.ResponseWriter, r *http.Request, id int, templateFolde
 	// Execute the template per HTTP request
 	pongo2.DefaultSet.Debug = true
 	pongo2.DefaultSet.SetBaseDirectory("../templates/" + templateFolder)
-	tplExample := pongo2.Must(pongo2.FromCache("../default/viewcontent.html"))
+	tplExample := pongo2.Must(pongo2.FromCache("../default/content/view.html"))
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
 	//todo: handle error, template compiling much better.

@@ -6,16 +6,12 @@ import (
 	"fmt"
 )
 
-var templateRootFolder = ""
-
-const templateViewContent = "viewcontent"
+const templateViewContent = "content_view"
 
 //Get content view template.
-func GetContentTemplate(content contenttype.ContentTyper, viewmode string, siteIdentifier string) string {
-	if templateRootFolder == "" {
-		templateRootFolder = util.ConfigPath() + "/../templates" //todo: better way
-		fmt.Println(templateRootFolder)
-	}
+func GetContentTemplate(content contenttype.ContentTyper, viewmode string, settings SiteSettings) string {
+	templateRootFolder := util.ConfigPath() + "/../templates"
+
 	matchData := map[string]interface{}{}
 	matchData["viewmode"] = viewmode
 	matchData["contenttype"] = content.ContentType()
@@ -29,7 +25,7 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, siteI
 
 	path := MatchTemplate(templateViewContent, matchData)
 
-	templateFolders := TemplateFolders(siteIdentifier)
+	templateFolders := settings.TemplateFolders
 	result := ""
 	//get the match based on template folder order
 	for _, folder := range templateFolders {

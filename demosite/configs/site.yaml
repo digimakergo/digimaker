@@ -23,9 +23,15 @@ sites:
       - host: "localhost:8089"
     root: 55
     default: 55
+    resource_prefix: "static" #eg. static/assets
     template_folder:
-      - "demosite"  #fist template folder will be used for base template(layout)
+      - "demosite"  #first template folder will be used for base template(layout)
       - "test"
+
+controllers:
+  user/view:
+    site:
+        - demosite      
 
 template:
     folder: ["demosite"]

@@ -1,4 +1,4 @@
-viewcontent:
+content_view:
 - contenttype: folder
   viewmode: full
   to: folder/full.html
@@ -7,3 +7,7 @@ viewcontent:
   to: article/full.html
 - viewmode: block
   to: block.html
+
+user_view:
+    - viewmode: full
+      to: viewuser.html

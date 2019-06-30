@@ -1,5 +1,5 @@
 {% macro viewcontent( content, viewmode) export%}
-    {%with viewmode|add:",demosite" as params%}
+    {%with viewmode|add:","|add:site as params%}
     {%with content|dm_tplpath:params as path%}
         {% if path=="" %}
             {PLEASE OVERRIDE. DEFAULT OUTPUT FOR {{content.ID}},{{content.Name}},{{viewmode}}}

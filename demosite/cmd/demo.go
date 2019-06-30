@@ -2,7 +2,6 @@ package main
 
 import (
 	"dm/dm"
-	"dm/dm/util"
 	"fmt"
 	"net/http"
 	"os"
@@ -32,14 +31,10 @@ func main() {
 
 	r := mux.NewRouter()
 	//read from config file, route content.
-	config := util.GetConfigSectionAll("sites", "site").(map[string]interface{})
-	for siteIdentifier, siteConfig := range config {
-		fmt.Println(siteIdentifier)
-		err := sitekit.RouteContent(r, siteConfig.(map[string]interface{}))
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+	err := sitekit.RouteFromFile(r, "sites", "site")
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
 	fmt.Println("success!")
 
