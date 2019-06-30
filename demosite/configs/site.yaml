@@ -27,11 +27,21 @@ sites:
     template_folder:
       - "demosite"  #first template folder will be used for base template(layout)
       - "test"
+  test1:
+     routes:
+       - host: "localhost:8089" ##separated by ",", support regular expression like{sub:[0-9]+}
+         path: "test1" ##separated by ","
+     root: 55
+     default: 55
+     resource_prefix: "static" #eg. static/assets
+     template_folder:
+       - "demosite"  #first template folder will be used for base template(layout)
+       - "test"
 
 controllers:
   user/view:
     site:
-        - demosite      
+        - demosite
 
 template:
     folder: ["demosite"]

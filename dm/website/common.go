@@ -1,10 +1,16 @@
 package website
 
+import "dm/dm/contenttype"
+
 var siteSettings = map[string]SiteSettings{}
 
+//a basic setting to run a site.
 type SiteSettings struct {
 	TemplateBase    string
 	TemplateFolders []string
+	RootContent     contenttype.ContentTyper
+	DefaultContent  contenttype.ContentTyper
+	Routes          []interface{}
 }
 
 func GetSiteSettings(identifier string) SiteSettings {
