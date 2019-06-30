@@ -138,3 +138,18 @@ func MatchCondition(conditions map[string]interface{}, target map[string]interfa
 	}
 	return matchResult, matchLog
 }
+
+//Split with triming space. "," is the default separator if no seperator is provided.
+func Split(str string, seperator ...string) []string {
+	sep := ""
+	if len(seperator) == 0 {
+		sep = ","
+	} else {
+		sep = seperator[0]
+	}
+	arr := strings.Split(str, sep)
+	for i, value := range arr {
+		arr[i] = strings.TrimSpace(value)
+	}
+	return arr
+}

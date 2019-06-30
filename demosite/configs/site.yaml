@@ -18,7 +18,7 @@ debug:
 sites:
 - routes:
   - host: "localhost:8089" ##separated by ",", support regular expression like{sub:[0-9]+}
-    path: "demosite,test" ##separated by ,
+    path: "demosite,test" ##separated by ","
   - host: "localhost:8089"
   root: 55
   default: 55

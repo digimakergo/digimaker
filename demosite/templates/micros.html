@@ -25,4 +25,4 @@
     {%endwith%}
 {% endmacro %}
 
-{% macro niceurl( content ) export%}/{{prefix}}/{{content|dm_niceurl}}{% endmacro %}
+{% macro niceurl( content ) export%}{%if prefix!=""%}/{{prefix}}{%endif%}/{{content|dm_niceurl}}{% endmacro %}
