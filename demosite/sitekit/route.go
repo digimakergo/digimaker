@@ -19,7 +19,7 @@ import (
 // template_folder
 // root:
 // default:
-func RouteContent(r *mux.Router, config map[interface{}]interface{}) error {
+func RouteContent(r *mux.Router, config map[string]interface{}) error {
 	routesConfig := config["routes"].([]interface{})
 
 	if _, ok := config["template_folder"]; !ok {
@@ -80,30 +80,40 @@ func routeContent(r *mux.Router, templateFolder string, prefix string, root int,
 	r.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, _ := strconv.Atoi(vars["id"])
-		viewContent(w, r, id, templateFolder, prefix)
+		renderContent(w, r, id, templateFolder, prefix, root, defaultContent)
 	})
 
 	r.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, _ := strconv.Atoi(vars["id"])
-		viewContent(w, r, id, templateFolder, prefix)
+		renderContent(w, r, id, templateFolder, prefix, root, defaultContent)
 	})
 }
 
-func viewContent(w http.ResponseWriter, r *http.Request, id int, templateFolder string, prefix string) {
+func renderContent(w http.ResponseWriter, r *http.Request, id int, templateFolder string, prefix string, rootContent int, defaultContent int) {
 	// Execute the template per HTTP request
 	pongo2.DefaultSet.Debug = true
 	pongo2.DefaultSet.SetBaseDirectory("../templates/" + templateFolder)
 	tplExample := pongo2.Must(pongo2.FromCache("../default/viewcontent.html"))
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
-	root, err := querier.FetchByID(55)
-	fmt.Println(err)
-	fmt.Println(content)
-	fmt.Println(root)
-	err = tplExample.ExecuteWriter(pongo2.Context{"content": content, "root": root, "viewmode": "full", "site": "demosite", "prefix": prefix}, w)
+	//todo: handle error, template compiling much better.
+	if err != nil {
+		fmt.Println(err)
+	}
+	if !util.ContainsInt(content.GetLocation().Path(), rootContent) {
+		w.Write([]byte("Not valid content"))
+		return
+	}
+	root, err := querier.FetchByID(rootContent)
 	if err != nil {
 		fmt.Println(err)
 		// http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
+	err = tplExample.ExecuteWriter(pongo2.Context{"content": content,
+		"root":     root,
+		"viewmode": "full",
+		"site":     "demosite",
+		"prefix":   prefix}, w)
+
 }

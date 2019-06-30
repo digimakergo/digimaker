@@ -32,9 +32,10 @@ func main() {
 
 	r := mux.NewRouter()
 	//read from config file, route content.
-	config := util.GetConfigSectionAll("sites", "site").([]interface{})
-	for _, siteConfig := range config {
-		err := sitekit.RouteContent(r, siteConfig.(map[interface{}]interface{}))
+	config := util.GetConfigSectionAll("sites", "site").(map[string]interface{})
+	for siteIdentifier, siteConfig := range config {
+		fmt.Println(siteIdentifier)
+		err := sitekit.RouteContent(r, siteConfig.(map[string]interface{}))
 		if err != nil {
 			fmt.Println(err.Error())
 			return
