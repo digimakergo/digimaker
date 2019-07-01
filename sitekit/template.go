@@ -1,4 +1,4 @@
-package website
+package sitekit
 
 import (
 	"dm/dm/contenttype"

@@ -2,7 +2,7 @@
 //{COPYRIGHTS}
 
 //Package website provides website buiding toolkits, template rendering&override. Note: routing is in another package.
-package website
+package sitekit
 
 //
 // //Given an id RenderContent will output content

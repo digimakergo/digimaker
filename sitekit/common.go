@@ -1,4 +1,4 @@
-package website
+package sitekit
 
 import "dm/dm/contenttype"
 
@@ -10,7 +10,7 @@ type SiteSettings struct {
 	TemplateFolders []string
 	RootContent     contenttype.ContentTyper
 	DefaultContent  contenttype.ContentTyper
-	Routes          []interface{}
+	Routes          []interface{} //host, path.
 }
 
 func GetSiteSettings(identifier string) SiteSettings {

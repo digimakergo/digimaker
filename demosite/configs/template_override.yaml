@@ -11,3 +11,6 @@ content_view:
 user_view:
     - viewmode: full
       to: viewuser.html
+
+user/list:
+    - to: viewuser.html

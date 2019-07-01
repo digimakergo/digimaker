@@ -10,7 +10,8 @@ import (
 	"strconv"
 
 	_ "dm/demosite/entity"
-	"dm/demosite/sitekit"
+	"dm/sitekit"
+	_ "dm/sitekit/pongo2"
 
 	"github.com/gorilla/mux"
 )
@@ -45,7 +46,7 @@ func main() {
 
 	//example of route
 	sitekit.SiteRouterHandle(r, "test1", "/user/list", func(w http.ResponseWriter, re *http.Request) {
-		w.Write([]byte("user/list"))
+		sitekit.OutputTemplate(w, re, "test1", "user/list")
 	})
 
 	//loop sites and route

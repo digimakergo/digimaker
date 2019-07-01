@@ -1,4 +1,4 @@
-package sitekit
+package pongo2
 
 import (
 	"context"
@@ -6,8 +6,8 @@ import (
 	"dm/dm/handler"
 	"dm/dm/util"
 	"dm/dm/util/debug"
-	"dm/dm/website"
 	"dm/niceurl"
+	"dm/sitekit"
 	"fmt"
 	"strings"
 
@@ -30,10 +30,10 @@ func dmNiceurl(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Er
 
 func dmTplPath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	paramArr := util.Split(param.String())
-	settings := website.GetSiteSettings(paramArr[1])
+	settings := sitekit.GetSiteSettings(paramArr[1])
 	fmt.Println(param)
 	fmt.Println(settings)
-	path := website.GetContentTemplate(in.Interface().(contenttype.ContentTyper), strings.TrimSpace(paramArr[0]), settings)
+	path := sitekit.GetContentTemplate(in.Interface().(contenttype.ContentTyper), strings.TrimSpace(paramArr[0]), settings)
 	fmt.Println(path)
 	return pongo2.AsValue(path), nil
 }
