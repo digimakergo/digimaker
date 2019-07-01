@@ -1,0 +1,22 @@
+{%import "../micros.html" output_content,output,niceurl%}
+
+{% comment %}
+Available varilables:
+
+For content(content/view):
+- site
+- content
+- root
+- viewmode
+- prefix
+
+For non content:
+- site
+- parameter given in handler/controller
+{% endcomment %}
+
+{%if template == "content/view" %}
+    {{output_content( content, "full" )}}
+{%else%}
+    {{output( template, matched_data )}}
+{%endif%}

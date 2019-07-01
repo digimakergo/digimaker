@@ -85,44 +85,45 @@ func HandleContent(r *mux.Router) error {
 	return nil
 }
 
+//Output content using conent template
 func OutputContent(w http.ResponseWriter, r *http.Request, id int, siteIdentifier string, prefix string) {
-	// Execute the template per HTTP request
-	pongo2.DefaultSet.Debug = true
-	siteSettings := GetSiteSettings(siteIdentifier)
-	pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
-	tpl := pongo2.Must(pongo2.FromCache("../default/content/view.html"))
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
 	//todo: handle error, template compiling much better.
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	siteSettings := GetSiteSettings(siteIdentifier)
 	if !util.ContainsInt(content.GetLocation().Path(), siteSettings.RootContent.GetLocation().ID) {
 		w.Write([]byte("Not valid content"))
 		return
 	}
 
-	err = tpl.ExecuteWriter(pongo2.Context{"content": content,
+	data := map[string]interface{}{"content": content,
 		"root":     siteSettings.RootContent,
 		"viewmode": "full",
-		"site":     "demosite",
-		"prefix":   prefix}, w)
+		"prefix":   prefix}
+	Output(w, r, siteIdentifier, "content/view", data)
 }
 
-func OutputTemplate(w http.ResponseWriter, r *http.Request, siteIdentifier string, templatePath string, matchData ...map[string]interface{}) {
-	realPath := ""
-	if len(matchData) == 0 {
-		realPath = MatchTemplate(templatePath, map[string]interface{}{})
-	} else {
-		realPath = MatchTemplate(templatePath, matchData[0])
-	}
-	if realPath == "" {
-		realPath = "default/" + templatePath + ".html"
-	}
+//Output using template
+func Output(w http.ResponseWriter, r *http.Request, siteIdentifier string, templatePath string, variables map[string]interface{}, matchedData ...map[string]interface{}) {
 	siteSettings := GetSiteSettings(siteIdentifier)
 	pongo2.DefaultSet.Debug = true
 	pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
-	fmt.Println(realPath)
-	tpl := pongo2.Must(pongo2.FromCache("../" + realPath))
-	tpl.Execute(pongo2.Context{})
+	tpl := pongo2.Must(pongo2.FromCache("../main.html"))
+
+	variables["site"] = siteIdentifier
+
+	variables["template"] = templatePath
+	if len(matchedData) == 0 {
+		variables["matched_data"] = nil
+	} else {
+		variables["matched_data"] = matchedData[0]
+	}
+	err := tpl.ExecuteWriter(pongo2.Context(variables), w)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+	}
 }

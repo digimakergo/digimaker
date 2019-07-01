@@ -43,7 +43,7 @@ func main() {
 	//Handle custom module.
 	//This should be before hanlding content, otherwise it can be routed by content first.
 	sitekit.SiteRouterHandle(r, "test1", "/user/list", func(w http.ResponseWriter, re *http.Request) {
-		sitekit.OutputTemplate(w, re, "test1", "user/list")
+		sitekit.Output(w, re, "test1", "user/list", map[string]interface{}{}, map[string]interface{}{"test": "hello"})
 	})
 
 	//Handle content
