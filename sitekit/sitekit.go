@@ -1,22 +1,23 @@
 package sitekit
 
 import (
+	"dm/dm/contenttype"
 	"dm/dm/handler"
 	"dm/dm/util"
-	"errors"
+	"dm/niceurl"
 	"fmt"
 	"net/http"
+	"strconv"
+
+	"github.com/pkg/errors"
 
 	"github.com/gorilla/mux"
 	"gopkg.in/flosch/pongo2.v2"
 )
 
-func Init(r *mux.Router, config map[string]interface{}) error {
+func InitSites(r *mux.Router, config map[string]interface{}) error {
 	for siteIdentifier, item := range config {
 		siteConfig := item.(map[string]interface{})
-		//init site settings
-
-		routesConfig := siteConfig["routes"].([]interface{})
 
 		if _, ok := siteConfig["template_folder"]; !ok {
 			return errors.New("Need template_folder setting.")
@@ -29,24 +30,57 @@ func Init(r *mux.Router, config map[string]interface{}) error {
 		root := siteConfig["root"].(int)
 		rootContent, err := handler.Querier().FetchByID(root)
 		if err != nil {
-			return err
+			return errors.Wrap(err, "Root doesn't exist.")
 		}
 
+		//todo: default can be optional.
 		if _, ok := siteConfig["default"]; !ok {
 			return errors.New("Need default setting.")
 		}
 		defaultInt := siteConfig["default"].(int)
-		defaultContent, err := handler.Querier().FetchByID(defaultInt)
-		if err != nil {
-			return err
+		var defaultContent contenttype.ContentTyper
+		if defaultInt == root {
+			defaultContent = rootContent
+		} else {
+			defaultContent, err = handler.Querier().FetchByID(defaultInt)
+			if err != nil {
+				return errors.Wrap(err, "Default doesn't exist.")
+			}
 		}
 
+		routesConfig := siteConfig["routes"].([]interface{})
 		siteSettings := SiteSettings{TemplateBase: templateFolder[0],
 			TemplateFolders: templateFolder,
 			RootContent:     rootContent,
 			DefaultContent:  defaultContent,
 			Routes:          routesConfig}
-		InitSiteSettings(siteIdentifier, siteSettings)
+		SetSiteSettings(siteIdentifier, siteSettings)
+	}
+	return nil
+}
+
+func HandleContent(r *mux.Router) error {
+	//loop sites and route
+	sites := GetSites()
+	for _, identifier := range sites {
+		var handleContentView = func(w http.ResponseWriter, r *http.Request) {
+			vars := mux.Vars(r)
+			id, _ := strconv.Atoi(vars["id"])
+			prefix := ""
+			if path, ok := vars["path"]; ok {
+				prefix = path
+			}
+			OutputContent(w, r, id, identifier, prefix)
+		}
+
+		//site route and get sub route
+		err := SiteRouter(r, identifier, func(s *mux.Router) {
+			s.HandleFunc("/content/view/{id}", handleContentView)
+			s.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(handleContentView)
+		})
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -17,6 +17,14 @@ func GetSiteSettings(identifier string) SiteSettings {
 	return siteSettings[identifier]
 }
 
-func InitSiteSettings(identifier string, settings SiteSettings) {
+func GetSites() []string {
+	var result []string
+	for key, _ := range siteSettings {
+		result = append(result, key)
+	}
+	return result
+}
+
+func SetSiteSettings(identifier string, settings SiteSettings) {
 	siteSettings[identifier] = settings
 }

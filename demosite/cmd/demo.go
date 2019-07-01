@@ -3,11 +3,9 @@ package main
 import (
 	"dm/dm"
 	"dm/dm/util"
-	"dm/niceurl"
 	"fmt"
 	"net/http"
 	"os"
-	"strconv"
 
 	_ "dm/demosite/entity"
 	"dm/sitekit"
@@ -32,44 +30,27 @@ func BootStrap() {
 
 func main() {
 	BootStrap()
-
 	r := mux.NewRouter()
-	//read from config file, route content.
-	config := util.GetConfigSectionAll("sites", "site").(map[string]interface{})
 
-	//init
-	err := sitekit.Init(r, config)
+	//Init sites
+	config := util.GetConfigSectionAll("sites", "site").(map[string]interface{})
+	err := sitekit.InitSites(r, config)
 	if err != nil {
 		fmt.Println(err.Error())
 		return
 	}
 
-	//example of route
+	//Handle custom module.
+	//This should be before hanlding content, otherwise it can be routed by content first.
 	sitekit.SiteRouterHandle(r, "test1", "/user/list", func(w http.ResponseWriter, re *http.Request) {
 		sitekit.OutputTemplate(w, re, "test1", "user/list")
 	})
 
-	//loop sites and route
-	for identifier, _ := range config {
-		var handleContentView = func(w http.ResponseWriter, r *http.Request) {
-			vars := mux.Vars(r)
-			id, _ := strconv.Atoi(vars["id"])
-			prefix := ""
-			if path, ok := vars["path"]; ok {
-				prefix = path
-			}
-			sitekit.OutputContent(w, r, id, identifier, prefix)
-		}
-
-		//site route and get sub route
-		err := sitekit.SiteRouter(r, identifier, func(s *mux.Router) {
-			s.HandleFunc("/content/view/{id}", handleContentView)
-			s.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(handleContentView)
-		})
-		if err != nil {
-			fmt.Println(err.Error())
-			return
-		}
+	//Handle content
+	err = sitekit.HandleContent(r)
+	if err != nil {
+		fmt.Println(err.Error())
+		return
 	}
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../static"))))

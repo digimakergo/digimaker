@@ -6,9 +6,10 @@ Sitekit is a toolkit which provides apis to build sites based on dm content fram
 
 - multi sites support
 - load multi sites from yaml config file or api, or both.
-- powerful template override based on conditions
+- powerful template override based on content conditions
 - nice url(from niceurl package)
 - route which can be integrate with other route by using sub route
+- template override can be used for custom module/controller
 
 ### Template engine
 For now the primary template engine is pongo2.
