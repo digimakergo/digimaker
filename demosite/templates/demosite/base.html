@@ -18,7 +18,7 @@
             <ul>
             {% for child in root|dm_children:"folder" %}
                     {%if child.FolderType.Data == ""%}
-                    <li>
+                    <li {%for i in content.Path()%}{%if i==child.ID%}class='current'{%endif%}{%endfor%}>
                         <a href="{{niceurl(child)}}">{{child.Location.Name}}</a>
                     </li>
                     {%endif%}

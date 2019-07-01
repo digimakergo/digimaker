@@ -107,7 +107,6 @@ func OutputContent(w http.ResponseWriter, r *http.Request, id int, siteIdentifie
 		"viewmode": "full",
 		"site":     "demosite",
 		"prefix":   prefix}, w)
-
 }
 
 func OutputTemplate(w http.ResponseWriter, r *http.Request, siteIdentifier string, templatePath string, matchData ...map[string]interface{}) {
