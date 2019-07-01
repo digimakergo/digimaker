@@ -14,3 +14,5 @@ Sitekit is a toolkit which provides apis to build sites based on dm content fram
 For now the primary template engine is pongo2.
 
 There is idea to support different template engines for different purpose(eg. pre-compiled template engine for performance sensitive case).
+
+See [Demosite](../demosite) for example use.
