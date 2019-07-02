@@ -20,7 +20,7 @@
 
 {#include path from override #}
 {% macro output( path, matched_data ) export%}
-    {{#todo: match it#}}
+    {#todo: match it#}
     {%with "../default/"|add:path|add:".html" as template%}
         {%include template%}
     {%endwith%}

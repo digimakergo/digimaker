@@ -56,6 +56,6 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../static"))))
 	http.Handle("/", r)
 	fmt.Println("success!")
-	http.ListenAndServe(":8089", nil)
+	http.ListenAndServe(":8092", nil)
 
 }
