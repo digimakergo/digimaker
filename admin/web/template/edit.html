@@ -37,7 +37,7 @@
                 {{if( eq $fieldDef.FieldType "text" )}}
                     <input type="text" class="form-control" name="{{$identifier}}" value="{{($.content.Value $identifier).Value}}" />
                 {{else if ( eq $fieldDef.FieldType "richtext" )}}
-                    <textarea name="{{$identifier}}" class="form-control field-richtext" rows="5" cols="80">{{($.content.Value $identifier).Value}}</textarea>
+                    <textarea name="{{$identifier}}" class="form-control field-richtext">{{($.content.Value $identifier).Value}}</textarea>
                 {{else}}
                     <span style="font-size: 70%">TO BE SUPPORTED - {{$fieldDef.FieldType}}</span>
                 {{end}}
