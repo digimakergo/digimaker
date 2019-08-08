@@ -77,10 +77,19 @@ func HandleContent(r *mux.Router) error {
 		err := SiteRouter(r, identifier, func(s *mux.Router) {
 			s.HandleFunc("/content/view/{id}", handleContentView)
 			s.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(handleContentView)
+
+			//default page to same as handling content/view/<default>
+			s.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				defaultContent := siteSettings[identifier].DefaultContent
+				defaultContentID := defaultContent.GetLocation().ID
+				r = mux.SetURLVars(r, map[string]string{"id": strconv.Itoa(defaultContentID)})
+				handleContentView(w, r)
+			})
 		})
 		if err != nil {
 			return err
 		}
+
 	}
 	return nil
 }
