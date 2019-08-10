@@ -21,6 +21,12 @@ Under demosite/cmd folder
 
 Visit http://localhost:8092
 
+
+**Admin(to be changed)**
+ - Configuration: change database connection in admin/configs/site.yaml
+ - Run: under admin/cmd, run `go run demo.go ..`
+ - Visit http://localhost:8089
+
 **Build mode**
 
 How to create a new site based on demosite?
