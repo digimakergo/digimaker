@@ -17,7 +17,7 @@ in configs/site.yaml, change database to correct
 Under demosite/cmd folder
 `go run demo.go ..`
 
-**Run**
+**Visit**
 
 Visit http://localhost:8092
 
