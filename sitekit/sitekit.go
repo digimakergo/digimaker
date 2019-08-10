@@ -7,6 +7,7 @@ import (
 	"dm/sitekit/niceurl"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/pkg/errors"
@@ -118,10 +119,11 @@ func OutputContent(w http.ResponseWriter, r *http.Request, id int, siteIdentifie
 
 //Output using template
 func Output(w http.ResponseWriter, r *http.Request, siteIdentifier string, templatePath string, variables map[string]interface{}, matchedData ...map[string]interface{}) {
-	siteSettings := GetSiteSettings(siteIdentifier)
+	// siteSettings := GetSiteSettings(siteIdentifier)
 	pongo2.DefaultSet.Debug = true
-	pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
-	tpl := pongo2.Must(pongo2.FromCache("../main.html"))
+	// pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
+	gopath := os.Getenv("GOPATH")
+	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/dm/sitekit/templates/main.html"))
 
 	variables["site"] = siteIdentifier
 

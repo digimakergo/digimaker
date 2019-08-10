@@ -94,7 +94,7 @@ func GenerateName(content contenttype.ContentTyper) string {
 	if content.ContentType() == "user" {
 		return content.Value("firstname").(fieldtype.TextField).Data + " " + content.Value("lastname").(fieldtype.TextField).Data
 	}
-	return content.Value("title").(fieldtype.TextField).Data //todo: make it patter based.
+	return content.Value("title").(fieldtype.TextField).Data //todo: make it pattern based.
 }
 
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.

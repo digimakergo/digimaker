@@ -4,7 +4,7 @@
         {% if path=="" %}
             {PLEASE OVERRIDE. DEFAULT OUTPUT FOR {{content.ID}},{{content.Name}},{{viewmode}}}
         {%else%}
-            {% with "../"|add: path as template %}
+            {% with "../../demosite/templates/"|add: path as template %}
                 <!-- {{path}} -->
                 {%include template %}
             {%endwith%}
@@ -13,9 +13,10 @@
     {%endwith%}
 {% endmacro %}
 
-
-{% macro viewfield( field ) export%}
-    FIELD
+{% macro output_field( identifier, field ) export%}
+    {%with "dm/sitekit/templates/fieldtype/"|add:identifier|add:".html"|dm_tplroot as path%}
+        {%include path with field=field%}
+    {%endwith%}
 {% endmacro %}
 
 {#include path from override #}

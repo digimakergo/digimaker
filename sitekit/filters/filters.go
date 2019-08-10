@@ -9,6 +9,7 @@ import (
 	"dm/sitekit"
 	"dm/sitekit/niceurl"
 	"fmt"
+	"os"
 	"strings"
 
 	"gopkg.in/flosch/pongo2.v2"
@@ -38,8 +39,14 @@ func dmTplPath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Er
 	return pongo2.AsValue(path), nil
 }
 
+func dmTplRoot(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	path := os.Getenv("GOPATH") + "/src/" + in.String()
+	return pongo2.AsValue(path), nil
+}
+
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_tplpath", dmTplPath)
+	pongo2.RegisterFilter("dm_tplroot", dmTplRoot)
 }

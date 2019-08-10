@@ -9,7 +9,7 @@ import (
 	"dm/dm/handler"
 	_ "dm/dm/handler/handlers"
 	"dm/dm/util/debug"
-	"dm/niceurl"
+	"dm/sitekit/niceurl"
 	"fmt"
 	"html/template"
 	"net/http"

@@ -1,15 +1,15 @@
-{% extends "base.html" %}
+{% extends "../base.html" %}
 
 {%block content%}
 <div class="{{content.ContentType}} full">
     <h2 class="title">
         {{content.Location.Name}}
-    </h2>    
+    </h2>
     <div class="summary">
-        {{content.Summary.Data|safe}}
+        {{output_field("richtext", content.Summary)}}
     </div>
     <div class="body">
-        {{content.Body.Data|safe}}
+        {{output_field("richtext", content.Body)}}
     </div>
 </div>
 

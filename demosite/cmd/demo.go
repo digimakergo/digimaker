@@ -9,7 +9,7 @@ import (
 
 	_ "dm/demosite/entity"
 	"dm/sitekit"
-	_ "dm/sitekit/pongo2"
+	_ "dm/sitekit/filters"
 
 	"github.com/gorilla/mux"
 )
@@ -55,7 +55,7 @@ func main() {
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../static"))))
 	http.Handle("/", r)
-	fmt.Println("success!")
+	fmt.Println("success! Listening on port 8092")
 	http.ListenAndServe(":8092", nil)
 
 }
