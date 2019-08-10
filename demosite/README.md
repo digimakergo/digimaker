@@ -5,16 +5,20 @@ Demosite is a minimal sample site using DM framework.
 How to run demosite
 ---------------
 **Import database**
+
 `mysql -u <username> -p demosite < db/db.sql`
 
 **Configurations**
+
 in configs/site.yaml, change database to correct
 
 **Run**
+
 Under demosite/cmd folder
 `go run demo.go ..`
 
 **Run**
+
 Visit http://localhost:8092
 
 **Build mode**
