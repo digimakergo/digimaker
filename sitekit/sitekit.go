@@ -4,7 +4,7 @@ import (
 	"dm/dm/contenttype"
 	"dm/dm/handler"
 	"dm/dm/util"
-	"dm/niceurl"
+	"dm/sitekit/niceurl"
 	"fmt"
 	"net/http"
 	"strconv"

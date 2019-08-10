@@ -6,8 +6,8 @@ import (
 	"dm/dm/handler"
 	"dm/dm/util"
 	"dm/dm/util/debug"
-	"dm/niceurl"
 	"dm/sitekit"
+	"dm/sitekit/niceurl"
 	"fmt"
 	"strings"
 
