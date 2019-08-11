@@ -384,11 +384,9 @@ func main() {
 		fmt.Fprintf(w, "User-agent: * \nDisallow /")
 	})
 
-	r.HandleFunc("/api/content/get/{id}", func(w http.ResponseWriter, r *http.Request) {
-		id := mux.Vars(r)["id"]
-		idInt, _ := strconv.Atoi(id)
-		rest.GetContent(idInt, w)
-	})
+	//rest api
+	restRouter := r.PathPrefix("/api").Subrouter()
+	rest.Route(restRouter)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../web"))))
 
