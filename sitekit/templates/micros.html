@@ -1,12 +1,12 @@
 {% macro output_content( content, viewmode) export%}
     {%with viewmode|add:","|add:site as params%}
-    {%with content|dm_tplpath:params as path%}
+    {%with content|dm_tpl_matched:params as path%}
         {% if path=="" %}
             {PLEASE OVERRIDE. DEFAULT OUTPUT FOR {{content.ID}},{{content.Name}},{{viewmode}}}
         {%else%}
-            {% with "../../demosite/templates/"|add: path as template %}
+            {% with path|dm_tpl_path as absolute_path %}
                 <!-- {{path}} -->
-                {%include template %}
+                {%include absolute_path %}
             {%endwith%}
         {% endif %}
     {%endwith%}
@@ -14,7 +14,7 @@
 {% endmacro %}
 
 {% macro output_field( identifier, field ) export%}
-    {%with "dm/sitekit/templates/fieldtype/"|add:identifier|add:".html"|dm_tplroot as path%}
+    {%with "fieldtype/"|add:identifier|add:".html"|dm_tpl_path:"dm/sitekit" as path%}
         {%include path with field=field%}
     {%endwith%}
 {% endmacro %}

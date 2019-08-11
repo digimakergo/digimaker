@@ -4,6 +4,8 @@
 package util
 
 import (
+	"os"
+
 	"github.com/spf13/viper"
 )
 
@@ -11,15 +13,21 @@ var defaultSettings = struct {
 	ConfigFile   string
 	ConfigFolder string
 	HomePath     string
-}{"site", "", ""}
+	PackageName  string
+}{"site", "", "", ""}
 
-func SetHomePath(homePath string) {
-	defaultSettings.HomePath = homePath
-	defaultSettings.ConfigFolder = homePath + "/configs"
+func SetPackageName(packageName string) {
+	defaultSettings.PackageName = packageName
+	defaultSettings.HomePath = os.Getenv("GOPATH") + "/src/" + packageName //todo: change to not using gopath
+	defaultSettings.ConfigFolder = defaultSettings.HomePath + "/configs"
 }
 
 func HomePath() string {
 	return defaultSettings.HomePath
+}
+
+func PackageName() string {
+	return defaultSettings.PackageName
 }
 
 func ConfigPath() string {

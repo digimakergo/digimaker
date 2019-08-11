@@ -26,7 +26,7 @@ sites:
     resource_prefix: "static" #eg. static/assets
     template_folder:
       - "demosite"  #first template folder will be used for base template(layout)
-      - "test"
+      - "test" # todo: idea to support package like "<packagename>, test"
       #todo: support path from package. eg. dm/dm/admin/templates/admin. question: then how to extend admin?
   #site test1
   test1:

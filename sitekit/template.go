@@ -31,6 +31,7 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 	for _, folder := range templateFolders {
 		if path != "" {
 			pathWithTemplateFolder := folder + "/" + path
+			fmt.Println(templateFolders)
 			if util.FileExists(templateRootFolder + "/" + pathWithTemplateFolder) {
 				result = pathWithTemplateFolder
 				break

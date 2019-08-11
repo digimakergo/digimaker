@@ -29,7 +29,7 @@ func dmNiceurl(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Er
 	return pongo2.AsValue(niceurl), nil
 }
 
-func dmTplPath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+func dmTplMatched(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	paramArr := util.Split(param.String())
 	settings := sitekit.GetSiteSettings(paramArr[1])
 	fmt.Println(param)
@@ -39,14 +39,23 @@ func dmTplPath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Er
 	return pongo2.AsValue(path), nil
 }
 
-func dmTplRoot(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	path := os.Getenv("GOPATH") + "/src/" + in.String()
+func dmTplPath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	path := ""
+	if !param.IsNil() {
+		//get path under gopath
+		packageName := param.String()
+		path = os.Getenv("GOPATH") + "/src/" + packageName + "/templates/" + in.String()
+	} else {
+		//get path under current package
+		path = util.HomePath() + "/templates/" + in.String()
+	}
+
 	return pongo2.AsValue(path), nil
 }
 
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
-	pongo2.RegisterFilter("dm_tplpath", dmTplPath)
-	pongo2.RegisterFilter("dm_tplroot", dmTplRoot)
+	pongo2.RegisterFilter("dm_tpl_matched", dmTplMatched)
+	pongo2.RegisterFilter("dm_tpl_path", dmTplPath)
 }

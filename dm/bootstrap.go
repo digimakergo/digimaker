@@ -7,9 +7,9 @@ import (
 	"dm/dm/util"
 )
 
-func Bootstrap(projectHome string) bool {
-	util.Log("system", "Starting from "+projectHome)
-	util.SetHomePath(projectHome)
+func Bootstrap(packageName string) bool {
+	util.Log("system", "Starting from "+packageName)
+	util.SetPackageName(packageName)
 	err := contenttype.LoadDefinition()
 	if err != nil {
 		return false
