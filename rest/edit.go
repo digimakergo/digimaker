@@ -1,0 +1,16 @@
+//Author xc, Created on 2019-08-11 17:07
+//{COPYRIGHTS}
+
+package edit
+
+func Add() {
+
+}
+
+func Update() {
+
+}
+
+func Delete() {
+
+}

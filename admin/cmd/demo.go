@@ -9,6 +9,7 @@ import (
 	"dm/dm/handler"
 	_ "dm/dm/handler/handlers"
 	"dm/dm/util/debug"
+	"dm/rest"
 	"dm/sitekit/niceurl"
 	"fmt"
 	"html/template"
@@ -381,6 +382,12 @@ func main() {
 
 	r.HandleFunc("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "User-agent: * \nDisallow /")
+	})
+
+	r.HandleFunc("/api/content/get/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := mux.Vars(r)["id"]
+		idInt, _ := strconv.Atoi(id)
+		rest.GetContent(idInt, w)
 	})
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../web"))))
