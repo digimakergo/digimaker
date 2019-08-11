@@ -15,7 +15,7 @@ in configs/site.yaml, change database to correct
 **Run**
 
 Under demosite/cmd folder
-`go run demo.go ..`
+`go run demo.go dm/demosite`
 
 **Visit**
 
@@ -24,7 +24,7 @@ Visit http://localhost:8092
 
 **Admin(to be changed)**
  - Configuration: change database connection in admin/configs/site.yaml
- - Run: under admin/cmd, run `go run demo.go ..`
+ - Run: under admin/cmd, run `go run demo.go dm/admin`
  - Visit http://localhost:8089
 
 **Build mode**
