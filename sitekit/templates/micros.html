@@ -2,7 +2,7 @@
     {%with viewmode|add:","|add:site as params%}
     {%with content|dm_tpl_matched:params as path%}
         {% if path=="" %}
-            {PLEASE OVERRIDE. DEFAULT OUTPUT FOR {{content.ID}},{{content.Name}},{{viewmode}}}
+            {OVERRIDE NOT FOUND, PLEASE OVERRIDE. {{content.ID}},{{content.Name}},{{viewmode}}}
         {%else%}
             {% with path|dm_tpl_path as absolute_path %}
                 <!-- {{path}} -->
