@@ -49,7 +49,7 @@ type Article struct{
      
     
     
-     contenttype.Location `boil:"location,bind"  json:"location"`
+     contenttype.Location `boil:"location,bind"`
     
 }
 
