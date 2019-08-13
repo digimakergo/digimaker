@@ -12,26 +12,26 @@ import (
 
 //Generate content types
 func main() {
-	projectName := ""
+	packageName := ""
 	if len(os.Args) >= 2 && os.Args[1] != "" {
-		projectName = os.Args[1]
-		util.SetConfigPath(projectName + "/configs")
+		packageName = os.Args[1]
+		util.SetPackageName(packageName)
 	}
 
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 
-	err := Generate(projectName + "/entity")
+	err := Generate(packageName, "entity")
 	if err != nil {
 		fmt.Println("Fail to generate: " + err.Error())
 	}
 }
 
-func Generate(outputFolder string) error {
+func Generate(packageName string, subFolder string) error {
 
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
-		ParseFiles("dm/codegen/contenttypes/contenttype.tpl"))
+		ParseFiles(os.Getenv("GOPATH") + "/src/dm/dm/codegen/contenttypes/contenttype.tpl"))
 
 	contentTypeDef := contenttype.GetDefinition()
 	for name, settings := range contentTypeDef {
@@ -40,7 +40,7 @@ func Generate(outputFolder string) error {
 		vars["name"] = name
 		vars["settings"] = settings
 
-		path := outputFolder + "/" + name + ".go"
+		path := util.HomePath() + "/" + subFolder + "/" + name + ".go"
 		//todo: genereate to a template folder first and then copy&override target,
 		//and if there is error remove that folder
 		file, _ := os.Create(path)
@@ -48,6 +48,7 @@ func Generate(outputFolder string) error {
 		if err != nil {
 			return err
 		}
+		fmt.Println("Generated " + name + ".go")
 	}
 	return nil
 }

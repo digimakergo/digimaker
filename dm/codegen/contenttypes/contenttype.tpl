@@ -25,7 +25,7 @@ type {{$struct_name}} struct{
      {{end}}
     {{end}}
     {{if .settings.HasLocation}}
-     contenttype.Location `boil:"location,bind"  json:"location"`
+     contenttype.Location `boil:"location,bind"`
     {{end}}
 }
 
