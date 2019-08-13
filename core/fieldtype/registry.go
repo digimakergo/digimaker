@@ -77,7 +77,7 @@ var fieldtypeDefinition FieldTypeSettings
 func LoadDefinition() error {
 	//Load datatype.json into DatatypeDefinition
 	var def map[string]FieldtypeSetting
-	err := util.UnmarshalData(util.ConfigPath()+"/datatype.json", &def)
+	err := util.UnmarshalData(util.ConfigPath()+"/fieldtype.json", &def)
 	if err != nil {
 		return err
 	}
