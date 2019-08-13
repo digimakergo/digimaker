@@ -4,38 +4,38 @@ Demosite is a minimal sample site using DM framework.
 
 How to run demosite
 ---------------
-**Import database**
+### Import database**
 
 `mysql -u <username> -p demosite < db/db.sql`
 
-**Configurations**
+### Configurations
 
 in configs/site.yaml, change database to correct
 
-**Run**
+### Run
 
 Under demosite/cmd folder
 `go run demo.go dm/demosite`
 
-**Visit**
+### Visit
 
 Visit http://localhost:8092
 
 
-**Admin(to be changed)**
+### Admin(to be changed)
  - Configuration: change database connection in admin/configs/site.yaml
  - Run: under admin/cmd, run `go run demo.go dm/admin`
  - Visit http://localhost:8089
 
-**Build mode**
+### Go build mode
 
 How to create a new site based on demosite?
 ----------------
 A simple way to create a new website is copy the demosite to a project and do modifications.
 
-**Import clean database**
+### Import clean database**
 
-**Generate content entities**
+### Generate content entities
 
 After configuring configs/contenttype.json, you need to create/update content entities.
 
@@ -43,8 +43,8 @@ Run below command where dm/demosite is the application package name, dm/core/cod
 
 `go run dm/core/codegen/contenttypes/gen.go dm/demosite`
 
-**Configurations**
+### Configurations
 
-**Run**
+### Run
 
-**Build**
+### Build
