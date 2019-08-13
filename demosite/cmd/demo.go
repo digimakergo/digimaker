@@ -1,8 +1,8 @@
 package main
 
 import (
-	"dm/dm"
-	"dm/dm/util"
+	"dm/core"
+	"dm/core/util"
 	"fmt"
 	"net/http"
 	"os"

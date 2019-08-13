@@ -39,9 +39,9 @@ A simple way to create a new website is copy the demosite to a project and do mo
 
 After configuring configs/contenttype.json, you need to create/update content entities.
 
-Run below command where dm/demosite is the application package name, dm/dm/codegen can be changed based on your current directory.
+Run below command where dm/demosite is the application package name, dm/core/codegen can be changed based on your current directory.
 
-`go run dm/dm/codegen/contenttypes/gen.go dm/demosite`
+`go run dm/core/codegen/contenttypes/gen.go dm/demosite`
 
 **Configurations**
 

@@ -5,13 +5,13 @@ package entity
 
 import (
 	"database/sql"
-	"dm/dm/contenttype"
-	"dm/dm/db"
-	"dm/dm/fieldtype"
+	"dm/core/contenttype"
+	"dm/core/db"
+	"dm/core/fieldtype"
 
-	"dm/dm/util"
+	"dm/core/util"
 
-	. "dm/dm/db"
+	. "dm/core/db"
 )
 
 type Folder struct {

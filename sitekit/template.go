@@ -1,8 +1,8 @@
 package sitekit
 
 import (
-	"dm/dm/contenttype"
-	"dm/dm/util"
+	"dm/core/contenttype"
+	"dm/core/util"
 	"fmt"
 )
 

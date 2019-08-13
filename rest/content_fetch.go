@@ -4,7 +4,7 @@
 package rest
 
 import (
-	"dm/dm/handler"
+	"dm/core/handler"
 	"encoding/json"
 	"errors"
 	"net/http"

@@ -1,0 +1,115 @@
+##
+##Generate models for content types. eg. article, folder
+##
+
+pkgname = "entity"
+output = "contenttype/entity"
+no-tests = "true"
+templates = [
+  "/Users/xc/go/caf-prototype/src/github.com/volatiletech/sqlboiler/templates",
+  "/Users/xc/go/caf-prototype/src/dm/codegen/entities/content/templates"
+]
+
+[mysql]
+host = "185.35.187.91"
+user = "dev"
+pass = "D!g!m@ker"
+dbname = "dev_emf"
+sslmode = "false"
+whitelist = ['dm_folder','dm_article', 'dm_user']
+
+[imports.all]
+third_party = ['"github.com/volatiletech/sqlboiler/boil"',
+                '"github.com/volatiletech/sqlboiler/queries/qmhelper"',
+                '"github.com/volatiletech/sqlboiler/strmangle"',
+                '"github.com/pkg/errors"',
+               '"github.com/volatiletech/sqlboiler/queries"',
+               '"dm/core/fieldtype"',
+               '. "dm/core/db"',
+               '"dm/core/db"']
+
+##TODO: use a better mechanism to diffenticate fields between:
+##1) preserved: eg. id, published.
+##2) actual field: eg. title
+##3) extended database field(should not convert to dmField): eg. magazine_id int
+##
+## ways can be:
+## - generate sqlboilder.toml from our json/toml which defineds content type
+## - do more in template(no recommanded)
+########
+#Common fields
+########
+[[types]]
+[types.match]
+name = "published"
+[types.replace]
+type = "int"
+
+[[types]]
+[types.match]
+name = "modified"
+[types.replace]
+type = "int"
+
+[[types]]
+[types.match]
+name = "remote_id"
+[types.replace]
+type = "string"
+
+#######
+# content types
+#######
+
+##folder
+[aliases.tables.dm_folder]
+up_plural = "Folders"
+up_singular = "Folder"
+down_plural = "folders"
+down_singular = "folder"
+
+[aliases.tables.dm_folder.columns]
+id = "CID"
+
+##article
+[aliases.tables.dm_article]
+up_plural = "Articles"
+up_singular = "Article"
+down_plural = "articles"
+down_singular = "article"
+
+[aliases.tables.dm_article.columns]
+id = "CID"
+
+##user
+[aliases.tables.dm_user]
+up_plural = "Users"
+up_singular = "User"
+down_plural = "users"
+down_singular = "user"
+
+[aliases.tables.dm_user.columns]
+id = "CID"
+
+########
+#Custom fields
+########
+[[types]]
+[types.match]
+db_type = "varchar"
+name = "title"
+[types.replace]
+type = "fieldtype.TextField"
+
+# Richtext
+[[types]]
+[types.match]
+db_type = "text"
+[types.replace]
+type = "fieldtype.RichTextField"
+
+[[types]]
+[types.match]
+name = "folder_type"
+[types.replace]
+type = "string"

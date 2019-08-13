@@ -5,7 +5,7 @@
 package niceurl
 
 import (
-	"dm/dm/contenttype"
+	"dm/core/contenttype"
 	"net/http"
 	"strconv"
 	"strings"

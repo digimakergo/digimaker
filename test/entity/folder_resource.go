@@ -5,13 +5,13 @@ package entity
 
 import (
     "database/sql"
-    "dm/dm/db"
-    "dm/dm/contenttype"
-	"dm/dm/fieldtype"
+    "dm/core/db"
+    "dm/core/contenttype"
+	"dm/core/fieldtype"
     
-    "dm/dm/util"
+    "dm/core/util"
     
-	. "dm/dm/db"
+	. "dm/core/db"
 )
 
 

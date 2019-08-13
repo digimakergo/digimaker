@@ -1,9 +1,9 @@
 package sitekit
 
 import (
-	"dm/dm/contenttype"
-	"dm/dm/handler"
-	"dm/dm/util"
+	"dm/core/contenttype"
+	"dm/core/handler"
+	"dm/core/util"
 	"dm/sitekit/niceurl"
 	"fmt"
 	"net/http"

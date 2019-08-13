@@ -1,7 +1,7 @@
 package sitekit
 
 import (
-	"dm/dm/util"
+	"dm/core/util"
 	"errors"
 	"net/http"
 

@@ -1,6 +1,6 @@
 package sitekit
 
-import "dm/dm/contenttype"
+import "dm/core/contenttype"
 
 var siteSettings = map[string]SiteSettings{}
 

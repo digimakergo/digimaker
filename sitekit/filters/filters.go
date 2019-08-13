@@ -2,10 +2,10 @@ package pongo2
 
 import (
 	"context"
-	"dm/dm/contenttype"
-	"dm/dm/handler"
-	"dm/dm/util"
-	"dm/dm/util/debug"
+	"dm/core/contenttype"
+	"dm/core/handler"
+	"dm/core/util"
+	"dm/core/util/debug"
 	"dm/sitekit"
 	"dm/sitekit/niceurl"
 	"fmt"
