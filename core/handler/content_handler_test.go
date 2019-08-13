@@ -17,7 +17,7 @@ import (
 var ctx context.Context
 
 func TestMain(m *testing.M) {
-	dm.Bootstrap("/Users/xc/go/caf-prototype/src/dm/test")
+	core.Bootstrap("/Users/xc/go/caf-prototype/src/dm/test")
 	fmt.Println("Test starting..")
 	ctx = debug.Init(context.Background())
 	m.Run()

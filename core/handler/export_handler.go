@@ -19,13 +19,12 @@ func (eh *ExportHandler) Export(content contenttype.ContentTyper, parent content
 	json.Unmarshal(data, &contentMap)
 	delete(contentMap, "id")
 	if content.Definition().HasLocation {
-		location := contentMap["location"].(map[string]interface{})
-		delete(location, "content_id")
-		delete(location, "parent_id")
+		delete(contentMap, "content_id")
+		delete(contentMap, "parent_id")
 		//todo: replace main_id with main_uid
 
-		delete(location, "id")
-		delete(location, "hierarchy")
+		delete(contentMap, "id")
+		delete(contentMap, "hierarchy")
 
 	}
 
@@ -57,12 +56,7 @@ func (eh *ExportHandler) Export(content contenttype.ContentTyper, parent content
 		}
 	}
 
-	jsonObject := map[string]interface{}{
-		"content_type": content.ContentType(),
-		"parent_uid":   parent.GetLocation().UID,
-		"cuid":         content.Value("cuid").(string),
-		"data":         contentMap,
-	}
-	data, err = json.Marshal(jsonObject)
+	contentMap["parent_uid"] = parent.GetLocation().UID
+	data, err = json.Marshal(contentMap)
 	return string(data), err
 }
