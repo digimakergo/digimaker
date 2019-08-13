@@ -390,6 +390,11 @@ func main() {
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../web"))))
 
+	r.HandleFunc("/helloworld", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte("w write."))
+		fmt.Fprintf(w, "hello world")
+	})
+
 	http.Handle("/", r)
 	http.ListenAndServe(":8089", nil)
 }

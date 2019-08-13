@@ -21,6 +21,7 @@ func main() {
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 
+	fmt.Println("Generating content entities for " + packageName)
 	err := Generate(packageName, "entity")
 	if err != nil {
 		fmt.Println("Fail to generate: " + err.Error())
