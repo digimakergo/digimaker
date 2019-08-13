@@ -1,4 +1,4 @@
-package dm
+package core
 
 type HanlderError struct {
 	Code    string

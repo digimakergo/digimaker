@@ -1,4 +1,4 @@
-package dm
+package core
 
 import (
 	"dm/core/contenttype"

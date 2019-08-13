@@ -17,7 +17,7 @@ import (
 func BootStrap() {
 	if len(os.Args) >= 2 && os.Args[1] != "" {
 		path := os.Args[1]
-		success := dm.Bootstrap(path)
+		success := core.Bootstrap(path)
 		if !success {
 			fmt.Println("Failed to start. Exiting.")
 			os.Exit(1)
