@@ -31,3 +31,12 @@ func (t *EditorList) Scan(src interface{}) error {
 func (t EditorList) Value() (driver.Value, error) {
 	return t.Data, nil
 }
+
+//implement FieldtypeHandler
+type EditorListHandler struct {
+	*FieldtypeHandler
+}
+
+func init() {
+	RegisterHandler("editorlist", EditorListHandler{})
+}

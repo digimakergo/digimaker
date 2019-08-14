@@ -18,3 +18,12 @@ func (t *TextField) Scan(src interface{}) error {
 func (t TextField) ViewValue() string {
 	return t.Raw
 }
+
+//implement FieldtypeHandler
+type TextFieldHandler struct {
+	*FieldtypeHandler
+}
+
+func init() {
+	RegisterHandler("text", TextFieldHandler{})
+}
