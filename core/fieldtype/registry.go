@@ -5,40 +5,16 @@ package fieldtype
 
 import "dm/core/util"
 
-//TypeLoaderDefault implements FieldInstancer and ContentTypeInstancer
-type TypeLoaderDefault struct{}
-
-func (TypeLoaderDefault) Instance(extendedType string, identifier string) interface{} {
-	var result interface{}
-	if extendedType == "field" {
-		switch identifier {
-		case "text":
-			result = new(TextField)
-		case "richtext":
-			result = new(RichTextField)
-		default:
-		}
-	} else if extendedType == "contenttype" {
-		switch identifier {
-		case "article":
-			//result = content.Article{}
-		default:
-		}
-	}
-
-	return result
-}
-
 //global variable for registering handlers
 //A handler is always singleton
-var handlerRegistry = map[string]FieldtypeHandler{}
+var handlerRegistry = map[string]FieldtypeHandlerI{}
 
-func RegisterHanlder(fieldType string, handler FieldtypeHandler) {
-	util.Log("system", "Registering handler for field type "+fieldType)
-	handlerRegistry[fieldType] = handler
+func RegisterHandler(identifier string, handler FieldtypeHandlerI) {
+	util.Log("system", "Registering handler for field type "+identifier)
+	handlerRegistry[identifier] = handler
 }
 
-func GetHandler(fieldType string) FieldtypeHandler {
+func GetHandler(fieldType string) FieldtypeHandlerI {
 	return handlerRegistry[fieldType]
 }
 
@@ -87,4 +63,8 @@ func LoadDefinition() error {
 
 func GetDefinition() FieldTypeSettings {
 	return fieldtypeDefinition
+}
+
+func GetFieldTypeDef(identifier string) FieldtypeSetting {
+	return fieldtypeDefinition[identifier]
 }

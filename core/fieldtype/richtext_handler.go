@@ -6,6 +6,7 @@ import (
 
 //implement FieldtypeHandler
 type RichTextFieldHandler struct {
+	*FieldtypeHandler
 }
 
 func (t RichTextFieldHandler) Validate(input interface{}) (bool, string) {
@@ -13,7 +14,9 @@ func (t RichTextFieldHandler) Validate(input interface{}) (bool, string) {
 }
 
 func (t RichTextFieldHandler) ToStorage(input interface{}) interface{} {
-	return RichTextField{Data: input.(string)}
+	r := RichTextField{}
+	r.Raw = input.(string)
+	return r
 }
 
 func (t RichTextFieldHandler) IsEmpty(input interface{}) bool {
@@ -24,5 +27,5 @@ func (t RichTextFieldHandler) IsEmpty(input interface{}) bool {
 }
 
 func init() {
-	RegisterHanlder("richtext", RichTextFieldHandler{})
+	RegisterHandler("richtext", RichTextFieldHandler{})
 }

@@ -10,10 +10,12 @@ type Fieldtyper interface {
 	//SetStoreData()
 }
 
-type FieldtypeHandler interface {
+type FieldtypeHandlerI interface {
 	ToStorage(input interface{}) interface{}
 	Validate(input interface{}) (bool, string)
 	IsEmpty(input interface{}) bool
+	SetIdentifier(identifier string)
+	Definition() FieldtypeSetting
 }
 
 //Relation field handler can convert relations into RelationField

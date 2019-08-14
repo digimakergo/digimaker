@@ -4,38 +4,17 @@
 //Package fieldtype implements build-in field types(value and fieldtype handler).
 package fieldtype
 
-import (
-	"database/sql/driver"
-	"errors"
-)
-
 //TextField is a field for normal text line. It implements Datatyper
 type TextField struct {
-	Data     string `json:"data"`
-	viewData interface{}
-}
-
-//When update db.
-func (t TextField) Value() (driver.Value, error) {
-	return t.Data, nil
+	FieldtypeValue
 }
 
 func (t *TextField) Scan(src interface{}) error {
-	var source string
-	switch src.(type) {
-	case string:
-		source = src.(string)
-	case []byte:
-		source = string(src.([]byte))
-	default:
-		return errors.New("Incompatible type for GzippedText")
-	}
-
-	t.Data = source
-	return nil
+	err := t.SetData(src, "text")
+	return err
 }
 
 //convert data to view data.
 func (t TextField) ViewValue() string {
-	return t.Data
+	return t.Raw
 }

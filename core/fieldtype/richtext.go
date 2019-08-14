@@ -4,30 +4,20 @@
 package fieldtype
 
 import (
-	"database/sql/driver"
-	"errors"
+	"strings"
 )
 
 type RichTextField struct {
-	Data string `json:"data"`
-}
-
-//when update db
-func (t RichTextField) Value() (driver.Value, error) {
-	return t.Data, nil
+	FieldtypeValue
 }
 
 func (t *RichTextField) Scan(src interface{}) error {
-	var source string
-	switch src.(type) {
-	case string:
-		source = src.(string)
-	case []byte:
-		source = string(src.([]byte))
-	default:
-		return errors.New("Incompatible type for GzippedText")
-	}
+	err := t.SetData(src, "richtext")
+	return err
+}
 
-	t.Data = source
-	return nil
+func (r *RichTextField) convertToOutput() {
+	s := r.Raw
+	s = strings.ReplaceAll(s, "fa", "FAG")
+	r.Output = s
 }
