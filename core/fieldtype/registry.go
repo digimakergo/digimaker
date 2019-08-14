@@ -3,7 +3,10 @@
 
 package fieldtype
 
-import "dm/core/util"
+import (
+	"dm/core/util"
+	"fmt"
+)
 
 //global variable for registering handlers
 //A handler is always singleton
@@ -30,8 +33,6 @@ func NewFieldType(fieldType string) Fieldtyper {
 	return fieldtypeRegistry[fieldType]()
 }
 
-type FieldTypeSettings map[string]FieldtypeSetting
-
 type RelationSetting struct {
 	DataFields  string `json:"data_fields"`
 	DataPattern string `json:"data_pattern"`
@@ -48,23 +49,24 @@ type FieldtypeSetting struct {
 }
 
 // Datatypes which defined in datatype.json
-var fieldtypeDefinition FieldTypeSettings
+var fieldtypeDefinition map[string]FieldtypeSetting
 
 func LoadDefinition() error {
 	//Load datatype.json into DatatypeDefinition
-	var def map[string]FieldtypeSetting
-	err := util.UnmarshalData(util.ConfigPath()+"/fieldtype.json", &def)
+	var defMap map[string]FieldtypeSetting
+	err := util.UnmarshalData(util.ConfigPath()+"/fieldtype.json", &defMap)
 	if err != nil {
 		return err
 	}
-	fieldtypeDefinition = def
+	for identifier, setting := range defMap {
+		setting.Identifier = identifier
+		defMap[identifier] = setting
+	}
+	fieldtypeDefinition = defMap
+	fmt.Println(fieldtypeDefinition["text"])
 	return nil
 }
 
-func GetDefinition() FieldTypeSettings {
-	return fieldtypeDefinition
-}
-
-func GetFieldTypeDef(identifier string) FieldtypeSetting {
+func GetDefinition(identifier string) FieldtypeSetting {
 	return fieldtypeDefinition[identifier]
 }

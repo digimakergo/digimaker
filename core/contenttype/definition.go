@@ -28,7 +28,7 @@ type ContentField struct {
 }
 
 func (f *ContentField) GetDefinition() fieldtype.FieldtypeSetting {
-	return fieldtype.GetDefinition()[f.FieldType]
+	return fieldtype.GetDefinition(f.FieldType)
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json

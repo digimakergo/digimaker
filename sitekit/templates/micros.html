@@ -13,8 +13,8 @@
     {%endwith%}
 {% endmacro %}
 
-{% macro output_field( identifier, field ) export%}
-    {%with "fieldtype/"|add:identifier|add:".html"|dm_tpl_path:"dm/sitekit" as path%}
+{% macro output_field( field ) export%}
+    {%with "fieldtype/"|add:field.Definition.Identifier|add:".html"|dm_tpl_path:"dm/sitekit" as path%}
         {%include path with field=field%}
     {%endwith%}
 {% endmacro %}
