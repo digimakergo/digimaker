@@ -6,7 +6,6 @@ package contenttype
 import (
 	"database/sql"
 	"dm/core/db"
-	"dm/core/fieldtype"
 	. "dm/core/db"
 	"dm/core/util"
 	"strings"
@@ -35,9 +34,9 @@ type Location struct {
 	path           []int  `boil:"-"`
 }
 
-func (c *Location) Fields() map[string]fieldtype.Fieldtyper {
-	return nil
-}
+// func (c *Location) Fields() map[string]fieldtype.Fieldtyper {
+// 	return nil
+// }
 
 func (c *Location) Values() map[string]interface{} {
 	result := make(map[string]interface{})

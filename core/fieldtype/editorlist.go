@@ -4,7 +4,6 @@
 package fieldtype
 
 import (
-	"database/sql/driver"
 	"errors"
 	"strings"
 )
@@ -26,11 +25,6 @@ func (t *EditorList) Scan(src interface{}) error {
 
 	t.Raw = source
 	return nil
-}
-
-//when update db
-func (t EditorList) Value() (driver.Value, error) {
-	return t.Data, nil
 }
 
 //implement FieldtypeHandler

@@ -74,7 +74,7 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 
 		switch current.ContentType() {
 		case "folder":
-			switch current.Value("folder_type").(fieldtype.TextField).Data {
+			switch current.Value("folder_type").(fieldtype.TextField).Raw {
 			//image folder
 			case "image":
 				debug.Debug(ctx, "Trying to get images", "system")
