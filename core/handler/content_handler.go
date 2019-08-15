@@ -170,8 +170,8 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	content := contenttype.NewInstance(contentType)
 	for identifier, input := range inputs {
 		fieldType := fieldsDefinition[identifier].FieldType
-		fieldtypeHandler := fieldtype.GetHandler(fieldType)
-		fieldValue := fieldtypeHandler.NewValue(input)
+		fieldHandler := fieldtype.GetHandler(fieldType)
+		fieldValue := fieldHandler.NewValue(input)
 		err := content.SetValue(identifier, fieldValue)
 		if err != nil {
 			return nil, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)

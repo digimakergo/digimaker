@@ -14,7 +14,7 @@ type FieldtypeHandler interface {
 	IsEmpty(input interface{}) bool
 }
 
-//This struct use generic field handling which include a FieldtypeHandler(composition patter)
+//This struct handle field generically and invoke a FieldtypeHandler(composition patter)
 type FieldHandler struct {
 	Fieldtype string
 	handler   FieldtypeHandler
