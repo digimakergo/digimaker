@@ -65,7 +65,7 @@ func (ch *ContentHandler) Validate(contentType string, inputs map[string]interfa
 		fieldHandler := fieldtype.GetHandler(fieldsDef[identifier].FieldType)
 		_, fieldExists := inputs[identifier]
 		if fieldDef.Required &&
-			(!fieldExists || (fieldExists && fieldHandler != nil && fieldHandler.IsEmpty(inputs[identifier]))) {
+			(!fieldExists || (fieldExists && fieldHandler.Fieldtype != "" && fieldHandler.IsEmpty(inputs[identifier]))) {
 			fieldResult := FieldValidationResult{Identifier: identifier, Detail: "1"}
 			result.Fields = append(result.Fields, fieldResult)
 		}
@@ -171,7 +171,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	for identifier, input := range inputs {
 		fieldType := fieldsDefinition[identifier].FieldType
 		fieldtypeHandler := fieldtype.GetHandler(fieldType)
-		fieldValue := fieldtypeHandler.ToStorage(input)
+		fieldValue := fieldtypeHandler.NewValue(input)
 		err := content.SetValue(identifier, fieldValue)
 		if err != nil {
 			return nil, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
@@ -362,7 +362,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	for identifier, input := range inputs {
 		fieldType := fieldsDefinition[identifier].FieldType
 		fieldtypeHandler := fieldtype.GetHandler(fieldType)
-		fieldValue := fieldtypeHandler.ToStorage(input)
+		fieldValue := fieldtypeHandler.NewValue(input)
 		err := content.SetValue(identifier, fieldValue)
 		if err != nil {
 			return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)

@@ -10,27 +10,18 @@ import (
 
 //global variable for registering handlers
 //A handler is always singleton
-var handlerRegistry = map[string]FieldtypeHandlerI{}
+var handlerRegistry = map[string]FieldHandler{}
 
-func RegisterHandler(identifier string, handler FieldtypeHandlerI) {
+func RegisterHandler(identifier string, handler FieldtypeHandler) {
 	util.Log("system", "Registering handler for field type "+identifier)
-	handlerRegistry[identifier] = handler
+	f := FieldHandler{}
+	f.Fieldtype = identifier
+	f.handler = handler
+	handlerRegistry[identifier] = f
 }
 
-func GetHandler(fieldType string) FieldtypeHandlerI {
+func GetHandler(fieldType string) FieldHandler {
 	return handlerRegistry[fieldType]
-}
-
-//Global variable for registering fieldtypes
-//Use call back to make sure it's not the same instance( the receiver can still singleton it )
-var fieldtypeRegistry = map[string]func() Fieldtyper{}
-
-func RegisterField(fieldType string, newFieldType func() Fieldtyper) {
-	fieldtypeRegistry[fieldType] = newFieldType
-}
-
-func NewFieldType(fieldType string) Fieldtyper {
-	return fieldtypeRegistry[fieldType]()
 }
 
 type RelationSetting struct {

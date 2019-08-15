@@ -7,8 +7,9 @@ import (
 	"strings"
 )
 
+//todo: better design relation between RichTextField and FieldValue.The new is
 type RichTextField struct {
-	FieldtypeValue
+	FieldValue
 }
 
 func (t *RichTextField) Scan(src interface{}) error {
@@ -23,21 +24,19 @@ func (r *RichTextField) convertToOutput() {
 }
 
 //implement FieldtypeHandler
-type RichTextFieldHandler struct {
-	*FieldtypeHandler
-}
+type RichTextHandler struct{}
 
-func (t RichTextFieldHandler) Validate(input interface{}) (bool, string) {
+func (t RichTextHandler) Validate(input interface{}) (bool, string) {
 	return true, ""
 }
 
-func (t RichTextFieldHandler) ToStorage(input interface{}) interface{} {
+func (t RichTextHandler) NewValueFromInput(input interface{}) interface{} {
 	r := RichTextField{}
-	r.Raw = input.(string)
+	r.Scan(input.(string))
 	return r
 }
 
-func (t RichTextFieldHandler) IsEmpty(input interface{}) bool {
+func (t RichTextHandler) IsEmpty(input interface{}) bool {
 	if strings.TrimSpace(input.(string)) == "" {
 		return true
 	}
@@ -45,5 +44,5 @@ func (t RichTextFieldHandler) IsEmpty(input interface{}) bool {
 }
 
 func init() {
-	RegisterHandler("richtext", RichTextFieldHandler{})
+	RegisterHandler("richtext", RichTextHandler{})
 }

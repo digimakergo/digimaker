@@ -6,10 +6,11 @@ package fieldtype
 import (
 	"database/sql/driver"
 	"errors"
+	"strings"
 )
 
 type EditorList struct {
-	Data string `json:"data"`
+	FieldValue
 }
 
 func (t *EditorList) Scan(src interface{}) error {
@@ -23,7 +24,7 @@ func (t *EditorList) Scan(src interface{}) error {
 		return errors.New("Incompatible type")
 	}
 
-	t.Data = source
+	t.Raw = source
 	return nil
 }
 
@@ -33,8 +34,23 @@ func (t EditorList) Value() (driver.Value, error) {
 }
 
 //implement FieldtypeHandler
-type EditorListHandler struct {
-	*FieldtypeHandler
+type EditorListHandler struct{}
+
+func (e EditorListHandler) Validate(input interface{}) (bool, string) {
+	return true, ""
+}
+
+func (e EditorListHandler) NewValueFromInput(input interface{}) interface{} {
+	r := EditorList{}
+	r.Raw = input.(string)
+	return r
+}
+
+func (e EditorListHandler) IsEmpty(input interface{}) bool {
+	if strings.TrimSpace(input.(string)) == "" {
+		return true
+	}
+	return false
 }
 
 func init() {
