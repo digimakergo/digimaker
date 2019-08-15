@@ -37,6 +37,18 @@
                     <input type="text" class="form-control" name="{{$identifier}}" />
                 {{else if ( eq $fieldDef.FieldType "richtext" )}}
                     <textarea name="{{$identifier}}" class="form-control field-richtext"></textarea>
+                {{else if ( eq $fieldDef.FieldType "image" )}}
+                    <input type="file" name="ff_{{$identifier}}" onchange="uploadFile(this)" accept=".gif,.jpg,.jpeg,.png" />
+                    <script>
+                        function uploadFile(ele){
+                            var form = $(ele).closest( 'form' );
+                            action = form.attr("action");
+                            form.attr( "action", "test" );
+                            form.submit();
+                            form.attr('action', action);
+                        }
+                    </script>
+                    <input type="hidden" name="{{$identifier}}" />
                 {{else}}
                     <span style="font-size: 70%" class="field-{{$fieldDef.FieldType}}">TO BE SUPPORTED - {{$fieldDef.FieldType}}</span>
                 {{end}}

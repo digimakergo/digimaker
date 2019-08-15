@@ -94,7 +94,7 @@
      "fields_display":["title", "path"],
      "fields":{ "imagetype": {"type":"string", "name":"Type","required":false},
                 "title": {"type":"text", "name":"Title", "required":true},
-                "path": {"type":"text", "name":"Image path", "required":true},
+                "path": {"type":"image", "name":"Image path", "required":true},
                 "parent_id": {"type":"int", "name":"Parent ID", "required":false}
                 }
             },
