@@ -3,6 +3,8 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="/static/javascript/tinymce/tinymce.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+    <script src="/static/javascript/site.js"></script>
     <script>tinymce.init({
         selector:'textarea.field-richtext',
         height: 300,
@@ -38,17 +40,8 @@
                 {{else if ( eq $fieldDef.FieldType "richtext" )}}
                     <textarea name="{{$identifier}}" class="form-control field-richtext"></textarea>
                 {{else if ( eq $fieldDef.FieldType "image" )}}
-                    <input type="file" name="ff_{{$identifier}}" onchange="uploadFile(this)" accept=".gif,.jpg,.jpeg,.png" />
-                    <script>
-                        function uploadFile(ele){
-                            var form = $(ele).closest( 'form' );
-                            action = form.attr("action");
-                            form.attr( "action", "test" );
-                            form.submit();
-                            form.attr('action', action);
-                        }
-                    </script>
-                    <input type="hidden" name="{{$identifier}}" />
+                <input type="file" data-field="{{$identifier}}" onchange="dm.uploadFile(this)" accept=".gif,.jpg,.jpeg,.png" />
+                  <input type="hidden" name="{{$identifier}}" />
                 {{else}}
                     <span style="font-size: 70%" class="field-{{$fieldDef.FieldType}}">TO BE SUPPORTED - {{$fieldDef.FieldType}}</span>
                 {{end}}

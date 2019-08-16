@@ -45,17 +45,22 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	}
 	defer file.Close()
 
-	filename := handler.Filename
+	filename := strings.ToLower(handler.Filename)
 	//check if file type is allowed
+	fileAllowed := false
 	filetypeArr := strings.Split(filetype, ",")
 	for _, extension := range filetypeArr {
-		if extension != "*" && !strings.HasSuffix(filename, extension) {
-			return "", errors.New("File format not allowed.")
+		if extension == "*" || strings.HasSuffix(filename, extension) {
+			fileAllowed = true
+			break
 		}
 	}
+	if !fileAllowed {
+		return "", errors.New("File format not allowed.")
+	}
 
-	tempFolder := util.GetConfig("General", "FileUploadFolder", "dm")
-	tempFolder = "/Users/xc/go/caf-prototype/src/dm/admin/web/var/upload_temp"
+	tempFolder := util.GetConfig("general", "upload_tempfolder", "dm")
+	// tempFolder = "/Users/xc/go/caf-prototype/src/dm/admin/web/var/upload_temp"
 	//Strip file name
 	reg := regexp.MustCompile("[^-A-Za-z0-9_]]")
 	filename = reg.ReplaceAllString(filename, "_") //filter out all non word characters

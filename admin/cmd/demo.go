@@ -8,6 +8,7 @@ import (
 	"dm/core/fieldtype"
 	"dm/core/handler"
 	_ "dm/core/handler/handlers"
+	"dm/core/util"
 	"dm/core/util/debug"
 	"dm/rest"
 	"dm/sitekit/niceurl"
@@ -394,6 +395,9 @@ func main() {
 		w.Write([]byte("w write."))
 		fmt.Fprintf(w, "hello world")
 	})
+
+	fmt.Println("DOO")
+	fmt.Println(util.GetConfig("general", "upload_tempfolder", "dm"))
 
 	http.Handle("/", r)
 	http.ListenAndServe(":8089", nil)
