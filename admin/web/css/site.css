@@ -235,6 +235,13 @@ span.icon-toggle.space {
     vertical-align:top;
 }
 
+input[type="file"]{
+    border: 1px solid #ececec;
+    background: #f3f3f3;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
 @media only screen and (max-width: 600px) {
     .tool{
         float: none
