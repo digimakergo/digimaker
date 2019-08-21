@@ -39,6 +39,17 @@ sites:
      template_folder:
        - "demosite"
        - "test"
+  #site test1
+  admindesign:
+     routes:
+       - host: "localhost:8092"
+         path: "admindesign"
+     root: 55
+     default: 55
+     resource_prefix: "static"
+     template_folder:
+       - "admindesign"
+       - "test"
 
 controllers:
   user/view:

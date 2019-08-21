@@ -64,27 +64,31 @@ func HandleContent(r *mux.Router) error {
 	//loop sites and route
 	sites := GetSites()
 	for _, identifier := range sites {
-		var handleContentView = func(w http.ResponseWriter, r *http.Request) {
+		var handleContentView = func(w http.ResponseWriter, r *http.Request, site string) {
 			vars := mux.Vars(r)
 			id, _ := strconv.Atoi(vars["id"])
 			prefix := ""
 			if path, ok := vars["path"]; ok {
 				prefix = path
 			}
-			OutputContent(w, r, id, identifier, prefix)
+			OutputContent(w, r, id, site, prefix)
 		}
 
 		//site route and get sub route
-		err := SiteRouter(r, identifier, func(s *mux.Router) {
-			s.HandleFunc("/content/view/{id}", handleContentView)
-			s.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(handleContentView)
+		err := SiteRouter(r, identifier, func(s *mux.Router, site string) {
+			s.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
+				handleContentView(w, r, site)
+			})
+			s.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				handleContentView(w, r, site)
+			})
 
 			//default page to same as handling content/view/<default>
 			s.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				defaultContent := siteSettings[identifier].DefaultContent
 				defaultContentID := defaultContent.GetLocation().ID
 				r = mux.SetURLVars(r, map[string]string{"id": strconv.Itoa(defaultContentID)})
-				handleContentView(w, r)
+				handleContentView(w, r, site)
 			})
 		})
 		if err != nil {

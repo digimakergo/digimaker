@@ -11,7 +11,7 @@ import (
 func SiteRouterHandle(r *mux.Router, identifierStr string, pattern string, handle func(w http.ResponseWriter, r *http.Request)) {
 	list := util.Split(identifierStr)
 	for _, identifier := range list {
-		SiteRouter(r, identifier, func(s *mux.Router) {
+		SiteRouter(r, identifier, func(s *mux.Router, site string) {
 			s.HandleFunc(pattern, func(wr http.ResponseWriter, re *http.Request) {
 				handle(wr, re)
 			})
@@ -24,7 +24,7 @@ func SiteRouterHandle(r *mux.Router, identifierStr string, pattern string, handl
 //- host
 //- path
 //- combined
-func SiteRouter(r *mux.Router, identifier string, handler func(s *mux.Router)) error {
+func SiteRouter(r *mux.Router, identifier string, handler func(s *mux.Router, site string)) error {
 	//go through all routes.
 	routesConfig := GetSiteSettings(identifier).Routes
 	for _, routeConfig := range routesConfig {
@@ -57,7 +57,7 @@ func SiteRouter(r *mux.Router, identifier string, handler func(s *mux.Router)) e
 				} else {
 					s = r.Host(host).Subrouter()
 				}
-				handler(s)
+				handler(s, identifier)
 			}
 		}
 	}

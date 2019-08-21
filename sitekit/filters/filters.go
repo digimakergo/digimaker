@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"gopkg.in/flosch/pongo2.v2"
 )
@@ -53,9 +54,16 @@ func dmTplPath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Er
 	return pongo2.AsValue(path), nil
 }
 
+func dmFormatTime(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	timestamp := in.Integer()
+	result := time.Unix(int64(timestamp), 0).Format("02.01.2006 15:04")
+	return pongo2.AsValue(result), nil
+}
+
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_tpl_matched", dmTplMatched)
 	pongo2.RegisterFilter("dm_tpl_path", dmTplPath)
+	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
 }

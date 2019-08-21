@@ -1,0 +1,181 @@
+{% extends "../base.html" %}
+
+{%block content%}
+
+
+<h2><i class="icon-type type-folder"></i> {{content.Name}}
+
+    <div class="inline-tool">
+            <span>
+                <a href="/content/edit/1" class="btn btn-link btn-sm" title="Edit">
+                    <i class="far fa-edit"></i> Edit
+                </a>
+            </span>
+    </div>
+</h2>
+
+<div class="tool">
+
+<div class="meta-content">
+    <table>
+        <tr>
+            <td style="width: 150px"><label>Published:</label></td>
+          <td>
+                  {{content.Published|dm_format_time}}
+          </td>
+        </tr>
+
+        <tr><td><label>Modified:</label></td>
+          <td>
+                  {{content.Modified|dm_format_time}}
+          </td>
+        </tr>
+
+        <tr><td><label>Type:</label></td>
+          <td>
+                  {{content.ContentType}}
+          </td>
+        </tr>
+
+        <tr><td><label>CID:</label></td>
+          <td>
+                  {{content.CID}}
+          </td>
+        </tr>
+
+        <tr><td><label>UID:</label></td>
+          <td>
+                  {{content.UID}}
+          </td>
+        </tr>
+
+        <tr><td style="width: 150px"><label>Title:</label></td>
+          <td>
+                  {{content.Name}}
+          </td>
+        </tr>
+        <tr><td style="width: 150px"><label>Summary:</label></td>
+          <td>
+              {{content.Summary.Data()}}
+          </td>
+        </tr>
+    </table>
+</div>
+
+
+</div>
+
+<script>
+function checkRow( row ){
+    if( event.srcElement.nodeName == "TD" )
+    {
+        var ele = $(row);
+        var checkbox = ele.find("input[type='checkbox']");
+        var checked = checkbox.is(":checked");
+        if( checked )
+        {
+            checkbox.prop( 'checked', false );
+            ele.removeClass('checked');
+        }
+        else
+        {
+           checkbox.prop( 'checked', "checked" );
+           ele.addClass('checked');
+        }
+
+    }
+}
+
+</script>
+
+<div class="content-main">
+{%with content|dm_children:"folder" as children%}
+{%if children%}
+<div class="content-tool">
+     <a href="/content/new/frontpage/1" class="btn btn-link btn-sm"><i class="fas fa-plus-square"></i> New</a>
+     <a href="/content/new/frontpage/1" class="btn btn-link btn-sm">     <input type="checkbox" value="" />
+         All
+     </a>
+     <a href="#" class="btn btn-link btn-sm" title="Move"><i class="fas fa-cut"></i> Move</a>
+     <a href="/content/export/76" class="btn btn-link btn-sm" title="Export"><i class="fas fa-file-export"></i> Export</a>
+     <a href="/content/delete/76" class="btn btn-link btn-sm" title="Remove"><i class="far fa-trash-alt"></i> Delete</a>
+
+</div>
+<h3><i class="icon-type type-folder"></i> Folders</h3>
+    <table class="table">
+    {% for child in children%}
+    <tr class="content-row" onclick="checkRow(this)">
+        <td class="select"><input type="checkbox" /></td>
+        <td class="content-title">
+           <a href="{{niceurl(child)}}">{{child.Location.Name}}</a>
+        </td>
+        <td data-published="{{child.Published|dm_format_time}}">{{child.Modified|dm_format_time}}</td>
+        <td>{{child.Priority}}</td>
+        <td>Chen</td>
+        <td class="list-tool">
+            <a href="/content/edit/76" class="action" title="Edit"><i class="far fa-edit"></i></a>
+            <!-- <a href="/content/export/76" class="action" title="Export"><i class="fas fa-file-export"></i></a> -->
+            <!-- <a href="/content/version/76" class="action" title="Version history(current version: 30)"><i class="fas fa-history"></i></a> -->
+            <a href="/content/delete/76" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
+
+             <a href="#" class="action" title="More"><i class="fas fa-ellipsis-h"></i></a>
+        </td>
+    </tr>
+    {%endfor%}
+    </table>
+{%endif%}
+{%endwith%}
+
+
+
+{%with content|dm_children:"article" as children%}
+{%if children%}
+<div class="content-tool">
+     <a href="/content/new/frontpage/1" class="btn btn-link btn-sm"><i class="fas fa-plus-square"></i> New</a>
+     <a href="/content/new/frontpage/1" class="btn btn-link btn-sm">     <input type="checkbox" value="" />
+         All
+     </a>
+     <a href="#" class="btn btn-link btn-sm" title="Move"><i class="fas fa-cut"></i> Move</a>
+     <a href="/content/export/76" class="btn btn-link btn-sm" title="Export"><i class="fas fa-file-export"></i> Export</a>
+     <a href="/content/delete/76" class="btn btn-link btn-sm" title="Remove"><i class="far fa-trash-alt"></i> Delete</a>
+     <a href="/content/delete/76" class="btn btn-link btn-sm" title="Remove"><i class="fas fa-filter"></i> Filter</a>
+<span style="font-size: 14px">
+Sort by
+<select class="form-control" style="display: inline-block; width: 100px;font-size: 14px">
+    <option>Published</option>
+    <option>Modified</option>
+</select>
+</span>
+</div>
+<h3><i class="icon-type type-article"></i> Articles</h3>
+    <table class="table">
+    {% for child in content|dm_children:"article" %}
+    <tr class="content-row"  onclick="checkRow(this)">
+        <td class="select"><input type="checkbox" /></td>
+        <td class="content-title">
+           <a href="{{niceurl(child)}}">{{child.Location.Name}}</a>
+        </td>
+        <td data-published="{{child.Published|dm_format_time}}">{{child.Modified|dm_format_time}}</td>
+        <td>{{child.Priority}}</td>
+        <td>Chen</td>
+        <td class="list-tool">
+            <a href="/content/edit/76" class="action" title="Edit"><i class="far fa-edit"></i></a>
+            <!-- <a href="/content/export/76" class="action" title="Export"><i class="fas fa-file-export"></i></a> -->
+            <!-- <a href="/content/version/76" class="action" title="Version history(current version: 30)"><i class="fas fa-history"></i></a> -->
+            <a href="/content/delete/76" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
+
+             <a href="#" class="action" title="More"><i class="fas fa-ellipsis-h"></i></a>
+        </td>
+    </tr>
+    {%endfor%}
+    </table>
+    <div style="text-align: right"> <a href="#"><i class="fas fa-chevron-left"></i></a>
+        <a href="#"><i class="fas fa-chevron-right"></i></a>
+         <a href="#"><i class="fas fa-step-backward"></i></a>
+         <a href="#"><i class="fas fa-step-forward"></i></a>
+         <input type="number" class="form-control form-control-sm" style="width: 40px;display:inline" value="1" />
+     </div>
+{%endif%}
+{%endwith%}
+</div>
+{%endblock%}

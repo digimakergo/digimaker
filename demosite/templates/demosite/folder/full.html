@@ -3,6 +3,7 @@
 
 {%block content%}
 <div class="{{content.ContentType}} full">
+    {%include "../inline-edit.html" with content=content%}
     <h2>
         {{content.Location.Name}}
     </h2>
