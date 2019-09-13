@@ -1,0 +1,110 @@
+{% extends "../base.html" %}
+
+{%block content%}
+<script src="/static/javascript/tinymce/tinymce.min.js"></script>
+
+<script>tinymce.init({
+    selector:'textarea.field-richtext',
+    height: 300,
+    menubar: false,
+    plugins: 'print preview fullpage powerpaste searchreplace autolink directionality advcode visualblocks visualchars fullscreen image link media mediaembed template codesample table charmap hr pagebreak nonbreaking anchor toc insertdatetime advlist lists wordcount tinymcespellchecker a11ychecker imagetools textpattern help formatpainter permanentpen pageembed tinycomments mentions linkchecker code',
+    toolbar: 'formatselect | bold italic underline strikethrough superscript subscript forecolor backcolor permanentpen formatpainter | table | link image media pageembed | alignleft aligncenter alignright alignjustify  | numlist bullist outdent indent | hr removeformat code'
+});</script>
+
+<div class="{{content.ContentType}} full">
+
+    <h2>Edit {{content.Name}} <a href="javascript:history.back()" style="font-size: 14px;font-weight: normal;"><i class="fas fa-save"></i> <u>Back</u></a>
+    </h2>    
+    <div class="tool" style="width: 21%; position: fixed;right: 5px;">
+    <div class="meta-content">
+        <div class="tool-head">Information</div>
+        <div  class="tool-content">
+        <table>
+            <tr>
+                <td><label>Published:</label></td>
+              <td>
+                      {{content.Published|dm_format_time}}
+              </td>
+            </tr>
+
+            <tr><td><label>Modified:</label></td>
+              <td>
+                      {{content.Modified|dm_format_time}}
+              </td>
+            </tr>
+
+            <tr><td><label>Type:</label></td>
+              <td>
+                      {{content.ContentType}}
+              </td>
+            </tr>
+
+            <tr><td><label>CID:</label></td>
+              <td>
+                      {{content.CID}}
+              </td>
+            </tr>
+
+            <tr><td><label>UID:</label></td>
+              <td>
+                      <input type="text" value="{{content.UID}}" style="width: 130px;padding: 2px 0px;border:none;text-overflow: ellipsis;overflow: hidden;" onclick="this.select()" />
+              </td>
+            </tr>
+
+            <tr><td><label>Title:</label></td>
+              <td>
+                      {{content.Name}}
+              </td>
+            </tr>
+            <tr><td><label>Summary:</label></td>
+              <td>
+                  {{content.Summary.Data()}}
+              </td>
+            </tr>
+        </table>
+        </div>
+    </div>
+
+    <div class="meta-content">
+        <div class="tool-head">Actions</div>
+        <div class="tool-content">
+            <div>
+                <button class="btn btn-link btn-sm" style="color: #e61102"><i class="fas fa-paper-plane"></i> Send</button>
+            </div>
+            <div>
+                <button class="btn btn-link btn-sm"><i class="fas fa-save"></i> Save</button>
+            </div>
+            <div>
+                <button class="btn btn-link btn-sm"><i class="fas fa-home"></i> Preview</button>
+            </div>
+            <div>
+                <button class="btn btn-link btn-sm"><i class="fas fa-window-close"></i> Cancel</button>
+            </div>
+            <hr />
+            <div>
+                <button class="btn btn-link btn-sm"><i class="fas fa-window-close"></i> Add location</button>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <div style="width: 75%;padding-right: 20px;">
+        <div>
+          <label>Title</label>:  <input class="form-control" type="text" value="{{content.Location.Name}}" />
+        </div>
+
+
+        <div class="summary">
+              <label>Summary</label>:
+            <textarea name="name" class="field-richtext" rows="8" cols="80">{{output_field(content.Summary)}}</textarea>
+        </div>
+        <div class="body">
+            <label>Body</label>:
+            <textarea name="name" class="field-richtext" rows="8" cols="80">
+            {{output_field(content.Body)}}
+            </textarea>
+        </div>
+    </div>
+</div>
+
+{%endblock%}

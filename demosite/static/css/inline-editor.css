@@ -38,6 +38,12 @@
     color: #ca1616;
 }
 
+.editmode{
+    float: right;
+    margin-right: 5px;
+    margin-top:5px;
+}
+
 /* .treelist{
     padding-left: 10px;
     position: fixed;

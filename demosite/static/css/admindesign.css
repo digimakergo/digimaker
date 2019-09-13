@@ -1,8 +1,12 @@
 body{
-background: #fdfefe
+    background: #fdfefe;
 }
 
-body > div, body > form{
+body, table{
+        font-size: 0.95em;
+}
+
+body > form{
     padding-left: 5px;
     padding-right: 5px;
 }
@@ -10,7 +14,22 @@ body > div, body > form{
 h3{
     font-weight: 400;
     margin-top: 10px;
-    font-size: 1.4em;
+    font-size: 18px;
+}
+
+.home{
+    /* border: 1px solid rgba(0,0,0,0); */
+    padding: 5px;
+}
+
+.home:hover{
+    border: 1px solid #cccccc;
+    background: #ffffff;
+
+}
+
+.path .current{
+    color: #183d56
 }
 
 .nav-link{
@@ -19,22 +38,33 @@ h3{
 
 .tool{
     float: right;
-    width: 30%;
-    padding: 0px 10px;
+    width: 25%;
 }
 
 
 .treemenu{
-    margin: 0px -5px -2px -5px;
-    background: rgba(255,255,255,0.9);
+    margin: -4px -5px -3px -5px;
+    padding-bottom: 5px;
+    /* background: #fcfdfd; */
+    padding-left: 8px;
 }
 
 .treemenu ul{
     margin-bottom: 0px
 }
 
+.treemenu li {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
 .btn-link{
     color:#272727
+}
+
+.btn-link:hover{
+    text-decoration: none;
+    color:#ff6e00
 }
 
 .nav li{
@@ -51,24 +81,34 @@ td{
 }
 
 a{
-    color: #326e94
+    color: #183d56;
 }
 
 a.active{
     color: #2365e8
 }
 
-a:hover{
-    color: #224996;
+a:hover, .menuitem a:hover{
+    /* color: #224996; */
+    color: rgb(230, 120, 0);
     text-decoration: none
 }
 
 a.action{
-    color:#696969
+    color:#565656
 }
 
 a.action:hover{
     color:#000000
+}
+
+.pagination{
+    display: block;
+    padding: 5px;
+}
+
+.pagination a{
+    color: #272727
 }
 
 .icon-type{
@@ -191,7 +231,22 @@ img.line{
 }
 
 .content-title{
-  width: 250px;`
+  width: 250px;
+}
+
+td.content-title div{
+    width: 360px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.treemenu .selected{
+    color: #e67800
+}
+
+.menuitem a.home, .menuitem  .resources a{
+    /* color: white; */
 }
 
 .field-relationlist{
@@ -201,20 +256,36 @@ img.line{
 }
 
 .meta-content{
-    font-size: 12px;
-    font-style: italic;
+    margin-bottom: 15px;
     cursor: default;
     margin-left: 2px;
-    padding: 5px;
+    padding-bottom: 5px;
 }
 
+.tool-head{
+    background: #f3f3f3;
+    padding: 4px 6px;
+    /* color: #ffffff; */
+    /* font-weight: lighter; */
+}
+
+.btn-dark{
+    background: #f7fbff;
+    border-color: #d0dae0;
+    color: #333333;
+}
+
+ .tool-content{
+     padding: 5px 10px;
+ }
+
 .meta-content label, .meta-content table{
-    color: #666666;
+    color: #333333;
     font-size: 14px;
 }
 
 .meta-content label{
-        margin:0px 5px;
+        margin:0px;
 }
 
 .table{
@@ -225,8 +296,13 @@ img.line{
     border-top-color: #e4e4e4
 }
 
+.table tr:last-child td{
+    border-bottom: 1px solid #e4e4e4
+}
+
 h2{
-    margin-top: 10px
+    margin-top: 10px;
+    font-size: 28px;
 }
 
 tr.checked .content-title{
@@ -234,18 +310,99 @@ tr.checked .content-title{
 }
 
 .left{
-    width: 25%;
+    width: 20%;
     display: inline-block;
     vertical-align:top;
     min-height: 100%;
     padding: 0px;
-    border-right: 1px solid #cfd5d8;
-    box-shadow: 0px 2px 2px 0px #d2dade
+    border-right: 1px solid #636363;
+    /* box-shadow: 0px 2px 2px 0px #d2dade; */
+    background: #525a5f
 }
 
 .left .current{
     color: #022e56;
 }
+
+.leftmenu{
+    background: #272d31;
+    position: absolute;
+    width: 60px;
+    height: 100%;
+    padding-top: 44px;
+    left:-255px;
+    border-right: 1px solid #464040;
+    box-shadow: 1px 7px 4px #464040;
+    text-align: center;
+    border-bottom-right-radius: 10px;
+    padding-bottom: 10px;
+}
+
+.leftmenu i{
+    font-size: 20px;
+    margin-left: 5px;
+}
+
+.leftmenu span{
+    /* padding: 6px 5px; */
+    display: inline-block;
+    font-size: 0.8em;
+}
+
+.logo{
+    display: inline-block;
+    transition: all 0.1s linear;
+    padding: 2px !important;
+    margin-left:10px;
+    border-radius: 3px;
+    border: 1px solid rgba(0,0,0,0);
+    position: absolute;
+    left: 0px;
+}
+
+.logo:hover{
+    /* border: 1px solid rgb(39, 46, 49); */
+    background: #272d31;
+}
+
+
+.selected-div{
+    background: rgba( 0,0,0,0.1 );
+    margin-left: -12px;
+    padding: 3px;
+    padding-left: 12px !important;
+}
+
+.resources{
+    float: right;
+}
+
+.resources a{
+    padding: 2px;
+}
+
+.leftmenu a{
+    color:rgba(255,255,255,0.9)
+}
+
+.leftmenu >div:hover a{
+    color: rgba(255, 134, 0, 0.87)
+}
+
+.leftmenu div.selected a{
+    color: #e67800;
+}
+
+.leftmenu > div{
+    padding-top: 6px;
+    padding-right: 5px;
+    padding-bottom: 6px;
+    cursor: pointer;
+    text-align: left;
+    padding-left: 10px;
+    font-weight: 300;
+}
+
 
 .treemenu ul ul{
     margin-left: 5px;
@@ -280,22 +437,40 @@ span.icon-toggle.space {
 }
 
 .menu{
-    background: #bcd2e0
+    /* background: #bcd2e0; */
+    /* margin-left: 44px; */
 }
 
 .menuitem{
-   border-top: 1px solid #fbfbfb;
-   border-bottom: 1px solid #cad3d8;
-   padding: 2px 5px;
-   background: rgba(255, 255, 255, 0.68);
+   /* border-top: 1px solid #cccccc; */
+   /* border-bottom: 1px solid #d9dbe0; */
+    padding: 3px 5px;
+    /* background: #f0f0f1; */
+}
+
+.notification{
+    display: inline-block;
+    /* border: 1px solid #3a3a3c; */
+    float: right;
+    border-radius: 12px;
+    font-size: 11px;
+    padding: 2px 3px;
+    background: #e67800;
+    color: #ffffff;
+}
+
+.menuitem > a{
+    padding-left: 5px
 }
 
 .menuitem a{
-    color: #183d56;
+    color: #ffffff;
+    font-weight: 300;
 }
 
 .main{
-    width: 74%;
+    padding: 0px 5px;
+    width: 79%;
     display: inline-block;
     position: relative;
     vertical-align:top;
@@ -310,9 +485,9 @@ input[type="file"]{
 
 .content-main{
     background: #ffffff;
-    padding: 10px;
+    padding: 0px 10px 10px 10px;
     float: left;
-    width: 70%;
+    width: 75%;
 }
 
 .content-main{
@@ -336,8 +511,13 @@ td.list-tool {
     float: right;
 }
 
-.content-tool a {
+.content-tool > a {
     padding: 4px 2px;
+    margin-bottom: 5px;
+}
+
+.content-tool > span{
+
 }
 
 td.select{
@@ -352,7 +532,34 @@ td.select{
 }
 
 .table td{
-    padding: 8px 5px;
+    padding: 7px 5px;
+}
+
+.leftmenu > .selected, .leftmenu > div:hover{
+    background: #333a3e
+}
+
+.table td input{
+    margin-top: 3px;
+}
+
+.separator{
+    color: #666666;
+    font-size: 14px;
+}
+
+h2.path{
+    font-size: 20px;
+    font-weight: 400;
+    padding-left: 8px;
+}
+
+.path .current{
+    font-weight: 500;
+}
+
+h2.path a, h2.path{
+    /* color: #666666; */
 }
 
 @media only screen and (max-width: 600px) {

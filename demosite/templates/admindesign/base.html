@@ -1,213 +1,223 @@
 
 <html>
 <head>
-  <title>DM Editorial UI</title>
+  <title>Digimaker {%block title%}{%endblock%}</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+
+  <link rel="icon" href="http://demo.digimaker.no:9200/static/images/logo1.png" type="image/x-icon" />
+
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/static/css/admindesign.css" rel="stylesheet">
 
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
   <script src="http://demo.digimaker.no:8089/static/javascript/site.js"></script>
 
 </head>
 
 <body>
   <div class="left">
-      <div style="padding:5px 10px;border-bottom:1px solid #cad3d8;background:#eaf1f5">
-          <a href="#" title="Digimaker Content Framework">
-              <img src="http://demo.digimaker.no:9200/static/images/logo1.png" width="25px" />
-          </a>
-          <div style="display:inline-block;font-size: 14px;float:right">
-              <div class="profile">&nbsp;<a href="#"><i class="fas fa-user"></i> Chen Xiongjie</a>
-              </div>
-        </div>
+      <div class="leftmenu">
+
+          <div class="selected">
+              <a href="/admindesign/content/view/55" title="Digimaker Dashboard">
+                  <i class="icon-type type-folder-site"></i> <span>Sites</span>
+              </a>
+          </div>
+
+          <div>
+              <a href="#"><i class="icon-type  type-users"></i>
+                    <span>Users</span>
+              </a>
+
+          </div>
+
+          <div>
+              <a href="/{{prefix}}/content/view/48"><i class="icon-type  type-media"></i>
+
+                  <span>Media</span>
+              </a>
+          </div>
+          <div>
+              <a href="/{{prefix}}/content/view/48"><i class="fas fa-cube"></i>
+                  <span>CRM&nbsp;&nbsp;&nbsp;</span>
+              </a>
+          </div>
       </div>
-
       <div class="menu">
+          <div class="menuitem" style="border-bottom: 1px solid #464646;height:41px;">
+                <a href="javascript:switchMenu();" class="logo" title="Open menu">
+                    <!-- <i class="fas fa-bars" style="font-size: 22px;"></i> -->
+                        <img style="filter:invert(1)" src="http://demo.digimaker.no:9200/static/images/logo1.png" width="28px" />
+                </a>
+                <script>
+                    function switchMenu(){
+                        var leftmenu = $('.leftmenu');
+                        var leftArea = $('.left');
+                        var shown = leftmenu.is(':visible');
+                        if( leftmenu.css('left') == '0px' ){
+                            leftmenu.animate({left: '-65px'}, 'fast');
+                            $(this).removeClass('logo-selected');
+                        }else{
+                             leftmenu.animate({left: '0px'}, 'fast');
+                            $(this).addClass('logo-selected');
+                        }
+                    }
+                </script>
 
-          <div class="menuitem">
-                <a href="/content/view/1"><i class="fas fa-tachometer-alt"></i>Dashboard</a>
+                <div class="profile" style="display:inline-block;float: right;padding:3px">&nbsp;<a href="#"><i class="fas fa-user"></i> Chen Xiongjie</a>
+          </div>
             </div>
-
-              <div class="menuitem">
-                    <div>
-                        <a href="/content/view/1"><i class="icon-type  type-home"></i>Sites</a>
-
-                        <a href="#"><i class="fas fa-caret-down" style="color:#656565"></i></a>
-
-                        <span class="show-hide" style="float: right">
-                            <a href="#"><i class="fas fa-chevron-down"></i></a>
-                        </span>
-                    </div>
-                    <div class="treemenu">
-                        <ul>
-
-                            <li>
-                                <a href="javascipt:void;"><span class="icon-toggle open"></span></a>
-                                <a href="/content/view/55">
-                                    <i class="icon-type type-folder-site"></i>Demosite1
-                                </a>
-
-                                    <ul>
-
-                                            <li>
-
-                                                <a href="javascipt:void;"><span class="icon-toggle open"></span></a>
-
-                                                <a href="/content/view/56">
-                                                    <i class="icon-type type-folder-image"></i>Images
-                                                </a>
-
-
-                                                <ul>
-
-                                                  <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                    <a href="/content/view/87">
-                                                        <i class="icon-type type-folder-image"></i>trip 2019
-                                                    </a>
-                                                  <li>
-
-                                                 </ul>
-
-                                            </li>
-
-                                            <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                <a href="/content/view/61">
-                                                    <i class="icon-type type-folder-file"></i>Files
-                                                </a>
-
-
-                                            </li>
-
-                                            <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                <a href="/content/view/85">
-                                                    <i class="icon-type type-folder-link"></i>Links
-                                                </a>
-
-
-                                            </li>
-
-                                            <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                <a href="/content/view/57">
-                                                    <i class="icon-type type-folder-"></i>News
-                                                </a>
-
-
-                                            </li>
-
-                                            <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                <a href="/content/view/58">
-                                                    <i class="icon-type type-folder-"></i>Blogs
-                                                </a>
-
-
-                                            </li>
-
-                                            <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                <a href="/content/view/59">
-                                                    <i class="icon-type type-folder-"></i>Contact us
-                                                </a>
-
-
-                                            </li>
-
-                                    </ul>
-
-                            </li>
-
-                            <li>
-                                <a href="javascipt:void;"><span class="icon-toggle open"></span></a>
-                                <a href="/content/view/4">
-                                    <i class="icon-type type-folder-"></i>News
-                                </a>
-
-                                    <ul>
-
-                                            <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                <a href="/content/view/70">
-                                                    <i class="icon-type type-folder-"></i>Test 06.05.2019 22:51
-                                                </a>
-
-
-                                            </li>
-
-                                            <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                <a href="/content/view/71">
-                                                    <i class="icon-type type-folder-"></i>Test 06.05.2019 22:53
-                                                </a>
-
-
-                                            </li>
-
-                                            <li>
-
-                                                      <span class="icon-toggle space"></span>
-
-                                                <a href="/content/view/109">
-                                                    <i class="icon-type type-folder-"></i>fff
-                                                </a>
-
-
-                                            </li>
-
-                                    </ul>
-
-                            </li>
-
-                      </ul>
-                    </div>
-                </div>
-
-
-                <div class="menuitem">
-                    <a href="/content/view/7">
-                        <i class="icon-type  type-users"></i>Users</a>
-
-                        <span class="show-hide">
-                            <a href="#"><i class="fas fa-chevron-right"></i></a>
-                        </span>
-                </div>
-
-                <div class="menuitem">
-                    <a href="/content/view/48"><i class="icon-type  type-media"></i>Media</a>
-
-                    <span class="show-hide">
-                        <a href="#"><i class="fas fa-chevron-right"></i></a>
+          <div class="menuitem" style="border-bottom: 1px solid #464646;border-top: 1px solid #6d6d6d">
+                <a href="/content/view/1"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                <span class="notification">20</span>
+            </div>
+          <div class="menuitem" style="border-top: 1px solid #6d6d6d">
+                <a href="/admindesign/content/view/55" >
+                    <i class="icon-type type-folder-site"></i> Demosite
+                    <!-- <i style="font-size:11px;padding: 5px" class="fas fa-chevron-down"></i> -->
+                </a>
+
+                <a href="#" title="Change Site" style="color:rgb(230, 120, 0);float: right;display: inline-block;
+    margin-top: 3px;"><i class="fas fa-wrench"></i></a>
+                <!--
+                <div class="resources">
+                    <span title="Images">
+                        <a href="#"><i class="icon-type type-folder-image"></i></a>
+                    </span>
+                    <span title="Files">
+                        <a href="#"><i class="icon-type type-folder-file"></i></a>
+                    </span>
+                    <span title="Links">
+                        <a href="#"><i class="icon-type type-folder-link"></i></a>
                     </span>
                 </div>
+            -->
+            </div>
+              <div class="menuitem" style="">
+                    <div class="treemenu">
+
+
+                                    <ul>
+
+                                            <li>
+                                                    <div class="selected-div">
+                                                    <a href="javascipt:void;">
+                                                        <span style="font-size: 12px; margin-top: 6px;color:#ffffff;margin-right:4px">
+                                                            <i class="fas fa-chevron-down"></i>
+                                                        </span>
+                                                    </a>
+
+                                                    <a class="selected" href="/{{prefix}}/content/view/57">
+                                                        <i class="icon-type type-folder-"></i>News
+                                                    </a>
+                                                    </div>
+                                                <ul>
+
+                                                        <li>
+
+                                                                  <span class="icon-toggle space"></span>
+                                                            <a href="/{{prefix}}/content/view/57">
+                                                                <i class="icon-type type-folder-"></i>2019
+                                                            </a>
+
+
+                                                        </li>
+                                                        <li>
+
+                                                                  <span class="icon-toggle space"></span>
+
+                                                            <a href="/{{prefix}}/content/view/57">
+                                                                <i class="icon-type type-folder-"></i>2018
+                                                            </a>
+
+
+                                                        </li>
+                                                        <li>
+
+                                                                  <span class="icon-toggle space"></span>
+
+                                                            <a href="/{{prefix}}/content/view/57">
+                                                                <i class="icon-type type-folder-"></i>Archive
+                                                            </a>
+
+
+                                                        </li>
+                                                </ul>
+
+                                            </li>
+
+                                            <li>
+                                             <div>
+                                                      <span class="icon-toggle space"></span>
+
+                                                <a href="/{{prefix}}/content/view/58">
+                                                    <i class="icon-type type-folder-"></i>Blogs
+                                                </a>
+                                            </div>
+
+                                            </li>
+
+                                            <li>
+                                             <div>
+                                                      <span class="icon-toggle space"></span>
+
+                                                <a href="/{{prefix}}/content/view/59">
+                                                    <i class="icon-type type-folder-"></i>Solutions
+                                                </a>
+                                            </div>
+
+                                            </li>
+
+                                            <li>
+
+                                             <div>
+                                                      <span class="icon-toggle space"></span>
+
+                                                <a href="/{{prefix}}/content/view/59">
+                                                    <i class="icon-type type-folder-"></i>Services
+                                                </a>
+                                            </div>
+
+                                            </li>
+
+                                            <li>
+                                             <div>
+                                                      <span class="icon-toggle space"></span>
+
+                                                <a href="/{{prefix}}/content/view/59">
+                                                    <i class="icon-type type-folder-"></i>Contact us
+                                                </a>
+                                            </div>
+
+                                            </li>
+
+                                    </ul>
+
+                    </div>
+                </div>
 
                 <div class="menuitem">
-                        <a href="#"><i class="icon-type  type-users"></i>CRM</a>
-                        <span class="show-hide">
-                            <a href="#"><i class="fas fa-chevron-right"></i></a>
-                        </span>
-                </div>
+                    &nbsp;&nbsp;<span style="font-size: 12px; margin-top: 6px;color:#ffffff">
+                        <i class="fas fa-chevron-right"></i>
+                    </span><a href="/content/view/1"><i class="icon-type type-folder-image"></i> Images</a>
+
+                  </div>
+                  <div class="menuitem">
+                     &nbsp;&nbsp; <span style="font-size: 12px; margin-top: 6px; color:#ffffff">
+                          <i class="fas fa-chevron-right"></i>
+                      </span>
+                      <a href="/content/view/1"><i class="icon-type type-folder-file"></i> Files</a>
+
+                    </div>
+                    <div class="menuitem">
+                          &nbsp;<a href="/content/view/1"><i class="icon-type type-folder-link"></i> Links</a>
+                      </div>
+
         </div>
 
 
@@ -235,7 +245,13 @@
   </div>
 
 </div>
+<script>
 
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
+</script>
 
 </body>
 </html>

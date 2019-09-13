@@ -1,25 +1,36 @@
 {% extends "../base.html" %}
 
+{%block title%}
+- {{content.Name}}
+{%endblock%}
+
 {%block content%}
 
 
-<h2><i class="icon-type type-folder"></i> {{content.Name}}
+<h2 class="path"><i class="icon-type type-folder"></i>
+
+    <a href="#">Demosite</a>
+    <span class="separator"><i class="fas fa-chevron-right"></i></span>
+    <span class="current">
+    {{content.Name}}
+    </span>
 
     <div class="inline-tool">
             <span>
                 <a href="/content/edit/1" class="btn btn-link btn-sm" title="Edit">
-                    <i class="far fa-edit"></i> Edit
+                    <i class="far fa-edit"></i>
                 </a>
             </span>
     </div>
 </h2>
 
 <div class="tool">
-
 <div class="meta-content">
+    <div class="tool-head">Information</div>
+    <div  class="tool-content">
     <table>
         <tr>
-            <td style="width: 150px"><label>Published:</label></td>
+            <td><label>Published:</label></td>
           <td>
                   {{content.Published|dm_format_time}}
           </td>
@@ -45,23 +56,45 @@
 
         <tr><td><label>UID:</label></td>
           <td>
-                  {{content.UID}}
+                  <input type="text" value="{{content.UID}}" style="width: 130px;padding: 2px 0px;border:none;text-overflow: ellipsis;overflow: hidden;" onclick="this.select()" />
           </td>
         </tr>
 
-        <tr><td style="width: 150px"><label>Title:</label></td>
+        <tr><td><label>Title:</label></td>
           <td>
                   {{content.Name}}
           </td>
         </tr>
-        <tr><td style="width: 150px"><label>Summary:</label></td>
+        <tr><td><label>Summary:</label></td>
           <td>
               {{content.Summary.Data()}}
           </td>
         </tr>
     </table>
+    </div>
 </div>
 
+<div class="meta-content">
+    <div class="tool-head">Actions</div>
+    <div class="tool-content">
+        <div>
+            <button class="btn btn-link btn-sm"><i class="fas fa-tools"></i> Move whole subtree</button>
+        </div>
+        <div>
+            <button class="btn btn-link btn-sm"><i class="fas fa-file-export"></i> Export subtree</button>
+        </div>
+        <div>
+            <button class="btn btn-link btn-sm"><i class="fas fa-paper-plane"></i> Send to clusters</button>
+        </div>
+        <hr />
+        <div>
+            <button class="btn btn-link btn-sm"><i class="fas fa-plus"></i> Create a new site</button>
+        </div>
+        <div>
+            <button class="btn btn-link btn-sm"><i class="fas fa-home"></i> View in frontend</button>
+        </div>
+    </div>
+</div>
 
 </div>
 
@@ -140,8 +173,8 @@ function checkRow( row ){
      <a href="/content/delete/76" class="btn btn-link btn-sm" title="Remove"><i class="far fa-trash-alt"></i> Delete</a>
      <a href="/content/delete/76" class="btn btn-link btn-sm" title="Remove"><i class="fas fa-filter"></i> Filter</a>
 <span style="font-size: 14px">
-Sort by
-<select class="form-control" style="display: inline-block; width: 100px;font-size: 14px">
+<i class="fas fa-sort-alpha-up"></i>
+<select class="form-control" style="display: inline-block; width: 100px;height: 30px;font-size: 14px">
     <option>Published</option>
     <option>Modified</option>
 </select>
@@ -153,13 +186,13 @@ Sort by
     <tr class="content-row"  onclick="checkRow(this)">
         <td class="select"><input type="checkbox" /></td>
         <td class="content-title">
-           <a href="{{niceurl(child)}}">{{child.Location.Name}}</a>
+           <div><a href="{{niceurl(child)}}">{{child.Location.Name}}</a></div>
         </td>
         <td data-published="{{child.Published|dm_format_time}}">{{child.Modified|dm_format_time}}</td>
         <td>{{child.Priority}}</td>
         <td>Chen</td>
         <td class="list-tool">
-            <a href="/content/edit/76" class="action" title="Edit"><i class="far fa-edit"></i></a>
+            <a href="/{{prefix}}/content/view/{{child.ID}}" class="action" title="Edit"><i class="far fa-edit"></i></a>
             <!-- <a href="/content/export/76" class="action" title="Export"><i class="fas fa-file-export"></i></a> -->
             <!-- <a href="/content/version/76" class="action" title="Version history(current version: 30)"><i class="fas fa-history"></i></a> -->
             <a href="/content/delete/76" class="action" title="Remove"><i class="far fa-trash-alt"></i></a>
@@ -169,7 +202,7 @@ Sort by
     </tr>
     {%endfor%}
     </table>
-    <div style="text-align: right"> <a href="#"><i class="fas fa-chevron-left"></i></a>
+    <div class="pagination" style="text-align: right"> <a href="#"><i class="fas fa-chevron-left"></i></a>
         <a href="#"><i class="fas fa-chevron-right"></i></a>
          <a href="#"><i class="fas fa-step-backward"></i></a>
          <a href="#"><i class="fas fa-step-forward"></i></a>
