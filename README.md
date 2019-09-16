@@ -1,6 +1,6 @@
 Digimaker Content Management Framework
 ----------------
-Digimaker is a simple, high performance and flexible Content Management Framework suitable to develop your web site and web application. Used scenarios are like websites, internal document management system, or generic software like workflow system, even CRM systems, or cloud based application.
+Digimaker is a simple, high performance and flexible Content Management Framework suitable to develop your web site and web application. Typical application cases are like websites, internal document management system, cloud based application, also some generic software like workflow systems, even CRM systems.
 
 
 ### Simple
