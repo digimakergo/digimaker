@@ -23,6 +23,9 @@ Written in Go language, with performance-prioritied practise, Digimaker CMF prov
 - powerful content model so extending&operating content is like operating database tables.
 - clear & beautiful callback & debug mechanisms.
 
+License
+--------
+Digimaker is honored to use MIT license(?). There is Digimaker Plus which provides additional valuable features, check more [here](http://www.digimaker.no).
 
 Doc
 --------
