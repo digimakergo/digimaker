@@ -20,7 +20,7 @@ Written in Go language, with performance-prioritied practise, Digimaker CMF prov
 - most common features are set in configuration, no coding needed.
 - reuse built-in modules like login, displaying content
 - extendable permission&user system
-- powerful content model so extending&operating content is like operating database tables.
+- powerful content model(content type&field type) to extending&operating content fitting your need
 - clear & beautiful callback & debug mechanisms.
 
 License
