@@ -5,7 +5,7 @@ Digimaker is a simple, high performance and flexible Content Management Framewor
 
 ### Simple
 
-- Django-syntax like templating
+- Django/Twig-syntax like templating
 - clear template structure
 - easily support multi side
 - Simple go language to extend api
