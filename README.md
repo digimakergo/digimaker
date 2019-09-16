@@ -25,7 +25,7 @@ Written in Go language, with performance-prioritied practise, Digimaker CMF prov
 
 License
 --------
-Digimaker is honored to use MIT license(?). There is Digimaker Plus which provides additional valuable features, check more [here](http://www.digimaker.no).
+Digimaker is honored to use MIT license(confirmed?). There is Digimaker Plus which provides additional valuable features(eg. maintenance tools), check more [here](http://www.digimaker.com).
 
 Doc
 --------
