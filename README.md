@@ -1,23 +1,21 @@
 Digimaker Content Management Framework
-=======================
-Digimaker is a simple, high performance and flexible Content Management Framework suitable to develop your web site and web application. It can be used for developing other system also(eg. workflow system, document system ).
+----------------
+Digimaker is a simple, high performance and flexible Content Management Framework suitable to develop your web site and web application. Used scenarios are like websites, internal document management system, or generic software like workflow system, even CRM systems, or cloud based application.
 
 
-Simple
------------
+### Simple
+
 - Django-syntax like templating
 - clear template structure
 - easily support multi side
 - Simple go language to extend api
 
 
-High performance
--------------
+### High performance
 Written in Go language, with performance-prioritied practise, Digimaker CMF provides best performance among main stream languages. Benchmark ref:xxxx. Query data you need most.
 
 
-Powerful&Flexible
------------
+### Powerful&Flexible
 - rest api to query/change contents
 - most common features are set in configuration, no coding needed.
 - reuse built-in modules like login, displaying content
