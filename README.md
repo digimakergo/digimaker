@@ -1,6 +1,6 @@
 Digimaker Content Management Framework
 ----------------
-Written in Go language, Digimaker is a simple, high performance and flexible Content Management (but not limited to) Framework to develop your web site and web application.
+Written in Go language, Digimaker is a simple, high performance and flexible Content Management(but not limited to) Framework to develop your web site and web application.
 
 The framework emphasizes below design principles:
 - minimal core+plugin design, avoiding over-engineering.
