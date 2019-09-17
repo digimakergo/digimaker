@@ -4,15 +4,15 @@ Written in Go language, Digimaker is a simple, high performance and flexible Con
 
 The framework emphasizes below design principles:
 - minimal core+plugin design, avoiding over-engineering.
-- providing features with good balance of simplicity and flexiablity
+- providing features with good balance of simplicity and flexibility
 - important to make everything easy to maintain(eg. good logging, debug info, error message)
 
 Typical application cases are like website, document management system, cloud based application, also some generic software like workflow systems, even CRM systems.
 
 ### Simple
-- [websites]Django/Twig-syntax like templating
-- [websites]clear template structure
-- [websites]easily support multi side
+- [website]Django/Twig-syntax like templating
+- [website]clear template structure
+- [website]easily support multi side
 - Go style api
 - Manipulate content via rest api.
 
@@ -41,4 +41,4 @@ See [Progress](dm/doc/9.Progress.md) for progresses.
 
 License
 --------
-Digimaker is honored to use MIT license(confirmed?). There are Paid Digimaker Plugins providing additional valuable features(eg. maintenance tools), check more [here](http://www.digimaker.com).
+Digimaker is honored to use MIT license(confirmed?). There are Paid Digimaker Plugins providing additional valuable features(eg. maintenance tools), check more on [http://www.digimaker.com](www.digimaker.com).
