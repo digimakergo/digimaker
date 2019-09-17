@@ -7,7 +7,7 @@ The framework emphasizes below design principles:
 - providing features with good balance of simplicity and flexiablity
 - important to make everything easy to maintain(eg. good logging, debug info, error message)
 
-Typical application cases are like websites, internal document management system, cloud based application, also some generic software like workflow systems, even CRM systems.
+Typical application cases are like website, document management system, cloud based application, also some generic software like workflow systems, even CRM systems.
 
 ### Simple
 - [websites]Django/Twig-syntax like templating
