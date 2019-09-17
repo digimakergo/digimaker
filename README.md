@@ -41,4 +41,4 @@ See [Progress](dm/doc/9.Progress.md) for progresses.
 
 License
 --------
-Digimaker is honored to use MIT license(confirmed?). There are Paid Digimaker Plugins providing additional valuable features(eg. maintenance tools), check more on [http://www.digimaker.com](www.digimaker.com).
+Digimaker is honored to use MIT license(confirmed?). There are Paid Digimaker Plugins providing additional valuable features(eg. maintenance tools), check more on [www.digimaker.com](http://www.digimaker.com).
