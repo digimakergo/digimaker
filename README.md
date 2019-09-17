@@ -16,8 +16,11 @@ The framework emphasizes below design principles:
 
 
 ### High performance
-Written in Go language, with performance-prioritied practise, Digimaker CMF provides best performance among main stream languages. Benchmark ref:xxxx. Query data you need most.
-
+Thanks to performance of Go language, with performance-prioritied design, Digimaker CMF provides very good performance.
+- Support cluster
+- Straightforward content model to database, query data you need directly.
+- Support database partition from model so querying > 10 millions of data can be like querying under 1 million.
+Benchmark reference:xxxx.
 
 ### Powerful&Flexible
 - rest api to query/change contents
