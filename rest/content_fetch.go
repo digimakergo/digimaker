@@ -9,6 +9,7 @@ import (
 	"dm/core/util/debug"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -44,7 +45,7 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		//todo: handle
 	}
 	context := debug.Init(context.Background())
-	list, err := querier.Children(rootContent, "folder,article", 1, context)
+	list, err := querier.Children(rootContent, 1, context)
 	if err != nil {
 
 	}
@@ -69,9 +70,10 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	}
 
 	context := debug.Init(context.Background())
-	tree, err := querier.SubTree(rootContent, 5, "folder,", 1, context)
+	tree, err := querier.SubTree(rootContent, 5, "folder", 1, context)
 	if err != nil {
 		//todo: handle error
+		fmt.Println(err.Error())
 	}
 
 	data, _ := json.Marshal(tree)

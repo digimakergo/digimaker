@@ -97,9 +97,24 @@ func (cq ContentQuery) List(contentType string, condition db.Condition) ([]conte
 	return result, err
 }
 
+//Fetch children by type
+func (cq ContentQuery) ChildrenByTypes(parentContent contenttype.ContentTyper, contentTypes string, userID int, context context.Context) (map[string][]contenttype.ContentTyper, error) {
+
+	return nil, nil
+}
+
 //Fetch children
-func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, childrenType string, userID int, context context.Context) ([]contenttype.ContentTyper, error) {
-	return cq.SubList(parentContent, childrenType, 1, userID, context)
+func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, userID int, context context.Context) (map[string][]contenttype.ContentTyper, error) {
+	contentTypeList := parentContent.Definition().AllowedTypes
+	var result = map[string][]contenttype.ContentTyper{}
+	for _, contentType := range contentTypeList {
+		children, err := cq.SubList(parentContent, contentType, 1, userID, context)
+		if err != nil {
+			return nil, err
+		}
+		result[contentType] = children
+	}
+	return result, nil
 }
 
 //Get sub tree under rootContent, permission considered.
