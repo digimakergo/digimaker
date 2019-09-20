@@ -7,6 +7,7 @@ import (
 func Route(r *mux.Router) {
 	r.HandleFunc("/content/get/{id}", GetContent)
 	r.HandleFunc("/content/treemenu/{id}", TreeMenu)
+	r.HandleFunc("/content/list/{id}", Children)
 	r.HandleFunc("/util/uploadfile", UploadFile)
 	r.HandleFunc("/util/uploadimage", UploadImage)
 

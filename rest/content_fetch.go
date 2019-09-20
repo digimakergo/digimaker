@@ -34,8 +34,21 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Children() {
+func Children(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	id, err := strconv.Atoi(params["id"])
+	querier := handler.Querier()
+	rootContent, err := querier.FetchByID(id)
+	if err != nil {
+		//todo: handle
+	}
+	context := debug.Init(context.Background())
+	list, err := querier.Children(rootContent, "folder,article", 1, context)
+	if err != nil {
 
+	}
+	data, _ := json.Marshal(list)
+	w.Write([]byte(data))
 }
 
 func SubTree() {
@@ -54,7 +67,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	}
 
 	context := debug.Init(context.Background())
-	tree, err := querier.SubTree(rootContent, 5, "folder", 1, context)
+	tree, err := querier.SubTree(rootContent, 5, "folder,", 1, context)
 	if err != nil {
 		//todo: handle error
 	}
