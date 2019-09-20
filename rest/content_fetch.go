@@ -36,6 +36,7 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 
 func Children(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	id, err := strconv.Atoi(params["id"])
 	querier := handler.Querier()
 	rootContent, err := querier.FetchByID(id)
@@ -57,6 +58,7 @@ func SubTree() {
 
 //Get tree menu under a node
 func TreeMenu(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 
