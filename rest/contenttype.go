@@ -14,6 +14,7 @@ import (
 func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	identifier := strings.TrimSpace(params["contentype"])
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	definition := contenttype.GetContentDefinition(identifier)
 	w.Header().Set("content-type", "application/json")
