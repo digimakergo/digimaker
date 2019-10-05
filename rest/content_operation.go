@@ -8,6 +8,7 @@ import (
 	"dm/core/util/debug"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -29,10 +30,11 @@ func New(w http.ResponseWriter, r *http.Request) {
 	contentType := params["contenttype"]
 
 	inputs := map[string]interface{}{}
-	r.ParseForm()
-	for key, value := range r.PostForm {
-		inputs[key] = value[0]
-	}
+	decorder := json.NewDecoder(r.Body)
+	err = decorder.Decode(&inputs)
+
+	fmt.Println(err)
+	fmt.Println(inputs)
 	//todo: add value based on definition
 
 	handler := handler.ContentHandler{Context: r.Context()}
@@ -41,6 +43,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 	if !validationResult.Passed() {
 		data, _ := json.Marshal(validationResult)
+		w.WriteHeader(400)
 		w.Write(data)
 		return
 	}

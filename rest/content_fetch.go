@@ -17,6 +17,7 @@ import (
 )
 
 func GetContent(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(r)
 	querier := handler.Querier()
 	id, err := strconv.Atoi(params["id"])
