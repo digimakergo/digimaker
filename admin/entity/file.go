@@ -17,20 +17,26 @@ import (
 type File struct{
      contenttype.ContentCommon `boil:",bind"`
     
-     
-     
-        Filetype  fieldtype.TextField `boil:"filetype" json:"filetype" toml:"filetype" yaml:"filetype"`
-     
+         
+         
+         
+            Filetype  fieldtype.TextField `boil:"filetype" json:"filetype" toml:"filetype" yaml:"filetype"`
+         
+        
     
-     
-     
-        Path  fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
-     
+         
+         
+         
+            Path  fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
+         
+        
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
 }
@@ -64,15 +70,21 @@ func (c *File) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         
-        result["filetype"]=c.Filetype
+        
+            result["filetype"]=c.Filetype
+        
         
     
         
-        result["path"]=c.Path
+        
+            result["path"]=c.Path
+        
         
     
         
-        result["title"]=c.Title
+        
+            result["title"]=c.Title
+        
         
     
 	for key, value := range c.ContentCommon.Values() {
@@ -94,20 +106,26 @@ func (c *File) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
     case "filetype":
         
             result = c.Filetype
         
+    
+    
     
     case "path":
         
             result = c.Path
         
     
+    
+    
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -123,20 +141,26 @@ func (c *File) SetValue(identifier string, value interface{}) error {
         
             
             
+            
             case "filetype":
             c.Filetype = value.(fieldtype.TextField)
             
+            
         
+            
             
             
             case "path":
             c.Path = value.(fieldtype.TextField)
             
+            
         
+            
             
             
             case "title":
             c.Title = value.(fieldtype.TextField)
+            
             
         
 	default:

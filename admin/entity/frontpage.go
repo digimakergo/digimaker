@@ -19,29 +19,35 @@ import (
 type Frontpage struct{
      contenttype.ContentCommon `boil:",bind"`
     
-     
-     
-        Mainarea  fieldtype.TextField `boil:"mainarea" json:"mainarea" toml:"mainarea" yaml:"mainarea"`
-     
+         
+         
+         
+            Mainarea  fieldtype.TextField `boil:"mainarea" json:"mainarea" toml:"mainarea" yaml:"mainarea"`
+         
+        
     
-     
-     
+         
+         
     
-     
-     
-        Sidearea  fieldtype.TextField `boil:"sidearea" json:"sidearea" toml:"sidearea" yaml:"sidearea"`
-     
+         
+         
+         
+            Sidearea  fieldtype.TextField `boil:"sidearea" json:"sidearea" toml:"sidearea" yaml:"sidearea"`
+         
+        
     
-     
-     
+         
+         
     
-     
-     
+         
+         
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
      contenttype.Location `boil:"location,bind"`
@@ -77,13 +83,17 @@ func (c *Frontpage) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         
-        result["mainarea"]=c.Mainarea
+        
+            result["mainarea"]=c.Mainarea
+        
         
     
         
     
         
-        result["sidearea"]=c.Sidearea
+        
+            result["sidearea"]=c.Sidearea
+        
         
     
         
@@ -91,7 +101,9 @@ func (c *Frontpage) ToMap() map[string]interface{} {
         
     
         
-        result["title"]=c.Title
+        
+            result["title"]=c.Title
+        
         
     
 	for key, value := range c.ContentCommon.Values() {
@@ -117,35 +129,47 @@ func (c *Frontpage) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
     case "mainarea":
         
             result = c.Mainarea
         
+    
+    
     
     case "mainarea_blocks":
         
             result = c.Relations.Map["mainarea_blocks"]
         
     
+    
+    
     case "sidearea":
         
             result = c.Sidearea
         
+    
+    
     
     case "sidearea_blocks":
         
             result = c.Relations.Map["sidearea_blocks"]
         
     
+    
+    
     case "slideshow":
         
             result = c.Relations.Map["slideshow"]
         
     
+    
+    
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -161,29 +185,35 @@ func (c *Frontpage) SetValue(identifier string, value interface{}) error {
         
             
             
+            
             case "mainarea":
             c.Mainarea = value.(fieldtype.TextField)
             
+            
         
             
             
         
+            
             
             
             case "sidearea":
             c.Sidearea = value.(fieldtype.TextField)
             
-        
-            
             
         
             
             
         
+            
+            
+        
+            
             
             
             case "title":
             c.Title = value.(fieldtype.TextField)
+            
             
         
 	default:

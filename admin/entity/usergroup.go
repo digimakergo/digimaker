@@ -19,15 +19,19 @@ import (
 type Usergroup struct{
      contenttype.ContentCommon `boil:",bind"`
     
-     
-     
-        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-     
+         
+         
+         
+            Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+         
+        
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
      contenttype.Location `boil:"location,bind"`
@@ -63,11 +67,15 @@ func (c *Usergroup) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         
-        result["summary"]=c.Summary
+        
+            result["summary"]=c.Summary
+        
         
     
         
-        result["title"]=c.Title
+        
+            result["title"]=c.Title
+        
         
     
 	for key, value := range c.ContentCommon.Values() {
@@ -93,15 +101,19 @@ func (c *Usergroup) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
     case "summary":
         
             result = c.Summary
         
     
+    
+    
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -117,14 +129,18 @@ func (c *Usergroup) SetValue(identifier string, value interface{}) error {
         
             
             
+            
             case "summary":
             c.Summary = value.(fieldtype.RichTextField)
+            
             
         
             
             
+            
             case "title":
             c.Title = value.(fieldtype.TextField)
+            
             
         
 	default:

@@ -19,20 +19,26 @@ import (
 type Folder struct{
      contenttype.ContentCommon `boil:",bind"`
     
-     
-     
-        FolderType  fieldtype.TextField `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
-     
+         
+         
+         
+            FolderType  fieldtype.TextField `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
+         
+        
     
-     
-     
-        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-     
+         
+         
+         
+            Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+         
+        
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
      contenttype.Location `boil:"location,bind"`
@@ -68,15 +74,21 @@ func (c *Folder) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         
-        result["folder_type"]=c.FolderType
+        
+            result["folder_type"]=c.FolderType
+        
         
     
         
-        result["summary"]=c.Summary
+        
+            result["summary"]=c.Summary
+        
         
     
         
-        result["title"]=c.Title
+        
+            result["title"]=c.Title
+        
         
     
 	for key, value := range c.ContentCommon.Values() {
@@ -102,20 +114,26 @@ func (c *Folder) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
     case "folder_type":
         
             result = c.FolderType
         
+    
+    
     
     case "summary":
         
             result = c.Summary
         
     
+    
+    
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -131,20 +149,26 @@ func (c *Folder) SetValue(identifier string, value interface{}) error {
         
             
             
+            
             case "folder_type":
             c.FolderType = value.(fieldtype.TextField)
             
+            
         
+            
             
             
             case "summary":
             c.Summary = value.(fieldtype.RichTextField)
             
+            
         
+            
             
             
             case "title":
             c.Title = value.(fieldtype.TextField)
+            
             
         
 	default:

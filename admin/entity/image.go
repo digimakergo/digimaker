@@ -4,61 +4,102 @@
 package entity
 
 import (
-	"database/sql"
-	"dm/core/contenttype"
-	"dm/core/db"
+    "database/sql"
+    "dm/core/db"
+    "dm/core/contenttype"
 	"dm/core/fieldtype"
-
+    
 	. "dm/core/db"
 )
 
-type Image struct {
-	contenttype.ContentCommon `boil:",bind"`
 
-	Imagetype string `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
 
-	ParentId int `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
-
-	Path fieldtype.ImageField `boil:"path" json:"path" toml:"path" yaml:"path"`
-
-	Title fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+type Image struct{
+     contenttype.ContentCommon `boil:",bind"`
+    
+         
+         
+         
+            Image  fieldtype.TextField `boil:"image" json:"image" toml:"image" yaml:"image"`
+         
+        
+    
+         
+         
+         
+            Imagetype  string `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
+         
+        
+    
+         
+         
+         
+            ParentId  int `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
+         
+        
+    
+         
+         
+         
+            Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
+    
+    
 }
 
-func (*Image) TableName() string {
-	return "dm_image"
+func ( *Image ) TableName() string{
+	 return "dm_image"
 }
 
-func (*Image) ContentType() string {
-	return "image"
+func ( *Image ) ContentType() string{
+	 return "image"
 }
 
-func (c *Image) GetName() string {
-	location := c.GetLocation()
-	if location != nil {
-		return location.Name
-	} else {
-		return ""
-	}
+func (c *Image ) GetName() string{
+	 location := c.GetLocation()
+     if location != nil{
+         return location.Name
+     }else{
+         return ""
+     }
 }
 
-func (c *Image) GetLocation() *contenttype.Location {
-
-	return nil
-
+func (c *Image) GetLocation() *contenttype.Location{
+    
+    return nil
+    
 }
+
 
 //todo: cache this? (then you need a reload?)
 func (c *Image) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
-
-	result["imagetype"] = c.Imagetype
-
-	result["parent_id"] = c.ParentId
-
-	result["path"] = c.Path
-
-	result["title"] = c.Title
-
+    
+        
+        
+            result["image"]=c.Image
+        
+        
+    
+        
+        
+            result["imagetype"]=c.Imagetype
+        
+        
+    
+        
+        
+            result["parent_id"]=c.ParentId
+        
+        
+    
+        
+        
+            result["title"]=c.Title
+        
+        
+    
 	for key, value := range c.ContentCommon.Values() {
 		result[key] = value
 	}
@@ -66,62 +107,95 @@ func (c *Image) ToMap() map[string]interface{} {
 }
 
 func (c *Image) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(), []string{"imagetype", "parent_id", "path", "title"}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ "image","imagetype","parent_id","title",}...)
 }
 
 func (c *Image) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition(c.ContentType())
+	return contenttype.GetContentDefinition( c.ContentType() )
 }
 
 func (c *Image) Value(identifier string) interface{} {
-
-	var result interface{}
+    
+    var result interface{}
 	switch identifier {
-
-	case "imagetype":
-
-		result = c.Imagetype
-
-	case "parent_id":
-
-		result = c.ParentId
-
-	case "path":
-
-		result = c.Path
-
-	case "title":
-
-		result = c.Title
-
+    
+    
+    case "image":
+        
+            result = c.Image
+        
+    
+    
+    
+    case "imagetype":
+        
+            result = c.Imagetype
+        
+    
+    
+    
+    case "parent_id":
+        
+            result = c.ParentId
+        
+    
+    
+    
+    case "title":
+        
+            result = c.Title
+        
+    
+    
 	case "cid":
 		result = c.ContentCommon.CID
-	default:
-		result = c.ContentCommon.Value(identifier)
-	}
+    default:
+    	result = c.ContentCommon.Value( identifier )
+    }
 	return result
 }
 
+
 func (c *Image) SetValue(identifier string, value interface{}) error {
 	switch identifier {
-
-	case "imagetype":
-		c.Imagetype = value.(string)
-
-	case "parent_id":
-		c.ParentId = value.(int)
-
-	case "path":
-		c.Path = value.(fieldtype.ImageField)
-
-	case "title":
-		c.Title = value.(fieldtype.TextField)
-
+        
+            
+            
+            
+            case "image":
+            c.Image = value.(fieldtype.TextField)
+            
+            
+        
+            
+            
+            
+            case "imagetype":
+            c.Imagetype = value.(string)
+            
+            
+        
+            
+            
+            
+            case "parent_id":
+            c.ParentId = value.(int)
+            
+            
+        
+            
+            
+            
+            case "title":
+            c.Title = value.(fieldtype.TextField)
+            
+            
+        
 	default:
 		err := c.ContentCommon.SetValue(identifier, value)
-		if err != nil {
-			return err
-		}
+        if err != nil{
+            return err
+        }
 	}
 	//todo: check if identifier exist
 	return nil
@@ -144,7 +218,7 @@ func (c *Image) Store(transaction ...*sql.Tx) error {
 	return nil
 }
 
-func (c *Image) StoreWithLocation() {
+func (c *Image)StoreWithLocation(){
 
 }
 
@@ -164,18 +238,18 @@ func init() {
 		return &[]Image{}
 	}
 
-	toList := func(obj interface{}) []contenttype.ContentTyper {
-		contentList := *obj.(*[]Image)
-		list := make([]contenttype.ContentTyper, len(contentList))
-		for i, _ := range contentList {
-			list[i] = &contentList[i]
-		}
-		return list
-	}
+    toList := func(obj interface{}) []contenttype.ContentTyper {
+        contentList := *obj.(*[]Image)
+        list := make([]contenttype.ContentTyper, len(contentList))
+        for i, _ := range contentList {
+            list[i] = &contentList[i]
+        }
+        return list
+    }
 
 	contenttype.Register("image",
 		contenttype.ContentTypeRegister{
-			New:     new,
-			NewList: newList,
-			ToList:  toList})
+			New:            new,
+			NewList:        newList,
+            ToList:         toList})
 }

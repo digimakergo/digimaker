@@ -37,7 +37,7 @@ func Generate(packageName string, subFolder string) error {
 	contentTypeDef := contenttype.GetDefinition()
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}
-		vars["def_fieldtype"] = fieldtype.GetDefinition()
+		vars["def_fieldtype"] = fieldtype.GetAllDefinition()
 		vars["name"] = name
 		vars["settings"] = settings
 

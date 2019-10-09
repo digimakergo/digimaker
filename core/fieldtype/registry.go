@@ -36,6 +36,7 @@ type FieldtypeSetting struct {
 	Value            string            `json:"value"`
 	Translations     map[string]string `json:"translations"`
 	IsRelation       bool              `json:"is_relation"`
+	IsContainer      bool              `json:"is_container"`
 	RelationSettings RelationSetting   `json:"relation_settings"`
 }
 
@@ -60,4 +61,8 @@ func LoadDefinition() error {
 
 func GetDefinition(identifier string) FieldtypeSetting {
 	return fieldtypeDefinition[identifier]
+}
+
+func GetAllDefinition() map[string]FieldtypeSetting {
+	return fieldtypeDefinition
 }

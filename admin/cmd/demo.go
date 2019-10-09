@@ -93,15 +93,15 @@ func Display(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 		}
 
 		if _, ok := variables["list"]; !ok {
-			allowedTypes := []string{"article"}
-			if current.ContentType() != "folder" {
-				allowedTypes = current.Definition().AllowedTypes
-			}
+			// allowedTypes := []string{"article"}
+			// if current.ContentType() != "folder" {
+			// 	allowedTypes = current.Definition().AllowedTypes
+			// }
 			list := []contenttype.ContentTyper{}
-			for _, allowedType := range allowedTypes {
-				currentList, _ := handler.Querier().Children(current, allowedType, 7, r.Context())
-				list = append(list, currentList...)
-			}
+			// for _, allowedType := range allowedTypes {
+			// 	currentList, _ := handler.Querier().Children(current, 7, r.Context())
+			// 	list = append(list, currentList...)
+			// }
 			variables["list"] = list
 		}
 

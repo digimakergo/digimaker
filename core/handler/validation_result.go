@@ -1,8 +1,8 @@
 package handler
 
 type ValidationResult struct {
-	Message []string
-	Fields  []FieldValidationResult
+	Message []string                `json:"message"`
+	Fields  []FieldValidationResult `json:"fields"`
 }
 
 func (v ValidationResult) Passed() bool {
@@ -10,6 +10,6 @@ func (v ValidationResult) Passed() bool {
 }
 
 type FieldValidationResult struct {
-	Identifier string
-	Detail     string //1 means required, other message means real messgae.
+	Identifier string `json:"identifier"`
+	Detail     string `json:"detail"` //1 means required, other message means real messgae.
 }

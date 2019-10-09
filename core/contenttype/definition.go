@@ -21,10 +21,11 @@ type ContentTypeSetting struct {
 }
 
 type ContentField struct {
-	Name       string            `json:"name"`
-	FieldType  string            `json:"type"`
-	Required   bool              `json:"required"`
-	Parameters map[string]string `json:"parameters"`
+	Name        string                 `json:"name"`
+	FieldType   string                 `json:"type"`
+	Required    bool                   `json:"required"`
+	IsContainer bool                   `json:"is_container"`
+	Parameters  map[string]interface{} `json:"parameters"`
 }
 
 func (f *ContentField) GetDefinition() fieldtype.FieldtypeSetting {

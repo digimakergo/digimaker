@@ -19,10 +19,12 @@ import (
 type {{$struct_name}} struct{
      contenttype.ContentCommon `boil:",bind"`
     {{range $identifier, $fieldtype := .settings.Fields}}
-     {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
-     {{if not $type_settings.IsRelation }}
-        {{$identifier|UpperName}}  {{if eq $fieldtype.FieldType "string" }}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
-     {{end}}
+         {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
+         {{if not $type_settings.IsRelation }}
+         {{if not $type_settings.IsContainer}}
+            {{$identifier|UpperName}}  {{if eq $fieldtype.FieldType "string" }}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+         {{end}}
+        {{end}}
     {{end}}
     {{if .settings.HasLocation}}
      contenttype.Location `boil:"location,bind"`
@@ -60,7 +62,9 @@ func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     {{range $identifier, $fieldtype := .settings.Fields}}
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
-        result["{{$identifier}}"]=c.{{$identifier|UpperName}}
+        {{if not (index $.def_fieldtype $fieldtype.FieldType).IsContainer}}
+            result["{{$identifier}}"]=c.{{$identifier|UpperName}}
+        {{end}}
         {{end}}
     {{end}}
 	for key, value := range c.ContentCommon.Values() {
@@ -86,12 +90,14 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     {{range $identifier, $fieldtype := .settings.Fields}}
+    {{if not (index $.def_fieldtype $fieldtype.FieldType).IsContainer}}
     case "{{$identifier}}":
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
             result = c.{{$identifier|UpperName}}
         {{else}}
             result = c.Relations.Map["{{$identifier}}"]
         {{end}}
+    {{end}}
     {{end}}
 	case "cid":
 		result = c.ContentCommon.CID
@@ -107,8 +113,10 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
         {{range $identifier, $fieldtype := .settings.Fields}}
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
             {{if not $type_settings.IsRelation}}
+            {{if not $type_settings.IsContainer}}
             case "{{$identifier}}":
             c.{{$identifier|UpperName}} = value.({{if eq $fieldtype.FieldType "string"}}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}})
+            {{end}}
             {{end}}
         {{end}}
 	default:

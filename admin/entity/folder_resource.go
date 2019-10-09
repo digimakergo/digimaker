@@ -19,20 +19,26 @@ import (
 type FolderResource struct{
      contenttype.ContentCommon `boil:",bind"`
     
-     
-     
-        ResourceType  fieldtype.TextField `boil:"resource_type" json:"resource_type" toml:"resource_type" yaml:"resource_type"`
-     
+         
+         
+         
+            ResourceType  fieldtype.TextField `boil:"resource_type" json:"resource_type" toml:"resource_type" yaml:"resource_type"`
+         
+        
     
-     
-     
-        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-     
+         
+         
+         
+            Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+         
+        
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
      contenttype.Location `boil:"location,bind"`
@@ -68,15 +74,21 @@ func (c *FolderResource) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         
-        result["resource_type"]=c.ResourceType
+        
+            result["resource_type"]=c.ResourceType
+        
         
     
         
-        result["summary"]=c.Summary
+        
+            result["summary"]=c.Summary
+        
         
     
         
-        result["title"]=c.Title
+        
+            result["title"]=c.Title
+        
         
     
 	for key, value := range c.ContentCommon.Values() {
@@ -102,20 +114,26 @@ func (c *FolderResource) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
     case "resource_type":
         
             result = c.ResourceType
         
+    
+    
     
     case "summary":
         
             result = c.Summary
         
     
+    
+    
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -131,20 +149,26 @@ func (c *FolderResource) SetValue(identifier string, value interface{}) error {
         
             
             
+            
             case "resource_type":
             c.ResourceType = value.(fieldtype.TextField)
             
+            
         
+            
             
             
             case "summary":
             c.Summary = value.(fieldtype.RichTextField)
             
+            
         
+            
             
             
             case "title":
             c.Title = value.(fieldtype.TextField)
+            
             
         
 	default:

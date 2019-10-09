@@ -19,25 +19,33 @@ import (
 type User struct{
      contenttype.ContentCommon `boil:",bind"`
     
-     
-     
-        Firstname  fieldtype.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
-     
+         
+         
+         
+            Firstname  fieldtype.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
+         
+        
     
-     
-     
-        Lastname  fieldtype.TextField `boil:"lastname" json:"lastname" toml:"lastname" yaml:"lastname"`
-     
+         
+         
+         
+            Lastname  fieldtype.TextField `boil:"lastname" json:"lastname" toml:"lastname" yaml:"lastname"`
+         
+        
     
-     
-     
-        Login  fieldtype.TextField `boil:"login" json:"login" toml:"login" yaml:"login"`
-     
+         
+         
+         
+            Login  fieldtype.TextField `boil:"login" json:"login" toml:"login" yaml:"login"`
+         
+        
     
-     
-     
-        Password  fieldtype.TextField `boil:"password" json:"password" toml:"password" yaml:"password"`
-     
+         
+         
+         
+            Password  fieldtype.TextField `boil:"password" json:"password" toml:"password" yaml:"password"`
+         
+        
     
     
      contenttype.Location `boil:"location,bind"`
@@ -73,19 +81,27 @@ func (c *User) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     
         
-        result["firstname"]=c.Firstname
+        
+            result["firstname"]=c.Firstname
+        
         
     
         
-        result["lastname"]=c.Lastname
+        
+            result["lastname"]=c.Lastname
+        
         
     
         
-        result["login"]=c.Login
+        
+            result["login"]=c.Login
+        
         
     
         
-        result["password"]=c.Password
+        
+            result["password"]=c.Password
+        
         
     
 	for key, value := range c.ContentCommon.Values() {
@@ -111,25 +127,33 @@ func (c *User) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
     case "firstname":
         
             result = c.Firstname
         
+    
+    
     
     case "lastname":
         
             result = c.Lastname
         
     
+    
+    
     case "login":
         
             result = c.Login
         
     
+    
+    
     case "password":
         
             result = c.Password
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -145,26 +169,34 @@ func (c *User) SetValue(identifier string, value interface{}) error {
         
             
             
+            
             case "firstname":
             c.Firstname = value.(fieldtype.TextField)
             
+            
         
+            
             
             
             case "lastname":
             c.Lastname = value.(fieldtype.TextField)
             
+            
         
+            
             
             
             case "login":
             c.Login = value.(fieldtype.TextField)
             
+            
         
+            
             
             
             case "password":
             c.Password = value.(fieldtype.TextField)
+            
             
         
 	default:
