@@ -223,7 +223,8 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 //Fill all data into content which is a pointer
 func (cq ContentQuery) Fill(contentType string, condition db.Condition, content interface{}) error {
 	dbhandler := db.DBHanlder()
-	tableName := contenttype.GetContentDefinition(contentType).TableName
+	def, _ := contenttype.GetContentDefinition(contentType)
+	tableName := def.TableName
 	err := dbhandler.GetByFields(contentType, tableName, condition, content)
 	if err != nil {
 		message := "[List]Content Query error"

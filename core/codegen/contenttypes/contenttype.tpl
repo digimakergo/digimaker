@@ -18,10 +18,10 @@ import (
 
 type {{$struct_name}} struct{
      contenttype.ContentCommon `boil:",bind"`
-    {{range $identifier, $fieldtype := .settings.Fields}}
+    {{range $identifier, $fieldtype := .fields}}
          {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
          {{if not $type_settings.IsRelation }}
-         {{if not $type_settings.IsContainer}}
+         {{if ne $fieldtype.FieldType "container"}}
             {{$identifier|UpperName}}  {{if eq $fieldtype.FieldType "string" }}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
          {{end}}
         {{end}}
@@ -60,9 +60,9 @@ func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
 //todo: cache this? (then you need a reload?)
 func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
-    {{range $identifier, $fieldtype := .settings.Fields}}
+    {{range $identifier, $fieldtype := .fields}}
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
-        {{if not (index $.def_fieldtype $fieldtype.FieldType).IsContainer}}
+        {{if ne $fieldtype.FieldType "container"}}
             result["{{$identifier}}"]=c.{{$identifier|UpperName}}
         {{end}}
         {{end}}
@@ -74,11 +74,12 @@ func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 }
 
 func (c *{{$struct_name}}) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .settings.Fields}}"{{$identifier}}",{{end}}}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .fields}}"{{$identifier}}",{{end}}}...)
 }
 
 func (c *{{$struct_name}}) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+    return def
 }
 
 func (c *{{$struct_name}}) Value(identifier string) interface{} {
@@ -89,8 +90,8 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{end}}
     var result interface{}
 	switch identifier {
-    {{range $identifier, $fieldtype := .settings.Fields}}
-    {{if not (index $.def_fieldtype $fieldtype.FieldType).IsContainer}}
+    {{range $identifier, $fieldtype := .fields}}
+    {{if ne $fieldtype.FieldType "container"}}
     case "{{$identifier}}":
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
             result = c.{{$identifier|UpperName}}
@@ -110,10 +111,10 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
 
 func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error {
 	switch identifier {
-        {{range $identifier, $fieldtype := .settings.Fields}}
+        {{range $identifier, $fieldtype := .fields}}
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
             {{if not $type_settings.IsRelation}}
-            {{if not $type_settings.IsContainer}}
+            {{if ne $fieldtype.FieldType "container"}}
             case "{{$identifier}}":
             c.{{$identifier|UpperName}} = value.({{if eq $fieldtype.FieldType "string"}}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}})
             {{end}}

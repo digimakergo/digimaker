@@ -171,7 +171,7 @@ func New(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	}
 	debug.StartTiming(r.Context(), "template", "kernel")
 	contentType := vars["type"]
-	def := contenttype.GetContentDefinition(contentType)
+	def, _ := contenttype.GetContentDefinition(contentType)
 	variables["definition"] = def
 	variables["contenttype"] = contentType
 	tpl := template.Must(template.ParseFiles("../web/template/new.html"))
@@ -217,7 +217,7 @@ func Edit(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	}
 	debug.StartTiming(r.Context(), "template", "kernel")
 	contentType := content.ContentType()
-	def := contenttype.GetContentDefinition(contentType)
+	def, _ := contenttype.GetContentDefinition(contentType)
 	variables["definition"] = def
 	variables["contenttype"] = contentType
 	tpl := template.Must(template.ParseFiles("../web/template/edit.html"))

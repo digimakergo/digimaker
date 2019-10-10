@@ -39,6 +39,7 @@ func Generate(packageName string, subFolder string) error {
 		vars := map[string]interface{}{}
 		vars["def_fieldtype"] = fieldtype.GetAllDefinition()
 		vars["name"] = name
+		vars["fields"] = settings.GetAllFields()
 		vars["settings"] = settings
 
 		path := util.HomePath() + "/" + subFolder + "/" + name + ".go"
@@ -49,7 +50,6 @@ func Generate(packageName string, subFolder string) error {
 		if err != nil {
 			return err
 		}
-		fmt.Println("Generated " + name + ".go")
 	}
 	return nil
 }

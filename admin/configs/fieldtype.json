@@ -12,7 +12,6 @@
         "searchable": false,
         "value": "container",
         "name": "Container",
-        "is_container": true,
         "translations": {
             "nor-no": "Tekst",
             "chi-cn": "文本"

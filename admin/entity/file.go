@@ -98,7 +98,8 @@ func (c *File) IdentifierList() []string {
 }
 
 func (c *File) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+    return def
 }
 
 func (c *File) Value(identifier string) interface{} {

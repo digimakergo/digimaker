@@ -89,7 +89,8 @@ func (c *Usergroup) IdentifierList() []string {
 }
 
 func (c *Usergroup) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+    return def
 }
 
 func (c *Usergroup) Value(identifier string) interface{} {

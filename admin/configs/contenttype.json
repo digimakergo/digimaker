@@ -131,7 +131,17 @@
             "editors": {
                 "type": "editorlist",
                 "name": "Editors",
-                "required": false
+                "required": false,
+                "dependencies": [
+                    [
+                        "title='yes'",
+                        "disable"
+                    ],
+                    [
+                        "title:disabled",
+                        "disable"
+                    ]
+                ]
             },
             "coverimage": {
                 "type": "image_relation",
@@ -151,29 +161,28 @@
             "relations": {
                 "type": "container",
                 "name": "Relations",
-                "parameters": {
-                    "fields": [
-                        "related_articles",
-                        "useful_resources"
-                    ]
-                },
-                "is_container": true,
-                "required": false
-            },
-            "related_articles": {
-                "type": "relationlist",
                 "required": false,
-                "name": "Related articles",
-                "parameters": {
-                    "type": "article"
-                }
-            },
-            "useful_resources": {
-                "type": "relationlist",
-                "required": false,
-                "name": "Useful resources",
-                "parameters": {
-                    "type": "*"
+                "children_order": [
+                    "related_articles",
+                    "useful_resources"
+                ],
+                "children": {
+                    "related_articles": {
+                        "type": "relationlist",
+                        "required": false,
+                        "name": "Related articles",
+                        "parameters": {
+                            "type": "article"
+                        }
+                    },
+                    "useful_resources": {
+                        "type": "relationlist",
+                        "required": false,
+                        "name": "Useful resources",
+                        "parameters": {
+                            "type": "*"
+                        }
+                    }
                 }
             }
         }
@@ -292,6 +301,66 @@
                 "type": "text",
                 "name": "Image path",
                 "required": true
+            }
+        }
+    },
+    "report": {
+        "Name": "Report",
+        "table_name": "eh_report",
+        "has_version": true,
+        "has_location": true,
+        "fields_display": [
+            "basic",
+            "contact"
+        ],
+        "fields": {
+            "basic": {
+                "type": "container",
+                "name": "Basic information",
+                "children_order": [
+                    "name",
+                    "address",
+                    "description"
+                ],
+                "children": {
+                    "name": {
+                        "type": "text",
+                        "name": "Name",
+                        "required": true
+                    },
+                    "address": {
+                        "type": "text",
+                        "name": "Address",
+                        "required": true
+                    },
+                    "description": {
+                        "type": "richtext",
+                        "name": "Description",
+                        "required": false
+                    }
+                },
+                "required": false
+            },
+            "contact": {
+                "type": "container",
+                "name": "Contact information",
+                "required": false,
+                "children_order": [
+                    "mobile",
+                    "email"
+                ],
+                "children": {
+                    "mobile": {
+                        "type": "text",
+                        "name": "Mobile",
+                        "required": false
+                    },
+                    "email": {
+                        "type": "text",
+                        "name": "Email",
+                        "required": true
+                    }
+                }
             }
         }
     }

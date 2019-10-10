@@ -102,7 +102,8 @@ func (c *Folder) IdentifierList() []string {
 }
 
 func (c *Folder) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+    return def
 }
 
 func (c *Folder) Value(identifier string) interface{} {
