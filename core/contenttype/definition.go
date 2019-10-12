@@ -13,63 +13,61 @@ import (
 type ContentTypeSettings map[string]ContentTypeSetting
 
 type ContentTypeSetting struct {
-	Name          string                  `json:"name"`
-	TableName     string                  `json:"table_name"`
-	HasVersion    bool                    `json:"has_version"`
-	HasLocation   bool                    `json:"has_location"`
-	FieldsDisplay []string                `json:"fields_display"`
-	AllowedTypes  []string                `json:"allowed_types"`
-	Fields        map[string]ContentField `json:"fields"`
-	allFields     map[string]ContentField
+	Name         string         `json:"name"`
+	TableName    string         `json:"table_name"`
+	HasVersion   bool           `json:"has_version"`
+	HasLocation  bool           `json:"has_location"`
+	AllowedTypes []string       `json:"allowed_types"`
+	Fields       []ContentField `json:"fields"`
+	//All fields where identifier is the key.
+	FieldMap map[string]ContentField
 }
 
-func (c *ContentTypeSetting) GetAllFields() map[string]ContentField {
-	if c.allFields == nil {
-		result := map[string]ContentField{}
-		for identifier, field := range c.Fields {
-			result[identifier] = field
-			//get sub fields
-			_, subFields := field.GetSubFields()
-			for identifier, subField := range subFields {
-				result[identifier] = subField
-			}
+func (c *ContentTypeSetting) Init() {
+	//set all fields into FieldMap
+	fieldMap := map[string]ContentField{}
+	for _, field := range c.Fields {
+		identifier := field.Identifier
+		fieldMap[identifier] = field
+		//get sub fields
+		subFields := field.GetSubFields()
+		for subIdentifier, subField := range subFields {
+			fieldMap[subIdentifier] = subField
 		}
-		c.allFields = result
 	}
-
-	return c.allFields
+	c.FieldMap = fieldMap
 }
 
 type ContentField struct {
-	Name          string                  `json:"name"`
-	FieldType     string                  `json:"type"`
-	Required      bool                    `json:"required"`
-	Parameters    map[string]interface{}  `json:"parameters"`
-	Description   string                  `json:"description"`
-	ChildrenOrder []string                `json:"children_order"`
-	Children      map[string]ContentField `json:"children"`
+	Identifier  string
+	Name        string                 `json:"name"`
+	FieldType   string                 `json:"type"`
+	Required    bool                   `json:"required"`
+	Description string                 `json:"description"`
+	Parameters  map[string]interface{} `json:"parameters"`
+	Children    []ContentField         `json:"children"`
 }
 
-func (cf *ContentField) GetSubFields() ([]string, map[string]ContentField) {
+func (cf *ContentField) GetSubFields() map[string]ContentField {
 	return getSubFields(cf)
 }
 
-func getSubFields(cf *ContentField) ([]string, map[string]ContentField) {
+func getSubFields(cf *ContentField) map[string]ContentField {
 	if cf.Children == nil {
-		return []string{}, nil
+		return nil
 	} else {
-		orderResult := []string{}
 		result := map[string]ContentField{}
-		for identifier, field := range cf.Children {
+		for _, field := range cf.Children {
+			identifier := field.Identifier
 			result[identifier] = field
 			//get children under child
-			order, children := getSubFields(&field)
-			for _, item := range order {
-				orderResult = append(orderResult, item)
-				result[item] = children[item]
+			children := getSubFields(&field)
+			for _, item := range children {
+				identifer := item.Identifier
+				result[identifer] = item
 			}
 		}
-		return orderResult, result
+		return result
 	}
 }
 
@@ -85,15 +83,19 @@ var contentTypeDefinition ContentTypeSettings
 // It will not load anything unless all json' format matches the struct definition.
 //
 func LoadDefinition() error {
-
 	//Load contenttype.json into ContentTypeDefinition
-	var contentDef map[string]ContentTypeSetting
-	err := util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &contentDef)
+	var def map[string]ContentTypeSetting
+	err := util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
 	if err != nil {
 		return err
 	}
 
-	contentTypeDefinition = contentDef
+	for identifier, _ := range def {
+		cDef := def[identifier]
+		cDef.Init()
+		def[identifier] = cDef
+	}
+	contentTypeDefinition = def
 
 	return nil
 }
@@ -113,38 +115,51 @@ func GetContentDefinition(contentType string) (ContentTypeSetting, error) {
 	}
 }
 
-//Get fields based on path pattern including container, separated by /. eg. article/relations, report/step1
-func GetFields(typePath string) ([]string, error) {
+//Get fields based on path pattern including container,
+//separated by /
+//. eg. article/relations, report/step1
+func GetFields(typePath string) (map[string]ContentField, error) {
 	arr := strings.Split(typePath, "/")
 	def, err := GetContentDefinition(arr[0])
 	if err != nil {
-		return []string{}, err
+		return nil, err
 	}
-	fieldNames := def.FieldsDisplay
-	fields := def.Fields
 	if len(arr) == 1 {
-		return fieldNames, nil
+		return def.FieldMap, nil
 	} else {
-		for i := 1; i < len(arr); i++ {
-			fieldIdentifier := arr[i]
-			if !util.Contains(fieldNames, fieldIdentifier) {
-				return []string{}, errors.New(arr[i] + "is not in sub fields.")
-			}
-			if field, ok := fields[fieldIdentifier]; ok {
-				if field.FieldType == "container" {
-					fieldsResult := field.Parameters["fields"].([]interface{})
-					result := []string{}
-					for i := range fieldsResult {
-						result = append(result, fieldsResult[i].(string))
-					}
-					return result, nil
-				} else {
-					return []string{}, errors.New(fieldIdentifier + "is not a container")
-				}
-			} else {
-				return []string{}, errors.New(fieldIdentifier + "doesn't exist.")
+		//get first level field
+		name := arr[1]
+		var currentField ContentField
+		for _, field := range def.Fields {
+			if field.Identifier == name {
+				currentField = field
 			}
 		}
-		return fieldNames, nil
+		if currentField.Identifier == "" {
+			return nil, errors.New(name + "doesn't exist.")
+		}
+
+		//get end level field
+		for i := 2; i < len(arr); i++ {
+			name = arr[i]
+			ok := false
+			for _, field := range currentField.Children {
+				if field.Identifier == currentField.Identifier {
+					ok = true
+					currentField = field
+				}
+			}
+
+			if !ok {
+				return nil, errors.New(name + "doesn't exist.")
+			}
+		}
+
+		if currentField.FieldType != "container" {
+			return nil, errors.New("End field is not a container")
+		}
+
+		//get subfields of end level
+		return currentField.GetSubFields(), nil
 	}
 }
