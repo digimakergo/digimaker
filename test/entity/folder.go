@@ -90,7 +90,7 @@ func (c *Folder) IdentifierList() []string {
 }
 
 func (c *Folder) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	return contenttype.GetDefinition( c.ContentType() )
 }
 
 func (c *Folder) Value(identifier string) interface{} {

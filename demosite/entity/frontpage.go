@@ -105,7 +105,7 @@ func (c *Frontpage) IdentifierList() []string {
 }
 
 func (c *Frontpage) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	return contenttype.GetDefinition( c.ContentType() )
 }
 
 func (c *Frontpage) Value(identifier string) interface{} {

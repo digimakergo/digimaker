@@ -42,7 +42,7 @@ var ErrorNoPermission = errors.New("The user doesn't have access to the action."
 
 //Validate and Return a validation result
 func (ch *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
-	definition, _ := contenttype.GetContentDefinition(contentType)
+	definition, _ := contenttype.GetDefinition(contentType)
 	//todo: check max length
 	//todo: check all kind of validation
 	fieldsDef := definition.FieldMap
@@ -163,7 +163,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	}
 
 	//todo: add validation callback.
-	contentDefinition, _ := contenttype.GetContentDefinition(contentType)
+	contentDefinition, _ := contenttype.GetDefinition(contentType)
 	fieldsDefinition := contentDefinition.FieldMap
 
 	//Create empty content instance and set value
@@ -348,7 +348,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	contentType := content.ContentType()
 	ch.Validate(contentType, inputs)
 	//Save to new version
-	contentDef, _ := contenttype.GetContentDefinition(contentType)
+	contentDef, _ := contenttype.GetDefinition(contentType)
 
 	tx, err := db.CreateTx()
 	if err != nil {

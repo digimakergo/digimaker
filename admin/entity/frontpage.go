@@ -117,7 +117,7 @@ func (c *Frontpage) IdentifierList() []string {
 }
 
 func (c *Frontpage) Definition() contenttype.ContentType {
-	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetDefinition( c.ContentType() )
     return def
 }
 

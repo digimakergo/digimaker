@@ -99,7 +99,7 @@ func (c *User) IdentifierList() []string {
 }
 
 func (c *User) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	return contenttype.GetDefinition( c.ContentType() )
 }
 
 func (c *User) Value(identifier string) interface{} {

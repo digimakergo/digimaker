@@ -62,7 +62,7 @@ func (handler *RelationHandler) AddContent(to contenttype.ContentTyper, from con
 
 //Generate relation data based on name pattern.
 func (handler *RelationHandler) generateData(to contenttype.ContentTyper, identifier string, from contenttype.ContentTyper) (string, error) {
-	def, _ := contenttype.GetContentDefinition(to.ContentType())
+	def, _ := contenttype.GetDefinition(to.ContentType())
 	fieldSetting, ok := def.FieldMap[identifier]
 	if !ok {
 		return "", errors.New("Target content doesn't have field " + identifier)

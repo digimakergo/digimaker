@@ -139,7 +139,7 @@ func (c *Article) IdentifierList() []string {
 }
 
 func (c *Article) Definition() contenttype.ContentType {
-	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetDefinition( c.ContentType() )
     return def
 }
 

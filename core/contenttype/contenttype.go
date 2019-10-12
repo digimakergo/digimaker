@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-type ContentTypeSettings map[string]ContentType
+type ContentTypeList map[string]ContentType
 
 type ContentType struct {
 	Name         string         `json:"name"`
@@ -77,7 +77,7 @@ func (f *ContentField) GetDefinition() fieldtype.FieldtypeSetting {
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json
-var contentTypeDefinition ContentTypeSettings
+var contentTypeDefinition ContentTypeList
 
 //LoadDefinition Load all setting in file into memory.
 func LoadDefinition() error {
@@ -98,12 +98,12 @@ func LoadDefinition() error {
 	return nil
 }
 
-func GetDefinition() ContentTypeSettings {
+func GetDefinitionList() ContentTypeList {
 	return contentTypeDefinition
 }
 
 //todo: Use a better name
-func GetContentDefinition(contentType string) (ContentType, error) {
+func GetDefinition(contentType string) (ContentType, error) {
 	definition := contentTypeDefinition
 	result, ok := definition[contentType]
 	if ok {
@@ -118,7 +118,7 @@ func GetContentDefinition(contentType string) (ContentType, error) {
 //. eg. article/relations, report/step1
 func GetFields(typePath string) (map[string]ContentField, error) {
 	arr := strings.Split(typePath, "/")
-	def, err := GetContentDefinition(arr[0])
+	def, err := GetDefinition(arr[0])
 	if err != nil {
 		return nil, err
 	}

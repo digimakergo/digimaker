@@ -89,7 +89,7 @@ func (c *Usergroup) IdentifierList() []string {
 }
 
 func (c *Usergroup) Definition() contenttype.ContentType {
-	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetDefinition( c.ContentType() )
     return def
 }
 

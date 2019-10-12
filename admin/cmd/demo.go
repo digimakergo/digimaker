@@ -171,7 +171,7 @@ func New(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	}
 	debug.StartTiming(r.Context(), "template", "kernel")
 	contentType := vars["type"]
-	def, _ := contenttype.GetContentDefinition(contentType)
+	def, _ := contenttype.GetDefinition(contentType)
 	variables["definition"] = def
 	variables["contenttype"] = contentType
 	tpl := template.Must(template.ParseFiles("../web/template/new.html"))
@@ -217,7 +217,7 @@ func Edit(w http.ResponseWriter, r *http.Request, vars map[string]string) {
 	}
 	debug.StartTiming(r.Context(), "template", "kernel")
 	contentType := content.ContentType()
-	def, _ := contenttype.GetContentDefinition(contentType)
+	def, _ := contenttype.GetDefinition(contentType)
 	variables["definition"] = def
 	variables["contenttype"] = contentType
 	tpl := template.Must(template.ParseFiles("../web/template/edit.html"))
@@ -263,7 +263,7 @@ func ModelList(w http.ResponseWriter, r *http.Request) {
 	debug.StartTiming(r.Context(), "template", "kernel")
 	tpl := template.Must(template.ParseFiles("../web/template/console/list.html"))
 	variables := map[string]interface{}{}
-	variables["definition"] = contenttype.GetDefinition()
+	variables["definition"] = contenttype.GetDefinitionList()
 	tpl.Execute(w, variables)
 	debug.EndTiming(r.Context(), "template", "kernel")
 }

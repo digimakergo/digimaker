@@ -111,7 +111,7 @@ func (c *Image) IdentifierList() []string {
 }
 
 func (c *Image) Definition() contenttype.ContentType {
-	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetDefinition( c.ContentType() )
     return def
 }
 

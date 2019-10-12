@@ -34,7 +34,7 @@ func Generate(packageName string, subFolder string) error {
 		Funcs(funcMap()).
 		ParseFiles(os.Getenv("GOPATH") + "/src/dm/core/codegen/contenttypes/contenttype.tpl"))
 
-	contentTypeDef := contenttype.GetDefinition()
+	contentTypeDef := contenttype.GetDefinitionList()
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}
 		vars["def_fieldtype"] = fieldtype.GetAllDefinition()

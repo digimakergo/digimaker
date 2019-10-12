@@ -95,7 +95,7 @@ func (c *Image) IdentifierList() []string {
 }
 
 func (c *Image) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	return contenttype.GetDefinition( c.ContentType() )
 }
 
 func (c *Image) Value(identifier string) interface{} {

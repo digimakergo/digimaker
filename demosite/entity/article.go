@@ -114,7 +114,7 @@ func (c *Article) IdentifierList() []string {
 }
 
 func (c *Article) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetContentDefinition( c.ContentType() )
+	return contenttype.GetDefinition( c.ContentType() )
 }
 
 func (c *Article) Value(identifier string) interface{} {

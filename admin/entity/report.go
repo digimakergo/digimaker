@@ -190,7 +190,7 @@ func (c *Report) IdentifierList() []string {
 }
 
 func (c *Report) Definition() contenttype.ContentType {
-	def, _ := contenttype.GetContentDefinition( c.ContentType() )
+	def, _ := contenttype.GetDefinition( c.ContentType() )
     return def
 }
 
