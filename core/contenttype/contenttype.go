@@ -14,12 +14,12 @@ import (
 type ContentTypeList map[string]ContentType
 
 type ContentType struct {
-	Name         string         `json:"name"`
-	TableName    string         `json:"table_name"`
-	HasVersion   bool           `json:"has_version"`
-	HasLocation  bool           `json:"has_location"`
-	AllowedTypes []string       `json:"allowed_types"`
-	Fields       []ContentField `json:"fields"`
+	Name         string            `json:"name"`
+	TableName    string            `json:"table_name"`
+	HasVersion   bool              `json:"has_version"`
+	HasLocation  bool              `json:"has_location"`
+	AllowedTypes []string          `json:"allowed_types"`
+	Fields       ContentFieldArray `json:"fields"`
 	//All fields where identifier is the key.
 	FieldMap map[string]ContentField `json:"-"`
 }
@@ -39,6 +39,19 @@ func (c *ContentType) Init() {
 	c.FieldMap = fieldMap
 }
 
+//Custom type for ContentField Array, to have more functions from the list
+type ContentFieldArray []ContentField
+
+func (cfArray ContentFieldArray) GetField(identifier string) (ContentField, bool) {
+	for _, field := range cfArray {
+		if field.Identifier == identifier {
+			return field, true
+		}
+	}
+	return ContentField{}, false
+}
+
+//Content field definition
 type ContentField struct {
 	Identifier  string                 `json:"identifier"`
 	Name        string                 `json:"name"`
@@ -46,7 +59,7 @@ type ContentField struct {
 	Required    bool                   `json:"required"`
 	Description string                 `json:"description"`
 	Parameters  map[string]interface{} `json:"parameters"`
-	Children    []ContentField         `json:"children"`
+	Children    ContentFieldArray      `json:"children"`
 }
 
 func (cf *ContentField) GetSubFields() map[string]ContentField {
@@ -140,16 +153,11 @@ func GetFields(typePath string) (map[string]ContentField, error) {
 		//get end level field
 		for i := 2; i < len(arr); i++ {
 			name = arr[i]
-			ok := false
-			for _, field := range currentField.Children {
-				if field.Identifier == name {
-					ok = true
-					currentField = field
-				}
-			}
+			field, ok := currentField.Children.GetField(name)
 			if !ok {
 				return nil, errors.New(name + " doesn't exist.")
 			}
+			currentField = field
 		}
 
 		if currentField.FieldType != "container" {
