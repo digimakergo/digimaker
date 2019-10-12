@@ -41,7 +41,7 @@ type ContentTyper interface {
 
 	GetLocation() *Location
 
-	Definition() ContentTypeSetting
+	Definition() ContentType
 
 	GetRelations() *ContentRelationList
 }

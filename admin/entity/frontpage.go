@@ -116,7 +116,7 @@ func (c *Frontpage) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "mainarea","mainarea_blocks","sidearea","sidearea_blocks","slideshow","title",}...)
 }
 
-func (c *Frontpage) Definition() contenttype.ContentTypeSetting {
+func (c *Frontpage) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }

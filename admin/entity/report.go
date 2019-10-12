@@ -53,6 +53,13 @@ type Report struct{
          
          
          
+            Email1  fieldtype.TextField `boil:"email1" json:"email1" toml:"email1" yaml:"email1"`
+         
+        
+    
+         
+         
+         
             Mobile  fieldtype.TextField `boil:"mobile" json:"mobile" toml:"mobile" yaml:"mobile"`
          
         
@@ -60,7 +67,24 @@ type Report struct{
          
          
          
+            Mobile1  fieldtype.TextField `boil:"mobile1" json:"mobile1" toml:"mobile1" yaml:"mobile1"`
+         
+        
+    
+         
+         
+         
             Name  fieldtype.TextField `boil:"name" json:"name" toml:"name" yaml:"name"`
+         
+        
+    
+         
+         
+         
+        
+    
+         
+         
          
         
     
@@ -125,13 +149,33 @@ func (c *Report) ToMap() map[string]interface{} {
     
         
         
+            result["email1"]=c.Email1
+        
+        
+    
+        
+        
             result["mobile"]=c.Mobile
         
         
     
         
         
+            result["mobile1"]=c.Mobile1
+        
+        
+    
+        
+        
             result["name"]=c.Name
+        
+        
+    
+        
+        
+        
+    
+        
         
         
     
@@ -142,10 +186,10 @@ func (c *Report) ToMap() map[string]interface{} {
 }
 
 func (c *Report) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "address","basic","contact","description","email","mobile","name",}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ "address","basic","contact","description","email","email1","mobile","mobile1","name","step1","step2",}...)
 }
 
-func (c *Report) Definition() contenttype.ContentTypeSetting {
+func (c *Report) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }
@@ -185,9 +229,23 @@ func (c *Report) Value(identifier string) interface{} {
     
     
     
+    case "email1":
+        
+            result = c.Email1
+        
+    
+    
+    
     case "mobile":
         
             result = c.Mobile
+        
+    
+    
+    
+    case "mobile1":
+        
+            result = c.Mobile1
         
     
     
@@ -196,6 +254,10 @@ func (c *Report) Value(identifier string) interface{} {
         
             result = c.Name
         
+    
+    
+    
+    
     
     
 	case "cid":
@@ -247,6 +309,14 @@ func (c *Report) SetValue(identifier string, value interface{}) error {
             
             
             
+            case "email1":
+            c.Email1 = value.(fieldtype.TextField)
+            
+            
+        
+            
+            
+            
             case "mobile":
             c.Mobile = value.(fieldtype.TextField)
             
@@ -255,8 +325,26 @@ func (c *Report) SetValue(identifier string, value interface{}) error {
             
             
             
+            case "mobile1":
+            c.Mobile1 = value.(fieldtype.TextField)
+            
+            
+        
+            
+            
+            
             case "name":
             c.Name = value.(fieldtype.TextField)
+            
+            
+        
+            
+            
+            
+            
+        
+            
+            
             
             
         

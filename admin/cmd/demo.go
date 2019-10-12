@@ -396,6 +396,12 @@ func main() {
 		fmt.Fprintf(w, "hello world")
 	})
 
+	allFields, _ := contenttype.GetFields("report")
+	for f, _ := range allFields {
+		fmt.Println(f)
+	}
+	fmt.Println(allFields)
+
 	fmt.Println("DOO")
 	fmt.Println(util.GetConfig("general", "upload_tempfolder", "dm"))
 

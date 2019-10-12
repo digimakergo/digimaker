@@ -114,7 +114,7 @@ func (c *User) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "firstname","lastname","login","password",}...)
 }
 
-func (c *User) Definition() contenttype.ContentTypeSetting {
+func (c *User) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }

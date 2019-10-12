@@ -138,7 +138,7 @@ func (c *Article) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "body","coverimage","editors","related_articles","relations","summary","title","useful_resources",}...)
 }
 
-func (c *Article) Definition() contenttype.ContentTypeSetting {
+func (c *Article) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }

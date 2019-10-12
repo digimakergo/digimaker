@@ -45,7 +45,7 @@ func (ch *ContentHandler) Validate(contentType string, inputs map[string]interfa
 	definition, _ := contenttype.GetContentDefinition(contentType)
 	//todo: check max length
 	//todo: check all kind of validation
-	fieldsDef := definition.Fields
+	fieldsDef := definition.FieldMap
 
 	result := ValidationResult{}
 
@@ -164,7 +164,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 
 	//todo: add validation callback.
 	contentDefinition, _ := contenttype.GetContentDefinition(contentType)
-	fieldsDefinition := contentDefinition.Fields
+	fieldsDefinition := contentDefinition.FieldMap
 
 	//Create empty content instance and set value
 	content := contenttype.NewInstance(contentType)
@@ -358,7 +358,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	//todo: update relations
 
 	//Set content.
-	fieldsDefinition := contentDef.Fields
+	fieldsDefinition := contentDef.FieldMap
 	for identifier, input := range inputs {
 		fieldType := fieldsDefinition[identifier].FieldType
 		fieldtypeHandler := fieldtype.GetHandler(fieldType)

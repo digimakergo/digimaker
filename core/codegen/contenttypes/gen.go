@@ -39,12 +39,14 @@ func Generate(packageName string, subFolder string) error {
 		vars := map[string]interface{}{}
 		vars["def_fieldtype"] = fieldtype.GetAllDefinition()
 		vars["name"] = name
-		vars["fields"] = settings.GetAllFields()
+		vars["fields"] = settings.FieldMap
+
 		vars["settings"] = settings
 
 		path := util.HomePath() + "/" + subFolder + "/" + name + ".go"
 		//todo: genereate to a template folder first and then copy&override target,
 		//and if there is error remove that folder
+		fmt.Println("Generating " + name)
 		file, _ := os.Create(path)
 		err := tpl.Execute(file, vars)
 		if err != nil {

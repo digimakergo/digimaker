@@ -10,9 +10,9 @@ import (
 	"strings"
 )
 
-type ContentTypeSettings map[string]ContentTypeSetting
+type ContentTypeSettings map[string]ContentType
 
-type ContentTypeSetting struct {
+type ContentType struct {
 	Name         string         `json:"name"`
 	TableName    string         `json:"table_name"`
 	HasVersion   bool           `json:"has_version"`
@@ -20,10 +20,10 @@ type ContentTypeSetting struct {
 	AllowedTypes []string       `json:"allowed_types"`
 	Fields       []ContentField `json:"fields"`
 	//All fields where identifier is the key.
-	FieldMap map[string]ContentField
+	FieldMap map[string]ContentField `json:"-"`
 }
 
-func (c *ContentTypeSetting) Init() {
+func (c *ContentType) Init() {
 	//set all fields into FieldMap
 	fieldMap := map[string]ContentField{}
 	for _, field := range c.Fields {
@@ -39,7 +39,7 @@ func (c *ContentTypeSetting) Init() {
 }
 
 type ContentField struct {
-	Identifier  string
+	Identifier  string                 `json:"identifier"`
 	Name        string                 `json:"name"`
 	FieldType   string                 `json:"type"`
 	Required    bool                   `json:"required"`
@@ -79,12 +79,9 @@ func (f *ContentField) GetDefinition() fieldtype.FieldtypeSetting {
 var contentTypeDefinition ContentTypeSettings
 
 //LoadDefinition Load all setting in file into memory.
-//
-// It will not load anything unless all json' format matches the struct definition.
-//
 func LoadDefinition() error {
 	//Load contenttype.json into ContentTypeDefinition
-	var def map[string]ContentTypeSetting
+	var def map[string]ContentType
 	err := util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
 	if err != nil {
 		return err
@@ -105,13 +102,13 @@ func GetDefinition() ContentTypeSettings {
 }
 
 //todo: Use a better name
-func GetContentDefinition(contentType string) (ContentTypeSetting, error) {
+func GetContentDefinition(contentType string) (ContentType, error) {
 	definition := contentTypeDefinition
 	result, ok := definition[contentType]
 	if ok {
 		return result, nil
 	} else {
-		return ContentTypeSetting{}, errors.New("doesn't exist.")
+		return ContentType{}, errors.New("doesn't exist.")
 	}
 }
 

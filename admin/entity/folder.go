@@ -101,7 +101,7 @@ func (c *Folder) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "folder_type","summary","title",}...)
 }
 
-func (c *Folder) Definition() contenttype.ContentTypeSetting {
+func (c *Folder) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }

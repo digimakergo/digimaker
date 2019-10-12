@@ -110,7 +110,7 @@ func (c *Image) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "image","imagetype","parent_id","title",}...)
 }
 
-func (c *Image) Definition() contenttype.ContentTypeSetting {
+func (c *Image) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }

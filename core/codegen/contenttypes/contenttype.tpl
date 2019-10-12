@@ -77,7 +77,7 @@ func (c *{{$struct_name}}) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .fields}}"{{$identifier}}",{{end}}}...)
 }
 
-func (c *{{$struct_name}}) Definition() contenttype.ContentTypeSetting {
+func (c *{{$struct_name}}) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }

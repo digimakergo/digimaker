@@ -101,7 +101,7 @@ func (c *FolderResource) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "resource_type","summary","title",}...)
 }
 
-func (c *FolderResource) Definition() contenttype.ContentTypeSetting {
+func (c *FolderResource) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }

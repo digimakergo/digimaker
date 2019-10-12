@@ -88,7 +88,7 @@ func (c *Usergroup) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "summary","title",}...)
 }
 
-func (c *Usergroup) Definition() contenttype.ContentTypeSetting {
+func (c *Usergroup) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }

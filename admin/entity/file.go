@@ -97,7 +97,7 @@ func (c *File) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "filetype","path","title",}...)
 }
 
-func (c *File) Definition() contenttype.ContentTypeSetting {
+func (c *File) Definition() contenttype.ContentType {
 	def, _ := contenttype.GetContentDefinition( c.ContentType() )
     return def
 }
