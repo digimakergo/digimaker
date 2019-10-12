@@ -12,6 +12,8 @@ func Route(r *mux.Router) {
 
 	r.HandleFunc("/content/new/{parent}/{contenttype}", New)
 
+	r.HandleFunc("/form/validate/{contenttype}", Validate)
+
 	r.HandleFunc("/util/uploadfile", UploadFile)
 	r.HandleFunc("/util/uploadimage", UploadImage)
 

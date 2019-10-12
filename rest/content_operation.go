@@ -57,10 +57,6 @@ func New(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
-func Validate() {
-
-}
-
 func Update() {
 
 }

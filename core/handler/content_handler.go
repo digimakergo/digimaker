@@ -40,23 +40,16 @@ type ContentHandler struct {
 
 var ErrorNoPermission = errors.New("The user doesn't have access to the action.")
 
-//Validate and Return a validation result
-func (ch *ContentHandler) Validate(contentType string, inputs map[string]interface{}) (bool, ValidationResult) {
-	definition, _ := contenttype.GetDefinition(contentType)
+//Validate and Return a validation result.
+func (ch *ContentHandler) Validate(contentTypePath string, inputs map[string]interface{}) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
-	fieldsDef := definition.FieldMap
-
 	result := ValidationResult{}
 
-	//Check if there are more fields than defined
-	for identifier, _ := range inputs {
-		_, exist := fieldsDef[identifier]
-		if !exist {
-			result.Fields = append(result.Fields, FieldValidationResult{Identifier: identifier, Detail: "2"}) //not needed
-		}
-	}
-	if !result.Passed() {
+	fieldsDef, err := contenttype.GetFields(contentTypePath)
+	contentType := strings.Split(contentTypePath, "/")[0]
+	if err != nil {
+		result.Message = []string{"Wrong content type " + contentTypePath} //todo: do not put this in result message.
 		return false, result
 	}
 
