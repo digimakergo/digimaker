@@ -102,7 +102,7 @@ func GetDefinitionList() ContentTypeList {
 	return contentTypeDefinition
 }
 
-//todo: Use a better name
+//Get a definition of a contenttype
 func GetDefinition(contentType string) (ContentType, error) {
 	definition := contentTypeDefinition
 	result, ok := definition[contentType]
@@ -134,7 +134,7 @@ func GetFields(typePath string) (map[string]ContentField, error) {
 			}
 		}
 		if currentField.Identifier == "" {
-			return nil, errors.New(name + "doesn't exist.")
+			return nil, errors.New(name + " doesn't exist.")
 		}
 
 		//get end level field
@@ -142,14 +142,13 @@ func GetFields(typePath string) (map[string]ContentField, error) {
 			name = arr[i]
 			ok := false
 			for _, field := range currentField.Children {
-				if field.Identifier == currentField.Identifier {
+				if field.Identifier == name {
 					ok = true
 					currentField = field
 				}
 			}
-
 			if !ok {
-				return nil, errors.New(name + "doesn't exist.")
+				return nil, errors.New(name + " doesn't exist.")
 			}
 		}
 
