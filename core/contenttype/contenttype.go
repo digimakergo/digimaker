@@ -3,34 +3,164 @@
 
 package contenttype
 
-import "encoding/json"
+import (
+	"dm/core/fieldtype"
+	"dm/core/util"
+	"encoding/json"
+	"errors"
+	"strings"
+)
 
-//The helpers that generated entity will use to reduce template logic.
+type ContentTypeSettings map[string]ContentType
 
-//Query:
-//Content.List("article", "id > 0")
-//Content.List("article", "title = 'Welcome'")
-//
-//Style 1:
-//Query("article", and( "title = 'Welcome'", "body !=''" ) ).Sort( "id desc" )
+type ContentType struct {
+	Name         string         `json:"name"`
+	TableName    string         `json:"table_name"`
+	HasVersion   bool           `json:"has_version"`
+	HasLocation  bool           `json:"has_location"`
+	AllowedTypes []string       `json:"allowed_types"`
+	Fields       []ContentField `json:"fields"`
+	//All fields where identifier is the key.
+	FieldMap map[string]ContentField `json:"-"`
+}
 
-//Style2:
-//Query("article", `{ "condition": "title='Welcome' and body !=''",
-//									  "sort":"id desc" 	}` )
-//
+func (c *ContentType) Init() {
+	//set all fields into FieldMap
+	fieldMap := map[string]ContentField{}
+	for _, field := range c.Fields {
+		identifier := field.Identifier
+		fieldMap[identifier] = field
+		//get sub fields
+		subFields := field.GetSubFields()
+		for subIdentifier, subField := range subFields {
+			fieldMap[subIdentifier] = subField
+		}
+	}
+	c.FieldMap = fieldMap
+}
 
-//Style 3: (way similar to this is imporssible in go I think)
-//Article.List( Cond( ( Article.ID > 5) && (Article.Modified > 5) ).Sort( Article.ID, desc ) )
+type ContentField struct {
+	Identifier  string                 `json:"identifier"`
+	Name        string                 `json:"name"`
+	FieldType   string                 `json:"type"`
+	Required    bool                   `json:"required"`
+	Description string                 `json:"description"`
+	Parameters  map[string]interface{} `json:"parameters"`
+	Children    []ContentField         `json:"children"`
+}
 
-//Style 4. Json Style
-//Content.List( "article", `{id: 123, name: "test" }` )
-//Content.List( "article", `{id: 123, author: [12,23] }` )
-//Content.List( "article, folder", `{modify: [">", "123123130"}]` )
-//Note: in this style, we could support MongoDB json's syntax style.
-//
-//Style5:
-//Content.GetByID().Subtree( []Cond{ CondLocation("12"), CondModifiedLT( 123123130 ) ] } ).SortBy( "id" )
-//
+func (cf *ContentField) GetSubFields() map[string]ContentField {
+	return getSubFields(cf)
+}
+
+func getSubFields(cf *ContentField) map[string]ContentField {
+	if cf.Children == nil {
+		return nil
+	} else {
+		result := map[string]ContentField{}
+		for _, field := range cf.Children {
+			identifier := field.Identifier
+			result[identifier] = field
+			//get children under child
+			children := getSubFields(&field)
+			for _, item := range children {
+				identifer := item.Identifier
+				result[identifer] = item
+			}
+		}
+		return result
+	}
+}
+
+func (f *ContentField) GetDefinition() fieldtype.FieldtypeSetting {
+	return fieldtype.GetDefinition(f.FieldType)
+}
+
+//ContentTypeDefinition Content types which defined in contenttype.json
+var contentTypeDefinition ContentTypeSettings
+
+//LoadDefinition Load all setting in file into memory.
+func LoadDefinition() error {
+	//Load contenttype.json into ContentTypeDefinition
+	var def map[string]ContentType
+	err := util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
+	if err != nil {
+		return err
+	}
+
+	for identifier, _ := range def {
+		cDef := def[identifier]
+		cDef.Init()
+		def[identifier] = cDef
+	}
+	contentTypeDefinition = def
+
+	return nil
+}
+
+func GetDefinition() ContentTypeSettings {
+	return contentTypeDefinition
+}
+
+//todo: Use a better name
+func GetContentDefinition(contentType string) (ContentType, error) {
+	definition := contentTypeDefinition
+	result, ok := definition[contentType]
+	if ok {
+		return result, nil
+	} else {
+		return ContentType{}, errors.New("doesn't exist.")
+	}
+}
+
+//Get fields based on path pattern including container,
+//separated by /
+//. eg. article/relations, report/step1
+func GetFields(typePath string) (map[string]ContentField, error) {
+	arr := strings.Split(typePath, "/")
+	def, err := GetContentDefinition(arr[0])
+	if err != nil {
+		return nil, err
+	}
+	if len(arr) == 1 {
+		return def.FieldMap, nil
+	} else {
+		//get first level field
+		name := arr[1]
+		var currentField ContentField
+		for _, field := range def.Fields {
+			if field.Identifier == name {
+				currentField = field
+			}
+		}
+		if currentField.Identifier == "" {
+			return nil, errors.New(name + "doesn't exist.")
+		}
+
+		//get end level field
+		for i := 2; i < len(arr); i++ {
+			name = arr[i]
+			ok := false
+			for _, field := range currentField.Children {
+				if field.Identifier == currentField.Identifier {
+					ok = true
+					currentField = field
+				}
+			}
+
+			if !ok {
+				return nil, errors.New(name + "doesn't exist.")
+			}
+		}
+
+		if currentField.FieldType != "container" {
+			return nil, errors.New("End field is not a container")
+		}
+
+		//get subfields of end level
+		return currentField.GetSubFields(), nil
+	}
+}
 
 //Content to json, used for internal content storing(eg. version data, draft data )
 func ContentToJson(content ContentTyper) (string, error) {
