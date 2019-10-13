@@ -41,17 +41,10 @@ type ContentHandler struct {
 var ErrorNoPermission = errors.New("The user doesn't have access to the action.")
 
 //Validate and Return a validation result.
-func (ch *ContentHandler) Validate(contentTypePath string, inputs map[string]interface{}) (bool, ValidationResult) {
+func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.ContentField, inputs map[string]interface{}) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
 	result := ValidationResult{}
-
-	fieldsDef, err := contenttype.GetFields(contentTypePath)
-	contentType := strings.Split(contentTypePath, "/")[0]
-	if err != nil {
-		result.Message = []string{"Wrong content type " + contentTypePath} //todo: do not put this in result message.
-		return false, result
-	}
 
 	//check required
 	for identifier, fieldDef := range fieldsDef {
@@ -149,15 +142,15 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (contenttype.ContentTyper, ValidationResult, error) {
 	//todo: permission check.
 
-	//Validate
-	valid, validationResult := ch.Validate(contentType, inputs)
-	if !valid {
-		return nil, validationResult, nil
-	}
-
 	//todo: add validation callback.
 	contentDefinition, _ := contenttype.GetDefinition(contentType)
 	fieldsDefinition := contentDefinition.FieldMap
+
+	//Validate
+	valid, validationResult := ch.Validate(contentType, fieldsDefinition, inputs)
+	if !valid {
+		return nil, validationResult, nil
+	}
 
 	//Create empty content instance and set value
 	content := contenttype.NewInstance(contentType)
@@ -339,10 +332,11 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	//Validate
 	debug.Debug(ch.Context, "Validating", "contenthandler.update")
 	contentType := content.ContentType()
-	ch.Validate(contentType, inputs)
-	//Save to new version
 	contentDef, _ := contenttype.GetDefinition(contentType)
 
+	ch.Validate(contentType, contentDef.FieldMap, inputs)
+
+	//Save to new version
 	tx, err := db.CreateTx()
 	if err != nil {
 		return false, ValidationResult{}, errors.Wrap(err, "Create transaction error.")
@@ -514,11 +508,6 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTra
 
 	}
 	return nil
-}
-
-//Format of fields: eg. title:"test", modified: 12121
-func (handler *ContentHandler) store(parentID int, contentType string, fields map[string]interface{}) {
-	handler.Validate(contentType, fields)
 }
 
 func (handler *ContentHandler) UpdateRelation(content contenttype.ContentTyper) {

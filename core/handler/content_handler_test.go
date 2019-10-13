@@ -28,12 +28,13 @@ func TestValidtion(t *testing.T) {
 	// Test validation1
 	handler := ContentHandler{}
 	params := map[string]interface{}{"title": "ff", "body": "Hello"}
-	passed, result := handler.Validate("article", params)
+	def, _ := contenttype.GetDefinition("article")
+	passed, result := handler.Validate("article", def.FieldMap, params)
 	assert.Equal(t, passed, true)
 
 	// Test validation2
 	params = map[string]interface{}{"title": "", "body": "Hello"}
-	_, result = handler.Validate("article", params)
+	_, result = handler.Validate("article", def.FieldMap, params)
 	assert.Equal(t, result.Fields[0].Identifier, "title")
 
 }

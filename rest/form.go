@@ -4,6 +4,7 @@
 package rest
 
 import (
+	"dm/core/contenttype"
 	"dm/core/handler"
 	"dm/core/util/debug"
 	"encoding/json"
@@ -33,10 +34,14 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w)
 	}
 
+	fieldMap, err := contenttype.GetFields(contentType)
+	if err != nil {
+		HandleError(err, w)
+	}
 	ctx := debug.Init(r.Context())
 	r = r.WithContext(ctx)
 	handler := handler.ContentHandler{Context: r.Context()}
-	result, validationResult := handler.Validate(contentType, inputs)
+	result, validationResult := handler.Validate(contentType, fieldMap, inputs)
 	if result {
 		w.Write([]byte("1"))
 	} else {
