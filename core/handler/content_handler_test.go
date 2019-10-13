@@ -35,7 +35,7 @@ func TestValidtion(t *testing.T) {
 	// Test validation2
 	params = map[string]interface{}{"title": "", "body": "Hello"}
 	_, result = handler.Validate("article", def.FieldMap, params)
-	assert.Equal(t, result.Fields[0].Identifier, "title")
+	assert.Equal(t, result.Fields["title"], "1")
 
 }
 

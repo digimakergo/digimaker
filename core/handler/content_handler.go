@@ -44,7 +44,7 @@ var ErrorNoPermission = errors.New("The user doesn't have access to the action."
 func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.ContentField, inputs map[string]interface{}) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
-	result := ValidationResult{}
+	result := ValidationResult{Fields: map[string]string{}}
 
 	//check required
 	for identifier, fieldDef := range fieldsDef {
@@ -52,8 +52,7 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 		_, fieldExists := inputs[identifier]
 		if fieldDef.Required &&
 			(!fieldExists || (fieldExists && fieldHandler.Fieldtype != "" && fieldHandler.IsEmpty(inputs[identifier]))) {
-			fieldResult := FieldValidationResult{Identifier: identifier, Detail: "1"}
-			result.Fields = append(result.Fields, fieldResult)
+			result.Fields[identifier] = "1"
 		}
 	}
 	if len(result.Fields) > 0 {
@@ -62,9 +61,8 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 	//Validate field
 	for identifier, input := range inputs {
 		fieldHanlder := fieldtype.GetHandler(fieldsDef[identifier].FieldType)
-		if valid, detail := fieldHanlder.Validate(input); !valid {
-			fieldResult := FieldValidationResult{Identifier: identifier, Detail: detail}
-			result.Fields = append(result.Fields, fieldResult)
+		if valid, fieldResult := fieldHanlder.Validate(input); !valid {
+			result.Fields[identifier] = fieldResult
 		}
 	}
 
