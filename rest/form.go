@@ -16,6 +16,7 @@ import (
 )
 
 func Validate(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(r)
 	contentType := params["contenttype"]
 	//todo: add permission check for which form/container can be.
@@ -32,12 +33,15 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 	err := decorder.Decode(&inputs)
 	if err != nil {
 		HandleError(err, w)
+		return
 	}
 
 	fieldMap, err := contenttype.GetFields(contentType)
 	if err != nil {
 		HandleError(err, w)
+		return
 	}
+
 	ctx := debug.Init(r.Context())
 	r = r.WithContext(ctx)
 	handler := handler.ContentHandler{Context: r.Context()}
@@ -45,6 +49,7 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 	if result {
 		w.Write([]byte("1"))
 	} else {
+		w.WriteHeader(400)
 		data, _ := json.Marshal(validationResult)
 		w.Write(data)
 	}
