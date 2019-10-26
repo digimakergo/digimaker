@@ -6,6 +6,7 @@ package fieldtype
 import (
 	"database/sql/driver"
 	"errors"
+	"strconv"
 )
 
 type FieldValue struct {
@@ -29,6 +30,8 @@ func (t *FieldValue) SetData(src interface{}, fieldtype string) error {
 			data = src.(string)
 		case []byte:
 			data = string(src.([]byte))
+		case int:
+			data = strconv.Itoa(src.(int))
 		default:
 			return errors.New("Incompatible type")
 		}

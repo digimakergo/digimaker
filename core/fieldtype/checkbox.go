@@ -8,7 +8,7 @@ import "strings"
 
 //TextField is a field for normal text line. It implements Datatyper
 type CheckboxField struct {
-	FieldValue
+	*FieldValue
 }
 
 func (t *CheckboxField) Scan(src interface{}) error {
@@ -29,8 +29,8 @@ func (t CheckboxHandler) Validate(input interface{}) (bool, string) {
 }
 
 func (t CheckboxHandler) NewValueFromInput(input interface{}) interface{} {
-	r := TextField{}
-	r.Scan(input.(string))
+	r := CheckboxField{}
+	r.Scan(input.(int))
 	return r
 }
 
