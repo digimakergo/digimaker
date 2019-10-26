@@ -6,6 +6,7 @@ package fieldtype
 import (
 	"database/sql/driver"
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -17,6 +18,9 @@ type FieldValue struct {
 
 //when update value to db
 func (t FieldValue) Value() (driver.Value, error) {
+	fmt.Println("GOOOOd----------------")
+	fmt.Println(t.Definition.Identifier)
+	fmt.Println(t.Raw)
 	return t.Raw, nil
 }
 
@@ -30,6 +34,8 @@ func (t *FieldValue) SetData(src interface{}, fieldtype string) error {
 			data = src.(string)
 		case []byte:
 			data = string(src.([]byte))
+		case int64:
+			data = strconv.FormatInt(src.(int64), 10)
 		case int:
 			data = strconv.Itoa(src.(int))
 		default:
