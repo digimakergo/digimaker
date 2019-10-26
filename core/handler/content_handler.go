@@ -74,13 +74,6 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 	return result.Passed(), result
 }
 
-func GenerateName(content contenttype.ContentTyper) string {
-	if content.ContentType() == "user" {
-		return content.Value("firstname").(fieldtype.TextField).Data() + " " + content.Value("lastname").(fieldtype.TextField).Data()
-	}
-	return content.Value("title").(fieldtype.TextField).Data() //todo: make it pattern based.
-}
-
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
 func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
@@ -510,4 +503,27 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTra
 
 func (handler *ContentHandler) UpdateRelation(content contenttype.ContentTyper) {
 
+}
+
+//Generate name based on name_pattern from definition.
+func GenerateName(content contenttype.ContentTyper) string {
+	pattern := content.Definition().NamePattern
+
+	//Get variables
+	vars := util.GetStrVar(pattern)
+	values := map[string]string{}
+	for i := range vars {
+		varName := vars[i]
+		field := content.Value(varName)
+		switch field.(type) {
+		//support Text for now. todo: support all fields.
+		//todo: support created, modified time
+		case fieldtype.TextField:
+			values[varName] = field.(fieldtype.TextField).Data()
+		}
+	}
+
+	//Replace variable with value
+	result := util.ReplaceStrVar(pattern, values)
+	return result
 }

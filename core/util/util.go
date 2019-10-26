@@ -52,6 +52,32 @@ func ArrayStrToInt(strArray []string) []int {
 	return result
 }
 
+var varBrakets = []string{"{", "}"}
+
+//Get variable from defined brakets. eg "{name} is {realname}" will get ["name", "realname"]
+func GetStrVar(str string) []string {
+	left := varBrakets[0]
+	right := varBrakets[1]
+	r, _ := regexp.Compile(left + `(\w+)` + right)
+	match := r.FindAllStringSubmatch(str, -1)
+	result := []string{}
+	for i := range match {
+		result = append(result, match[i][1])
+	}
+	return result
+}
+
+//Replace variable with values in string
+func ReplaceStrVar(str string, values map[string]string) string {
+	result := str
+	for key := range values {
+		value := values[key]
+		old := varBrakets[0] + key + varBrakets[1]
+		result = strings.ReplaceAll(result, old, value)
+	}
+	return result
+}
+
 //Convert like "hello_world" to "HelloWorld"
 func UpperName(input string) string {
 	arr := strings.Split(input, "_")

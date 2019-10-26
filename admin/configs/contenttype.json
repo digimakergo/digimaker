@@ -2,6 +2,7 @@
     "folder": {
         "name": "Folder",
         "table_name": "dm_folder",
+        "name_pattern":"{title}",
         "has_version": false,
         "has_location": true,
         "allowed_types": [
@@ -32,6 +33,7 @@
     "frontpage": {
         "name": "Frontpage",
         "table_name": "dm_frontpage",
+        "name_pattern":"{title}",
         "has_version": false,
         "has_location": true,
         "allowed_types": [
@@ -82,6 +84,7 @@
     "folder_resource": {
         "name": "Media",
         "table_name": "dm_folder_resource",
+        "name_pattern":"{title}",
         "has_version": false,
         "has_location": true,
         "fields": [
@@ -108,6 +111,7 @@
     "article": {
         "Name": "Article",
         "table_name": "dm_article",
+        "name_pattern":"{title}",
         "has_version": true,
         "has_location": true,
         "fields": [
@@ -176,6 +180,7 @@
     "usergroup": {
         "name": "User group",
         "table_name": "dm_usergroup",
+        "name_pattern":"{title}",
         "has_version": false,
         "has_location": true,
         "allowed_types": [
@@ -199,6 +204,7 @@
     "user": {
         "name": "User",
         "table_name": "dm_user",
+        "name_pattern":"{firstname} {lastname}",
         "has_version": true,
         "has_location": true,
         "fields_display": [
