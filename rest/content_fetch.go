@@ -41,20 +41,21 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 func Children(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	getParams := r.URL.Query()
-	//
-	// offsetStr := getParams.Get("offset")
-	// offset, err := strconv.Atoi(offsetStr)
-	// if offsetStr != "" && err != nil {
-	// 	HandleError(errors.New("Invalid offset"), w)
-	// 	return
-	// }
-	//
-	// limitStr := getParams.Get("limit")
-	// limit, err := strconv.Atoi(limitStr)
-	// if limitStr != "" && err != nil {
-	// 	HandleError(errors.New("Invalid limit"), w)
-	// 	return
-	// }
+
+	//offset and limit
+	offsetStr := getParams.Get("offset")
+	offset, err := strconv.Atoi(offsetStr)
+	if offsetStr != "" && err != nil {
+		HandleError(errors.New("Invalid offset"), w)
+		return
+	}
+
+	limitStr := getParams.Get("limit")
+	limit, err := strconv.Atoi(limitStr)
+	if limitStr != "" && err != nil {
+		HandleError(errors.New("Invalid limit"), w)
+		return
+	}
 
 	//sort by
 	sortbyStr := getParams.Get("sortby")
@@ -73,7 +74,7 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		//todo: handle
 	}
 	context := debug.Init(context.Background())
-	list, count, err := querier.Children(rootContent, contenttype, 1, sortbyArr, true, context)
+	list, count, err := querier.Children(rootContent, contenttype, 1, []int{offset, limit}, sortbyArr, true, context)
 	if err != nil {
 		HandleError(err, w)
 		return

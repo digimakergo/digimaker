@@ -22,7 +22,7 @@ type RMDB struct {
 
 //Query by ID
 func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content interface{}) error {
-	_, err := rmdb.GetByFields(contentType, tableName, Cond("location.id", id), []string{}, content, false) //todo: use table name as parameter
+	_, err := rmdb.GetByFields(contentType, tableName, Cond("location.id", id), []int{}, []string{}, content, false) //todo: use table name as parameter
 	return err
 }
 
@@ -31,7 +31,7 @@ func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content 
 //  var content contenttype.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
-func (*RMDB) GetByFields(contentType string, tableName string, condition Condition, sortby []string, content interface{}, count bool) (int, error) {
+func (*RMDB) GetByFields(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
 		return -1, errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
@@ -64,6 +64,17 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
                                       'description',relation.description,
                                       'data' ,relation.data )
                          ORDER BY relation.priority ), ']') as relations`
+
+	//limit
+	limitStr := ""
+	if len(limit) > 0 {
+		if len(limit) != 2 {
+			return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
+		}
+		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+	}
+
+	//sort by
 	sortbyArr := []string{}
 	for _, item := range sortby {
 		if strings.TrimSpace(item) != "" {
@@ -96,7 +107,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
                         ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
                      WHERE ` + conditions + `
                      GROUP BY location.id
-                     ` + sortbyStr
+										 ` + sortbyStr + " " + limitStr
 
 	util.Debug("db", sqlStr)
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
