@@ -22,7 +22,8 @@ type RMDB struct {
 
 //Query by ID
 func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content interface{}) error {
-	return rmdb.GetByFields(contentType, tableName, Cond("location.id", id), []string{}, content) //todo: use table name as parameter
+	_, err := rmdb.GetByFields(contentType, tableName, Cond("location.id", id), []string{}, content, false) //todo: use table name as parameter
+	return err
 }
 
 //Query to fill in contentTyper. Use reference in content parameter.
@@ -30,10 +31,10 @@ func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content 
 //  var content contenttype.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
-func (*RMDB) GetByFields(contentType string, tableName string, condition Condition, sortby []string, content interface{}) error {
+func (*RMDB) GetByFields(contentType string, tableName string, condition Condition, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
-		return errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
+		return -1, errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
 	}
 
 	//get condition string for fields
@@ -64,7 +65,6 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
                                       'data' ,relation.data )
                          ORDER BY relation.priority ), ']') as relations`
 	sortbyArr := []string{}
-	fmt.Println(sortby)
 	for _, item := range sortby {
 		if strings.TrimSpace(item) != "" {
 			itemArr := util.Split(item)
@@ -74,7 +74,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
 			if len(itemArr) == 2 {
 				sortByOrder = strings.ToUpper(itemArr[1])
 				if sortByOrder != "ASC" && sortByOrder != "DESC" {
-					return errors.New("Invalid sorting string: " + sortByOrder)
+					return -1, errors.New("Invalid sorting string: " + sortByOrder)
 				}
 			}
 			sortbyItem := sortByField + " " + sortByOrder
@@ -106,10 +106,29 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
 			util.Warning("db", err.Error())
 		} else {
 			message := "[RMDB.GetByFields]Error when query. sql - " + sqlStr
-			return errors.Wrap(err, message)
+			return -1, errors.Wrap(err, message)
 		}
 	}
-	return nil
+
+	//count if there is
+	countResult := 0
+	if count {
+		countSqlStr := `SELECT COUNT(*) AS count
+									 FROM ( ` + tableName + ` content
+										 INNER JOIN dm_location location
+												ON location.content_type = '` + contentType + `' AND location.content_id=content.id )
+										 WHERE ` + conditions
+
+		fmt.Println(countSqlStr)
+		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
+		if err != nil {
+			message := "[RMDB.GetByFields]Error when query count. sql - " + countSqlStr
+			return -1, errors.Wrap(err, message)
+		}
+		rows.Next()
+		rows.Scan(&countResult)
+	}
+	return countResult, nil
 }
 
 // Count based on condition

@@ -73,12 +73,18 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		//todo: handle
 	}
 	context := debug.Init(context.Background())
-	list, err := querier.Children(rootContent, contenttype, 1, sortbyArr, context)
+	list, count, err := querier.Children(rootContent, contenttype, 1, sortbyArr, true, context)
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
-	data, _ := json.Marshal(list)
+
+	result := struct {
+		List  interface{} `json:"list"`
+		Count int         `json:"count"`
+	}{list, count}
+
+	data, _ := json.Marshal(result)
 	w.Write([]byte(data))
 }
 
