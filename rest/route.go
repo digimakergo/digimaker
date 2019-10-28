@@ -8,7 +8,7 @@ func Route(r *mux.Router) {
 	r.HandleFunc("/contenttype/get/{contentype}", GetDefinition)
 	r.HandleFunc("/content/get/{id}", GetContent)
 	r.HandleFunc("/content/treemenu/{id}", TreeMenu)
-	r.HandleFunc("/content/list/{id}", Children)
+	r.HandleFunc("/content/list/{id}/{contenttype}", Children)
 
 	r.HandleFunc("/content/new/{parent}/{contenttype}", New)
 

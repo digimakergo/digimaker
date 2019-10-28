@@ -62,15 +62,21 @@ func Children(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		HandleError(errors.New("Invalid id"), w)
+		return
+	}
+	contenttype := params["contenttype"]
 	querier := handler.Querier()
 	rootContent, err := querier.FetchByID(id)
 	if err != nil {
 		//todo: handle
 	}
 	context := debug.Init(context.Background())
-	list, err := querier.Children(rootContent, 1, sortbyArr, context)
+	list, err := querier.Children(rootContent, contenttype, 1, sortbyArr, context)
 	if err != nil {
-
+		HandleError(err, w)
+		return
 	}
 	data, _ := json.Marshal(list)
 	w.Write([]byte(data))

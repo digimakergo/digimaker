@@ -103,18 +103,15 @@ func (cq ContentQuery) ChildrenByTypes(parentContent contenttype.ContentTyper, c
 	return nil, nil
 }
 
+//todo: have a setting for each type.
 //Fetch children
-func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, userID int, sortby []string, context context.Context) (map[string][]contenttype.ContentTyper, error) {
+func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, contenttype string, userID int, sortby []string, context context.Context) ([]contenttype.ContentTyper, error) {
 	contentTypeList := parentContent.Definition().AllowedTypes
-	var result = map[string][]contenttype.ContentTyper{}
-	for _, contentType := range contentTypeList {
-		children, err := cq.SubList(parentContent, contentType, 1, userID, sortby, context)
-		if err != nil {
-			return nil, err
-		}
-		result[contentType] = children
+	if !util.Contains(contentTypeList, contenttype) {
+		return nil, errors.New("content type " + contenttype + "doesn't exist or not allowed.")
 	}
-	return result, nil
+	result, err := cq.SubList(parentContent, contenttype, 1, userID, sortby, context)
+	return result, err
 }
 
 //Get sub tree under rootContent, permission considered.
