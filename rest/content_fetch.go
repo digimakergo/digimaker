@@ -6,6 +6,7 @@ package rest
 import (
 	"context"
 	"dm/core/handler"
+	"dm/core/util"
 	"dm/core/util/debug"
 	"encoding/json"
 	"errors"
@@ -36,8 +37,29 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Get children of a content(eg. folder)
 func Children(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+	getParams := r.URL.Query()
+	//
+	// offsetStr := getParams.Get("offset")
+	// offset, err := strconv.Atoi(offsetStr)
+	// if offsetStr != "" && err != nil {
+	// 	HandleError(errors.New("Invalid offset"), w)
+	// 	return
+	// }
+	//
+	// limitStr := getParams.Get("limit")
+	// limit, err := strconv.Atoi(limitStr)
+	// if limitStr != "" && err != nil {
+	// 	HandleError(errors.New("Invalid limit"), w)
+	// 	return
+	// }
+
+	//sort by
+	sortbyStr := getParams.Get("sortby")
+	sortbyArr := util.Split(sortbyStr, ";")
+
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	id, err := strconv.Atoi(params["id"])
 	querier := handler.Querier()
@@ -46,7 +68,7 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		//todo: handle
 	}
 	context := debug.Init(context.Background())
-	list, err := querier.Children(rootContent, 1, context)
+	list, err := querier.Children(rootContent, 1, sortbyArr, context)
 	if err != nil {
 
 	}
@@ -71,7 +93,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	}
 
 	context := debug.Init(context.Background())
-	tree, err := querier.SubTree(rootContent, 5, "folder", 1, context)
+	tree, err := querier.SubTree(rootContent, 5, "folder", 1, []string{"id"}, context)
 	if err != nil {
 		//todo: handle error
 		fmt.Println(err.Error())

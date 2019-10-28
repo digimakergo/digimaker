@@ -103,6 +103,14 @@ func NameToIdentifier(input string) string {
 	return result
 }
 
+//Strip unregular string to avoid sql injection.
+//Note this is not used to strip whole sql, but phrase of sql.(eg. ORDER BY ...), not applicable for values.
+func StripSQLPhrase(str string) string {
+	reg, _ := regexp.Compile("[^a-z0-9A-Z., ]+")
+	result := reg.ReplaceAllString(str, "")
+	return result
+}
+
 //Iternate condition rules to see if all are matching.
 //If there are keys in condition rules but not in realValues, match fails.
 //eg. conditions: {id: 12, type:"image"}

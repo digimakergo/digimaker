@@ -6,7 +6,9 @@ import (
 	"context"
 	"database/sql"
 	"dm/core/util"
+	"fmt"
 	"strconv"
+	"strings"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
 	"github.com/pkg/errors"
@@ -20,15 +22,15 @@ type RMDB struct {
 
 //Query by ID
 func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content interface{}) error {
-	return rmdb.GetByFields(contentType, tableName, Cond("location.id", id), content) //todo: use table name as parameter
+	return rmdb.GetByFields(contentType, tableName, Cond("location.id", id), []string{}, content) //todo: use table name as parameter
 }
 
 //Query to fill in contentTyper. Use reference in content parameter.
 //It fill in with nil if nothing found(no error returned in this case)
 //  var content contenttype.Article
-//  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, content)
+//  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
-func (*RMDB) GetByFields(contentType string, tableName string, condition Condition, content interface{}) error {
+func (*RMDB) GetByFields(contentType string, tableName string, condition Condition, sortby []string, content interface{}) error {
 	db, err := DB()
 	if err != nil {
 		return errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
@@ -61,6 +63,30 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
                                       'description',relation.description,
                                       'data' ,relation.data )
                          ORDER BY relation.priority ), ']') as relations`
+	sortbyArr := []string{}
+	fmt.Println(sortby)
+	for _, item := range sortby {
+		if strings.TrimSpace(item) != "" {
+			itemArr := util.Split(item)
+			sortByField := itemArr[0]
+			sortByOrder := "ASC"
+
+			if len(itemArr) == 2 {
+				sortByOrder = strings.ToUpper(itemArr[1])
+				if sortByOrder != "ASC" && sortByOrder != "DESC" {
+					return errors.New("Invalid sorting string: " + sortByOrder)
+				}
+			}
+			sortbyItem := sortByField + " " + sortByOrder
+			sortbyArr = append(sortbyArr, sortbyItem)
+		}
+	}
+
+	sortbyStr := ""
+	if len(sortbyArr) > 0 {
+		sortbyStr = "ORDER BY " + strings.Join(sortbyArr, ",")
+		sortbyStr = util.StripSQLPhrase(sortbyStr)
+	}
 
 	sqlStr := `SELECT content.*, content.id AS cid, ` + locationColumns + relationQuery + `
                    FROM ( ` + tableName + ` content
@@ -70,7 +96,7 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
                         ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
                      WHERE ` + conditions + `
                      GROUP BY location.id
-                     ORDER BY location.priority, location.id`
+                     ` + sortbyStr
 
 	util.Debug("db", sqlStr)
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
