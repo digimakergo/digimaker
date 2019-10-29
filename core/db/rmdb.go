@@ -138,7 +138,9 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
 		}
 		rows.Next()
 		rows.Scan(&countResult)
+		rows.Close()
 	}
+
 	return countResult, nil
 }
 
@@ -158,6 +160,7 @@ func (*RMDB) Count(tablename string, condition Condition) (int, error) {
 	rows.Next()
 	var count int
 	rows.Scan(&count)
+	rows.Close()
 	return count, nil
 }
 
