@@ -1,6 +1,9 @@
 package fieldtype
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 //All field types need to implement FieldtypeHandler interface.
 type FieldtypeHandler interface {
@@ -21,6 +24,7 @@ type FieldHandler struct {
 }
 
 func (f FieldHandler) Validate(input interface{}) (bool, string) {
+	fmt.Println(f.Fieldtype)
 	return f.handler.Validate(input)
 }
 
