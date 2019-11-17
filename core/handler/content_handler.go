@@ -49,23 +49,28 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 	//check required
 	for identifier, fieldDef := range fieldsDef {
 		fieldHandler := fieldtype.GetHandler(fieldsDef[identifier].FieldType)
-		_, fieldExists := inputs[identifier]
-		if fieldDef.Required &&
-			(!fieldExists || (fieldExists && fieldHandler.Fieldtype != "" && fieldHandler.IsEmpty(inputs[identifier]))) {
-			result.Fields[identifier] = "1"
+		input, fieldExists := inputs[identifier]
+		fieldResult := ""
+		//validat both required and others together.
+		if fieldExists {
+			if fieldDef.Required && fieldHandler.IsEmpty(input) {
+				fieldResult = "1"
+			} else {
+				if valid, res := fieldHandler.Validate(input); !valid {
+					fieldResult = res
+				}
+			}
+		} else {
+			if fieldDef.Required {
+				fieldResult = "1"
+			}
 		}
-	}
-	if len(result.Fields) > 0 {
-		return false, result
-	}
-	//Validate field
-	for identifier, input := range inputs {
-		fieldHanlder := fieldtype.GetHandler(fieldsDef[identifier].FieldType)
-		if valid, fieldResult := fieldHanlder.Validate(input); !valid {
+		if fieldResult != "" {
 			result.Fields[identifier] = fieldResult
 		}
 	}
 
+	//validate from contenttype handler
 	contentTypeHanlder := GetContentTypeHandler(contentType)
 	if contentTypeHanlder != nil {
 		debug.Debug(ch.Context, "Validating from content type handler", "contenthandler.validate")
