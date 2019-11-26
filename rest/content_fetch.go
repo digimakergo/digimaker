@@ -106,7 +106,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	}
 
 	context := debug.Init(context.Background())
-	tree, err := querier.SubTree(rootContent, 5, "folder", 1, []string{"id"}, context)
+	tree, err := querier.SubTree(rootContent, 5, "folder,usergroup", 1, []string{"id"}, context)
 	if err != nil {
 		//todo: handle error
 		fmt.Println(err.Error())

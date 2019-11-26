@@ -20,7 +20,7 @@ func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.E
 	querier := handler.Querier()
 	parent := in.Interface().(contenttype.ContentTyper)
 	context := debug.Init(context.Background())
-	children, _ := querier.Children(parent, param.String(), 2, context)
+	children, _, _ := querier.Children(parent, param.String(), 2, []int{}, []string{}, false, context)
 	return pongo2.AsValue(children), nil
 }
 
