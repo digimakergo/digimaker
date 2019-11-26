@@ -7,12 +7,15 @@ import (
 	"dm/core/util"
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"os/exec"
 	"regexp"
 	"strings"
 )
 
 func UploadFile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	filename, err := HandleUploadFile(r, "*")
 	result := ""
 	if err != nil {
@@ -79,4 +82,37 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	pathArr := strings.Split(tempFile.Name(), "/")
 	tempFilename := pathArr[len(pathArr)-1]
 	return tempFilename, nil
+}
+
+func HtmlToPDF(w http.ResponseWriter, r *http.Request) {
+	//todo: permission check
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	html := r.PostFormValue("html")
+	name := r.PostFormValue("name")
+	if html == "" || name == "" {
+		HandleError(errors.New("empty data"), w)
+		return
+	}
+	result, err := htmlToPDF(html, name)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	w.Write([]byte("var/" + result))
+}
+
+func htmlToPDF(html string, name string) (string, error) {
+	tempFolder := util.GetConfig("general", "var_folder", "dm")
+	uid := util.GenerateUID()
+	sourceName := "/pdf/" + name + "-" + uid + ".html"
+	targetName := "/pdf/" + name + "-" + uid + ".pdf"
+	source := tempFolder + sourceName
+	target := tempFolder + targetName
+	ioutil.WriteFile(source, []byte(html), 0777)
+	output, _ := exec.Command("wkhtmltopdf", "--print-media-type", source, target).Output()
+	log.Println(output)
+	// if err != nil {
+	// 	return "", err
+	// }
+	return targetName, nil
 }
