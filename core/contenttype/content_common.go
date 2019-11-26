@@ -6,11 +6,12 @@ type ContentCommon struct {
 	Published int                 `boil:"published" json:"published" toml:"published" yaml:"published"`
 	Modified  int                 `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
 	CUID      string              `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	Status    int                 `boil:"status" json:"status" toml:"status" yaml:"status"`
 	Relations ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
 func (c ContentCommon) IdentifierList() []string {
-	return []string{"cid", "version", "published", "modified", "cuid"}
+	return []string{"cid", "version", "published", "modified", "cuid", "status"}
 }
 
 func (c ContentCommon) Values() map[string]interface{} {
@@ -19,6 +20,7 @@ func (c ContentCommon) Values() map[string]interface{} {
 	result["version"] = c.Version
 	result["published"] = c.Published
 	result["modified"] = c.Modified
+	result["status"] = c.Status
 	result["cuid"] = c.CUID
 	for identifier, relationValue := range c.Relations.Map {
 		result[identifier] = relationValue
@@ -37,6 +39,8 @@ func (c *ContentCommon) Value(identifier string) interface{} {
 		result = c.Modified
 	case "published":
 		result = c.Published
+	case "status":
+		result = c.Status
 	case "cuid":
 		result = c.CUID
 	case "relations":
@@ -55,6 +59,8 @@ func (c *ContentCommon) SetValue(identifier string, value interface{}) error {
 		c.Published = value.(int)
 	case "modified":
 		c.Modified = value.(int)
+	case "status":
+		c.Status = value.(int)
 	case "cuid":
 		c.CUID = value.(string)
 	}

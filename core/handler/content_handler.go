@@ -341,14 +341,17 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	//todo: update relations
 
 	//Set content.
+
 	fieldsDefinition := contentDef.FieldMap
-	for identifier, input := range inputs {
-		fieldType := fieldsDefinition[identifier].FieldType
-		fieldtypeHandler := fieldtype.GetHandler(fieldType)
-		fieldValue := fieldtypeHandler.NewValue(input)
-		err := content.SetValue(identifier, fieldValue)
-		if err != nil {
-			return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
+	for identifier, fieldDefinition := range fieldsDefinition {
+		if input, ok := inputs[identifier]; ok {
+			fieldType := fieldDefinition.FieldType
+			fieldtypeHandler := fieldtype.GetHandler(fieldType)
+			fieldValue := fieldtypeHandler.NewValue(input)
+			err := content.SetValue(identifier, fieldValue)
+			if err != nil {
+				return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
+			}
 		}
 	}
 
@@ -367,6 +370,19 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	}
 	now := int(time.Now().Unix())
 	content.SetValue("modified", now)
+
+	//Invoke callback
+	matchData := map[string]interface{}{"content_type": contentType}
+	if content.Definition().HasLocation {
+		hierachy := content.GetLocation().Hierarchy
+		matchData["under"] = strings.Split(hierachy, "/")
+	}
+	//todo: maybe old content need to pass to callback.
+	err = ch.InvokeCallback("update", true, matchData, content, tx)
+	if err != nil {
+		tx.Rollback()
+		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+	}
 
 	//Save update content.
 	debug.Debug(ch.Context, "Saving content", "contenthandler.update")
@@ -391,19 +407,6 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 			return false, ValidationResult{}, errors.Wrap(err, "Updating location info error.")
 		}
 		debug.Debug(ch.Context, "Location updated", "contenthandler.update")
-	}
-
-	//Invoke callback
-	matchData := map[string]interface{}{"content_type": contentType}
-	if content.Definition().HasLocation {
-		hierachy := content.GetLocation().Hierarchy
-		matchData["under"] = strings.Split(hierachy, "/")
-	}
-	//todo: maybe old content need to pass to callback.
-	err = ch.InvokeCallback("update", true, matchData, content, tx)
-	if err != nil {
-		tx.Rollback()
-		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
 	}
 
 	debug.Debug(ch.Context, "All done. Commitinng.", "contenthandler.update")

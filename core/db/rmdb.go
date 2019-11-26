@@ -31,7 +31,7 @@ func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content 
 //  var content contenttype.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
-func (*RMDB) GetByFields(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
+func (r *RMDB) GetByFields(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
 		return -1, errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
@@ -75,28 +75,10 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
 	}
 
 	//sort by
-	sortbyArr := []string{}
-	for _, item := range sortby {
-		if strings.TrimSpace(item) != "" {
-			itemArr := util.Split(item)
-			sortByField := itemArr[0]
-			sortByOrder := "ASC"
 
-			if len(itemArr) == 2 {
-				sortByOrder = strings.ToUpper(itemArr[1])
-				if sortByOrder != "ASC" && sortByOrder != "DESC" {
-					return -1, errors.New("Invalid sorting string: " + sortByOrder)
-				}
-			}
-			sortbyItem := sortByField + " " + sortByOrder
-			sortbyArr = append(sortbyArr, sortbyItem)
-		}
-	}
-
-	sortbyStr := ""
-	if len(sortbyArr) > 0 {
-		sortbyStr = "ORDER BY " + strings.Join(sortbyArr, ",")
-		sortbyStr = util.StripSQLPhrase(sortbyStr)
+	sortbyStr, err := r.getSortBy(sortby)
+	if err != nil {
+		return -1, err
 	}
 
 	sqlStr := `SELECT content.*, content.id AS cid, ` + locationColumns + relationQuery + `
@@ -144,6 +126,34 @@ func (*RMDB) GetByFields(contentType string, tableName string, condition Conditi
 	return countResult, nil
 }
 
+func (r *RMDB) getSortBy(sortby []string) (string, error) {
+	//sort by
+	sortbyArr := []string{}
+	for _, item := range sortby {
+		if strings.TrimSpace(item) != "" {
+			itemArr := util.Split(item)
+			sortByField := itemArr[0]
+			sortByOrder := "ASC"
+
+			if len(itemArr) == 2 {
+				sortByOrder = strings.ToUpper(itemArr[1])
+				if sortByOrder != "ASC" && sortByOrder != "DESC" {
+					return "", errors.New("Invalid sorting string: " + sortByOrder)
+				}
+			}
+			sortbyItem := sortByField + " " + sortByOrder
+			sortbyArr = append(sortbyArr, sortbyItem)
+		}
+	}
+
+	sortbyStr := ""
+	if len(sortbyArr) > 0 {
+		sortbyStr = "ORDER BY " + strings.Join(sortbyArr, ",")
+		sortbyStr = util.StripSQLPhrase(sortbyStr)
+	}
+	return sortbyStr, nil
+}
+
 // Count based on condition
 func (*RMDB) Count(tablename string, condition Condition) (int, error) {
 	conditions, values := BuildCondition(condition)
@@ -165,9 +175,13 @@ func (*RMDB) Count(tablename string, condition Condition) (int, error) {
 }
 
 //todo: support limit.
-func (*RMDB) GetEntity(tablename string, condition Condition, entity interface{}) error {
+func (r *RMDB) GetEntity(tablename string, condition Condition, sortby []string, entity interface{}) error {
 	conditions, values := BuildCondition(condition)
-	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions
+	sortbyStr, err := r.getSortBy(sortby)
+	if err != nil {
+		return err
+	}
+	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions + " " + sortbyStr
 	util.Debug("db", sqlStr)
 	db, err := DB()
 	if err != nil {

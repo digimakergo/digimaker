@@ -27,7 +27,7 @@ func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, erro
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEntity("dm_location", db.Cond("id", locationID), &location)
+	err := dbhandler.GetEntity("dm_location", db.Cond("id", locationID), []string{}, &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
 	}
@@ -46,7 +46,7 @@ func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) 
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEntity("dm_location", db.Cond("uid", uid), &location)
+	err := dbhandler.GetEntity("dm_location", db.Cond("uid", uid), []string{}, &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyuid]Can not fetch location by uid "+uid)
 	}
