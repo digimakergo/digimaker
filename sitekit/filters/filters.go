@@ -8,6 +8,7 @@ import (
 	"dm/core/util/debug"
 	"dm/sitekit"
 	"dm/sitekit/niceurl"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -60,10 +61,55 @@ func dmFormatTime(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2
 	return pongo2.AsValue(result), nil
 }
 
+func dmConfig(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	filename := in.String()
+	if param.IsNil() {
+		err := pongo2.Error{ErrorMsg: "Need section param."}
+		return pongo2.AsValue(""), &err
+	}
+	section := param.String()
+	result := util.GetConfigSectionAll(section, filename)
+	return pongo2.AsValue(result), nil
+}
+
+func dmValue(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	input := in.Interface().(map[string]interface{})
+	key := param.String()
+	result := input[key]
+	return pongo2.AsValue(result), nil
+}
+
+func dmJson(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	input := in.String()
+	var result interface{}
+	err := json.Unmarshal([]byte(input), &result)
+	if err != nil {
+		result = nil
+	}
+	return pongo2.AsValue(result), nil
+}
+
+func dmStr(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	input := in.Interface()
+	result := fmt.Sprintln(input)
+	return pongo2.AsValue(result), nil
+}
+
+func dmNow(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	result := time.Now()
+	return pongo2.AsValue(result), nil
+}
+
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_tpl_matched", dmTplMatched)
 	pongo2.RegisterFilter("dm_tpl_path", dmTplPath)
 	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
+	pongo2.RegisterFilter("dm_config", dmConfig)
+	pongo2.RegisterFilter("dm_json", dmJson)
+	pongo2.RegisterFilter("dm_str", dmStr)
+	pongo2.RegisterFilter("dm_value", dmValue)
+	pongo2.RegisterFilter("dm_now", dmNow)
+
 }

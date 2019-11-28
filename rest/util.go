@@ -4,6 +4,7 @@
 package rest
 
 import (
+	"dm/core/handler"
 	"dm/core/util"
 	"errors"
 	"io/ioutil"
@@ -11,7 +12,13 @@ import (
 	"net/http"
 	"os/exec"
 	"regexp"
+	"strconv"
 	"strings"
+
+	_ "dm/sitekit/filters"
+
+	"github.com/gorilla/mux"
+	pongo2 "gopkg.in/flosch/pongo2.v2"
 )
 
 func UploadFile(w http.ResponseWriter, r *http.Request) {
@@ -82,6 +89,60 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	pathArr := strings.Split(tempFile.Name(), "/")
 	tempFilename := pathArr[len(pathArr)-1]
 	return tempFilename, nil
+}
+
+func ExportPDF(w http.ResponseWriter, r *http.Request) {
+	//todo: permission check
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	params := mux.Vars(r)
+	id := params["id"]
+
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		HandleError(errors.New("id not int"), w)
+		return
+	}
+	querier := handler.Querier()
+	content, err := querier.FetchByID(idInt)
+	if err != nil {
+		HandleError(errors.New("Content not found"), w)
+		return
+	}
+
+	contenttype := content.ContentType()
+	tpl := pongo2.Must(pongo2.FromFile(util.HomePath() + "/templates/pdf/" + contenttype + ".html"))
+	variables := map[string]interface{}{}
+	variables["content"] = content
+	w.Header().Set("Content-Type", "text/html")
+	err2 := tpl.ExecuteWriter(pongo2.Context(variables), w)
+	if err2 != nil {
+		w.Write([]byte(err2.Error()))
+		return
+	}
+
+	// variables["site"] = siteIdentifier
+	//
+	// variables["template"] = templatePath
+	// if len(matchedData) == 0 {
+	// 	variables["matched_data"] = nil
+	// } else {
+	// 	variables["matched_data"] = matchedData[0]
+	// }
+	// err := tpl.ExecuteWriter(pongo2.Context(variables), w)
+	//
+	// w.Write([]byte(id))
+	// html := r("html")
+	// name := r.PostFormValue("name")
+	// if html == "" || name == "" {
+	// 	HandleError(errors.New("empty data"), w)
+	// 	return
+	// }
+	// result, err := htmlToPDF(html, name)
+	// if err != nil {
+	// 	HandleError(err, w)
+	// 	return
+	// }
+	// w.Write([]byte("var/" + result))
 }
 
 func HtmlToPDF(w http.ResponseWriter, r *http.Request) {
