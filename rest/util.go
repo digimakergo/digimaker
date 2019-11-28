@@ -113,12 +113,20 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	tpl := pongo2.Must(pongo2.FromFile(util.HomePath() + "/templates/pdf/" + contenttype + ".html"))
 	variables := map[string]interface{}{}
 	variables["content"] = content
-	w.Header().Set("Content-Type", "text/html")
-	err2 := tpl.ExecuteWriter(pongo2.Context(variables), w)
+
+	data, err2 := tpl.ExecuteBytes(pongo2.Context(variables))
 	if err2 != nil {
-		w.Write([]byte(err2.Error()))
+		HandleError(err2, w)
 		return
 	}
+
+	pdfFile, err := htmlToPDF(string(data), content.GetName()+"-"+id)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	http.Redirect(w, r, "/var/"+pdfFile, 302)
 
 	// variables["site"] = siteIdentifier
 	//
@@ -170,7 +178,7 @@ func htmlToPDF(html string, name string) (string, error) {
 	source := tempFolder + sourceName
 	target := tempFolder + targetName
 	ioutil.WriteFile(source, []byte(html), 0777)
-	output, _ := exec.Command("wkhtmltopdf", "--print-media-type", source, target).Output()
+	output, _ := exec.Command("wkhtmltopdf", "--javascript-delay", "1000", "-L", "0mm", "-R", "0mm", "-T", "0mm", "-B", "0mm", "--print-media-type", source, target).Output()
 	log.Println(output)
 	// if err != nil {
 	// 	return "", err
