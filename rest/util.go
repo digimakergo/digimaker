@@ -185,3 +185,10 @@ func htmlToPDF(html string, name string) (string, error) {
 	// }
 	return targetName, nil
 }
+
+func init() {
+	RegisterRoute("/util/uploadfile", UploadFile)
+	RegisterRoute("/util/uploadimage", UploadImage)
+
+	RegisterRoute("/pdf/{id}", ExportPDF)
+}

@@ -107,3 +107,10 @@ func Update(w http.ResponseWriter, r *http.Request) {
 func Delete() {
 
 }
+
+func init() {
+
+	RegisterRoute("/content/new/{parent}/{contenttype}", New)
+	RegisterRoute("/content/update/{id}", Update)
+
+}

@@ -55,3 +55,7 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 		w.Write(data)
 	}
 }
+
+func init() {
+	RegisterRoute("/form/validate/{contenttype}", Validate)
+}

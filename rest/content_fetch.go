@@ -115,3 +115,11 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	data, _ := json.Marshal(tree)
 	w.Write([]byte(data))
 }
+
+func init() {
+	RegisterRoute("/contenttype/get/{contentype}", GetDefinition)
+	RegisterRoute("/content/get/{id}", GetContent)
+
+	RegisterRoute("/content/treemenu/{id}", TreeMenu)
+	RegisterRoute("/content/list/{id}/{contenttype}", Children)
+}
