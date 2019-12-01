@@ -16,7 +16,6 @@ import (
 )
 
 func Validate(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(r)
 	contentType := params["contenttype"]
 	//todo: add permission check for which form/container can be.

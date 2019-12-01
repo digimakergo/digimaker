@@ -14,7 +14,6 @@ import (
 func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	typeStr := strings.TrimSpace(params["contentype"])
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 
 	containers := strings.Split(typeStr, "/")
 	definition, _ := contenttype.GetDefinition(containers[0])

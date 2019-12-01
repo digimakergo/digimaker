@@ -16,7 +16,6 @@ import (
 
 func New(w http.ResponseWriter, r *http.Request) {
 	//todo: permission
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	ctx := debug.Init(r.Context())
 	r = r.WithContext(ctx)
 
@@ -61,7 +60,6 @@ func New(w http.ResponseWriter, r *http.Request) {
 
 func Update(w http.ResponseWriter, r *http.Request) {
 	//todo: permission
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	ctx := debug.Init(r.Context())
 	r = r.WithContext(ctx)
 

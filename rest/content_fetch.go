@@ -18,7 +18,6 @@ import (
 )
 
 func GetContent(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(r)
 	querier := handler.Querier()
 	id, err := strconv.Atoi(params["id"])
@@ -61,7 +60,6 @@ func Children(w http.ResponseWriter, r *http.Request) {
 	sortbyStr := getParams.Get("sortby")
 	sortbyArr := util.Split(sortbyStr, ";")
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		HandleError(errors.New("Invalid id"), w)
@@ -95,7 +93,6 @@ func SubTree() {
 
 //Get tree menu under a node
 func TreeMenu(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(r)
 	id, err := strconv.Atoi(params["id"])
 

@@ -22,7 +22,6 @@ import (
 )
 
 func UploadFile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	filename, err := HandleUploadFile(r, "*")
 	result := ""
 	if err != nil {
@@ -93,7 +92,6 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 
 func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	//todo: permission check
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	params := mux.Vars(r)
 	id := params["id"]
 
@@ -155,7 +153,6 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 
 func HtmlToPDF(w http.ResponseWriter, r *http.Request) {
 	//todo: permission check
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	html := r.PostFormValue("html")
 	name := r.PostFormValue("name")
 	if html == "" || name == "" {
