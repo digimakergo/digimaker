@@ -102,12 +102,12 @@ func (cq ContentQuery) List(contentType string, condition db.Condition, limit []
 }
 
 //Fetch children
-func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, contenttype string, userID int, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
+func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, contenttype string, userID int, cond db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
 	contentTypeList := parentContent.Definition().AllowedTypes
 	if !util.Contains(contentTypeList, contenttype) {
 		return nil, -1, errors.New("content type " + contenttype + "doesn't exist or not allowed.")
 	}
-	result, countResult, err := cq.SubList(parentContent, contenttype, 1, userID, limit, sortby, withCount, context)
+	result, countResult, err := cq.SubList(parentContent, contenttype, 1, userID, cond, limit, sortby, withCount, context)
 	return result, countResult, err
 }
 
@@ -116,7 +116,7 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 	contentTypeList := strings.Split(contentTypes, ",")
 	var list []contenttype.ContentTyper
 	for _, contentType := range contentTypeList {
-		currentList, _, err := cq.SubList(rootContent, contentType, depth, userID, []int{}, sortby, false, context)
+		currentList, _, err := cq.SubList(rootContent, contentType, depth, userID, db.Cond("1", "1"), []int{}, sortby, false, context)
 		if err != nil {
 			return TreeNode{}, err
 		}
@@ -149,21 +149,20 @@ func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentT
 }
 
 //Get subtree with permission considered.
-func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
+func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
 	limits, err := permission.GetUserLimits(userID, "content", "read", context)
 	if err != nil {
 		return nil, -1, errors.Wrap(err, "Can not fetch permission.")
 	}
 
 	rootLocation := rootContent.GetLocation()
-	var condition db.Condition
 	if depth == 1 {
 		//Direct children
-		condition = db.Cond("location.parent_id", rootLocation.ID)
+		condition = condition.Cond("location.parent_id", rootLocation.ID)
 	} else {
 		rootHierarchy := rootLocation.Hierarchy
 		rootDepth := rootLocation.Depth
-		condition = db.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
+		condition = condition.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
 	}
 
 	//add conditions based on limits

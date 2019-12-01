@@ -3,6 +3,7 @@ package pongo2
 import (
 	"context"
 	"dm/core/contenttype"
+	"dm/core/db"
 	"dm/core/handler"
 	"dm/core/util"
 	"dm/core/util/debug"
@@ -21,7 +22,7 @@ func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.E
 	querier := handler.Querier()
 	parent := in.Interface().(contenttype.ContentTyper)
 	context := debug.Init(context.Background())
-	children, _, _ := querier.Children(parent, param.String(), 2, []int{}, []string{}, false, context)
+	children, _, _ := querier.Children(parent, param.String(), 2, db.Cond("1", "1"), []int{}, []string{}, false, context)
 	return pongo2.AsValue(children), nil
 }
 

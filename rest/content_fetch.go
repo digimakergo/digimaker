@@ -5,6 +5,7 @@ package rest
 
 import (
 	"context"
+	"dm/core/db"
 	"dm/core/handler"
 	"dm/core/util"
 	"dm/core/util/debug"
@@ -72,7 +73,36 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		//todo: handle
 	}
 	context := debug.Init(context.Background())
-	list, count, err := querier.Children(rootContent, contenttype, 1, []int{offset, limit}, sortbyArr, true, context)
+	cxt := r.Context()
+	if cxt.Value("user_id") == nil {
+		HandleError(errors.New("No user found"), w, 410)
+		return
+	}
+	userid := cxt.Value("user_id").(int)
+
+	//filter
+	author := getParams.Get("author")
+	condition := db.Cond("1", "1")
+	if author != "" {
+		if author == "self" {
+			condition = condition.Cond("location.author", userid)
+		} else {
+			authorInt, err := strconv.Atoi(author)
+			if err != nil {
+				HandleError(errors.New("wrong author format"), w, 410)
+				return
+			}
+			condition = condition.Cond("location.author", authorInt)
+		}
+	}
+	//todo: add more filters including field filter.
+
+	limitArr := []int{}
+	if offsetStr != "" && limitStr != "" {
+		limitArr = []int{offset, limit}
+	}
+
+	list, count, err := querier.Children(rootContent, contenttype, userid, condition, limitArr, sortbyArr, true, context)
 	if err != nil {
 		HandleError(err, w)
 		return
