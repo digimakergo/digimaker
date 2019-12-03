@@ -175,7 +175,7 @@ func htmlToPDF(html string, name string) (string, error) {
 	source := tempFolder + sourceName
 	target := tempFolder + targetName
 	ioutil.WriteFile(source, []byte(html), 0777)
-	output, _ := exec.Command("wkhtmltopdf", "--javascript-delay", "1000", "-L", "0mm", "-R", "0mm", "-T", "0mm", "-B", "0mm", "--print-media-type", source, target).Output()
+	output, _ := exec.Command("wkhtmltopdf", "--javascript-delay", "1000", "-L", "0mm", "-R", "0mm", "-T", "25mm", "-B", "25mm", "--print-media-type", "--header-html", tempFolder+"/pdf-assets/header.html", "--footer-html", tempFolder+"/pdf-assets/footer.html", source, target).Output()
 	log.Println(output)
 	// if err != nil {
 	// 	return "", err
