@@ -81,7 +81,7 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
-func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
+func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, userId int, tx *sql.Tx, parentID ...int) error {
 	if content.GetCID() == 0 {
 		debug.Debug(ch.Context, "Content is new.", "contenthandler.StoreCreatedContent")
 	}
@@ -111,6 +111,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		location.ContentID = content.GetCID()
 		location.ContentType = content.ContentType()
 		location.UID = util.GenerateUID()
+		location.Author = userId
 		contentName := GenerateName(content)
 		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(contentName)
 		location.Depth = parent.Depth + 1
@@ -162,7 +163,6 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	now := int(time.Now().Unix())
 	content.SetValue("published", now)
 	content.SetValue("modified", now)
-	content.SetValue("author", userId)
 	content.SetValue("cuid", util.GenerateUID())
 
 	debug.StartTiming(ch.Context, "database", "contenthandler.create")
@@ -194,7 +194,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if contentDefinition.HasVersion {
 		content.SetValue("version", versionIfNeeded)
 	}
-	err = ch.storeCreatedContent(content, tx, parentID...)
+	err = ch.storeCreatedContent(content, userId, tx, parentID...)
 	if err != nil {
 		tx.Rollback()
 		debug.Error(ch.Context, err.Error(), "contenthandler.Create")
