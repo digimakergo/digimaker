@@ -54,6 +54,7 @@ func (c *Location) Values() map[string]interface{} {
 	result["is_invisible"] = c.IsInvisible
 	result["priority"] = c.Priority
 	result["uid"] = c.UID
+	result["author"] = c.Author
 	result["section"] = c.Section
 	result["p"] = c.P
 	return result
