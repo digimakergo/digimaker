@@ -19,6 +19,13 @@ func New(w http.ResponseWriter, r *http.Request) {
 	ctx := debug.Init(r.Context())
 	r = r.WithContext(ctx)
 
+	userId := r.Context().Value("user_id")
+	if userId == nil {
+		HandleError(errors.New("Need to login"), w) //todo: add status code
+		return
+	}
+	userIdInt := userId.(int)
+
 	params := mux.Vars(r)
 	parent := params["parent"]
 	parentInt, err := strconv.Atoi(parent)
@@ -39,7 +46,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 	//todo: add value based on definition
 
 	handler := handler.ContentHandler{Context: r.Context()}
-	content, validationResult, err := handler.Create(contentType, inputs, parentInt)
+	content, validationResult, err := handler.Create(contentType, inputs, userIdInt, parentInt)
 
 	w.Header().Set("content-type", "application/json")
 	if !validationResult.Passed() {

@@ -135,7 +135,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 }
 
 //Create a content(same behavior as Draft&Publish but store published version directly)
-func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, parentID ...int) (contenttype.ContentTyper, ValidationResult, error) {
+func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, userId int, parentID ...int) (contenttype.ContentTyper, ValidationResult, error) {
 	//todo: permission check.
 
 	//todo: add validation callback.
@@ -162,6 +162,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	now := int(time.Now().Unix())
 	content.SetValue("published", now)
 	content.SetValue("modified", now)
+	content.SetValue("author", userId)
 	content.SetValue("cuid", util.GenerateUID())
 
 	debug.StartTiming(ch.Context, "database", "contenthandler.create")
