@@ -42,6 +42,7 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 	//todo: get columns from either config or entities
 	columns := []string{"id", "parent_id", "main_id",
 		"hierarchy", "depth", "content_type",
+		"author",
 		"content_id", "language",
 		"identifier_path",
 		"name", "is_hidden", "is_invisible",
