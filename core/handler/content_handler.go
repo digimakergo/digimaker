@@ -194,6 +194,20 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if contentDefinition.HasVersion {
 		content.SetValue("version", versionIfNeeded)
 	}
+
+	//Invoke callback
+	matchData := map[string]interface{}{"parent_id": parentID[0], //todo: maybe set parent id as mandatory parameter in Create
+		"content_type": contentType}
+	if contentDefinition.HasLocation {
+		hierachy := content.GetLocation().Hierarchy
+		matchData["under"] = strings.Split(hierachy, "/")
+	}
+	err = ch.InvokeCallback("create", true, matchData, content, tx)
+	if err != nil {
+		tx.Rollback()
+		return nil, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+	}
+
 	err = ch.storeCreatedContent(content, userId, tx, parentID...)
 	if err != nil {
 		tx.Rollback()
@@ -210,19 +224,6 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 			return nil, ValidationResult{}, errors.Wrap(err, "Create version error.")
 		}
 		debug.Debug(ch.Context, "Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create")
-	}
-
-	//Invoke callback
-	matchData := map[string]interface{}{"parent_id": parentID[0], //todo: maybe set parent id as mandatory parameter in Create
-		"content_type": contentType}
-	if contentDefinition.HasLocation {
-		hierachy := content.GetLocation().Hierarchy
-		matchData["under"] = strings.Split(hierachy, "/")
-	}
-	err = ch.InvokeCallback("create", true, matchData, content, tx)
-	if err != nil {
-		tx.Rollback()
-		return nil, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
 	}
 
 	//Commit all operations
