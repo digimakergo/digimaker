@@ -106,7 +106,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		}
 
 		//Save location
-		location := contenttype.Location{}
+		location := content.GetLocation()
 		location.ParentID = parentIDInt
 		location.ContentID = content.GetCID()
 		location.ContentType = content.ContentType()
@@ -129,6 +129,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		if err != nil {
 			return errors.Wrap(err, "Transaction failed in location when saving location for main_id and hierarchy.")
 		}
+
 		//todo: set location to the content
 		debug.Debug(ch.Context, "Location is saved. location id :"+strconv.Itoa(location.ID)+". ", "contenthandler.StoreCreatedContent")
 	}
@@ -194,20 +195,6 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if contentDefinition.HasVersion {
 		content.SetValue("version", versionIfNeeded)
 	}
-
-	//Invoke callback
-	matchData := map[string]interface{}{"parent_id": parentID[0], //todo: maybe set parent id as mandatory parameter in Create
-		"content_type": contentType}
-	if contentDefinition.HasLocation {
-		hierachy := content.GetLocation().Hierarchy
-		matchData["under"] = strings.Split(hierachy, "/")
-	}
-	err = ch.InvokeCallback("create", true, matchData, content, tx)
-	if err != nil {
-		tx.Rollback()
-		return nil, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
-	}
-
 	err = ch.storeCreatedContent(content, userId, tx, parentID...)
 	if err != nil {
 		tx.Rollback()
@@ -226,6 +213,20 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		debug.Debug(ch.Context, "Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create")
 	}
 
+	//Invoke callback
+	matchData := map[string]interface{}{"parent_id": parentID[0], //todo: maybe set parent id as mandatory parameter in Create
+		"content_type": contentType}
+	if contentDefinition.HasLocation {
+		hierachy := content.GetLocation().Hierarchy
+		matchData["under"] = strings.Split(hierachy, "/")
+	}
+
+	err = ch.InvokeCallback("create", true, matchData, content, tx)
+	if err != nil {
+		tx.Rollback()
+		return nil, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+	}
+
 	//Commit all operations
 	err = tx.Commit()
 	if err != nil {
@@ -236,9 +237,6 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 
 	debug.Debug(ch.Context, "Data committed.", "contenthandler.create")
 
-	ch.InvokeCallback("created", false, matchData, content) //continue if there is error
-
-	debug.Debug(ch.Context, "Create finished.", "contenthandler.create")
 	debug.EndTiming(ch.Context, "database", "contenthandler.create")
 	return content, ValidationResult{}, nil
 }
@@ -373,19 +371,6 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	now := int(time.Now().Unix())
 	content.SetValue("modified", now)
 
-	//Invoke callback
-	matchData := map[string]interface{}{"content_type": contentType}
-	if content.Definition().HasLocation {
-		hierachy := content.GetLocation().Hierarchy
-		matchData["under"] = strings.Split(hierachy, "/")
-	}
-	//todo: maybe old content need to pass to callback.
-	err = ch.InvokeCallback("update", true, matchData, content, tx)
-	if err != nil {
-		tx.Rollback()
-		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
-	}
-
 	//Save update content.
 	debug.Debug(ch.Context, "Saving content", "contenthandler.update")
 	err = content.Store(tx)
@@ -411,6 +396,20 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		debug.Debug(ch.Context, "Location updated", "contenthandler.update")
 	}
 
+	//Invoke callback
+	matchData := map[string]interface{}{"content_type": contentType}
+	if content.Definition().HasLocation {
+		hierachy := content.GetLocation().Hierarchy
+		matchData["under"] = strings.Split(hierachy, "/")
+	}
+
+	//todo: maybe old content need to pass to callback.
+	err = ch.InvokeCallback("update", true, matchData, content, tx)
+	if err != nil {
+		tx.Rollback()
+		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+	}
+
 	debug.Debug(ch.Context, "All done. Commitinng.", "contenthandler.update")
 	err = tx.Commit()
 	if err != nil {
@@ -418,8 +417,6 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		debug.Error(ch.Context, "Commit error: "+err.Error(), "contenthandler.update")
 		return false, ValidationResult{}, errors.Wrap(err, "Commit error.")
 	}
-
-	ch.InvokeCallback("updated", false, matchData, content)
 
 	return true, ValidationResult{}, nil
 }
