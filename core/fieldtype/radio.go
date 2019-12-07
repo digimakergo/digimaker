@@ -38,7 +38,7 @@ func (t RadioHandler) Validate(input interface{}) (bool, string) {
 }
 
 func (t RadioHandler) NewValueFromInput(input interface{}) interface{} {
-	r := TextField{}
+	r := RadioField{}
 	r.Scan(input.(string))
 	return r
 }

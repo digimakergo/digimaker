@@ -40,7 +40,7 @@ func (t NumberHandler) Validate(input interface{}) (bool, string) {
 }
 
 func (t NumberHandler) NewValueFromInput(input interface{}) interface{} {
-	r := TextField{}
+	r := NumberField{}
 	r.Scan(input.(string))
 	return r
 }
