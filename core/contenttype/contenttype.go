@@ -59,6 +59,7 @@ type ContentField struct {
 	FieldType   string                 `json:"type"`
 	Required    bool                   `json:"required"`
 	Description string                 `json:"description"`
+	IsOutput    bool                   `json:"is_output"`
 	Parameters  map[string]interface{} `json:"parameters"`
 	Children    ContentFieldArray      `json:"children"`
 }

@@ -21,7 +21,7 @@ type {{$struct_name}} struct{
     {{range $identifier, $fieldtype := .fields}}
          {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
          {{if not $type_settings.IsRelation }}
-         {{if ne $fieldtype.FieldType "container"}}
+         {{if not $fieldtype.IsOutput}}
             {{$identifier|UpperName}}  {{if eq $fieldtype.FieldType "string" }}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
          {{end}}
         {{end}}
@@ -62,7 +62,7 @@ func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
     {{range $identifier, $fieldtype := .fields}}
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
-        {{if ne $fieldtype.FieldType "container"}}
+        {{if not $fieldtype.IsOutput}}
             result["{{$identifier}}"]=c.{{$identifier|UpperName}}
         {{end}}
         {{end}}
@@ -91,7 +91,7 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     {{range $identifier, $fieldtype := .fields}}
-    {{if ne $fieldtype.FieldType "container"}}
+    {{if not $fieldtype.IsOutput}}
     case "{{$identifier}}":
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
             result = c.{{$identifier|UpperName}}
@@ -114,7 +114,7 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
         {{range $identifier, $fieldtype := .fields}}
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
             {{if not $type_settings.IsRelation}}
-            {{if ne $fieldtype.FieldType "container"}}
+            {{if not $fieldtype.IsOutput}}
             case "{{$identifier}}":
             c.{{$identifier|UpperName}} = value.({{if eq $fieldtype.FieldType "string"}}string{{else if eq $fieldtype.FieldType "int"}}int{{else}}fieldtype.{{$type_settings.Value}}{{end}})
             {{end}}
