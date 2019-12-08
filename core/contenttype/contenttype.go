@@ -8,9 +8,11 @@ import (
 	"dm/core/util"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"strings"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
 )
 
 type ContentTypeList map[string]map[string]ContentType
@@ -120,14 +122,15 @@ func LoadDefinition() error {
 		def[identifier] = cDef
 	}
 	contentTypeDefinition = map[string]map[string]ContentType{"default": def}
-	loadTranslation()
+	loadTranslations()
 
 	return nil
 }
 
 //load translation based on existing definition
 //todo: use locale folder
-func loadTranslation() {
+func loadTranslations() {
+
 	var def map[string]ContentType
 	util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
 
@@ -135,15 +138,33 @@ func loadTranslation() {
 	language := "eng-GB"
 
 	//todo: formalize this: use folder, and loop through language
-	translationStr, err := ioutil.ReadFile(util.ConfigPath() + "/contenttype_" + language + ".json")
+	viper := viper.New()
+	viper.AddConfigPath(util.ConfigPath())
+	filename := "contenttype_" + language
+	viper.SetConfigName(filename)
+	viper.ReadInConfig()
+	viper.WatchConfig()
 
-	if err != nil {
-		log.Println("Language " + language + "is not valid format. Not loaded.")
-		return
-	}
-	var translation map[string][]map[string]string //eg. "article":[{"name":"Navn"}]
-	json.Unmarshal(translationStr, &translation)
+	translationObj := viper.AllSettings()
+	str, _ := json.Marshal(translationObj)
+	var translation = map[string][]map[string]string{}
+	json.Unmarshal(str, &translation)
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		if e.Name == util.ConfigPath()+"/"+filename+".json" {
+			log.Println("Translation changed. file: " + filename)
+			translationObj := viper.AllSettings()
+			str, _ = json.Marshal(translationObj)
+			json.Unmarshal(str, &translation)
+			loadTranslation(def, translation)
+		}
+	})
+	loadTranslation(def, translation)
 
+	//set language related definition
+	contentTypeDefinition[language] = def
+}
+
+func loadTranslation(def map[string]ContentType, translation map[string][]map[string]string) {
 	for contenttype, contenttypeDef := range def {
 		translist, ok := translation[contenttype]
 		if !ok {
@@ -167,8 +188,6 @@ func loadTranslation() {
 		})
 		def[contenttype] = contenttypeDef
 	}
-	//set language related definition
-	contentTypeDefinition[language] = def
 }
 
 func getTranslation(context string, translist []map[string]string) string {
