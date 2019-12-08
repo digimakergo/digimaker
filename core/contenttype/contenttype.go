@@ -32,8 +32,8 @@ func (c *ContentType) Init(fieldCallback ...func(*ContentField)) {
 	fieldMap := map[string]ContentField{}
 	for i, field := range c.Fields {
 		identifier := field.Identifier
-		if len(fieldCallback) >0 {
-			fieldCallback[0]( &field )
+		if len(fieldCallback) > 0 {
+			fieldCallback[0](&field)
 		}
 		fieldMap[identifier] = field
 		//get sub fields
@@ -81,8 +81,8 @@ func getSubFields(cf *ContentField, callback ...func(*ContentField)) map[string]
 		result := map[string]ContentField{}
 		for i, field := range cf.Children {
 			identifier := field.Identifier
-			if len(callback) > 0{
-				callback[0]( &field )
+			if len(callback) > 0 {
+				callback[0](&field)
 			}
 
 			//get children under child
@@ -128,15 +128,16 @@ func LoadDefinition() error {
 //load translation based on existing definition
 //todo: use locale folder
 func loadTranslation() {
-	var def = contentTypeDefinition["default"]
+	var def map[string]ContentType
+	util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
 
 	//todo: use language loop in folder
 	language := "eng-GB"
 
 	//todo: formalize this: use folder, and loop through language
-	translationStr, err := ioutil.ReadFile(util.ConfigPath() + "/contenttype_"+language+".json")
+	translationStr, err := ioutil.ReadFile(util.ConfigPath() + "/contenttype_" + language + ".json")
 
-	if err != nil{
+	if err != nil {
 		log.Println("Language " + language + "is not valid format. Not loaded.")
 		return
 	}
@@ -145,21 +146,21 @@ func loadTranslation() {
 
 	for contenttype, contenttypeDef := range def {
 		translist, ok := translation[contenttype]
-		if !ok{
-				continue
+		if !ok {
+			continue
 		}
-		contenttypeDef.Init(func(field *ContentField){
+		contenttypeDef.Init(func(field *ContentField) {
 			//translate name
 			context := "field/" + field.Identifier + "/name"
 			value := getTranslation(context, translist)
-			if value != ""{
+			if value != "" {
 				field.Name = value
 			}
 
 			//translate description
 			context = "field/" + field.Identifier + "/description"
 			value = getTranslation(context, translist)
-			if value != ""{
+			if value != "" {
 				field.Description = value
 			}
 
@@ -170,12 +171,12 @@ func loadTranslation() {
 	contentTypeDefinition[language] = def
 }
 
-func getTranslation(context string, translist []map[string]string) string{
+func getTranslation(context string, translist []map[string]string) string {
 	value := ""
-	for i := range translist{
-		if translist[i]["context"] == context{
-			 value = translist[i]["translation"]
-			 break
+	for i := range translist {
+		if translist[i]["context"] == context {
+			value = translist[i]["translation"]
+			break
 		}
 	}
 	return value
