@@ -14,9 +14,13 @@ import (
 func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	typeStr := strings.TrimSpace(params["contentype"])
+	language := r.URL.Query().Get("language")
+	if language == "" {
+		language = "default"
+	}
 
 	containers := strings.Split(typeStr, "/")
-	definition, _ := contenttype.GetDefinition(containers[0])
+	definition, _ := contenttype.GetDefinition(containers[0], language)
 
 	data, _ := json.Marshal(definition)
 	resultMap := map[string]interface{}{}
@@ -29,4 +33,8 @@ func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("content-type", "application/json")
 
 	w.Write(result)
+}
+
+func init() {
+	RegisterRoute("/contenttype/get/{contentype}", GetDefinition)
 }

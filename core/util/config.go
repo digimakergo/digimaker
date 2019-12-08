@@ -81,6 +81,7 @@ func GetConfigSectionAll(section string, config string) interface{} {
 	err := viper.ReadInConfig()
 	if err != nil {
 		Error("Fatal error config file: ", err.Error())
+		return nil
 	}
 
 	value := viper.Get(section)
