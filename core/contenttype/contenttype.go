@@ -8,6 +8,7 @@ import (
 	"dm/core/util"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -122,46 +123,57 @@ func LoadDefinition() error {
 		def[identifier] = cDef
 	}
 	contentTypeDefinition = map[string]map[string]ContentType{"default": def}
-	loadTranslations()
+	fmap := def["report"].FieldMap
+	result := []map[string]string{}
+	for _, value := range fmap {
+		item := map[string]string{"context": "field/" + value.Identifier + "/name", "text": value.Name}
+		result = append(result, item)
+		item = map[string]string{"context": "field/" + value.Identifier + "/description", "text": value.Description}
+		result = append(result, item)
+	}
+	str, _ := json.Marshal(result)
+	fmt.Println(string(str))
+	//todo: use config or scan folder.
+	//todo nb: the translation can be add later but listener should be there
+	loadTranslations([]string{"nor-NO", "eng-GB"})
 
 	return nil
 }
 
 //load translation based on existing definition
 //todo: use locale folder
-func loadTranslations() {
+func loadTranslations(languages []string) {
+	for _, language := range languages {
+		var def map[string]ContentType
+		util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
 
-	var def map[string]ContentType
-	util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
+		//todo: formalize this: use folder, and loop through language
+		viper := viper.New()
+		viper.AddConfigPath(util.ConfigPath())
+		filename := "contenttype_" + language
+		viper.SetConfigName(filename)
+		viper.ReadInConfig()
+		viper.WatchConfig()
 
-	//todo: use language loop in folder
-	language := "eng-GB"
+		translationObj := viper.AllSettings()
+		str, _ := json.Marshal(translationObj)
+		var translation = map[string][]map[string]string{}
+		json.Unmarshal(str, &translation)
+		viper.OnConfigChange(func(e fsnotify.Event) {
+			if e.Name == util.ConfigPath()+"/"+filename+".json" {
+				log.Println("Translation changed. file: " + filename)
+				translationObj := viper.AllSettings()
+				str, _ = json.Marshal(translationObj)
+				json.Unmarshal(str, &translation)
+				loadTranslation(def, translation)
+			}
+		})
+		loadTranslation(def, translation)
 
-	//todo: formalize this: use folder, and loop through language
-	viper := viper.New()
-	viper.AddConfigPath(util.ConfigPath())
-	filename := "contenttype_" + language
-	viper.SetConfigName(filename)
-	viper.ReadInConfig()
-	viper.WatchConfig()
+		//set language related definition
+		contentTypeDefinition[language] = def
+	}
 
-	translationObj := viper.AllSettings()
-	str, _ := json.Marshal(translationObj)
-	var translation = map[string][]map[string]string{}
-	json.Unmarshal(str, &translation)
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		if e.Name == util.ConfigPath()+"/"+filename+".json" {
-			log.Println("Translation changed. file: " + filename)
-			translationObj := viper.AllSettings()
-			str, _ = json.Marshal(translationObj)
-			json.Unmarshal(str, &translation)
-			loadTranslation(def, translation)
-		}
-	})
-	loadTranslation(def, translation)
-
-	//set language related definition
-	contentTypeDefinition[language] = def
 }
 
 func loadTranslation(def map[string]ContentType, translation map[string][]map[string]string) {
