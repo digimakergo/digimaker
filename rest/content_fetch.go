@@ -5,6 +5,7 @@ package rest
 
 import (
 	"context"
+	"dm/core/contenttype"
 	"dm/core/db"
 	"dm/core/handler"
 	"dm/core/util"
@@ -35,6 +36,48 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 		data, _ := json.Marshal(content) //todo: use export for same serilization?
 		w.Write(data)
 	}
+}
+
+func GetVersion(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	querier := handler.Querier()
+	id, _ := strconv.Atoi(params["id"])
+
+	versionNo, _ := strconv.Atoi(params["version"])
+
+	querier = handler.Querier()
+	content, err := querier.FetchByID(id)
+	if err != nil {
+		HandleError(errors.New("Can not find content. error: "+err.Error()), w)
+		return
+	}
+
+	if content == nil {
+		HandleError(errors.New("Content doesn't exist"), w)
+		return
+	}
+
+	maxVersion := content.Value("version").(int)
+
+	if versionNo > maxVersion {
+		HandleError(errors.New("version doesn't exist."), w)
+		return
+	}
+
+	dbHandler := db.DBHanlder()
+	version := contenttype.Version{}
+	dbHandler.GetEntity(version.TableName(),
+		db.Cond("content_id", content.GetCID()).Cond("content_type", content.ContentType()).Cond("version", versionNo),
+		[]string{},
+		&version)
+	if version.ID == 0 {
+		HandleError(errors.New("version doesn't exist."), w)
+		return
+	}
+
+	data, _ := json.Marshal(version)
+	w.Header().Set("content-type", "application/json")
+	w.Write([]byte(data))
 }
 
 //Get children of a content(eg. folder)
@@ -144,9 +187,9 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	RegisterRoute("/contenttype/get/{contentype}", GetDefinition)
-	RegisterRoute("/content/get/{id}", GetContent)
+	RegisterRoute("/content/get/{id:[0-9]+}", GetContent)
+	RegisterRoute("/content/get/{id:[0-9]+}/{version:[0-9]+}", GetContent)
 
-	RegisterRoute("/content/treemenu/{id}", TreeMenu)
-	RegisterRoute("/content/list/{id}/{contenttype}", Children)
+	RegisterRoute("/content/treemenu/{id:[0-9]+}", TreeMenu)
+	RegisterRoute("/content/list/{id:[0-9]+}/{contenttype}", Children)
 }
