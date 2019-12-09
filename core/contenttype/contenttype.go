@@ -182,12 +182,16 @@ func loadTranslation(def map[string]ContentType, translation map[string][]map[st
 		if !ok {
 			continue
 		}
+		origFields := contentTypeDefinition["default"][contenttype].FieldMap
 		contenttypeDef.Init(func(field *ContentField) {
 			//translate name
 			context := "field/" + field.Identifier + "/name"
 			value := getTranslation(context, translist)
+			origField := origFields[field.Identifier]
 			if value != "" {
 				field.Name = value
+			} else {
+				field.Name = origField.Name
 			}
 
 			//translate description
@@ -195,6 +199,8 @@ func loadTranslation(def map[string]ContentType, translation map[string][]map[st
 			value = getTranslation(context, translist)
 			if value != "" {
 				field.Description = value
+			} else {
+				field.Description = origField.Name
 			}
 
 		})
