@@ -38,6 +38,7 @@ func (c *ContentType) Init(fieldCallback ...func(*ContentField)) {
 		if len(fieldCallback) > 0 {
 			fieldCallback[0](&field)
 		}
+
 		fieldMap[identifier] = field
 		//get sub fields
 		subFields := field.GetSubFields(fieldCallback...)
@@ -92,10 +93,14 @@ func getSubFields(cf *ContentField, callback ...func(*ContentField)) map[string]
 			children := getSubFields(&field, callback...)
 			for _, item := range children {
 				identifier2 := item.Identifier
-				result[identifier2] = item
+				if !item.IsOutput {
+					result[identifier2] = item
+				}
 			}
 			cf.Children[i] = field
-			result[identifier] = field
+			if !field.IsOutput {
+				result[identifier] = field
+			}
 		}
 		return result
 	}

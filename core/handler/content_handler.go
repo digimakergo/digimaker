@@ -221,7 +221,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		matchData["under"] = strings.Split(hierachy, "/")
 	}
 
-	err = ch.InvokeCallback("create", true, matchData, content, tx)
+	err = ch.InvokeCallback("create", true, matchData, content, tx, inputs)
 	if err != nil {
 		tx.Rollback()
 		return nil, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
@@ -404,7 +404,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	}
 
 	//todo: maybe old content need to pass to callback.
-	err = ch.InvokeCallback("update", true, matchData, content, tx)
+	err = ch.InvokeCallback("update", true, matchData, content, tx, inputs)
 	if err != nil {
 		tx.Rollback()
 		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
