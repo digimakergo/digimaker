@@ -74,7 +74,7 @@ func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 }
 
 func (c *{{$struct_name}}) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .fields}}"{{$identifier}}",{{end}}}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .fields}}{{if not $fieldtype.IsOutput}}"{{$identifier}}",{{end}}{{end}}}...)
 }
 
 func (c *{{$struct_name}}) Definition() contenttype.ContentType {

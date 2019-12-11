@@ -8,7 +8,6 @@ import (
 	"dm/core/util"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"strings"
 
@@ -91,16 +90,12 @@ func getSubFields(cf *ContentField, callback ...func(*ContentField)) map[string]
 
 			//get children under child
 			children := getSubFields(&field, callback...)
+			cf.Children[i] = field
 			for _, item := range children {
 				identifier2 := item.Identifier
-				if !item.IsOutput {
-					result[identifier2] = item
-				}
+				result[identifier2] = item
 			}
-			cf.Children[i] = field
-			if !field.IsOutput {
-				result[identifier] = field
-			}
+			result[identifier] = field
 		}
 		return result
 	}
@@ -128,16 +123,7 @@ func LoadDefinition() error {
 		def[identifier] = cDef
 	}
 	contentTypeDefinition = map[string]map[string]ContentType{"default": def}
-	fmap := def["report"].FieldMap
-	result := []map[string]string{}
-	for _, value := range fmap {
-		item := map[string]string{"context": "field/" + value.Identifier + "/name", "text": value.Name}
-		result = append(result, item)
-		item = map[string]string{"context": "field/" + value.Identifier + "/description", "text": value.Description}
-		result = append(result, item)
-	}
-	str, _ := json.Marshal(result)
-	fmt.Println(string(str))
+
 	//todo: use config or scan folder.
 	//todo nb: the translation can be add later but listener should be there
 	loadTranslations([]string{"nor-NO", "eng-GB"})
@@ -193,6 +179,7 @@ func loadTranslation(def map[string]ContentType, translation map[string][]map[st
 			context := "field/" + field.Identifier + "/name"
 			value := getTranslation(context, translist)
 			origField := origFields[field.Identifier]
+
 			if value != "" {
 				field.Name = value
 			} else {
@@ -205,7 +192,7 @@ func loadTranslation(def map[string]ContentType, translation map[string][]map[st
 			if value != "" {
 				field.Description = value
 			} else {
-				field.Description = origField.Name
+				field.Description = origField.Description
 			}
 
 		})
