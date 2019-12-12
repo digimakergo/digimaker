@@ -96,11 +96,26 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//todo: permission check
+	// userIdI := r.Context().Value("user_id")
+	// if userIdI == nil {
+	// 	HandleError(errors.New("user not found"), w)
+	// 	return
+	// }
+	// userId := userIdI.(int)
+	userId := 174
+
 	version := contenttype.Version{}
-	version.ContentType = ctype
-	version.ContentID = id
-	version.Author = r.Context().Value("user_id").(int)
-	version.Version = 0
+	dbHandler := db.DBHanlder()
+	dbHandler.GetEntity(version.TableName(),
+		db.Cond("author", userId).Cond("content_id", id).Cond("content_type", ctype),
+		[]string{}, &version)
+	if version.ID == 0 {
+		version.ContentType = ctype
+		version.ContentID = id
+		version.Author = userId
+		version.Version = 0
+	}
 	version.Data = data
 	version.Created = int(time.Now().Unix())
 	tx, _ := db.CreateTx()
@@ -109,11 +124,13 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = version.Store(tx)
+	tx.Commit()
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
 
+	w.Write([]byte(strconv.Itoa(version.ID)))
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
