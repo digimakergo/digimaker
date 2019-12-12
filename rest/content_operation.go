@@ -4,12 +4,15 @@
 package rest
 
 import (
+	"dm/core/contenttype"
+	"dm/core/db"
 	"dm/core/handler"
 	"dm/core/util/debug"
 	"encoding/json"
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -65,6 +68,54 @@ func New(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+func SaveDraft(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	ctype := params["type"]
+	_, err := contenttype.GetDefinition(ctype)
+	if err != nil {
+		HandleError(errors.New("type doesn't exist."), w)
+		return
+	}
+
+	id, err := strconv.Atoi(params["id"])
+	if err != nil {
+		HandleError(errors.New("Wrong id"), w)
+		return
+	}
+
+	inputs := map[string]string{}
+	decorder := json.NewDecoder(r.Body)
+	err = decorder.Decode(&inputs)
+	if err != nil {
+		HandleError(errors.New("wrong format"), w)
+		return
+	}
+	data, ok := inputs["data"]
+	if !ok {
+		HandleError(errors.New("need data"), w)
+		return
+	}
+
+	version := contenttype.Version{}
+	version.ContentType = ctype
+	version.ContentID = id
+	version.Author = r.Context().Value("user_id").(int)
+	version.Version = 0
+	version.Data = data
+	version.Created = int(time.Now().Unix())
+	tx, _ := db.CreateTx()
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	err = version.Store(tx)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+}
+
 func Update(w http.ResponseWriter, r *http.Request) {
 	//todo: permission
 	ctx := debug.Init(r.Context())
@@ -117,5 +168,5 @@ func init() {
 
 	RegisterRoute("/content/new/{parent}/{contenttype}", New)
 	RegisterRoute("/content/update/{id}", Update)
-
+	RegisterRoute("/content/savedraft/{id}/{type}", SaveDraft)
 }
