@@ -97,13 +97,12 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//todo: permission check
-	// userIdI := r.Context().Value("user_id")
-	// if userIdI == nil {
-	// 	HandleError(errors.New("user not found"), w)
-	// 	return
-	// }
-	// userId := userIdI.(int)
-	userId := 174
+	userIdI := r.Context().Value("user_id")
+	if userIdI == nil {
+		HandleError(errors.New("need login"), w)
+		return
+	}
+	userId := userIdI.(int)
 
 	version := contenttype.Version{}
 	dbHandler := db.DBHanlder()
@@ -130,7 +129,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(strconv.Itoa(version.ID)))
+	w.Write([]byte(strconv.Itoa(version.Created)))
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
