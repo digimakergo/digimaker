@@ -195,6 +195,20 @@ func loadTranslation(def map[string]ContentType, translation map[string][]map[st
 				field.Description = origField.Description
 			}
 
+			//translate parameters
+			for key, param := range field.Parameters {
+				switch param.(type) {
+				case string:
+					value = getTranslation("field/"+field.Identifier+"/parameters/"+key, translist)
+					if value != "" {
+						field.Parameters[key] = value
+					} else {
+						field.Parameters[key] = origField.Parameters[key]
+					}
+					break
+				}
+			}
+
 		})
 		def[contenttype] = contenttypeDef
 	}
