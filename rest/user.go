@@ -2,6 +2,7 @@ package rest
 
 import (
 	"dm/core/db"
+	"dm/core/fieldtype"
 	"dm/core/handler"
 	"dm/core/util"
 	"dm/eth/entity"
@@ -67,10 +68,11 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		//send password
 		url := "http://xxxx.com/api/user/resetpassword-confirm/" + activation.Hash
-		err := util.SendMail(
-			[]string{email}
+		util.SendMail(
+			[]string{email},
 			"reset password",
 			"Click to reset password: <a href="+url+">url</a>")
+		//todo: rollback
 		w.Write([]byte("1"))
 	}
 
@@ -99,7 +101,6 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 		decorder := json.NewDecoder(r.Body)
 		err := decorder.Decode(&inputs)
 		if err != nil {
-			HandleError(errors.New("wrong format."), w)
 			return
 		}
 		if password, ok := inputs["password"]; ok {
@@ -110,10 +111,20 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 				HandleError(errors.New("No user found"), w)
 				return
 			}
-			hashedPassword, _ := util.HashPassword(password.(string))
-			user.SetValue("password", hashedPassword)
+			pHandler := fieldtype.GetHandler("password")
+			valid, message := pHandler.Validate(password)
+			if !valid {
+				HandleError(errors.New(message), w)
+				return
+			}
+			value := pHandler.NewValue(password)
+			user.SetValue("password", value)
 			user.Store()
 
+			dbHanldler.Delete("dm_activation", db.Cond("id", activation.ID))
+			//todo: use transaction
+
+			w.Write([]byte("1"))
 		}
 
 	}

@@ -29,8 +29,8 @@ type PasswordHandler struct{}
 
 func (t PasswordHandler) Validate(input interface{}) (bool, string) {
 	str := input.(string)
-	if len(str) < 8 {
-		return false, "Password needs to be more than 8 characters." //todo: more rule based on configuration.
+	if len(str) < 7 {
+		return false, "Password needs to be at least 7 characters." //todo: more rule based on configuration.
 	}
 	return true, ""
 }
