@@ -91,6 +91,8 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 }
 
 func ExportPDF(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	//todo: permission check
 	params := mux.Vars(r)
 	id := params["id"]
@@ -118,7 +120,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pdfFile, err := htmlToPDF(string(data), content.GetName()+"-"+id)
+	pdfFile, err := htmlToPDF(string(data), util.NameToIdentifier(content.GetName())+"-"+id)
 	if err != nil {
 		HandleError(err, w)
 		return
