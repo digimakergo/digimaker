@@ -5,7 +5,6 @@
 package util
 
 import (
-	"dm/core/util"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -207,7 +206,7 @@ func MatchPassword(password string, hash string) bool {
 
 //todo: rewrite this.
 func SendMail(to []string, subject, body string) error {
-	from := util.GetConfig("general", "send_from", "dm")
+	from := GetConfig("general", "send_from", "dm")
 	r := strings.NewReplacer("\r\n", "", "\r", "", "\n", "", "%0a", "", "%0d", "")
 
 	addr := "127.0.0.1:25"
