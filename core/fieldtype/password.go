@@ -15,7 +15,7 @@ type PasswordField struct {
 }
 
 func (t *PasswordField) Scan(src interface{}) error {
-	err := t.SetData(src, "text")
+	err := t.SetData(src, "password")
 	return err
 }
 
