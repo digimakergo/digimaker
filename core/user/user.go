@@ -5,10 +5,9 @@ import (
 	"dm/core/db"
 	"dm/core/fieldtype"
 	"dm/core/handler"
+	"dm/core/util"
 	"errors"
 	"strings"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 //CanLogin check if the username/email and password matches
@@ -30,23 +29,10 @@ func CanLogin(usernameEmail string, password string) (error, contenttype.Content
 		return errors.New("User not found"), nil
 	}
 	passwordField := user.Value("password").(fieldtype.TextField)
-	result := MatchPassword(password, passwordField.Raw)
+	result := util.MatchPassword(password, passwordField.Raw)
 	if result {
 		return nil, user
 	} else {
 		return errors.New("Password is wrong"), nil
 	}
-}
-
-func HashPassword(password string) (string, error) {
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), 14) //todo: make cost configable
-	return string(hash), err
-}
-
-func MatchPassword(password string, hash string) bool {
-	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-	if err != nil {
-		return false
-	}
-	return true
 }

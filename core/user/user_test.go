@@ -3,6 +3,7 @@ package user
 import (
 	"context"
 	"dm/core"
+	"dm/core/util"
 	"dm/core/util/debug"
 	"fmt"
 	"testing"
@@ -20,7 +21,7 @@ func TestMain(m *testing.M) {
 
 func TestCanLogin(t *testing.T) {
 	// htmlToPDF("<div>Test1</div>")
-	hash, err := HashPassword("test")
+	hash, err := util.HashPassword("Test123")
 	fmt.Println(hash)
 	fmt.Println(err)
 	result, _ := CanLogin("admin", "test")

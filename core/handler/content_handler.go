@@ -330,7 +330,10 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	contentType := content.ContentType()
 	contentDef, _ := contenttype.GetDefinition(contentType)
 
-	ch.Validate(contentType, contentDef.FieldMap, inputs)
+	valid, result := ch.Validate(contentType, contentDef.FieldMap, inputs)
+	if !valid {
+		return valid, result, nil
+	}
 
 	//Save to new version
 	tx, err := db.CreateTx()

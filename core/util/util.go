@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/rs/xid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 //UnmarshalData Load json and unmall into variable
@@ -186,4 +187,17 @@ func Split(str string, seperator ...string) []string {
 		arr[i] = strings.TrimSpace(value)
 	}
 	return arr
+}
+
+func HashPassword(password string) (string, error) {
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), 14) //todo: make cost configable
+	return string(hash), err
+}
+
+func MatchPassword(password string, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	if err != nil {
+		return false
+	}
+	return true
 }
