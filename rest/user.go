@@ -66,11 +66,11 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	_, err := dbHandler.Insert("dm_activation", dbMap)
 	if err == nil {
 		//send password
-		err := util.SendMail("chen@digimaker.no",
+		url := "http://xxxx.com/api/user/resetpassword-confirm/" + activation.Hash
+		err := util.SendMail(
+			[]string{email}
 			"reset password",
-			"http://xxxx.com/api/user/resetpassword-confirm/"+activation.Hash,
-			[]string{email})
-		fmt.Println(err)
+			"Click to reset password: <a href="+url+">url</a>")
 		w.Write([]byte("1"))
 	}
 
