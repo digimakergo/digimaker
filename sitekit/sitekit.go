@@ -6,6 +6,7 @@ import (
 	"dm/core/util"
 	"dm/sitekit/niceurl"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -71,7 +72,7 @@ func HandleContent(r *mux.Router) error {
 			if path, ok := vars["path"]; ok {
 				prefix = path
 			}
-			OutputContent(w, r, id, site, prefix)
+			OutputContent(w, id, site, prefix)
 		}
 
 		//site route and get sub route
@@ -100,7 +101,7 @@ func HandleContent(r *mux.Router) error {
 }
 
 //Output content using conent template
-func OutputContent(w http.ResponseWriter, r *http.Request, id int, siteIdentifier string, prefix string) {
+func OutputContent(w io.Writer, id int, siteIdentifier string, prefix string) {
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
 	//todo: handle error, template compiling much better.
@@ -118,11 +119,11 @@ func OutputContent(w http.ResponseWriter, r *http.Request, id int, siteIdentifie
 		"root":     siteSettings.RootContent,
 		"viewmode": "full",
 		"prefix":   prefix}
-	Output(w, r, siteIdentifier, "content/view", data)
+	Output(w, siteIdentifier, "content/view", data)
 }
 
 //Output using template
-func Output(w http.ResponseWriter, r *http.Request, siteIdentifier string, templatePath string, variables map[string]interface{}, matchedData ...map[string]interface{}) {
+func Output(w io.Writer, siteIdentifier string, templatePath string, variables map[string]interface{}, matchedData ...map[string]interface{}) {
 	// siteSettings := GetSiteSettings(siteIdentifier)
 	pongo2.DefaultSet.Debug = true
 	// pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
