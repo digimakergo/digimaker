@@ -4,6 +4,7 @@
 package fieldtype
 
 import (
+	"log"
 	"strings"
 )
 
@@ -32,8 +33,15 @@ func (t RichTextHandler) Validate(input interface{}) (bool, string) {
 
 func (t RichTextHandler) NewValueFromInput(input interface{}) interface{} {
 	r := RichTextField{}
-	r.Scan(input.(string))
-	return r
+	switch input.(type) {
+	case string:
+		r.Scan(input.(string))
+		return r
+	default:
+		log.Println("not a richtext: ")
+		log.Println(input)
+		return nil
+	}
 }
 
 func (t RichTextHandler) IsEmpty(input interface{}) bool {
