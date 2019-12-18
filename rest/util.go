@@ -96,6 +96,10 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	//todo: permission check
 	params := mux.Vars(r)
 	id := params["id"]
+	language := r.FormValue("language")
+	if language == "" {
+		language = "default"
+	}
 
 	idInt, err := strconv.Atoi(id)
 	if err != nil {
@@ -112,6 +116,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	contenttype := content.ContentType()
 	tpl := pongo2.Must(pongo2.FromFile(util.HomePath() + "/templates/pdf/" + contenttype + ".html"))
 	variables := map[string]interface{}{}
+	variables["language"] = language
 	variables["content"] = content
 	authorID := content.Value("author").(int)
 	author, _ := querier.FetchByContentID("user", authorID)
