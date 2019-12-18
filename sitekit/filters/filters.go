@@ -62,6 +62,28 @@ func dmFormatTime(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2
 	return pongo2.AsValue(result), nil
 }
 
+func dmFormatNumber(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	str := in.String()
+	arr := []byte(str)
+	spliter := []byte(param.String())[0]
+	result := []byte{}
+	count := len(str)
+	div := count - count/3*3
+	for i := 0; i < div; i++ {
+		result = append(result, arr[i])
+	}
+
+	for j := count / 3; j >= 1; j-- {
+		if len(result) > 0 {
+			result = append(result, spliter, arr[count-j*3], arr[count-j*3+1], arr[count-j*3+2])
+		} else {
+			result = append(result, arr[count-j*3], arr[count-j*3+1], arr[count-j*3+2])
+		}
+	}
+	resultStr := string(result)
+	return pongo2.AsValue(resultStr), nil
+}
+
 func dmConfig(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	filename := in.String()
 	if param.IsNil() {
@@ -107,6 +129,7 @@ func init() {
 	pongo2.RegisterFilter("dm_tpl_matched", dmTplMatched)
 	pongo2.RegisterFilter("dm_tpl_path", dmTplPath)
 	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
+	pongo2.RegisterFilter("dm_format_number", dmFormatNumber)
 	pongo2.RegisterFilter("dm_config", dmConfig)
 	pongo2.RegisterFilter("dm_json", dmJson)
 	pongo2.RegisterFilter("dm_str", dmStr)
