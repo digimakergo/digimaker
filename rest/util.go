@@ -113,6 +113,9 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	tpl := pongo2.Must(pongo2.FromFile(util.HomePath() + "/templates/pdf/" + contenttype + ".html"))
 	variables := map[string]interface{}{}
 	variables["content"] = content
+	authorID := content.Value("author").(int)
+	author, _ := querier.FetchByContentID("user", authorID)
+	variables["author"] = author
 
 	data, err2 := tpl.ExecuteBytes(pongo2.Context(variables))
 	if err2 != nil {
