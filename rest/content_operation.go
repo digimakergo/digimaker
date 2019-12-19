@@ -182,6 +182,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	id := params["id"]
 	idInt, _ := strconv.Atoi(id)
 	handler := handler.ContentHandler{}
+	handler.Context = r.Context()
 	err := handler.DeleteByID(idInt, true)
 	if err != nil {
 		HandleError(err, w)
