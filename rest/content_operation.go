@@ -176,13 +176,24 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("1"))
 }
 
-func Delete() {
-
+func Delete(w http.ResponseWriter, r *http.Request) {
+	//todo: check permission
+	params := mux.Vars(r)
+	id := params["id"]
+	idInt, _ := strconv.Atoi(id)
+	handler := handler.ContentHandler{}
+	err := handler.DeleteByID(idInt, true)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	w.Write([]byte("1"))
 }
 
 func init() {
 
 	RegisterRoute("/content/new/{parent}/{contenttype}", New)
 	RegisterRoute("/content/update/{id}", Update)
+	RegisterRoute("/content/delete/{id}", Delete)
 	RegisterRoute("/content/savedraft/{id}/{type}", SaveDraft)
 }
