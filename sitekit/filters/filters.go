@@ -96,9 +96,18 @@ func dmConfig(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Err
 }
 
 func dmValue(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	input := in.Interface().(map[string]interface{})
-	key := param.String()
-	result := input[key]
+	var result interface{}
+	switch in.Interface().(type) {
+	case []interface{}:
+		input := in.Interface().([]interface{})
+		key := param.Integer()
+		result = input[key]
+	default:
+		input := in.Interface().(map[string]interface{})
+		key := param.String()
+		result = input[key]
+	}
+
 	return pongo2.AsValue(result), nil
 }
 
