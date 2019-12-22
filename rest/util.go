@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
@@ -91,8 +92,6 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 }
 
 func ExportPDF(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-
 	//todo: permission check
 	params := mux.Vars(r)
 	id := params["id"]
@@ -128,37 +127,15 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	pdfFile, err := htmlToPDF(string(data), util.NameToIdentifier(content.GetName())+"-"+id)
+	modified := content.Value("modified").(int)
+	name := util.NameToIdentifier(content.GetName()) + "-" + id + "-" + language + "-" + strconv.Itoa(modified)
+	pdfFile, err := htmlToPDF(string(data), name)
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
 
 	http.Redirect(w, r, "/var/"+pdfFile, 302)
-
-	// variables["site"] = siteIdentifier
-	//
-	// variables["template"] = templatePath
-	// if len(matchedData) == 0 {
-	// 	variables["matched_data"] = nil
-	// } else {
-	// 	variables["matched_data"] = matchedData[0]
-	// }
-	// err := tpl.ExecuteWriter(pongo2.Context(variables), w)
-	//
-	// w.Write([]byte(id))
-	// html := r("html")
-	// name := r.PostFormValue("name")
-	// if html == "" || name == "" {
-	// 	HandleError(errors.New("empty data"), w)
-	// 	return
-	// }
-	// result, err := htmlToPDF(html, name)
-	// if err != nil {
-	// 	HandleError(err, w)
-	// 	return
-	// }
-	// w.Write([]byte("var/" + result))
 }
 
 func HtmlToPDF(w http.ResponseWriter, r *http.Request) {
@@ -179,11 +156,16 @@ func HtmlToPDF(w http.ResponseWriter, r *http.Request) {
 
 func htmlToPDF(html string, name string) (string, error) {
 	tempFolder := util.GetConfig("general", "var_folder", "dm")
-	uid := util.GenerateUID()
-	sourceName := "/pdf/" + name + "-" + uid + ".html"
-	targetName := "/pdf/" + name + "-" + uid + ".pdf"
-	source := tempFolder + sourceName
+	targetName := "/pdf/" + name + ".pdf"
 	target := tempFolder + targetName
+
+	//if exist already, return it
+	if _, err := os.Stat(target); err == nil {
+		return targetName, nil
+	}
+	sourceName := "/pdf/" + name + ".html"
+
+	source := tempFolder + sourceName
 	ioutil.WriteFile(source, []byte(html), 0777)
 	output, _ := exec.Command("wkhtmltopdf", "--javascript-delay", "1000", "-L", "0mm", "-R", "0mm", "-T", "25mm", "-B", "25mm", "--print-media-type", "--header-html", tempFolder+"/pdf-assets/header.html", "--footer-html", tempFolder+"/pdf-assets/footer.html", source, target).Output()
 	log.Println(output)
