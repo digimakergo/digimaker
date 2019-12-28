@@ -85,7 +85,7 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-        tempFile.Chmod( 0775 )
+        tempFile.Chmod( 0664 )
 	tempFile.Write(fileContent)
 	pathArr := strings.Split(tempFile.Name(), "/")
 	tempFilename := pathArr[len(pathArr)-1]
