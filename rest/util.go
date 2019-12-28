@@ -85,6 +85,7 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+        tempFile.Chmod( 0775 )
 	tempFile.Write(fileContent)
 	pathArr := strings.Split(tempFile.Name(), "/")
 	tempFilename := pathArr[len(pathArr)-1]
@@ -112,8 +113,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contenttype := content.ContentType()
-	tpl := pongo2.Must(pongo2.FromFile(util.HomePath() + "/templates/pdf/" + contenttype + ".html"))
+	tpl := pongo2.Must(pongo2.FromFile(util.HomePath() + "/templates/pdf/main.html"))
 	variables := map[string]interface{}{}
 	variables["language"] = language
 	variables["content"] = content
