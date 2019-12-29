@@ -9,8 +9,7 @@ import (
 )
 
 type Permission struct {
-	Module    string                 `json:"module"`
-	Action    string                 `json:"action"`
+	Operation []string               `json:"operation"`
 	LimitedTo map[string]interface{} `json:"limited_to"`
 }
 

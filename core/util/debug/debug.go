@@ -6,8 +6,8 @@ package debug
 
 import (
 	"context"
-	"dm/core/util"
 	"errors"
+	"log"
 	"time"
 )
 
@@ -40,10 +40,7 @@ type Debugger struct {
 
 //Add debug into debug struct
 func (d *Debugger) Add(debugType string, message string, category string) {
-	d.List = append(d.List, DebugMessage{category, debugType, message})
-	if debugType == "error" {
-		util.Error("[" + category + "]" + message)
-	}
+	log.Println("[" + debugType + "][" + category + "] " + message)
 }
 
 //Get Debugger instance from context

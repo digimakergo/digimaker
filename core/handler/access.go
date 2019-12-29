@@ -10,17 +10,19 @@ import (
 	"dm/core/util"
 	"dm/core/util/debug"
 	"fmt"
+	"log"
 	"strconv"
 )
 
 //If the user has acccess given matchedData(realData here)
-func HasAccessTo(userID int, module string, action string, realData map[string]interface{}, context context.Context) (bool, error) {
+func HasAccessTo(userID int, operation string, realData map[string]interface{}, context context.Context) bool {
 	//get permission limits
-	limits, err := permission.GetUserLimits(userID, module, action, context)
+	limits, err := permission.GetUserLimits(userID, operation, context)
 	debug.Debug(context, "Limits: "+fmt.Sprintln(limits), "permission")
 
 	if err != nil {
-		return false, err
+		log.Println(err.Error())
+		return false
 	}
 
 	//match limits
@@ -38,20 +40,17 @@ func HasAccessTo(userID int, module string, action string, realData map[string]i
 			break
 		}
 	}
-	return result, nil
+	return result
 }
 
 //If the use can read the content
-func CanRead(userID int, content contenttype.ContentTyper, context context.Context) (bool, error) {
+func CanRead(userID int, content contenttype.ContentTyper, context context.Context) bool {
 	location := content.GetLocation()
 	data := map[string]interface{}{
 		"id":          location.ID,
 		"contenttype": content.ContentType(),
 		"under":       location.Path(),
 	}
-	result, err := HasAccessTo(userID, "content", "read", data, context)
-	if err != nil {
-		return false, err
-	}
-	return result, nil
+	result := HasAccessTo(userID, "content/read", data, context)
+	return result
 }

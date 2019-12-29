@@ -150,7 +150,7 @@ func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentT
 
 //Get subtree with permission considered.
 func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
-	limits, err := permission.GetUserLimits(userID, "content", "read", context)
+	limits, err := permission.GetUserLimits(userID, "content/read", context)
 	if err != nil {
 		return nil, -1, errors.Wrap(err, "Can not fetch permission.")
 	}

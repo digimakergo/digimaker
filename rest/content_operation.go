@@ -18,16 +18,13 @@ import (
 )
 
 func New(w http.ResponseWriter, r *http.Request) {
-	//todo: permission
 	ctx := debug.Init(r.Context())
 	r = r.WithContext(ctx)
 
-	userId := r.Context().Value("user_id")
-	if userId == nil {
-		HandleError(errors.New("Need to login"), w) //todo: add status code
+	userId := CheckUserID(r.Context(), w)
+	if userId == 0 {
 		return
 	}
-	userIdInt := userId.(int)
 
 	params := mux.Vars(r)
 	parent := params["parent"]
@@ -49,7 +46,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 	//todo: add value based on definition
 
 	handler := handler.ContentHandler{Context: r.Context()}
-	content, validationResult, err := handler.Create(contentType, inputs, userIdInt, parentInt)
+	content, validationResult, err := handler.Create(contentType, inputs, userId, parentInt)
 
 	w.Header().Set("content-type", "application/json")
 	if !validationResult.Passed() {
@@ -96,13 +93,11 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//todo: permission check
-	userIdI := r.Context().Value("user_id")
-	if userIdI == nil {
-		HandleError(errors.New("need login"), w)
+	//todo: more permission check
+	userId := CheckUserID(r.Context(), w)
+	if userId == 0 {
 		return
 	}
-	userId := userIdI.(int)
 
 	version := contenttype.Version{}
 	dbHandler := db.DBHanlder()
@@ -133,7 +128,11 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
-	//todo: permission
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
 	ctx := debug.Init(r.Context())
 	r = r.WithContext(ctx)
 
@@ -156,7 +155,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	//todo: add value based on definition
 
 	handler := handler.ContentHandler{Context: r.Context()}
-	result, validationResult, err := handler.UpdateByID(idInt, inputs)
+	result, validationResult, err := handler.UpdateByID(idInt, inputs, userID)
 
 	if !result {
 		w.Header().Set("content-type", "application/json")
@@ -177,13 +176,19 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
-	//todo: check permission
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
 	params := mux.Vars(r)
 	id := params["id"]
 	idInt, _ := strconv.Atoi(id)
 	handler := handler.ContentHandler{}
-	handler.Context = r.Context()
-	err := handler.DeleteByID(idInt, true)
+	ctx := debug.Init(r.Context())
+	r = r.WithContext(ctx)
+	handler.Context = ctx
+	err := handler.DeleteByID(idInt, userID, true)
 	if err != nil {
 		HandleError(err, w)
 		return

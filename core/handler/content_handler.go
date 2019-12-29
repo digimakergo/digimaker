@@ -137,8 +137,19 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 }
 
 //Create a content(same behavior as Draft&Publish but store published version directly)
-func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, userId int, parentID ...int) (contenttype.ContentTyper, ValidationResult, error) {
-	//todo: permission check.
+func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, userId int, parentID int) (contenttype.ContentTyper, ValidationResult, error) {
+
+	parent, _ := querier.FetchByID(parentID)
+	if parent == nil {
+		return nil, ValidationResult{}, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
+	}
+	realData := map[string]interface{}{
+		"under":       strings.Split(parent.GetLocation().Hierarchy, "/"),
+		"contenttype": contentType,
+	} //todo: support more conditions
+	if !HasAccessTo(userId, "content/create", realData, ch.Context) {
+		return nil, ValidationResult{}, errors.New("User doesn't have access to create")
+	}
 
 	//todo: add validation callback.
 	contentDefinition, _ := contenttype.GetDefinition(contentType)
@@ -182,7 +193,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	contentTypeHandler := GetContentTypeHandler(contentType)
 	if contentTypeHandler != nil {
 		debug.Debug(ch.Context, "Calling handler for "+contentType, "contenthandler.create")
-		err := contentTypeHandler.New(content, tx, parentID...)
+		err := contentTypeHandler.New(content, tx, parentID)
 		if err != nil {
 			tx.Rollback()
 			debug.Error(ch.Context, "Error from callback: "+err.Error(), "contenthandler.create")
@@ -195,7 +206,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if contentDefinition.HasVersion {
 		content.SetValue("version", versionIfNeeded)
 	}
-	err = ch.storeCreatedContent(content, userId, tx, parentID...)
+	err = ch.storeCreatedContent(content, userId, tx, parentID)
 	if err != nil {
 		tx.Rollback()
 		debug.Error(ch.Context, err.Error(), "contenthandler.Create")
@@ -214,7 +225,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	}
 
 	//Invoke callback
-	matchData := map[string]interface{}{"parent_id": parentID[0], //todo: maybe set parent id as mandatory parameter in Create
+	matchData := map[string]interface{}{"parent_id": parentID,
 		"content_type": contentType}
 	if contentDefinition.HasLocation {
 		hierachy := content.GetLocation().Hierarchy
@@ -297,7 +308,7 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 	return version.ID, nil
 }
 
-func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, inputs map[string]interface{}) (bool, ValidationResult, error) {
+func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, inputs map[string]interface{}, userId int) (bool, ValidationResult, error) {
 	content, err := Querier().FetchByContentID(contentType, contentID)
 	if err != nil {
 		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via content id.")
@@ -306,10 +317,10 @@ func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, in
 		return false, ValidationResult{}, errors.Wrap(err, "Got empty content.")
 	}
 
-	return ch.Update(content, inputs)
+	return ch.Update(content, inputs, userId)
 }
 
-func (ch ContentHandler) UpdateByID(id int, inputs map[string]interface{}) (bool, ValidationResult, error) {
+func (ch ContentHandler) UpdateByID(id int, inputs map[string]interface{}, userId int) (bool, ValidationResult, error) {
 	content, err := Querier().FetchByID(id)
 	if err != nil {
 		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via id.")
@@ -318,13 +329,24 @@ func (ch ContentHandler) UpdateByID(id int, inputs map[string]interface{}) (bool
 		return false, ValidationResult{}, errors.Wrap(err, "Got empty content.")
 	}
 
-	return ch.Update(content, inputs)
+	return ch.Update(content, inputs, userId)
 }
 
 //Update content.
 //The inputs doesn't need to include all required fields. However if it's there,
 // it will check if it's required&empty
-func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[string]interface{}) (bool, ValidationResult, error) {
+func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[string]interface{}, userId int) (bool, ValidationResult, error) {
+	accessRealData := map[string]interface{}{
+		"contenttype": content.ContentType(),
+		"under":       content.GetLocation().ID,
+	}
+	if content.GetLocation().Author == userId {
+		accessRealData["author"] = "self"
+	}
+	if !HasAccessTo(userId, "content/update", accessRealData, ch.Context) {
+		return false, ValidationResult{}, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
+	}
+
 	//Validate
 	debug.Debug(ch.Context, "Validating", "contenthandler.update")
 	contentType := content.ContentType()
@@ -425,21 +447,33 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 }
 
 //Delete content by location id
-func (ch ContentHandler) DeleteByID(id int, toTrash bool) error {
+func (ch ContentHandler) DeleteByID(id int, userId int, toTrash bool) error {
 	content, err := Querier().FetchByID(id)
 	//todo: check how many. if more than 1, delete current only(and set main_id if needed)
 	if err != nil {
 		return errors.New("[handler.delete]Content doesn't exist with id: " + strconv.Itoa(id))
 	}
-	err = ch.DeleteByContent(content, toTrash)
+	err = ch.DeleteByContent(content, userId, toTrash)
 	return err
 }
 
 //Delete content, relations and location.
 //Note: this is only for when there is 1 location.
 //  You need to judge if there are more than one locations before invoking this.
-func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, toTrash bool) error {
+func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userId int, toTrash bool) error {
 	//todo: check delete children. There should be more consideration if there are more children.
+
+	accessRealData := map[string]interface{}{
+		"contenttype": content.ContentType(),
+		"under":       strings.Split(content.GetLocation().Hierarchy, "/"),
+	}
+	if content.GetLocation().Author == userId {
+		accessRealData["author"] = "self"
+	}
+	if !HasAccessTo(userId, "content/delete", accessRealData, ch.Context) {
+		return errors.New("User " + strconv.Itoa(userId) + " Doesn't have access to delete")
+	}
+
 	//Delete location
 	location := content.GetLocation()
 	if location.CountLocations() > 1 {

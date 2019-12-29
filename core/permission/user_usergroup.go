@@ -43,32 +43,34 @@ func GetUserPolicies(userID int) ([]UsergroupPolicy, error) {
 }
 
 //Get user's limits
-func GetUserLimits(userID int, module string, action string, context context.Context) ([]map[string]interface{}, error) {
+func GetUserLimits(userID int, operation string, context context.Context) ([]map[string]interface{}, error) {
 	policyList, err := GetUserPolicies(userID)
 	debug.Debug(context, "Got policy list: "+fmt.Sprint(policyList), "permission")
 	if err != nil {
 		return nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
 	}
 	//todo: cache limits to user, and cache anoymous globally.
-	result := GetLimitsFromPolicy(policyList, module, action)
+	result := GetLimitsFromPolicy(policyList, operation)
 	debug.Debug(context, "Got limits:"+fmt.Sprint(result), "permission")
 	return result, nil
 }
 
-func GetLimitsFromPolicy(policyList []UsergroupPolicy, module string, action string) []map[string]interface{} {
+func GetLimitsFromPolicy(policyList []UsergroupPolicy, operation string) []map[string]interface{} {
 	result := []map[string]interface{}{}
 	for _, ugPolicy := range policyList {
 		policy := ugPolicy.GetPolicy()
 		for _, permission := range policy.Permissions {
-			if permission.Module == module && permission.Action == action {
-				limit := permission.LimitedTo
-				if ugPolicy.Scope != "" {
-					limit["scope"] = ugPolicy.Scope
+			for _, item := range permission.Operation {
+				if item == operation {
+					limit := permission.LimitedTo
+					if ugPolicy.Scope != "" {
+						limit["scope"] = ugPolicy.Scope
+					}
+					if ugPolicy.Under != "" {
+						limit["under"] = ugPolicy.Under
+					}
+					result = append(result, limit)
 				}
-				if ugPolicy.Under != "" {
-					limit["under"] = ugPolicy.Under
-				}
-				result = append(result, limit)
 			}
 		}
 	}
