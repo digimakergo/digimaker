@@ -148,12 +148,67 @@ func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentT
 	}
 }
 
-//Get subtree with permission considered.
-func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
+func permCondition(userID int, contenttype string, context context.Context) db.Condition {
 	limits, err := permission.GetUserLimits(userID, "content/read", context)
 	if err != nil {
-		return nil, -1, errors.Wrap(err, "Can not fetch permission.")
+		//todo: debug messsage it
 	}
+
+	//add conditions based on limits
+	var result db.Condition
+	for _, limit := range limits {
+		if ctype, ok := limit["contenttype"]; ok {
+			ctypeList := ctype.([]interface{})
+			ctypeMatched := false
+			for _, value := range ctypeList {
+				if value.(string) == contenttype {
+					ctypeMatched = true
+					break
+				}
+			}
+			//if the limit doesn't include the type, get next limit.
+			if !ctypeMatched {
+				continue
+			}
+		}
+
+		var sectionCond db.Condition
+		if section, ok := limit["section"]; ok {
+			sectionCond = db.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
+		} else {
+			sectionCond = db.Cond("1", "1")
+		}
+
+		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
+		// if sTree, ok := limit["subtree"]; ok {
+		// 	item := sTree.(string) //todo: support array
+		// 	itemInt, _ := strconv.Atoi(item)
+		// 	subtree = append(subtree, itemInt)
+		// }
+		if result.Children == nil {
+			result = sectionCond
+		} else {
+			result = result.Or(sectionCond)
+		}
+
+		//todo: current self author will override the other policy. to be fixed.
+		if author, ok := limit["author"]; ok {
+			if author.(string) == "self" {
+				authorCond := db.Cond("location.author", userID)
+				if result.Children == nil {
+					result = authorCond
+				} else {
+					result = result.And(authorCond)
+				}
+			}
+		}
+
+	}
+	return result
+}
+
+//Get subtree with permission considered.
+func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
 
 	rootLocation := rootContent.GetLocation()
 	if depth == 1 {
@@ -165,48 +220,10 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 		condition = condition.Cond("location.hierarchy like", rootHierarchy+"/%").Cond("location.depth <=", rootDepth+depth)
 	}
 
-	//add conditions based on limits
-	var permissionCondition db.Condition
-	for _, limit := range limits {
-		var currentCondition db.Condition
-		if ctype, ok := limit["contenttype"]; ok {
-			ctypeList := ctype.([]interface{})
-			ctypeMatched := false
-			for _, value := range ctypeList {
-				if value.(string) == contentType {
-					ctypeMatched = true
-					break
-				}
-			}
-			//if the limit doesn't include the type, get next limit.
-			if !ctypeMatched {
-				continue
-			}
-		}
-
-		if section, ok := limit["section"]; ok {
-			currentCondition = db.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
-		} else {
-			currentCondition = db.Cond("1", "1")
-		}
-
-		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
-		// if sTree, ok := limit["subtree"]; ok {
-		// 	item := sTree.(string) //todo: support array
-		// 	itemInt, _ := strconv.Atoi(item)
-		// 	subtree = append(subtree, itemInt)
-		// }
-		if currentCondition.Children != nil {
-			if permissionCondition.Children == nil {
-				permissionCondition = currentCondition
-			} else {
-				permissionCondition = permissionCondition.Or(currentCondition)
-			}
-		}
-	}
-
-	if permissionCondition.Children != nil {
-		condition = condition.And(permissionCondition)
+	//permission condition
+	permCondition := permCondition(userID, contentType, context)
+	if permCondition.Children != nil {
+		condition = condition.And(permCondition)
 	}
 
 	//fetch

@@ -111,6 +111,7 @@ func GetLimitsFromPolicy(policyList []RolePolicy, operation string) []map[string
 			}
 		}
 	}
+	//todo: merge all limits first.
 	return result
 }
 

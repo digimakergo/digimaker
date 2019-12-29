@@ -8,6 +8,7 @@ import (
 	"dm/core/contenttype"
 	"dm/core/db"
 	"dm/core/handler"
+	"dm/core/permission"
 	"dm/core/util"
 	"dm/core/util/debug"
 	"encoding/json"
@@ -20,6 +21,14 @@ import (
 )
 
 func GetContent(w http.ResponseWriter, r *http.Request) {
+	ctx := debug.Init(r.Context())
+	r = r.WithContext(ctx)
+
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
 	params := mux.Vars(r)
 	querier := handler.Querier()
 	id, err := strconv.Atoi(params["id"])
@@ -32,6 +41,10 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w)
 		return
 	} else {
+		if !permission.CanRead(userID, content, r.Context()) {
+			HandleError(errors.New("Doesn't have permission."), w, 403)
+			return
+		}
 		w.Header().Set("content-type", "application/json")
 		data, _ := json.Marshal(content) //todo: use export for same serilization?
 		w.Write(data)

@@ -50,6 +50,9 @@ func CanRead(userID int, content contenttype.ContentTyper, context context.Conte
 		"contenttype": content.ContentType(),
 		"under":       location.Path(),
 	}
+	if userID == content.GetLocation().Author {
+		data["author"] = "self"
+	}
 	result := HasAccessTo(userID, "content/read", data, context)
 	return result
 }

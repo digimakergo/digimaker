@@ -17,7 +17,6 @@ import (
 )
 
 func CurrentUser(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")
 	ctx := r.Context()
 	value := ctx.Value("user")
 	if value != nil {
