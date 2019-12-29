@@ -1,12 +1,11 @@
 //Author xc, Created on 2019-06-01 20:00
 //{COPYRIGHTS}
 
-package handler
+package permission
 
 import (
 	"context"
 	"dm/core/contenttype"
-	"dm/core/permission"
 	"dm/core/util"
 	"dm/core/util/debug"
 	"fmt"
@@ -17,7 +16,7 @@ import (
 //If the user has acccess given matchedData(realData here)
 func HasAccessTo(userID int, operation string, realData map[string]interface{}, context context.Context) bool {
 	//get permission limits
-	limits, err := permission.GetUserLimits(userID, operation, context)
+	limits, err := GetUserLimits(userID, operation, context)
 	debug.Debug(context, "Limits: "+fmt.Sprintln(limits), "permission")
 
 	if err != nil {

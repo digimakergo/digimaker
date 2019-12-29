@@ -176,7 +176,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	}
 
 	context := debug.Init(context.Background())
-	tree, err := querier.SubTree(rootContent, 5, "folder,usergroup", 1, []string{"id"}, context)
+	tree, err := querier.SubTree(rootContent, 5, "folder,role,usergroup", 1, []string{"id"}, context)
 	if err != nil {
 		//todo: handle error
 		fmt.Println(err.Error())
@@ -188,7 +188,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	RegisterRoute("/content/get/{id:[0-9]+}", GetContent)
-	RegisterRoute("/content/get/{id:[0-9]+}/{version:[0-9]+}", GetContent)
+	RegisterRoute("/content/get/{id:[0-9]+}/{version:[0-9]+}", GetVersion)
 
 	RegisterRoute("/content/treemenu/{id:[0-9]+}", TreeMenu)
 	RegisterRoute("/content/list/{id:[0-9]+}/{contenttype}", Children)

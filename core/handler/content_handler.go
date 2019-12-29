@@ -13,6 +13,7 @@ import (
 	"dm/core/contenttype"
 	"dm/core/db"
 	"dm/core/fieldtype"
+	"dm/core/permission"
 	"dm/core/util"
 	"dm/core/util/debug"
 	"strconv"
@@ -147,7 +148,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		"under":       strings.Split(parent.GetLocation().Hierarchy, "/"),
 		"contenttype": contentType,
 	} //todo: support more conditions
-	if !HasAccessTo(userId, "content/create", realData, ch.Context) {
+	if !permission.HasAccessTo(userId, "content/create", realData, ch.Context) {
 		return nil, ValidationResult{}, errors.New("User doesn't have access to create")
 	}
 
@@ -343,7 +344,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	if content.GetLocation().Author == userId {
 		accessRealData["author"] = "self"
 	}
-	if !HasAccessTo(userId, "content/update", accessRealData, ch.Context) {
+	if !permission.HasAccessTo(userId, "content/update", accessRealData, ch.Context) {
 		return false, ValidationResult{}, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
 	}
 
@@ -470,7 +471,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 	if content.GetLocation().Author == userId {
 		accessRealData["author"] = "self"
 	}
-	if !HasAccessTo(userId, "content/delete", accessRealData, ch.Context) {
+	if !permission.HasAccessTo(userId, "content/delete", accessRealData, ch.Context) {
 		return errors.New("User " + strconv.Itoa(userId) + " Doesn't have access to delete")
 	}
 

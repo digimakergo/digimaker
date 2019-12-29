@@ -1,8 +1,7 @@
-package handler
+package permission
 
 import (
 	"context"
-	"dm/core/permission"
 	"dm/core/util/debug"
 	"fmt"
 	"testing"
@@ -12,11 +11,11 @@ import (
 
 func TestHasAccessTo(t *testing.T) {
 	context := debug.Init(context.Background())
-	policyList, err := permission.GetUserPolicies(2)
+	policyList, err := GetUserPolicies(2)
 	assert.NotNil(t, policyList)
 	assert.Nil(t, err)
 	currentData := map[string]interface{}{"contenttype": "folder1"}
-	result, err := HasAccessTo(2, "content", "read", currentData, context)
+	result := HasAccessTo(2, "content/read", currentData, context)
 	for _, item := range debug.GetDebugger(context).List {
 		fmt.Println(item)
 	}

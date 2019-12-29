@@ -1,10 +1,9 @@
-package user
+package handler
 
 import (
 	"dm/core/contenttype"
 	"dm/core/db"
 	"dm/core/fieldtype"
-	"dm/core/handler"
 	"dm/core/util"
 	"errors"
 	"strings"
@@ -12,7 +11,7 @@ import (
 
 //CanLogin check if the username/email and password matches
 func CanLogin(usernameEmail string, password string) (error, contenttype.ContentTyper) {
-	querier := handler.Querier()
+	querier := Querier()
 
 	//todo: use username instead of 'login'
 	cond := db.Cond("login=", usernameEmail)
