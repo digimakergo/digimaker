@@ -511,7 +511,12 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 		if err != nil {
 			tx.Rollback()
 		} else {
-			//TODO: delete version if there is.
+			//delete versions
+			if content.Definition().HasVersion {
+				dbHanlder := db.DBHanlder()
+				dbHanlder.Delete("dm_version", db.Cond("content_type", content.ContentType()).
+					Cond("content_id", content.GetCID()), tx)
+			}
 
 			//Delete content
 			err = content.Delete(tx)
