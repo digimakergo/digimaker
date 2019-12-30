@@ -4,7 +4,9 @@ import (
 	"dm/core/db"
 	"dm/core/fieldtype"
 	"dm/core/handler"
+	"dm/core/permission"
 	"dm/core/util"
+	"dm/core/util/debug"
 	"dm/eth/entity"
 	"encoding/json"
 	"errors"
@@ -16,13 +18,24 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//Get current user
 func CurrentUser(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	params := mux.Vars(r)
+	site := params["site"]
+
+	ctx := debug.Init(r.Context())
+	r = r.WithContext(ctx)
 	value := ctx.Value("user")
 	if value != nil {
 		user := value.(*entity.User)
-		data, _ := json.Marshal(user)
-		w.Write(data)
+		userID := user.CID
+		hasAccess := permission.HasAccessTo(userID, "site/access", map[string]interface{}{"site": site}, ctx)
+		if hasAccess {
+			data, _ := json.Marshal(user)
+			w.Write(data)
+		} else {
+			HandleError(errors.New("Doesn't have access"), w, 403)
+		}
 	} else {
 		HandleError(errors.New("No user in context"), w)
 	}
@@ -131,7 +144,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	RegisterRoute("/user/current", CurrentUser)
+	RegisterRoute("/user/current/{site}", CurrentUser)
 	RegisterRoute("/user/resetpassword/{email}", ResetPassword)
 	RegisterRoute("/user/resetpassword-confirm/{hash}", ResetPasswordDone)
 }
