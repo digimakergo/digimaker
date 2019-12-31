@@ -130,11 +130,10 @@ func Children(w http.ResponseWriter, r *http.Request) {
 	}
 	context := debug.Init(context.Background())
 	cxt := r.Context()
-	if cxt.Value("user_id") == nil {
-		HandleError(errors.New("No user found"), w, 410)
+	userid := CheckUserID(cxt, w)
+	if userid == 0 {
 		return
 	}
-	userid := cxt.Value("user_id").(int)
 
 	//filter
 	author := getParams.Get("author")
