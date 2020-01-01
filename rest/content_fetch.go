@@ -204,7 +204,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	RegisterRoute("/content/get/{id:[0-9]+}", GetContent)
-	RegisterRoute("/content/get/{id:[0-9]+}/{version:[0-9]+}", GetVersion)
+	RegisterRoute("/content/version/{id:[0-9]+}/{version:[0-9]+}", GetVersion)
 
 	RegisterRoute("/content/treemenu/{id:[0-9]+}", TreeMenu)
 	RegisterRoute("/content/list/{id:[0-9]+}/{contenttype}", Children)
