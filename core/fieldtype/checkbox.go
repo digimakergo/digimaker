@@ -5,6 +5,7 @@
 package fieldtype
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -41,7 +42,8 @@ func (t CheckboxHandler) Validate(input interface{}) (bool, string) {
 func (t CheckboxHandler) NewValueFromInput(input interface{}) interface{} {
 	r := CheckboxField{}
 	// i, _ := strconv.Atoi(input.(string))
-	r.Scan(input.(string))
+	value := fmt.Sprint(input)
+	r.Scan(value)
 	return r
 }
 
