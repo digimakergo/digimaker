@@ -4,6 +4,7 @@ import (
 	"context"
 	"dm/core/contenttype"
 	"dm/core/db"
+	"dm/core/fieldtype"
 	"dm/core/permission"
 	"dm/core/util"
 	"encoding/json"
@@ -255,9 +256,15 @@ func (cq ContentQuery) Draft(author int) {
 
 //return a version content
 func (cq ContentQuery) Version(contentType string, condition db.Condition) (contenttype.Version, contenttype.ContentTyper, error) {
+
+	def, err := contenttype.GetDefinition(contentType)
+	if err != nil {
+		return contenttype.Version{}, nil, err
+	}
+
 	version := contenttype.Version{}
 	dbHandler := db.DBHanlder()
-	err := dbHandler.GetEntity("dm_version", condition.Cond("content_type", contentType), []string{}, &version)
+	err = dbHandler.GetEntity("dm_version", condition.Cond("content_type", contentType), []string{}, &version)
 	if err != nil {
 		return contenttype.Version{}, nil, err
 	}
@@ -268,7 +275,19 @@ func (cq ContentQuery) Version(contentType string, condition db.Condition) (cont
 	data := []byte(version.Data)
 	content := contenttype.NewInstance(contentType)
 	author := version.Author
-	json.Unmarshal(data, &content)
+	obj := map[string]interface{}{}
+	json.Unmarshal(data, &obj)
+
+	for name := range def.FieldMap {
+		value := obj[name]
+		if value != nil {
+			valueStr, _ := json.Marshal(value)
+			fHandler := fieldtype.GetHandler(def.FieldMap[name].FieldType)
+			fieldValue := fHandler.NewValue(string(valueStr))
+			content.SetValue(name, fieldValue)
+		}
+	}
+
 	content.SetValue("author", author)
 	return version, content, nil
 }
