@@ -6,6 +6,7 @@ import (
 	"dm/core/db"
 	"dm/core/permission"
 	"dm/core/util"
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -245,6 +246,31 @@ func (cq ContentQuery) Fill(contentType string, condition db.Condition, limit []
 	}
 	*count = countResult
 	return nil
+}
+
+//Get version where version number is 0
+func (cq ContentQuery) Draft(author int) {
+
+}
+
+//return a version content
+func (cq ContentQuery) Version(contentType string, condition db.Condition) (contenttype.Version, contenttype.ContentTyper, error) {
+	version := contenttype.Version{}
+	dbHandler := db.DBHanlder()
+	err := dbHandler.GetEntity("dm_version", condition.Cond("content_type", contentType), []string{}, &version)
+	if err != nil {
+		return contenttype.Version{}, nil, err
+	}
+	if version.ID == 0 {
+		return contenttype.Version{}, nil, nil
+	}
+
+	data := []byte(version.Data)
+	content := contenttype.NewInstance(contentType)
+	author := version.Author
+	json.Unmarshal(data, &content)
+	content.SetValue("author", author)
+	return version, content, nil
 }
 
 //todo: use method instead of global variable
