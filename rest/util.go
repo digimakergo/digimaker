@@ -85,7 +85,7 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-        tempFile.Chmod( 0664 )
+	tempFile.Chmod(0664)
 	tempFile.Write(fileContent)
 	pathArr := strings.Split(tempFile.Name(), "/")
 	tempFilename := pathArr[len(pathArr)-1]
@@ -129,7 +129,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 
 	modified := content.Value("modified").(int)
 	name := util.NameToIdentifier(content.GetName()) + "-" + id + "-" + language + "-" + strconv.Itoa(modified)
-	pdfFile, err := htmlToPDF(string(data), name)
+	pdfFile, err := HtmlToPDF(string(data), name)
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -138,23 +138,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/var/"+pdfFile, 302)
 }
 
-func HtmlToPDF(w http.ResponseWriter, r *http.Request) {
-	//todo: permission check
-	html := r.PostFormValue("html")
-	name := r.PostFormValue("name")
-	if html == "" || name == "" {
-		HandleError(errors.New("empty data"), w)
-		return
-	}
-	result, err := htmlToPDF(html, name)
-	if err != nil {
-		HandleError(err, w)
-		return
-	}
-	w.Write([]byte("var/" + result))
-}
-
-func htmlToPDF(html string, name string) (string, error) {
+func HtmlToPDF(html string, name string) (string, error) {
 	tempFolder := util.GetConfig("general", "var_folder", "dm")
 	targetName := "/pdf/" + name + ".pdf"
 	target := tempFolder + targetName
