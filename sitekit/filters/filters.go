@@ -132,6 +132,12 @@ func dmNow(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error)
 	return pongo2.AsValue(result), nil
 }
 
+func dmSplit(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	result := strings.Split(in.String(), param.String())
+
+	return pongo2.AsValue(result), nil
+}
+
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
@@ -144,5 +150,6 @@ func init() {
 	pongo2.RegisterFilter("dm_str", dmStr)
 	pongo2.RegisterFilter("dm_value", dmValue)
 	pongo2.RegisterFilter("dm_now", dmNow)
+        pongo2.RegisterFilter("dm_split", dmSplit)
 
 }
