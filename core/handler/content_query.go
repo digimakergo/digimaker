@@ -281,9 +281,9 @@ func (cq ContentQuery) Version(contentType string, condition db.Condition) (cont
 	for name := range def.FieldMap {
 		value := obj[name]
 		if value != nil {
-			valueStr, _ := json.Marshal(value)
+			//valueStr, _ := json.Marshal(value)
 			fHandler := fieldtype.GetHandler(def.FieldMap[name].FieldType)
-			fieldValue := fHandler.NewValue(string(valueStr))
+			fieldValue := fHandler.NewValue(value)
 			content.SetValue(name, fieldValue)
 		}
 	}
