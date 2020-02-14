@@ -131,7 +131,9 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
 		[]string{}, &newVersion)
 	if newVersion.ID == 0 || newVersion.ID > 0 && newVersion.Created == createdTime {
-		HandleError(errors.New("Not saved."), w)
+		message := "Not saved. new id:" + strconv.Itoa(newVersion.ID) + " .new saved time:" +
+			strconv.Itoa(newVersion.Created) + ", should saved time:" + strconv.Itoa(createdTime)
+		HandleError(errors.New(message), w)
 		return
 	}
 
