@@ -102,7 +102,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 	version := contenttype.Version{}
 	dbHandler := db.DBHanlder()
 	dbHandler.GetEntity(version.TableName(),
-		db.Cond("author", userId).Cond("content_id", id).Cond("content_type", ctype),
+		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
 		[]string{}, &version)
 	if version.ID == 0 {
 		version.ContentType = ctype
@@ -111,7 +111,8 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		version.Version = 0
 	}
 	version.Data = data
-	version.Created = int(time.Now().Unix())
+	createdTime := int(time.Now().Unix())
+	version.Created = createdTime
 	tx, _ := db.CreateTx()
 	if err != nil {
 		HandleError(err, w)
@@ -124,7 +125,17 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(strconv.Itoa(version.Created)))
+	//refetch to make sure it's saved
+	newVersion := contenttype.Version{}
+	dbHandler.GetEntity(version.TableName(),
+		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
+		[]string{}, &newVersion)
+	if newVersion.ID == 0 || newVersion.ID > 0 && newVersion.Created == createdTime {
+		HandleError(errors.New("Not saved."), w)
+		return
+	}
+
+	w.Write([]byte(strconv.Itoa(newVersion.Created)))
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
