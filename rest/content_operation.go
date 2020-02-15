@@ -66,6 +66,12 @@ func New(w http.ResponseWriter, r *http.Request) {
 }
 
 func SaveDraft(w http.ResponseWriter, r *http.Request) {
+	//todo: more permission check
+	userId := CheckUserID(r.Context(), w)
+	if userId == 0 {
+		return
+	}
+
 	params := mux.Vars(r)
 	ctype := params["type"]
 	_, err := contenttype.GetDefinition(ctype)
@@ -90,12 +96,6 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 	data, ok := inputs["data"]
 	if !ok {
 		HandleError(errors.New("need data"), w)
-		return
-	}
-
-	//todo: more permission check
-	userId := CheckUserID(r.Context(), w)
-	if userId == 0 {
 		return
 	}
 
