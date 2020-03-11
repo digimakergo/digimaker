@@ -43,4 +43,5 @@ func (t TextHandler) IsEmpty(input interface{}) bool {
 
 func init() {
 	RegisterHandler("text", TextHandler{})
+        RegisterHandler("eth_indicator", TextHandler{})
 }

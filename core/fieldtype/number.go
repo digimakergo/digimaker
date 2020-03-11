@@ -5,6 +5,7 @@
 package fieldtype
 
 import (
+        "fmt"
 	"strconv"
 	"strings"
 )
@@ -29,9 +30,9 @@ type NumberHandler struct{}
 
 func (t NumberHandler) Validate(input interface{}) (bool, string) {
 	//todo: support int
-	s := input.(string)
+	s := fmt.Sprint(input)
 	if s != "" {
-		_, err := strconv.Atoi(input.(string))
+		_, err := strconv.Atoi(s)
 		if err != nil {
 			return false, s + " is not a number."
 		}
@@ -41,12 +42,12 @@ func (t NumberHandler) Validate(input interface{}) (bool, string) {
 
 func (t NumberHandler) NewValueFromInput(input interface{}) interface{} {
 	r := NumberField{}
-	r.Scan(input.(string))
+	r.Scan(fmt.Sprint(input))
 	return r
 }
 
 func (t NumberHandler) IsEmpty(input interface{}) bool {
-	if strings.TrimSpace(input.(string)) == "" {
+	if strings.TrimSpace(fmt.Sprint(input)) == "" {
 		return true
 	}
 	return false

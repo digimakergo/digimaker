@@ -5,6 +5,7 @@
 package fieldtype
 
 import (
+        "fmt"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ type RadioHandler struct{}
 
 func (t RadioHandler) Validate(input interface{}) (bool, string) {
 	//todo: support int
-	s := input.(string)
+	s := fmt.Sprint(input)
 	if s != "" {
 		if s != "-1" && s != "1" && s != "0" {
 			return false, "Invalid radio value."
@@ -39,12 +40,12 @@ func (t RadioHandler) Validate(input interface{}) (bool, string) {
 
 func (t RadioHandler) NewValueFromInput(input interface{}) interface{} {
 	r := RadioField{}
-	r.Scan(input.(string))
+	r.Scan(fmt.Sprint(input))
 	return r
 }
 
 func (t RadioHandler) IsEmpty(input interface{}) bool {
-	if strings.TrimSpace(input.(string)) == "" {
+	if strings.TrimSpace(fmt.Sprint(input)) == "" {
 		return true
 	}
 	return false
