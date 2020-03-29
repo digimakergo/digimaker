@@ -292,6 +292,18 @@ func (cq ContentQuery) Version(contentType string, condition db.Condition) (cont
 	return version, content, nil
 }
 
+func (cq ContentQuery) GetUser(id int) (contenttype.ContentTyper, error) {
+	querier := Querier()
+	user, err := querier.FetchByContentID("user", id)
+	return user, err
+}
+
+func (cq ContentQuery) GetContentAuthor(content contenttype.ContentTyper) (contenttype.ContentTyper, error) {
+	authorID := content.Value("author").(int)
+	user, err := cq.GetUser(authorID)
+	return user, err
+}
+
 //todo: use method instead of global variable
 var querier ContentQuery = ContentQuery{}
 
