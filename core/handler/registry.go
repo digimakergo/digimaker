@@ -6,6 +6,7 @@ package handler
 
 import (
 	"dm/core/util"
+	"dm/core/util/log"
 	"strconv"
 	"strings"
 )
@@ -25,7 +26,7 @@ func GetContentTypeHandler(contentType string) ContentTypeHandler {
 var operationHandlerList []OperationHandler = []OperationHandler{}
 
 func RegisterOperationHandler(handler OperationHandler) {
-	util.Log("system", "Registering operation handler "+handler.Identifier)
+	log.Info("Registering operation handler " + handler.Identifier)
 	operationHandlerList = append(operationHandlerList, handler)
 }
 

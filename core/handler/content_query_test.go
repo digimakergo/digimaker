@@ -8,7 +8,6 @@ import (
 	"dm/admin/entity"
 	"dm/core/db"
 	"dm/core/util"
-	"dm/core/util/debug"
 	"fmt"
 	"strconv"
 	"testing"

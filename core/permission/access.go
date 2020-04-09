@@ -7,9 +7,8 @@ import (
 	"context"
 	"dm/core/contenttype"
 	"dm/core/util"
-	"dm/core/util/debug"
+	"dm/core/util/log"
 	"fmt"
-	"log"
 	"strconv"
 )
 
@@ -17,25 +16,25 @@ import (
 func HasAccessTo(userID int, operation string, realData map[string]interface{}, context context.Context) bool {
 	//get permission limits
 	limits, err := GetUserLimits(userID, operation, context)
-	debug.Debug(context, "Limits: "+fmt.Sprintln(limits), "permission")
+	log.Debug("Limits: "+fmt.Sprintln(limits), "permission")
 
 	if err != nil {
-		log.Println(err.Error())
+		log.Error(err.Error(), "permission")
 		return false
 	}
 
 	//match limits
 	result := false
 	for i, limit := range limits {
-		debug.Debug(context, "Matching limit "+strconv.Itoa(i+1)+"/"+strconv.Itoa(len(limits)), "permission")
+		log.Debug("Matching limit "+strconv.Itoa(i+1)+"/"+strconv.Itoa(len(limits)), "permission")
 		policyResult, matchLog := util.MatchCondition(limit, realData)
 		for _, item := range matchLog {
-			debug.Debug(context, item, "permission")
+			log.Debug(item, "permission")
 		}
 
 		if policyResult {
 			result = true
-			debug.Debug(context, "Policy matched.", "permission")
+			log.Debug("Policy matched.", "permission")
 			break
 		}
 	}

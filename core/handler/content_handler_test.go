@@ -6,7 +6,6 @@ import (
 	"dm/core"
 	"dm/core/contenttype"
 	"dm/core/db"
-	"dm/core/util/debug"
 	"fmt"
 	"testing"
 	"time"

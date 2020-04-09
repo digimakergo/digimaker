@@ -6,6 +6,7 @@ import (
 	"dm/core/contenttype"
 	"dm/core/db"
 	"dm/core/util"
+	"dm/core/util/log"
 	"encoding/json"
 	"strconv"
 
@@ -37,13 +38,13 @@ func (mh *ImportHandler) ImportAContent(contentType string, cuid string, parentU
 	json.Unmarshal(contentData, content)
 
 	content.SetValue("cid", 0)
-	util.Log("import", "Saving content first.")
+	log.Debug("Saving content first.", "import")
 	err = content.Store(tx)
 	if err != nil {
 		tx.Rollback()
 		return errors.Wrap(err, "Can not saved. Rolled back.")
 	}
-	util.Log("contenthandler.import", "Content saved. cuid: "+content.Value("cuid").(string)+", id: "+strconv.Itoa(content.GetCID()))
+	log.Debug("Content saved. cuid: "+content.Value("cuid").(string)+", id: "+strconv.Itoa(content.GetCID()), "contenthandler.import")
 
 	parent, err := Querier().FetchByUID(parentUID)
 	if parent == nil {
@@ -56,12 +57,12 @@ func (mh *ImportHandler) ImportAContent(contentType string, cuid string, parentU
 		location.ParentID = parentID
 		location.ContentID = content.GetCID()
 		err = location.Store(tx)
-		util.Log("contenthandler.import", "Saving location.")
+		log.Debug("Saving location.", "contenthandler.import")
 		if err != nil {
 			tx.Rollback()
 			return errors.Wrap(err, "Can not save location")
 		}
-		util.Log("contenthandler.import", "Location saved. uid: "+location.UID+", new id:"+strconv.Itoa(location.ID))
+		log.Debug("Location saved. uid: "+location.UID+", new id:"+strconv.Itoa(location.ID), "contenthandler.import")
 	} else {
 		hasParent := util.Contains(content.IdentifierList(), "parent_id")
 		if hasParent {
@@ -79,7 +80,7 @@ func (mh *ImportHandler) ImportAContent(contentType string, cuid string, parentU
 	//TODO: udpate main id where main_uid is not the same as uid
 
 	tx.Commit()
-	util.Log("contenthandler.import", "Committed")
+	log.Debug("Committed", "contenthandler.import")
 	return nil
 }
 

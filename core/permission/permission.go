@@ -9,7 +9,7 @@ import (
 	"dm/core/contenttype"
 	"dm/core/db"
 	"dm/core/util"
-	"dm/core/util/debug"
+	"dm/core/util/log"
 	"fmt"
 	"strconv"
 	"strings"
@@ -82,13 +82,13 @@ func GetUserPolicies(userID int) ([]RolePolicy, error) {
 //Get user's limits
 func GetUserLimits(userID int, operation string, context context.Context) ([]map[string]interface{}, error) {
 	policyList, err := GetUserPolicies(userID)
-	debug.Debug(context, "Got policy list: "+fmt.Sprint(policyList), "permission")
+	log.Debug("Got policy list: "+fmt.Sprint(policyList), "permission")
 	if err != nil {
 		return nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
 	}
 	//todo: cache limits to user, and cache anoymous globally.
 	result := GetLimitsFromPolicy(policyList, operation)
-	debug.Debug(context, "Got limits:"+fmt.Sprint(result), "permission")
+	log.Debug("Got limits:"+fmt.Sprint(result), "permission")
 	return result, nil
 }
 

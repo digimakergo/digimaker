@@ -4,13 +4,11 @@
 package rest
 
 import (
-	"context"
 	"dm/core/contenttype"
 	"dm/core/db"
 	"dm/core/handler"
 	"dm/core/permission"
 	"dm/core/util"
-	"dm/core/util/debug"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -21,9 +19,6 @@ import (
 )
 
 func GetContent(w http.ResponseWriter, r *http.Request) {
-	ctx := debug.Init(r.Context())
-	r = r.WithContext(ctx)
-
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
 		return
@@ -49,6 +44,7 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 		data, _ := json.Marshal(content) //todo: use export for same serilization?
 		w.Write(data)
 	}
+
 }
 
 func GetVersion(w http.ResponseWriter, r *http.Request) {
@@ -128,7 +124,6 @@ func Children(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		//todo: handle
 	}
-	context := debug.Init(context.Background())
 	cxt := r.Context()
 	userid := CheckUserID(cxt, w)
 	if userid == 0 {
@@ -157,7 +152,7 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		limitArr = []int{offset, limit}
 	}
 
-	list, count, err := querier.Children(rootContent, contenttype, userid, condition, limitArr, sortbyArr, true, context)
+	list, count, err := querier.Children(rootContent, contenttype, userid, condition, limitArr, sortbyArr, true, cxt)
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -187,12 +182,11 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		//todo: handle
 	}
 
-	context := debug.Init(context.Background())
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
 		return
 	}
-	tree, err := querier.SubTree(rootContent, 5, "folder,role,usergroup", userID, []string{"id"}, context)
+	tree, err := querier.SubTree(rootContent, 5, "folder,role,usergroup", userID, []string{"id"}, r.Context())
 	if err != nil {
 		//todo: handle error
 		fmt.Println(err.Error())

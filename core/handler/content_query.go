@@ -7,6 +7,7 @@ import (
 	"dm/core/fieldtype"
 	"dm/core/permission"
 	"dm/core/util"
+	"dm/core/util/log"
 	"encoding/json"
 	"strconv"
 	"strings"
@@ -242,7 +243,7 @@ func (cq ContentQuery) Fill(contentType string, condition db.Condition, limit []
 	countResult, err := dbhandler.GetByFields(contentType, tableName, condition, limit, sortby, content, hasCount)
 	if err != nil {
 		message := "[List]Content Query error"
-		util.Error(message, err.Error())
+		log.Error(message+err.Error(), "")
 		return errors.Wrap(err, message)
 	}
 	*count = countResult

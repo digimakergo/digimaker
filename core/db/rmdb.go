@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"dm/core/util"
+	"dm/core/util/log"
 	"fmt"
 	"strconv"
 	"strings"
@@ -92,12 +93,12 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
                      GROUP BY location.id
 										 ` + sortbyStr + " " + limitStr
 
-	util.Debug("db", sqlStr)
+	log.Debug(sqlStr+","+fmt.Sprintln(values), "db")
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			util.Warning("db", err.Error())
+			log.Warning(err.Error(), "GetByFields")
 		} else {
 			message := "[RMDB.GetByFields]Error when query. sql - " + sqlStr
 			return -1, errors.Wrap(err, message)
@@ -159,7 +160,7 @@ func (r *RMDB) getSortBy(sortby []string) (string, error) {
 func (*RMDB) Count(tablename string, condition Condition) (int, error) {
 	conditions, values := BuildCondition(condition)
 	sqlStr := "SELECT COUNT(*) AS count FROM " + tablename + " WHERE " + conditions
-	util.Debug("db", sqlStr)
+	log.Debug(sqlStr, "db")
 	db, err := DB()
 	if err != nil {
 		return 0, errors.Wrap(err, "[RMDB.Count]Error when connecting db.")
@@ -183,14 +184,14 @@ func (r *RMDB) GetEntity(tablename string, condition Condition, sortby []string,
 		return err
 	}
 	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions + " " + sortbyStr
-	util.Debug("db", sqlStr)
+	log.Debug(sqlStr, "db")
 	db, err := DB()
 	if err != nil {
 		return errors.Wrap(err, "[RMDB.GetEntity]Error when connecting db.")
 	}
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
 	if err == sql.ErrNoRows {
-		util.Warning("db", err.Error())
+		log.Warning(err.Error(), "GetEntity")
 	} else {
 		return errors.Wrap(err, "[RMDB.GetEntity]Error when query.")
 	}
@@ -220,7 +221,7 @@ func (RMDB) Insert(tablename string, values map[string]interface{}, transation .
 	sqlStr += ")"
 	valuesString += ")"
 	sqlStr = sqlStr + " " + valuesString
-	util.Debug("db", sqlStr)
+	log.Debug(sqlStr, "db")
 
 	var result sql.Result
 	var error error
@@ -245,7 +246,7 @@ func (RMDB) Insert(tablename string, values map[string]interface{}, transation .
 		return 0, errors.Wrap(err, "[RBDM.Insert]Error when inserting. sql - "+sqlStr)
 	}
 
-	util.Debug("db", "Insert results in id: "+strconv.FormatInt(id, 10))
+	log.Debug("Insert results in id: "+strconv.FormatInt(id, 10), "db")
 
 	return int(id), nil
 }
@@ -265,7 +266,7 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition Co
 	valueParameters = append(valueParameters, conditionValues...)
 	sqlStr += " WHERE " + conditionString
 
-	util.Debug("db", sqlStr)
+	log.Debug(sqlStr, "db")
 
 	var result sql.Result
 	var error error
@@ -282,7 +283,7 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition Co
 		return errors.Wrap(error, "[RMDB.Update]Error when updating. sql - "+sqlStr)
 	}
 	resultRows, _ := result.RowsAffected()
-	util.Debug("db", "Updated rows:"+strconv.FormatInt(resultRows, 10))
+	log.Debug("Updated rows:"+strconv.FormatInt(resultRows, 10), "db")
 	return nil
 }
 
@@ -291,7 +292,7 @@ func (*RMDB) Delete(tableName string, condition Condition, transation ...*sql.Tx
 	conditionString, conditionValues := BuildCondition(condition)
 	sqlStr := "DELETE FROM " + tableName + " WHERE " + conditionString
 
-	util.Debug("db", sqlStr)
+	log.Debug(sqlStr, "db")
 
 	var result sql.Result
 	var error error
@@ -309,7 +310,7 @@ func (*RMDB) Delete(tableName string, condition Condition, transation ...*sql.Tx
 		return errors.Wrap(error, "[RMDB.Delete]Error when deleting. sql - "+sqlStr)
 	}
 	resultRows, _ := result.RowsAffected()
-	util.Debug("db", "Deleted rows:"+strconv.FormatInt(resultRows, 10))
+	log.Debug("Deleted rows:"+strconv.FormatInt(resultRows, 10), "db")
 	return nil
 }
 

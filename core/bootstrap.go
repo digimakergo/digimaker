@@ -5,10 +5,11 @@ import (
 	"dm/core/fieldtype"
 	"dm/core/permission"
 	"dm/core/util"
+	"dm/core/util/log"
 )
 
 func Bootstrap(packageName string) bool {
-	util.Log("system", "Starting from "+packageName)
+	log.Info("Starting from " + packageName)
 	util.SetPackageName(packageName)
 	err := contenttype.LoadDefinition()
 	if err != nil {

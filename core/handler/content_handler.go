@@ -15,7 +15,7 @@ import (
 	"dm/core/fieldtype"
 	"dm/core/permission"
 	"dm/core/util"
-	"dm/core/util/debug"
+	"dm/core/util/log"
 	"strconv"
 	"strings"
 	"time"
@@ -74,7 +74,7 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 	//validate from contenttype handler
 	contentTypeHanlder := GetContentTypeHandler(contentType)
 	if contentTypeHanlder != nil {
-		debug.Debug(ch.Context, "Validating from content type handler", "contenthandler.validate")
+		log.Debug("Validating from content type handler", "contenthandler.validate", ch.Context)
 		contentTypeHanlder.Validate(inputs, &result)
 	}
 	return result.Passed(), result
@@ -84,14 +84,14 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 //If it's no-location content, ingore the parentID.
 func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, userId int, tx *sql.Tx, parentID ...int) error {
 	if content.GetCID() == 0 {
-		debug.Debug(ch.Context, "Content is new.", "contenthandler.StoreCreatedContent")
+		log.Debug("Content is new.", "contenthandler.StoreCreatedContent", ch.Context)
 	}
 	err := content.Store(tx)
 	if err != nil {
 		return err
 	}
 
-	debug.Debug(ch.Context, "Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "contenthandler.StoreCreatedContent")
+	log.Debug("Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "contenthandler.StoreCreatedContent", ch.Context)
 
 	//todo: deal with relations
 
@@ -132,7 +132,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		}
 
 		//todo: set location to the content
-		debug.Debug(ch.Context, "Location is saved. location id :"+strconv.Itoa(location.ID)+". ", "contenthandler.StoreCreatedContent")
+		log.Debug("Location is saved. location id :"+strconv.Itoa(location.ID)+". ", "contenthandler.StoreCreatedContent", ch.Context)
 	}
 	return nil
 }
@@ -180,8 +180,8 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	content.SetValue("modified", now)
 	content.SetValue("cuid", util.GenerateUID())
 
-	debug.StartTiming(ch.Context, "database", "contenthandler.create")
-	debug.Debug(ch.Context, "Validation passed. Start saving content.", "contenthandler.Create")
+	log.StartTiming(ch.Context, "contenthandler_create.database")
+	log.Debug("Validation passed. Start saving content.", "contenthandler.Create", ch.Context)
 	//Create transaction
 	database, err := db.DB()
 	if err != nil {
@@ -195,11 +195,11 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	//call content type handler
 	contentTypeHandler := GetContentTypeHandler(contentType)
 	if contentTypeHandler != nil {
-		debug.Debug(ch.Context, "Calling handler for "+contentType, "contenthandler.create")
+		log.Debug("Calling handler for "+contentType, "contenthandler.create", ch.Context)
 		err := contentTypeHandler.New(content, tx, parentID)
 		if err != nil {
 			tx.Rollback()
-			debug.Error(ch.Context, "Error from callback: "+err.Error(), "contenthandler.create")
+			log.Error("Error from callback: "+err.Error(), "contenthandler.create", ch.Context)
 			return nil, ValidationResult{}, err
 		}
 	}
@@ -212,19 +212,19 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	err = ch.storeCreatedContent(content, userId, tx, parentID)
 	if err != nil {
 		tx.Rollback()
-		debug.Error(ch.Context, err.Error(), "contenthandler.Create")
+		log.Error(err.Error(), "contenthandler.Create", ch.Context)
 		return nil, ValidationResult{}, errors.Wrap(err, "Create content error")
 	}
 
 	//Save version if needed
 	if contentDefinition.HasVersion {
-		debug.Debug(ch.Context, "creating version", "contenthandler.Create")
+		log.Debug("creating version", "contenthandler.Create", ch.Context)
 		_, err = ch.CreateVersion(content, versionIfNeeded, tx)
 		if err != nil {
-			debug.Error(ch.Context, err.Error(), "contenthandler.Create")
+			log.Error(err.Error(), "contenthandler.Create", ch.Context)
 			return nil, ValidationResult{}, errors.Wrap(err, "Create version error.")
 		}
-		debug.Debug(ch.Context, "Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create")
+		log.Debug("Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create", ch.Context)
 	}
 
 	//Invoke callback
@@ -245,13 +245,13 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
-		debug.Error(ch.Context, "Commit error: "+err.Error(), "contenthandler.create")
+		log.Error("Commit error: "+err.Error(), "contenthandler.create", ch.Context)
 		return nil, ValidationResult{}, errors.Wrap(err, "Commit error.")
 	}
 
-	debug.Debug(ch.Context, "Data committed.", "contenthandler.create")
+	log.Debug("Data committed.", "contenthandler.create", ch.Context)
 
-	debug.EndTiming(ch.Context, "database", "contenthandler.create")
+	log.TickTiming(ch.Context, "contenthandler_create.database")
 	return content, ValidationResult{}, nil
 }
 
@@ -265,23 +265,23 @@ func (ch ContentHandler) InvokeCallback(event string, stopOnError bool, matchDat
 		for _, operationHandler := range operationHandlerList {
 			identifierList = append(identifierList, operationHandler.Identifier)
 		}
-		debug.Debug(ch.Context, "Matched callbacks: "+strings.Join(identifierList, ","), "contenthandler.invoke_callback")
+		log.Debug("Matched callbacks: "+strings.Join(identifierList, ","), "contenthandler.invoke_callback", ch.Context)
 	} else {
-		debug.Debug(ch.Context, "No callbacks matched.", "contenthandler.invoke_callback")
+		log.Debug("No callbacks matched.", "contenthandler.invoke_callback", ch.Context)
 	}
 
 	for _, info := range matchInfo {
-		debug.Debug(ch.Context, info, "callback_match")
+		log.Debug(info, "callback_match", ch.Context)
 	}
 	for i, operationHandler := range operationHandlerList {
-		debug.Debug(ch.Context, strconv.Itoa(i+1)+"/"+strconv.Itoa(count)+
-			" Invoking operation "+operationHandler.Identifier+" on "+event, "contehandler.invoke_callback")
+		log.Debug(strconv.Itoa(i+1)+"/"+strconv.Itoa(count)+
+			" Invoking operation "+operationHandler.Identifier+" on "+event, "contehandler.invoke_callback", ch.Context)
 		err := operationHandler.Execute(event, content, params...)
 		if err != nil && stopOnError {
-			debug.Error(ch.Context, "Error when invoking operation handler "+operationHandler.Identifier+":"+err.Error(), "contehandler.invoke_callback")
+			log.Error("Error when invoking operation handler "+operationHandler.Identifier+":"+err.Error(), "contehandler.invoke_callback", ch.Context)
 			return err
 		}
-		debug.Debug(ch.Context, "Invoking ended on "+operationHandler.Identifier, "contehandler.invoke_callback")
+		log.Debug("Invoking ended on "+operationHandler.Identifier, "contehandler.invoke_callback", ch.Context)
 	}
 	return nil
 }
@@ -289,7 +289,7 @@ func (ch ContentHandler) InvokeCallback(event string, stopOnError bool, matchDat
 //Create a new version.
 //It doesn't validate version number is increment
 func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, versionNumber int, tx *sql.Tx) (int, error) {
-	debug.Debug(ch.Context, "Creating version: "+strconv.Itoa(versionNumber), "contenthandler.CreateVersion")
+	log.Debug("Creating version: "+strconv.Itoa(versionNumber), "contenthandler.CreateVersion", ch.Context)
 	id := content.GetCID()
 	data, err := contenttype.ContentToJson(content)
 	if err != nil {
@@ -307,7 +307,7 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 		tx.Rollback()
 		return 0, errors.Wrap(err, "Can not save version on contetent id: "+strconv.Itoa(id))
 	}
-	debug.Debug(ch.Context, "Version created.", "contenthandler.CreateVersion")
+	log.Debug("Version created.", "contenthandler.CreateVersion", ch.Context)
 	return version.ID, nil
 }
 
@@ -351,7 +351,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	}
 
 	//Validate
-	debug.Debug(ch.Context, "Validating", "contenthandler.update")
+	log.Debug("Validating", "contenthandler.update", ch.Context)
 	contentType := content.ContentType()
 	contentDef, _ := contenttype.GetDefinition(contentType)
 
@@ -386,25 +386,25 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	//Save new version and set to content
 	if contentDef.HasVersion {
 		version := content.Value("version").(int) + 1
-		debug.Debug(ch.Context, "Creating new version: "+strconv.Itoa(version), "contenthandler.update")
+		log.Debug("Creating new version: "+strconv.Itoa(version), "contenthandler.update", ch.Context)
 		_, err := ch.CreateVersion(content, version, tx)
 		if err != nil {
 			//todo: rollback here not inside.
-			debug.Debug(ch.Context, "Create new version failed: "+err.Error(), "contenthandler.update")
+			log.Debug("Create new version failed: "+err.Error(), "contenthandler.update", ch.Context)
 			return false, ValidationResult{}, errors.Wrap(err, "Can not save version.")
 		}
-		debug.Debug(ch.Context, "New version created", "contenthandler.update")
+		log.Debug("New version created", "contenthandler.update", ch.Context)
 		content.SetValue("version", version)
 	}
 	now := int(time.Now().Unix())
 	content.SetValue("modified", now)
 
 	//Save update content.
-	debug.Debug(ch.Context, "Saving content", "contenthandler.update")
+	log.Debug("Saving content", "contenthandler.update", ch.Context)
 	err = content.Store(tx)
 	if err != nil {
 		tx.Rollback()
-		debug.Debug(ch.Context, "Saving content failed: "+err.Error(), "contenthandler.update")
+		log.Debug("Saving content failed: "+err.Error(), "contenthandler.update", ch.Context)
 		return false, ValidationResult{}, errors.Wrap(err, "Saving content error. ")
 	}
 
@@ -414,14 +414,14 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		location := content.GetLocation()
 		location.Name = GenerateName(content)
 		//todo: location.IdentifierPath =
-		debug.Debug(ch.Context, "Updating location info", "contenthandler.update")
+		log.Debug("Updating location info", "contenthandler.update", ch.Context)
 		err := location.Store(tx)
 		if err != nil {
 			tx.Rollback()
-			debug.Debug(ch.Context, "Updating location failed: "+err.Error(), "contenthandler.update")
+			log.Debug("Updating location failed: "+err.Error(), "contenthandler.update", ch.Context)
 			return false, ValidationResult{}, errors.Wrap(err, "Updating location info error.")
 		}
-		debug.Debug(ch.Context, "Location updated", "contenthandler.update")
+		log.Debug("Location updated", "contenthandler.update", ch.Context)
 	}
 
 	//Invoke callback
@@ -438,11 +438,11 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
 	}
 
-	debug.Debug(ch.Context, "All done. Commitinng.", "contenthandler.update")
+	log.Debug("All done. Commitinng.", "contenthandler.update", ch.Context)
 	err = tx.Commit()
 	if err != nil {
 		tx.Rollback()
-		debug.Error(ch.Context, "Commit error: "+err.Error(), "contenthandler.update")
+		log.Error("Commit error: "+err.Error(), "contenthandler.update", ch.Context)
 		return false, ValidationResult{}, errors.Wrap(err, "Commit error.")
 	}
 
@@ -484,14 +484,14 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 	} else {
 		database, err := db.DB()
 		if err != nil {
-			util.Error(err.Error())
+			log.Error(err.Error(), "", ch.Context)
 			return errors.New("[handler.deleteByContent]Can not create connection.")
 		}
 		tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
 		if err != nil {
 			tx.Rollback()
 			message := "[handler.deleteByContent]Can not create transaction."
-			util.Error(message + err.Error())
+			log.Error(message+err.Error(), "", ch.Context)
 			return errors.New(message)
 		}
 
@@ -503,7 +503,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 			if err != nil {
 				tx.Rollback()
 				message := "[handler.deleteByContent]Can not delete relation."
-				util.Error(message + err.Error())
+				log.Error(message+err.Error(), "", ch.Context)
 				return errors.New(message)
 			}
 		}
@@ -542,7 +542,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 		err = tx.Commit()
 		if err != nil {
 			message := "[handler.deleteByContent]Can not commit."
-			util.Error(message + err.Error())
+			log.Error(message+err.Error(), "", ch.Context)
 			return errors.New(message)
 		}
 

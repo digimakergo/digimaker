@@ -2,7 +2,7 @@
 package contenttype
 
 import (
-	"dm/core/util"
+	"dm/core/util/log"
 )
 
 //todo: use a better name. eg. ContentTypeMethod
@@ -16,8 +16,12 @@ var contenttypeList = map[string]ContentTypeRegister{}
 
 //Register a content type and store in global variable
 func Register(contentType string, register ContentTypeRegister) {
-	util.Log("system", "Registering content type "+contentType)
-	contenttypeList[contentType] = register
+	log.Info("Registering content type " + contentType)
+	if _, ok := contenttypeList[contentType]; !ok {
+		contenttypeList[contentType] = register
+	} else {
+		log.Info(contentType + " has been registered. Ignore.")
+	}
 }
 
 //Create new list.eg &[]Article{}

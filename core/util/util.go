@@ -5,10 +5,12 @@
 package util
 
 import (
+	"dm/core/util/log"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/smtp"
 	"os"
 	"regexp"
@@ -23,14 +25,14 @@ import (
 func UnmarshalData(filepath string, v interface{}) error {
 	file, err := os.Open(filepath)
 	if err != nil {
-		Error("Error when loading content definition: " + err.Error())
+		log.Error("Error when loading content definition: "+err.Error(), "")
 		return err
 	}
 	byteValue, _ := ioutil.ReadAll(file)
 
 	err = json.Unmarshal(byteValue, v)
 	if err != nil {
-		Error("Error when loading definition " + filepath + ": " + err.Error())
+		log.Error("Error when loading definition "+filepath+": "+err.Error(), "")
 		return err
 	}
 
@@ -246,4 +248,12 @@ func SendMail(to []string, subject, body string) error {
 		return err
 	}
 	return c.Quit()
+}
+
+func GetIP(r *http.Request) string {
+	forwarded := r.Header.Get("X-FORWARDED-FOR")
+	if forwarded != "" {
+		return forwarded
+	}
+	return r.RemoteAddr
 }
