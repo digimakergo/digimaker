@@ -20,7 +20,7 @@ func Register(contentType string, register ContentTypeRegister) {
 	if _, ok := contenttypeList[contentType]; !ok {
 		contenttypeList[contentType] = register
 	} else {
-		log.Info(contentType + " has been registered. Ignore.")
+		log.Warning(contentType+" has been registered. Ignore.", "system")
 	}
 }
 
