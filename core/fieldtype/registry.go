@@ -5,6 +5,7 @@ package fieldtype
 
 import (
 	"dm/core/util"
+	"dm/core/log"
 	"fmt"
 )
 
@@ -13,7 +14,7 @@ import (
 var handlerRegistry = map[string]FieldHandler{}
 
 func RegisterHandler(identifier string, handler FieldtypeHandler) {
-	util.Log("system", "Registering handler for field type "+identifier)
+	log.Info("Registering handler for field type " + identifier)
 	f := FieldHandler{}
 	f.Fieldtype = identifier
 	f.handler = handler

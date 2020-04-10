@@ -71,6 +71,8 @@ func combineExpression(operator string, input1 Condition, input2 Condition, more
 	return condition
 }
 
+//todo: have a empty condition like db.NewCond
+
 func Cond(fieldString string, value interface{}) Condition {
 	condition := new(Condition)
 	condition.Logic = ""

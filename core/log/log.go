@@ -6,6 +6,7 @@ import (
 	"context"
 	"io/ioutil"
 	"os"
+	"strconv"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -41,10 +42,9 @@ func Error(message string, label string, ctx ...context.Context) {
 func Debug(message interface{}, category string, ctx ...context.Context) {
 	if len(ctx) == 1 {
 		logger := GetLogger(ctx[0])
-		logger.Debug(message, category)
-		logger.Debug("FFGG")
+		logger.Debug(message, "["+category+"]")
 	} else {
-		log.Debug(message, category)
+		log.Debug(message, "["+category+"]")
 	}
 }
 
@@ -78,8 +78,9 @@ func GetTimer(ctx context.Context) TimerCategory {
 
 func LogTiming(ctx context.Context) {
 	timer := GetTimer(ctx)
-	for key, item := range timer {
-		Debug(item, key, ctx)
+	for category, _ := range timer {
+		duration, _ := GetDuration(ctx, category)
+		Debug(strconv.Itoa(duration)+"ms", category, ctx)
 	}
 }
 

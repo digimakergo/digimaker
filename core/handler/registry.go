@@ -6,7 +6,7 @@ package handler
 
 import (
 	"dm/core/util"
-	"dm/core/util/log"
+	"dm/core/log"
 	"strconv"
 	"strings"
 )
