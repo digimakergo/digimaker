@@ -1,3 +1,5 @@
+//Author xc, Created on 2020-04-09 19:00
+//{COPYRIGHTS}
 package log
 
 import (
