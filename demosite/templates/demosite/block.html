@@ -1,9 +1,0 @@
-<div class="block">
-    {%include "inline-edit.html" with content=content%}
-    <div class="title">
-        <a href="{{niceurl(content)}}"><h3>{{content.Name}}</h3></a>
-    </div>
-    <div class="summary">
-        <a href="{{niceurl(content)}}"><h3>{{content.Summary.Data()|safe}}</h3></a>
-    </div>
-</div>
