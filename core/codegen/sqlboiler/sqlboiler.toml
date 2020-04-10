@@ -3,22 +3,21 @@
 ##
 
 
-#
-# under this folder(sqlboiler), run <path of sqlboiler under bin> <path of mysql driver under bin>
-# core contenttype/*.go to target
+# run <path of sqlboiler under bin> <path of mysql driver under bin>
 
 pkgname = "contenttype"
 output = "contenttype"
 no-tests = "true"
 templates = [
-  "../../../../../volatiletech/sqlboiler/templates",
+  "../../../../volatiletech/sqlboiler/templates",
   "core/templates"
 ]
 
 [mysql]
-user = "dev"
-pass = "test123"
-dbname = "dev_emf"
+host = "127.0.0.1"
+user = "eth"
+pass = "D!g!m@ker"
+dbname = "eth"
 sslmode = "false"
 whitelist = ['dm_relation','dm_version']
 
