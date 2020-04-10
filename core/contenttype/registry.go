@@ -2,7 +2,7 @@
 package contenttype
 
 import (
-	"dm/core/log"
+	"github.com/xc/digimaker/core/log"
 )
 
 //todo: use a better name. eg. ContentTypeMethod

@@ -6,8 +6,8 @@ package handlers
 
 import (
 	"database/sql"
-	"dm/core/contenttype"
-	"dm/core/handler"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/handler"
 )
 
 type ImageHandler struct {

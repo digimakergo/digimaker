@@ -4,7 +4,7 @@
 package util
 
 import (
-	"dm/core/log"
+	"github.com/xc/digimaker/core/log"
 	"os"
 
 	"github.com/spf13/viper"

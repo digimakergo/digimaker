@@ -4,8 +4,8 @@
 package fieldtype
 
 import (
-	"dm/core/util"
-	"dm/core/log"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/core/log"
 	"fmt"
 )
 

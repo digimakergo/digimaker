@@ -5,13 +5,13 @@ package entity
 
 import (
     "database/sql"
-    "dm/core/db"
-    "dm/core/contenttype"
-	"dm/core/fieldtype"
+    "github.com/xc/digimaker/core/db"
+    "github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/fieldtype"
     {{if .settings.HasLocation}}
-    "dm/core/util"
+    "github.com/xc/digimaker/core/util"
     {{end}}
-	. "dm/core/db"
+	. "github.com/xc/digimaker/core/db"
 )
 
 {{$struct_name :=.name|UpperName}}

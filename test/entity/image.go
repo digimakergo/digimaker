@@ -5,11 +5,11 @@ package entity
 
 import (
     "database/sql"
-    "dm/core/db"
-    "dm/core/contenttype"
-	"dm/core/fieldtype"
+    "github.com/xc/digimaker/core/db"
+    "github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/fieldtype"
     
-	. "dm/core/db"
+	. "github.com/xc/digimaker/core/db"
 )
 
 

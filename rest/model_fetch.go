@@ -3,7 +3,7 @@
 package rest
 
 import (
-	"dm/core/contenttype"
+	"github.com/xc/digimaker/core/contenttype"
 	"encoding/json"
 	"net/http"
 	"strings"

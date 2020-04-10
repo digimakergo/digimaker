@@ -1,7 +1,7 @@
 package sitekit
 
 import (
-	"dm/core/util"
+	"github.com/xc/digimaker/core/util"
 	"errors"
 	"net/http"
 

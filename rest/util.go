@@ -4,8 +4,8 @@
 package rest
 
 import (
-	"dm/core/handler"
-	"dm/core/util"
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/util"
 	"errors"
 	"io/ioutil"
 	"log"
@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"strings"
 
-	_ "dm/sitekit/filters"
+	_ "github.com/xc/digimaker/sitekit/filters"
 
 	"github.com/gorilla/mux"
 	pongo2 "gopkg.in/flosch/pongo2.v2"

@@ -5,8 +5,8 @@
 package handler
 
 import (
-	"dm/core/util"
-	"dm/core/log"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/core/log"
 	"strconv"
 	"strings"
 )

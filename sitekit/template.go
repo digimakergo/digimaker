@@ -1,8 +1,8 @@
 package sitekit
 
 import (
-	"dm/core/contenttype"
-	"dm/core/util"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/util"
 	"fmt"
 )
 

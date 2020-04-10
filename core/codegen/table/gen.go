@@ -1,9 +1,9 @@
 package main
 
 import (
-	"dm/core/contenttype"
-	"dm/core/fieldtype"
-	"dm/core/util"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/util"
 	"errors"
 	"fmt"
 	"os"

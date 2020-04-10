@@ -5,7 +5,7 @@
 package util
 
 import (
-	"dm/core/log"
+	"github.com/xc/digimaker/core/log"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"

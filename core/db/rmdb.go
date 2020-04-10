@@ -5,8 +5,8 @@ package db
 import (
 	"context"
 	"database/sql"
-	"dm/core/util"
-	"dm/core/log"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/core/log"
 	"fmt"
 	"strconv"
 	"strings"

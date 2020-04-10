@@ -3,7 +3,7 @@
 package handler
 
 import (
-	"dm/core/contenttype"
+	"github.com/xc/digimaker/core/contenttype"
 	"fmt"
 	"testing"
 )

@@ -5,9 +5,9 @@ package contenttype
 
 import (
 	"database/sql"
-	"dm/core/db"
-	. "dm/core/db"
-	"dm/core/util"
+	"github.com/xc/digimaker/core/db"
+	. "github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/util"
 	"strings"
 )
 

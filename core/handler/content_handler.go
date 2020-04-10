@@ -10,17 +10,17 @@ This is a parent struct which consits of location and the content itself(eg. art
 import (
 	"context"
 	"database/sql"
-	"dm/core/contenttype"
-	"dm/core/db"
-	"dm/core/fieldtype"
-	"dm/core/permission"
-	"dm/core/util"
-	"dm/core/log"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/permission"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/core/log"
 	"strconv"
 	"strings"
 	"time"
 
-	. "dm/core/db"
+	. "github.com/xc/digimaker/core/db"
 
 	"github.com/pkg/errors"
 )

@@ -2,10 +2,10 @@ package handler
 
 import (
 	"context"
-	"dm/admin/entity"
-	"dm/core"
-	"dm/core/contenttype"
-	"dm/core/db"
+	"github.com/xc/digimaker/admin/entity"
+	"github.com/xc/digimaker/core"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
 	"fmt"
 	"testing"
 	"time"

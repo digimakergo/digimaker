@@ -1,12 +1,12 @@
 package rest
 
 import (
-	"dm/core/db"
-	"dm/core/fieldtype"
-	"dm/core/handler"
-	"dm/core/permission"
-	"dm/core/util"
-	"dm/eth/entity"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/permission"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/eth/entity"
 	"encoding/json"
 	"errors"
 	"fmt"

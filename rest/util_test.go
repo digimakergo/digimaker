@@ -1,15 +1,15 @@
 package rest
 
 import (
-	"dm/core"
-	_ "dm/eth/entity"
+	"github.com/xc/digimaker/core"
+	_ "github.com/xc/digimaker/eth/entity"
 	"fmt"
 	"testing"
 )
 
 func TestMain(m *testing.M) {
 
-	core.Bootstrap("dm/eth")
+	core.Bootstrap("github.com/xc/digimaker/eth")
 	fmt.Println("Test starting..")
 	m.Run()
 }

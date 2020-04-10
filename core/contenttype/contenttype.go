@@ -4,8 +4,8 @@
 package contenttype
 
 import (
-	"dm/core/fieldtype"
-	"dm/core/util"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/util"
 	"encoding/json"
 	"errors"
 	"log"

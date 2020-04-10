@@ -2,7 +2,7 @@ package permission
 
 import (
 	"context"
-	"dm/core/util/debug"
+	"github.com/xc/digimaker/core/util/debug"
 	"fmt"
 	"testing"
 

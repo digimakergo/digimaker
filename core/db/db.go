@@ -7,7 +7,7 @@ package db
 import (
 	"context"
 	"database/sql"
-	"dm/core/util"
+	"github.com/xc/digimaker/core/util"
 
 	"github.com/pkg/errors"
 )

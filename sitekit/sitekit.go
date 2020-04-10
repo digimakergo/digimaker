@@ -1,10 +1,10 @@
 package sitekit
 
 import (
-	"dm/core/contenttype"
-	"dm/core/handler"
-	"dm/core/util"
-	"dm/sitekit/niceurl"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/sitekit/niceurl"
 	"fmt"
 	"io"
 	"net/http"

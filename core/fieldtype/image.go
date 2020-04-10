@@ -4,7 +4,7 @@
 package fieldtype
 
 import (
-	"dm/core/util"
+	"github.com/xc/digimaker/core/util"
 	"os"
 	"strings"
 )

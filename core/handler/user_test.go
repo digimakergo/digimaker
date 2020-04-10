@@ -2,18 +2,18 @@ package handler
 
 import (
 	"context"
-	"dm/core"
-	"dm/core/util"
-	"dm/core/util/debug"
+	"github.com/xc/digimaker/core"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/core/util/debug"
 	"fmt"
 	"testing"
 
-	_ "dm/eth/entity"
+	_ "github.com/xc/digimaker/eth/entity"
 )
 
 func TestMain(m *testing.M) {
 
-	core.Bootstrap("dm/eth")
+	core.Bootstrap("github.com/xc/digimaker/eth")
 	fmt.Println("Test starting..")
 	debug.Init(context.Background())
 	m.Run()

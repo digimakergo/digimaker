@@ -4,13 +4,13 @@
 package contenttype
 
 import (
-	"dm/core/util"
+	"github.com/xc/digimaker/core/util"
 	"fmt"
 	"testing"
 )
 
 func TestLoad(t *testing.T) {
-	util.SetPackageName("dm/admin")
+	util.SetPackageName("github.com/xc/digimaker/admin")
 	err := LoadDefinition()
 	if err != nil {
 		t.Fail()

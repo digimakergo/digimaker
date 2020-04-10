@@ -2,12 +2,12 @@ package pongo2
 
 import (
 	"context"
-	"dm/core/contenttype"
-	"dm/core/db"
-	"dm/core/handler"
-	"dm/core/util"
-	"dm/sitekit"
-	"dm/sitekit/niceurl"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/sitekit"
+	"github.com/xc/digimaker/sitekit/niceurl"
 	"encoding/json"
 	"fmt"
 	"os"

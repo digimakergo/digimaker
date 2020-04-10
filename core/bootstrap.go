@@ -1,11 +1,11 @@
 package core
 
 import (
-	"dm/core/contenttype"
-	"dm/core/fieldtype"
-	"dm/core/permission"
-	"dm/core/util"
-	"dm/core/log"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/permission"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/core/log"
 )
 
 func Bootstrap(packageName string) bool {

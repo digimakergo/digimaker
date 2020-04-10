@@ -1,10 +1,10 @@
 package handler
 
 import (
-	"dm/core/contenttype"
-	"dm/core/db"
-	"dm/core/fieldtype"
-	"dm/core/util"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/util"
 	"errors"
 	"strings"
 )

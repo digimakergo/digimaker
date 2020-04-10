@@ -1,6 +1,6 @@
 package sitekit
 
-import "dm/core/contenttype"
+import "github.com/xc/digimaker/core/contenttype"
 
 var siteSettings = map[string]SiteSettings{}
 

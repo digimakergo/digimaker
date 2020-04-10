@@ -4,10 +4,10 @@
 package rest
 
 import (
-	"dm/core/contenttype"
-	"dm/core/db"
-	"dm/core/handler"
-	"dm/core/util/debug"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/util/debug"
 	"encoding/json"
 	"errors"
 	"net/http"

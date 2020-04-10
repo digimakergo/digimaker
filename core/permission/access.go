@@ -5,9 +5,9 @@ package permission
 
 import (
 	"context"
-	"dm/core/contenttype"
-	"dm/core/log"
-	"dm/core/util"
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/util"
 	"fmt"
 	"strconv"
 )

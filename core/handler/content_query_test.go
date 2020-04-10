@@ -5,9 +5,9 @@ package handler
 
 import (
 	"context"
-	"dm/admin/entity"
-	"dm/core/db"
-	"dm/core/util"
+	"github.com/xc/digimaker/admin/entity"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/util"
 	"fmt"
 	"strconv"
 	"testing"

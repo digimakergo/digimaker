@@ -4,7 +4,7 @@ package handler
 
 import (
 	"database/sql"
-	"dm/core/contenttype"
+	"github.com/xc/digimaker/core/contenttype"
 )
 
 //todo: think it might be good to use "struct with callback method" instead of interface.
