@@ -31,14 +31,15 @@ Benchmark reference:xxxx.
 - extendable permission&user system
 - powerful content model(content type&field type) to extending&operating content fitting your need
 - clear & beautiful callback & debug mechanisms.
+- online debug so administrator can monitor request's processing data, time spent, etc.
 
 
 Documentation
 --------
-See [doc](dm/doc) for ideas detail and evolving.
+See [doc](core/doc) for ideas detail and evolving.
 
-See [Progress](dm/doc/9.Progress.md) for progresses.
+See [Progress](core/doc/9.Progress.md) for progresses.
 
 License
 --------
-Digimaker is honored to use MIT license(confirmed?). There are Paid Digimaker Plugins providing additional valuable features(eg. maintenance tools), check more on [www.digimaker.com](http://www.digimaker.com).
+Digimaker uses MIT license. There are Paid Digimaker Plugins providing additional valuable features(eg. maintenance tools), check more on [www.digimaker.com](http://www.digimaker.com).
