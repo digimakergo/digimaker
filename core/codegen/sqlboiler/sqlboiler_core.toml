@@ -3,18 +3,19 @@
 ##
 
 
-# run sqlboiler --config configs/sqlboiler_core.toml  mysql
+#
+# under this folder(sqlboiler), run <path of sqlboiler under bin> <path of mysql driver under bin>
+# core contenttype/*.go to target
 
 pkgname = "contenttype"
 output = "contenttype"
 no-tests = "true"
 templates = [
-  "/Users/xc/go/caf-prototype/src/github.com/volatiletech/sqlboiler/templates",
-  "/Users/xc/go/caf-prototype/src/dm/codegen/entities/core/templates"
+  "../../../../../volatiletech/sqlboiler/templates",
+  "core/templates"
 ]
 
 [mysql]
-host = "localhost"
 user = "dev"
 pass = "test123"
 dbname = "dev_emf"
