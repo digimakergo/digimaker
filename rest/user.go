@@ -6,7 +6,6 @@ import (
 	"dm/core/handler"
 	"dm/core/permission"
 	"dm/core/util"
-	"dm/core/util/debug"
 	"dm/eth/entity"
 	"encoding/json"
 	"errors"
@@ -23,8 +22,7 @@ func CurrentUser(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	site := params["site"]
 
-	ctx := debug.Init(r.Context())
-	r = r.WithContext(ctx)
+	ctx := r.Context()
 	value := ctx.Value("user")
 	if value != nil {
 		user := value.(*entity.User)

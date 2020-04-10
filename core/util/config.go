@@ -4,6 +4,7 @@
 package util
 
 import (
+	"dm/core/util/log"
 	"os"
 
 	"github.com/spf13/viper"
@@ -65,7 +66,7 @@ func GetConfigSectionI(section string, config ...string) map[string]interface{} 
 
 	var result map[string]interface{}
 	if sectionValue == nil {
-		Warning("Section ", section, " doesn't exist on ", filename)
+		log.Warning("Section "+section+" doesn't exist on "+filename, "")
 		result = nil
 	} else {
 		result = sectionValue.(map[string]interface{})
@@ -80,7 +81,7 @@ func GetConfigSectionAll(section string, config string) interface{} {
 	//todo: did viper cached all? need to verify.
 	err := viper.ReadInConfig()
 	if err != nil {
-		Error("Fatal error config file: ", err.Error())
+		log.Error("Fatal error config file: "+err.Error(), "")
 		return nil
 	}
 

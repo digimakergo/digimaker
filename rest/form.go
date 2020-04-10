@@ -6,7 +6,6 @@ package rest
 import (
 	"dm/core/contenttype"
 	"dm/core/handler"
-	"dm/core/util/debug"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -41,8 +40,6 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := debug.Init(r.Context())
-	r = r.WithContext(ctx)
 	handler := handler.ContentHandler{Context: r.Context()}
 	arr := strings.Split(contentType, "/")
 	result, validationResult := handler.Validate(arr[0], fieldMap, inputs)

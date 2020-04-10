@@ -15,7 +15,7 @@ func (hook *ContextHook) Fire(entry *log.Entry) error {
 		return err
 	}
 	//todo: based on settings(eg. debug by ip/user), output context log information.
-	f, err := os.OpenFile("log.txt",
+	f, err := os.OpenFile("request-debug.log",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		log.Println(err)

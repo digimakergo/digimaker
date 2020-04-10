@@ -6,7 +6,6 @@ import (
 	"dm/core/db"
 	"dm/core/handler"
 	"dm/core/util"
-	"dm/core/util/debug"
 	"dm/sitekit"
 	"dm/sitekit/niceurl"
 	"encoding/json"
@@ -21,8 +20,7 @@ import (
 func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	querier := handler.Querier()
 	parent := in.Interface().(contenttype.ContentTyper)
-	context := debug.Init(context.Background())
-	children, _, _ := querier.Children(parent, param.String(), 2, db.Cond("1", "1"), []int{}, []string{}, false, context)
+	children, _, _ := querier.Children(parent, param.String(), 2, db.Cond("1", "1"), []int{}, []string{}, false, context.Background())
 	return pongo2.AsValue(children), nil
 }
 
@@ -150,6 +148,6 @@ func init() {
 	pongo2.RegisterFilter("dm_str", dmStr)
 	pongo2.RegisterFilter("dm_value", dmValue)
 	pongo2.RegisterFilter("dm_now", dmNow)
-        pongo2.RegisterFilter("dm_split", dmSplit)
+	pongo2.RegisterFilter("dm_split", dmSplit)
 
 }
