@@ -4,7 +4,7 @@
 package util
 
 import (
-	"dm/core/util/log"
+	"dm/core/log"
 	"os"
 
 	"github.com/spf13/viper"

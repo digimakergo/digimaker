@@ -5,7 +5,7 @@
 package util
 
 import (
-	"dm/core/util/log"
+	"dm/core/log"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"

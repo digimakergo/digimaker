@@ -6,7 +6,7 @@ import (
 	"dm/core/contenttype"
 	"dm/core/db"
 	"dm/core/util"
-	"dm/core/util/log"
+	"dm/core/log"
 	"encoding/json"
 	"strconv"
 

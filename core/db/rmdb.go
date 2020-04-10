@@ -6,7 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"dm/core/util"
-	"dm/core/util/log"
+	"dm/core/log"
 	"fmt"
 	"strconv"
 	"strings"

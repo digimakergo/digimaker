@@ -2,7 +2,7 @@
 package contenttype
 
 import (
-	"dm/core/util/log"
+	"dm/core/log"
 )
 
 //todo: use a better name. eg. ContentTypeMethod

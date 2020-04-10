@@ -7,7 +7,7 @@ import (
 	"dm/core/fieldtype"
 	"dm/core/permission"
 	"dm/core/util"
-	"dm/core/util/log"
+	"dm/core/log"
 	"encoding/json"
 	"strconv"
 	"strings"

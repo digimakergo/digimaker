@@ -5,7 +5,7 @@ import (
 	"dm/core/fieldtype"
 	"dm/core/permission"
 	"dm/core/util"
-	"dm/core/util/log"
+	"dm/core/log"
 )
 
 func Bootstrap(packageName string) bool {
