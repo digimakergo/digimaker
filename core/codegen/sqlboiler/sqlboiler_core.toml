@@ -14,9 +14,9 @@ templates = [
 ]
 
 [mysql]
-host = "185.35.187.91"
+host = "localhost"
 user = "dev"
-pass = "D!g!m@ker"
+pass = "test123"
 dbname = "dev_emf"
 sslmode = "false"
 whitelist = ['dm_relation','dm_version']
