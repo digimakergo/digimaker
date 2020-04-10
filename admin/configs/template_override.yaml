@@ -1,9 +1,0 @@
-- from: viewcontent.html
-  contenttype:folder
-  viewmode:full
-  to: folder/full.html
-
- - from: viewcontent.html
-   contenttype: article
-   viewmode: full
-   to: article/full.html
