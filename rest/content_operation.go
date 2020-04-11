@@ -7,10 +7,13 @@ import (
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/core/handler"
-	"github.com/xc/digimaker/core/util/debug"
+	"github.com/xc/digimaker/core/util"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -18,8 +21,6 @@ import (
 )
 
 func New(w http.ResponseWriter, r *http.Request) {
-	ctx := debug.Init(r.Context())
-	r = r.WithContext(ctx)
 
 	userId := CheckUserID(r.Context(), w)
 	if userId == 0 {
@@ -86,13 +87,26 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	agent := r.UserAgent()
+	folderName := util.HomePath() + "/log/draft/" + strconv.Itoa(userId)
+	if _, existError := os.Stat(folderName); os.IsNotExist(existError) {
+		os.Mkdir(folderName, 0775)
+	}
+	logPath := folderName + "/" + time.Now().Format("20060102_150405.log")
+	ip := r.Header.Get("X-Forwarded-For")
+
 	inputs := map[string]string{}
 	decorder := json.NewDecoder(r.Body)
 	err = decorder.Decode(&inputs)
 	if err != nil {
 		HandleError(errors.New("wrong format"), w)
+		ioutil.WriteFile(logPath, []byte(ip+","+agent+"\n"+err.Error()), 0775)
 		return
 	}
+
+	logConent := []byte(ip + "," + agent + "\n" + fmt.Sprint(inputs))
+	ioutil.WriteFile(logPath, logConent, 0775)
+
 	data, ok := inputs["data"]
 	if !ok {
 		HandleError(errors.New("need data"), w)
@@ -146,9 +160,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := debug.Init(r.Context())
-	r = r.WithContext(ctx)
-
 	params := mux.Vars(r)
 	id := params["id"]
 	idInt, err := strconv.Atoi(id)
@@ -198,9 +209,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	id := params["id"]
 	idInt, _ := strconv.Atoi(id)
 	handler := handler.ContentHandler{}
-	ctx := debug.Init(r.Context())
-	r = r.WithContext(ctx)
-	handler.Context = ctx
+	handler.Context = r.Context()
 	err := handler.DeleteByID(idInt, userID, true)
 	if err != nil {
 		HandleError(err, w)
