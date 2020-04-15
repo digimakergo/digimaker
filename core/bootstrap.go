@@ -2,6 +2,7 @@ package core
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/fieldtype"
@@ -11,12 +12,14 @@ import (
 )
 
 func Bootstrap(homePath string) bool {
-	log.Info("Starting from " + homePath)
 
 	if _, err := os.Stat(homePath); os.IsNotExist(err) {
 		log.Fatal("Folder " + homePath + " doesn't exist.")
 		return false
 	}
+
+	abs, _ := filepath.Abs(homePath)
+	log.Info("Starting from " + abs)
 
 	util.InitHomePath(homePath)
 	err := contenttype.LoadDefinition()
