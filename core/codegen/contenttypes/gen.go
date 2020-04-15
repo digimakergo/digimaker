@@ -2,33 +2,34 @@
 package main
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/util"
 	"fmt"
 	"os"
 	"text/template"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/util"
 )
 
 //Generate content types
 func main() {
-	packageName := ""
+	homePath := ""
 	if len(os.Args) >= 2 && os.Args[1] != "" {
-		packageName = os.Args[1]
-		util.SetPackageName(packageName)
+		homePath = os.Args[1]
+		util.InitHomePath(homePath)
 	}
 
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 
-	fmt.Println("Generating content entities for " + packageName)
-	err := Generate(packageName, "entity")
+	fmt.Println("Generating content entities for " + homePath)
+	err := Generate(homePath, "entity")
 	if err != nil {
 		fmt.Println("Fail to generate: " + err.Error())
 	}
 }
 
-func Generate(packageName string, subFolder string) error {
+func Generate(homePath string, subFolder string) error {
 
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).

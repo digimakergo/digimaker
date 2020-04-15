@@ -1,27 +1,28 @@
 package main
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/util"
 	"errors"
 	"fmt"
 	"os"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/util"
 )
 
 func main() {
-	packageName := ""
+	homePath := ""
 	tableName := ""
 	if len(os.Args) >= 3 && os.Args[1] != "" {
-		packageName = os.Args[1]
-		util.SetPackageName(packageName)
+		homePath = os.Args[1]
+		util.InitHomePath(homePath)
 		tableName = os.Args[2]
 	}
 
 	contenttype.LoadDefinition()
 	fieldtype.LoadDefinition()
 
-	fmt.Println("Generating table " + tableName + " in " + packageName)
+	fmt.Println("Generating table " + tableName + " in " + homePath)
 	err := GenerateTable(tableName)
 	if err != nil {
 		fmt.Println("Fail to generate: " + err.Error())

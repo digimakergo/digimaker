@@ -4,8 +4,6 @@
 package util
 
 import (
-	"os"
-
 	"github.com/xc/digimaker/core/log"
 
 	"github.com/spf13/viper"
@@ -15,21 +13,15 @@ var defaultSettings = struct {
 	ConfigFile   string
 	ConfigFolder string
 	HomePath     string
-	PackageName  string
-}{"site", "", "", ""}
+}{"site", "", ""}
 
-func SetPackageName(packageName string) {
-	defaultSettings.PackageName = packageName
-	defaultSettings.HomePath = os.Getenv("GOPATH") + "/src/" + packageName //todo: change to not using gopath
+func InitHomePath(homePath string) {
+	defaultSettings.HomePath = homePath
 	defaultSettings.ConfigFolder = defaultSettings.HomePath + "/configs"
 }
 
 func HomePath() string {
 	return defaultSettings.HomePath
-}
-
-func PackageName() string {
-	return defaultSettings.PackageName
 }
 
 func ConfigPath() string {

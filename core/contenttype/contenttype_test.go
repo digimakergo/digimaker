@@ -4,9 +4,10 @@
 package contenttype
 
 import (
-	"github.com/xc/digimaker/core/util"
 	"fmt"
 	"testing"
+
+	"github.com/xc/digimaker/core/util"
 )
 
 func TestLoad(t *testing.T) {
