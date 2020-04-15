@@ -4,8 +4,7 @@
 package rest
 
 import (
-	"github.com/xc/digimaker/core/handler"
-	"github.com/xc/digimaker/core/util"
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"log"
@@ -15,6 +14,10 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/permission"
+	"github.com/xc/digimaker/core/util"
 
 	_ "github.com/xc/digimaker/sitekit/filters"
 
@@ -151,7 +154,7 @@ func HtmlToPDF(html string, name string) (string, error) {
 
 	source := tempFolder + sourceName
 	ioutil.WriteFile(source, []byte(html), 0777)
-        output, _ := exec.Command("wkhtmltopdf", "--javascript-delay", "1500", "-L", "0px", "-R", "0px", "-T", "95px", "-B", "95.5px", "--print-media-type", "--header-html", tempFolder+"/pdf-assets/header.html", "--footer-html", tempFolder+"/pdf-assets/footer.html", source, target).Output()
+	output, _ := exec.Command("wkhtmltopdf", "--javascript-delay", "1500", "-L", "0px", "-R", "0px", "-T", "95px", "-B", "95.5px", "--print-media-type", "--header-html", tempFolder+"/pdf-assets/header.html", "--footer-html", tempFolder+"/pdf-assets/footer.html", source, target).Output()
 	log.Println(output)
 	// if err != nil {
 	// 	return "", err
@@ -159,9 +162,35 @@ func HtmlToPDF(html string, name string) (string, error) {
 	return targetName, nil
 }
 
+func GetAllowedLimitations(w http.ResponseWriter, r *http.Request) {
+	userId := CheckUserID(r.Context(), w)
+	if userId == 0 {
+		return
+	}
+
+	params := mux.Vars(r)
+	operation := params["operation"]
+	operation = strings.ReplaceAll(operation, "_", "/")
+
+	allowedOperations := util.GetConfigArr("permission", "rest_allowed_operations", "dm")
+	if !util.Contains(allowedOperations, operation) {
+		HandleError(errors.New("Operation not allowed"), w, 403)
+		return
+	}
+
+	limits, err := permission.GetUserLimits(userId, operation, r.Context())
+	if err != nil {
+		HandleError(err, w)
+	} else {
+		result, _ := json.Marshal(limits)
+		w.Write(result)
+	}
+}
+
 func init() {
 	RegisterRoute("/util/uploadfile", UploadFile)
 	RegisterRoute("/util/uploadimage", UploadImage)
+	RegisterRoute("/util/allowed_limitations/{operation}", GetAllowedLimitations)
 
 	RegisterRoute("/pdf/{id}", ExportPDF)
 }

@@ -4,8 +4,9 @@
 package util
 
 import (
-	"github.com/xc/digimaker/core/log"
 	"os"
+
+	"github.com/xc/digimaker/core/log"
 
 	"github.com/spf13/viper"
 )
@@ -39,6 +40,20 @@ func ConfigPath() string {
 func GetConfig(section string, identifier string, config ...string) string {
 	configList := GetConfigSection(section, config...)
 	result := configList[identifier]
+	return result
+}
+
+func GetConfigArr(section string, identifier string, config ...string) []string {
+	configList := GetConfigSectionI(section, config...)
+	if _, ok := configList[identifier]; !ok {
+		log.Warning("Identifier "+identifier+" doesn't exist on section "+section, "config")
+		return nil
+	}
+	listValue := configList[identifier].([]interface{})
+	result := []string{}
+	for _, item := range listValue {
+		result = append(result, item.(string))
+	}
 	return result
 }
 
