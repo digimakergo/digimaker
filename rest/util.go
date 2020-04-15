@@ -190,7 +190,7 @@ func GetAllowedLimitations(w http.ResponseWriter, r *http.Request) {
 func init() {
 	RegisterRoute("/util/uploadfile", UploadFile)
 	RegisterRoute("/util/uploadimage", UploadImage)
-	RegisterRoute("/util/allowed_limitations/{operation}", GetAllowedLimitations)
+	RegisterRoute("/util/limitations/{operation}", GetAllowedLimitations)
 
 	RegisterRoute("/pdf/{id}", ExportPDF)
 }
