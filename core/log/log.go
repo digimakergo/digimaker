@@ -39,6 +39,10 @@ func Error(message string, label string, ctx ...context.Context) {
 	}
 }
 
+func Fatal(message string) {
+	log.Fatal(message)
+}
+
 func Debug(message interface{}, category string, ctx ...context.Context) {
 	if len(ctx) == 1 {
 		logger := GetLogger(ctx[0])
