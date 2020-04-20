@@ -5,7 +5,6 @@
 package util
 
 import (
-	"github.com/xc/digimaker/core/log"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -16,6 +15,8 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/xc/digimaker/core/log"
 
 	"github.com/rs/xid"
 	"golang.org/x/crypto/bcrypt"
@@ -111,7 +112,7 @@ func NameToIdentifier(input string) string {
 //Strip unregular string to avoid sql injection.
 //Note this is not used to strip whole sql, but phrase of sql.(eg. ORDER BY ...), not applicable for values.
 func StripSQLPhrase(str string) string {
-	reg, _ := regexp.Compile("[^a-z0-9A-Z., ]+")
+	reg, _ := regexp.Compile("[^a-z0-9A-Z., _]+")
 	result := reg.ReplaceAllString(str, "")
 	return result
 }
