@@ -4,6 +4,8 @@
 package util
 
 import (
+	"path/filepath"
+
 	"github.com/xc/digimaker/core/log"
 
 	"github.com/spf13/viper"
@@ -22,6 +24,11 @@ func InitHomePath(homePath string) {
 
 func HomePath() string {
 	return defaultSettings.HomePath
+}
+
+func AbsHomePath() string {
+	abs, _ := filepath.Abs(defaultSettings.HomePath)
+	return abs
 }
 
 func ConfigPath() string {

@@ -2,17 +2,18 @@ package pongo2
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
+	"os"
+	"strings"
+	"time"
+
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/core/handler"
 	"github.com/xc/digimaker/core/util"
 	"github.com/xc/digimaker/sitekit"
 	"github.com/xc/digimaker/sitekit/niceurl"
-	"encoding/json"
-	"fmt"
-	"os"
-	"strings"
-	"time"
 
 	"gopkg.in/flosch/pongo2.v2"
 )
@@ -45,10 +46,11 @@ func dmTplPath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Er
 	if !param.IsNil() {
 		//get path under gopath
 		packageName := param.String()
+
 		path = os.Getenv("GOPATH") + "/src/" + packageName + "/templates/" + in.String()
 	} else {
 		//get path under current package
-		path = util.HomePath() + "/templates/" + in.String()
+		path = util.AbsHomePath() + "/templates/" + in.String()
 	}
 
 	return pongo2.AsValue(path), nil
