@@ -5,11 +5,12 @@ package db
 import (
 	"context"
 	"database/sql"
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/core/log"
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/util"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
 	"github.com/pkg/errors"
@@ -133,7 +134,7 @@ func (r *RMDB) getSortBy(sortby []string) (string, error) {
 	sortbyArr := []string{}
 	for _, item := range sortby {
 		if strings.TrimSpace(item) != "" {
-			itemArr := util.Split(item)
+			itemArr := util.Split(item, " ")
 			sortByField := itemArr[0]
 			sortByOrder := "ASC"
 
