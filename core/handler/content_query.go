@@ -2,15 +2,16 @@ package handler
 
 import (
 	"context"
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/permission"
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/core/log"
 	"encoding/json"
 	"strconv"
 	"strings"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/permission"
+	"github.com/xc/digimaker/core/util"
 
 	"github.com/pkg/errors"
 )
@@ -277,16 +278,20 @@ func (cq ContentQuery) Version(contentType string, condition db.Condition) (cont
 	content := contenttype.NewInstance(contentType)
 	author := version.Author
 	obj := map[string]interface{}{}
-	json.Unmarshal(data, &obj)
 
-	for name := range def.FieldMap {
-		value := obj[name]
-		if value != nil {
-			//valueStr, _ := json.Marshal(value)
-			fHandler := fieldtype.GetHandler(def.FieldMap[name].FieldType)
-			fieldValue := fHandler.NewValue(value)
-			content.SetValue(name, fieldValue)
+	if version.Version == 0 {
+		json.Unmarshal(data, &obj)
+		for name := range def.FieldMap {
+			value := obj[name]
+			if value != nil {
+				//valueStr, _ := json.Marshal(value)
+				fHandler := fieldtype.GetHandler(def.FieldMap[name].FieldType)
+				fieldValue := fHandler.NewValue(value)
+				content.SetValue(name, fieldValue)
+			}
 		}
+	} else {
+		json.Unmarshal(data, &content) //todo: change this to be same as version 0
 	}
 
 	content.SetValue("author", author)
