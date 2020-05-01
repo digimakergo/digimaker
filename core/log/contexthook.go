@@ -36,3 +36,27 @@ func (hook *ContextHook) Levels() []log.Level {
 		log.InfoLevel,
 	}
 }
+
+//set debug setting in a local variable
+var debugIps []string
+
+//can debug a category or not
+func CanDebug(ip string) bool {
+	result := false
+	for _, value := range debugIps {
+		if value == ip {
+			result = true
+			break
+		}
+	}
+	return result
+}
+
+func SetDebugIp() {
+
+}
+
+func init() {
+	//todo: set it from another place
+	debugIps = []string{"127.0.0.1", "::1"}
+}

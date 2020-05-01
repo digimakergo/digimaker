@@ -12,11 +12,11 @@ import (
 )
 
 //system info
-func Info(message string) {
+func Info(message interface{}) {
 	log.Info(message)
 }
 
-func Warning(message string, label string, ctx ...context.Context) {
+func Warning(message interface{}, label string, ctx ...context.Context) {
 	if len(ctx) == 1 {
 		logger := GetLogger(ctx[0])
 		//write warning to context log and global log
@@ -28,7 +28,7 @@ func Warning(message string, label string, ctx ...context.Context) {
 }
 
 //Write error
-func Error(message string, label string, ctx ...context.Context) {
+func Error(message interface{}, label string, ctx ...context.Context) {
 	if len(ctx) == 1 {
 		logger := GetLogger(ctx[0])
 		//white both to context log and global log
@@ -39,21 +39,21 @@ func Error(message string, label string, ctx ...context.Context) {
 	}
 }
 
-func Fatal(message string) {
+func Fatal(message interface{}) {
 	log.Fatal(message)
 }
 
+//Output debug info with on category.
 func Debug(message interface{}, category string, ctx ...context.Context) {
-	if len(ctx) == 1 {
-		logger := GetLogger(ctx[0])
-		logger.Debug(message, "["+category+"]")
-	} else {
-		log.Debug(message, "["+category+"]")
-	}
+		if len(ctx) == 1 {
+			logger := GetLogger(ctx[0])
+			logger.Debug(message, "["+category+"]")
+		} else {
+			log.Debug(message, "["+category+"]")
+		}
 }
 
 type loggerKey struct{}
-type debugInfoKey struct{}
 type timerKey struct{}
 
 //Init before request.
@@ -61,7 +61,10 @@ func WithLogger(ctx context.Context, fields log.Fields) context.Context {
 	//create a new context logger
 	logger := log.New()
 	logger.SetOutput(ioutil.Discard)
-	logger.AddHook(&ContextHook{})
+	ip := fields["ip"].(string)
+	if CanDebug(ip) {  //output debug when can debug
+		logger.AddHook(&ContextHook{})
+	}
 	logger.SetLevel(log.DebugLevel)
 	entry := logger.WithFields(fields)
 	result := context.WithValue(ctx, loggerKey{}, entry)
@@ -89,6 +92,7 @@ func LogTiming(ctx context.Context) {
 }
 
 func init() {
+	//todo: log it to file based on parameters
 	log.SetOutput(os.Stdout)
 	log.SetFormatter(&log.TextFormatter{
 		DisableColors:   false,

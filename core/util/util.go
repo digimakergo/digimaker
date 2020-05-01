@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/smtp"
 	"os"
@@ -256,5 +257,6 @@ func GetIP(r *http.Request) string {
 	if forwarded != "" {
 		return forwarded
 	}
-	return r.RemoteAddr
+	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+	return ip
 }
