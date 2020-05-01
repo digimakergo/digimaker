@@ -15,7 +15,7 @@ var defaultSettings = struct {
 	ConfigFile   string
 	ConfigFolder string
 	HomePath     string
-}{"site", "", ""}
+}{"dm", "", ""}
 
 func InitHomePath(homePath string) {
 	defaultSettings.HomePath = homePath
@@ -42,6 +42,7 @@ func GetConfig(section string, identifier string, config ...string) string {
 	return result
 }
 
+//Get config string array
 func GetConfigArr(section string, identifier string, config ...string) []string {
 	configList := GetConfigSectionI(section, config...)
 	if _, ok := configList[identifier]; !ok {
