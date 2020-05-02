@@ -64,6 +64,10 @@ func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
 //todo: cache this? (then you need a reload?)
 func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
+    {{range $identifier, $fieldtype := .data_fields}}
+         result["{{$identifier}}"]=c.{{$identifier|UpperName}}
+    {{end}}
+
     {{range $identifier, $fieldtype := .fields}}
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
         {{if not $fieldtype.IsOutput}}
@@ -94,6 +98,10 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{end}}
     var result interface{}
 	switch identifier {
+    {{range $identifier, $fieldtype := .data_fields}}
+      case "{{$identifier}}":
+         result = c.{{$identifier|UpperName}}
+    {{end}}
     {{range $identifier, $fieldtype := .fields}}
     {{if not $fieldtype.IsOutput}}
     case "{{$identifier}}":
@@ -115,6 +123,10 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
 
 func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error {
 	switch identifier {
+        {{range $identifier, $fieldtype := .data_fields}}
+          case "{{$identifier}}":
+             c.{{$identifier|UpperName}} = value.({{$fieldtype}})
+        {{end}}
         {{range $identifier, $fieldtype := .fields}}
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
             {{if not $type_settings.IsRelation}}
