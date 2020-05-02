@@ -4,16 +4,17 @@
 package rest
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/handler"
-	"github.com/xc/digimaker/core/permission"
-	"github.com/xc/digimaker/core/util"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/permission"
+	"github.com/xc/digimaker/core/util"
 
 	"github.com/gorilla/mux"
 )
@@ -161,7 +162,29 @@ func Children(w http.ResponseWriter, r *http.Request) {
 	result := struct {
 		List  interface{} `json:"list"`
 		Count int         `json:"count"`
-	}{list, count}
+	}{Count: count}
+
+	configFields := util.GetConfigArr("rest_list_fields", contenttype)
+	if configFields != nil {
+		//output needed fields
+		outputList := []map[string]interface{}{}
+		for _, content := range list {
+			//get a map based content
+			outputContent := map[string]interface{}{}
+			data, _ := json.Marshal(content)
+			json.Unmarshal(data, &outputContent)
+
+			for _, field := range content.IdentifierList() {
+				if !util.Contains(configFields, field) {
+					delete(outputContent, field)
+				}
+			}
+			outputList = append(outputList, outputContent)
+		}
+		result.List = outputList
+	} else {
+		result.List = list
+	}
 
 	data, _ := json.Marshal(result)
 	w.Write([]byte(data))
