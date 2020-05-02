@@ -310,3 +310,17 @@ func JsonToContent(contentJson string, content ContentTyper) error {
 	err := json.Unmarshal([]byte(contentJson), content)
 	return err
 }
+
+//Convert content to map
+func ContentToMap(content ContentTyper) (map[string]interface{}, error) {
+	jsonData, err := json.Marshal(content)
+	if err != nil {
+		return nil, err
+	}
+	result := map[string]interface{}{}
+	err = json.Unmarshal(jsonData, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}

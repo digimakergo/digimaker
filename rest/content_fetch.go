@@ -13,6 +13,7 @@ import (
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/permission"
 	"github.com/xc/digimaker/core/util"
 
@@ -119,7 +120,7 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		HandleError(errors.New("Invalid id"), w)
 		return
 	}
-	contenttype := params["contenttype"]
+	ctype := params["contenttype"]
 	querier := handler.Querier()
 	rootContent, err := querier.FetchByID(id)
 	if err != nil {
@@ -153,7 +154,7 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		limitArr = []int{offset, limit}
 	}
 
-	list, count, err := querier.Children(rootContent, contenttype, userid, condition, limitArr, sortbyArr, true, cxt)
+	list, count, err := querier.Children(rootContent, ctype, userid, condition, limitArr, sortbyArr, true, cxt)
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -164,15 +165,18 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		Count int         `json:"count"`
 	}{Count: count}
 
-	configFields := util.GetConfigArr("rest_list_fields", contenttype)
+	configFields := util.GetConfigArr("rest_list_fields", ctype)
 	if configFields != nil {
 		//output needed fields
 		outputList := []map[string]interface{}{}
 		for _, content := range list {
 			//get a map based content
-			outputContent := map[string]interface{}{}
-			data, _ := json.Marshal(content)
-			json.Unmarshal(data, &outputContent)
+			outputContent, err := contenttype.ContentToMap(content)
+			if err != nil {
+				log.Error("Marshall content error: "+err.Error(), "", cxt)
+				HandleError(errors.New("Error when converting data."), w)
+				return
+			}
 
 			for _, field := range content.IdentifierList() {
 				if !util.Contains(configFields, field) {
@@ -188,10 +192,6 @@ func Children(w http.ResponseWriter, r *http.Request) {
 
 	data, _ := json.Marshal(result)
 	w.Write([]byte(data))
-}
-
-func SubTree() {
-
 }
 
 //Get tree menu under a node
