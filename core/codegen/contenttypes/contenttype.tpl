@@ -20,7 +20,7 @@ type {{$struct_name}} struct{
      contenttype.ContentCommon `boil:",bind"`
 
      {{range $identifier, $fieldtype := .data_fields}}
-          {{$identifier|UpperName}}  {{$fieldtype}} `boil:"{{$identifier}}" json:{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+          {{$identifier|UpperName}}  {{$fieldtype}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
      {{end}}
     {{range $identifier, $fieldtype := .fields}}
          {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
@@ -60,7 +60,7 @@ func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
     {{end}}
 }
 
-
+//Get map of the all fields(including data_fields)
 //todo: cache this? (then you need a reload?)
 func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 	result := make(map[string]interface{})
@@ -81,6 +81,7 @@ func (c *{{$struct_name}}) ToMap() map[string]interface{} {
 	return result
 }
 
+//Get identifier list of fields(NOT including data_fields )
 func (c *{{$struct_name}}) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .fields}}{{if not $fieldtype.IsOutput}}"{{$identifier}}",{{end}}{{end}}}...)
 }
@@ -90,6 +91,7 @@ func (c *{{$struct_name}}) Definition(language ...string) contenttype.ContentTyp
     return def
 }
 
+//Get field value
 func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{if .settings.HasLocation}}
     if util.Contains( c.Location.IdentifierList(), identifier ) {
@@ -120,7 +122,7 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
 	return result
 }
 
-
+//Set value to a field
 func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         {{range $identifier, $fieldtype := .data_fields}}
