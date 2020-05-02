@@ -33,7 +33,7 @@ func Generate(homePath string, subFolder string) error {
 
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
-		ParseFiles(os.Getenv("GOPATH") + "/src/dm/core/codegen/contenttypes/contenttype.tpl"))
+		ParseFiles(os.Getenv("GOPATH") + "/src/github.com/xc/digimaker/core/codegen/contenttypes/contenttype.tpl"))
 
 	contentTypeDef := contenttype.GetDefinitionList()["default"]
 	for name, settings := range contentTypeDef {
@@ -41,6 +41,11 @@ func Generate(homePath string, subFolder string) error {
 		vars["def_fieldtype"] = fieldtype.GetAllDefinition()
 		vars["name"] = name
 		vars["fields"] = settings.FieldMap
+		datafieldMap := map[string]string{}
+		for _, item := range settings.DataFields {
+			datafieldMap[item.Identifier] = item.FieldType
+		}
+		vars["data_fields"] = datafieldMap
 
 		vars["settings"] = settings
 

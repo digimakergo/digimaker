@@ -4,12 +4,13 @@
 package contenttype
 
 import (
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/util"
 	"encoding/json"
 	"errors"
 	"log"
 	"strings"
+
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/util"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -25,6 +26,7 @@ type ContentType struct {
 	HasLocation  bool              `json:"has_location"`
 	AllowedTypes []string          `json:"allowed_types"`
 	Fields       ContentFieldArray `json:"fields"`
+	DataFields   []DataField       `json:"data_fields"`
 	//All fields where identifier is the key.
 	FieldMap map[string]ContentField `json:"-"`
 }
@@ -71,6 +73,11 @@ type ContentField struct {
 	IsOutput    bool                   `json:"is_output"`
 	Parameters  map[string]interface{} `json:"parameters"`
 	Children    ContentFieldArray      `json:"children"`
+}
+
+type DataField struct {
+	Identifier string `json:"identifier"`
+	FieldType  string `json:"type"`
 }
 
 func (cf *ContentField) GetSubFields(callback ...func(*ContentField)) map[string]ContentField {

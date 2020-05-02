@@ -18,6 +18,10 @@ import (
 
 type {{$struct_name}} struct{
      contenttype.ContentCommon `boil:",bind"`
+
+     {{range $identifier, $fieldtype := .data_fields}}
+          {{$identifier|UpperName}}  {{$fieldtype}} `boil:"{{$identifier}}" json:{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+     {{end}}
     {{range $identifier, $fieldtype := .fields}}
          {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
          {{if not $type_settings.IsRelation }}
