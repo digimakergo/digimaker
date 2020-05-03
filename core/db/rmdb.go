@@ -39,21 +39,14 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 		return -1, errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
 	}
 
+	columns := util.GetConfigArr("internal", "location_columns")
+	columnsWithPrefix := util.Iterate(columns, func(s string) string {
+		return `location.` + s + ` AS "location.` + s + `"`
+	})
+	locationColumns := strings.Join(columnsWithPrefix, ",")
+
 	//get condition string for fields
-	conditions, values := BuildCondition(condition)
-	//todo: get columns from either config or entities
-	columns := []string{"id", "parent_id", "main_id",
-		"hierarchy", "depth", "content_type",
-		"author",
-		"content_id", "language",
-		"identifier_path",
-		"name", "is_hidden", "is_invisible",
-		"priority", "uid", "section", "p"}
-	locationColumns := ""
-	for _, column := range columns {
-		locationColumns += `location.` + column + ` AS "location.` + column + `",`
-	}
-	locationColumns = locationColumns[:len(locationColumns)-1]
+	conditions, values := BuildCondition(condition, columns)
 
 	relationQuery := ` ,
                     CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
@@ -66,7 +59,7 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
                                       'uid', relation.uid,
                                       'description',relation.description,
                                       'data' ,relation.data )
-                         ORDER BY relation.priority ), ']') as relations`
+                         ORDER BY relation.priority ), ']') AS relations`
 
 	//limit
 	limitStr := ""
@@ -78,20 +71,19 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 	}
 
 	//sort by
-
 	sortbyStr, err := r.getSortBy(sortby)
 	if err != nil {
 		return -1, err
 	}
 
-	sqlStr := `SELECT content.*, content.id AS cid, ` + locationColumns + relationQuery + `
+	sqlStr := `SELECT content.*, content.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
                    FROM ( ` + tableName + ` content
                      INNER JOIN dm_location location
                         ON location.content_type = '` + contentType + `' AND location.content_id=content.id )
-                     LEFT JOIN dm_relation relation
-                        ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
+                     LEFT JOIN dm_relation relation ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
+										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=location.author
                      WHERE ` + conditions + `
-                     GROUP BY location.id
+                     GROUP BY location.id, author_name
 										 ` + sortbyStr + " " + limitStr
 
 	log.Debug(sqlStr+","+fmt.Sprintln(values), "db")
@@ -115,7 +107,6 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 												ON location.content_type = '` + contentType + `' AND location.content_id=content.id )
 										 WHERE ` + conditions
 
-		fmt.Println(countSqlStr)
 		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
 		if err != nil {
 			message := "[RMDB.GetByFields]Error when query count. sql - " + countSqlStr
@@ -262,6 +253,7 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition Co
 			valueParameters = append(valueParameters, value)
 		}
 	}
+
 	sqlStr = sqlStr[:len(sqlStr)-1]
 	conditionString, conditionValues := BuildCondition(condition)
 	valueParameters = append(valueParameters, conditionValues...)

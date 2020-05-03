@@ -5,10 +5,11 @@ package contenttype
 
 import (
 	"database/sql"
+	"strings"
+
 	"github.com/xc/digimaker/core/db"
 	. "github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/core/util"
-	"strings"
 )
 
 // Location is an object representing the database table.
@@ -23,7 +24,6 @@ type Location struct {
 	ContentType    string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID      int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	Language       string `boil:"language" json:"language" toml:"language" yaml:"language"`
-	Author         int    `boil:"author" json:"author" toml:"author" yaml:"author"`
 	Name           string `boil:"name" json:"name" toml:"name" yaml:"name"`
 	IsHidden       bool   `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
 	IsInvisible    bool   `boil:"is_invisible" json:"is_invisible" toml:"is_invisible" yaml:"is_invisible"`
@@ -54,7 +54,6 @@ func (c *Location) Values() map[string]interface{} {
 	result["is_invisible"] = c.IsInvisible
 	result["priority"] = c.Priority
 	result["uid"] = c.UID
-	result["author"] = c.Author
 	result["section"] = c.Section
 	result["p"] = c.P
 	return result
@@ -65,7 +64,7 @@ func (c *Location) TableName() string {
 }
 
 func (c *Location) IdentifierList() []string {
-	return []string{"id", "identifier_path", "parent_id", "main_id", "hierarchy", "content_id", "author"}
+	return []string{"id", "identifier_path", "parent_id", "main_id", "hierarchy", "content_id"}
 }
 
 func (c *Location) Field(name string) interface{} {
@@ -87,8 +86,6 @@ func (c *Location) Field(name string) interface{} {
 		result = c.ContentID
 	case "language", "Language":
 		result = c.Language
-	case "author", "Author":
-		result = c.Author
 	case "name", "Name":
 		result = c.Name
 	case "is_hidden", "IsHidden":

@@ -10,15 +10,16 @@ This is a parent struct which consits of location and the content itself(eg. art
 import (
 	"context"
 	"database/sql"
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/permission"
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/core/log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/permission"
+	"github.com/xc/digimaker/core/util"
 
 	. "github.com/xc/digimaker/core/db"
 
@@ -112,7 +113,6 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		location.ContentID = content.GetCID()
 		location.ContentType = content.ContentType()
 		location.UID = util.GenerateUID()
-		location.Author = userId
 		contentName := GenerateName(content)
 		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(contentName)
 		location.Depth = parent.Depth + 1
@@ -178,6 +178,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	now := int(time.Now().Unix())
 	content.SetValue("published", now)
 	content.SetValue("modified", now)
+	content.SetValue("author", userId)
 	content.SetValue("cuid", util.GenerateUID())
 
 	log.StartTiming(ch.Context, "contenthandler_create.database")
@@ -209,6 +210,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if contentDefinition.HasVersion {
 		content.SetValue("version", versionIfNeeded)
 	}
+
 	err = ch.storeCreatedContent(content, userId, tx, parentID)
 	if err != nil {
 		tx.Rollback()
@@ -343,7 +345,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		"contenttype": content.ContentType(),
 		"under":       content.GetLocation().ID,
 	}
-	if content.GetLocation().Author == userId {
+	if content.Value("author").(int) == userId {
 		accessRealData["author"] = "self"
 	}
 	if !permission.HasAccessTo(userId, "content/update", accessRealData, ch.Context) {
@@ -470,7 +472,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 		"contenttype": content.ContentType(),
 		"under":       strings.Split(content.GetLocation().Hierarchy, "/"),
 	}
-	if content.GetLocation().Author == userId {
+	if content.Value("author").(int) == userId {
 		accessRealData["author"] = "self"
 	}
 	if !permission.HasAccessTo(userId, "content/delete", accessRealData, ch.Context) {

@@ -1,13 +1,15 @@
 package contenttype
 
 type ContentCommon struct {
-	CID       int                 `boil:"cid" json:"cid" toml:"cid" yaml:"cid"`
-	Version   int                 `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Published int                 `boil:"published" json:"published" toml:"published" yaml:"published"`
-	Modified  int                 `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
-	CUID      string              `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
-	Status    int                 `boil:"status" json:"status" toml:"status" yaml:"status"`
-	Relations ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
+	CID        int                 `boil:"cid" json:"cid" toml:"cid" yaml:"cid"`
+	Version    int                 `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Published  int                 `boil:"published" json:"published" toml:"published" yaml:"published"`
+	Modified   int                 `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
+	CUID       string              `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	Status     int                 `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Author     int                 `boil:"author" json:"author" toml:"author" yaml:"author"`
+	AuthorName string              `boil:"author_name" json:"author_name" toml:"author_name" yaml:"author_name"`
+	Relations  ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
 func (c ContentCommon) IdentifierList() []string {
@@ -21,6 +23,8 @@ func (c ContentCommon) Values() map[string]interface{} {
 	result["published"] = c.Published
 	result["modified"] = c.Modified
 	result["status"] = c.Status
+	result["author"] = c.Author
+	result["author_name"] = c.AuthorName
 	result["cuid"] = c.CUID
 	for identifier, relationValue := range c.Relations.Map {
 		result[identifier] = relationValue
@@ -39,6 +43,10 @@ func (c *ContentCommon) Value(identifier string) interface{} {
 		result = c.Modified
 	case "published":
 		result = c.Published
+	case "author":
+		result = c.Author
+	case "author_name":
+		result = c.AuthorName
 	case "status":
 		result = c.Status
 	case "cuid":
@@ -61,6 +69,8 @@ func (c *ContentCommon) SetValue(identifier string, value interface{}) error {
 		c.Modified = value.(int)
 	case "status":
 		c.Status = value.(int)
+	case "author":
+		c.Author = value.(int)
 	case "cuid":
 		c.CUID = value.(string)
 	}

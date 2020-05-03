@@ -4,10 +4,12 @@ package db
 
 import (
 	"strings"
+
+	"github.com/xc/digimaker/core/util"
 )
 
 //todo: optimize - use pointers & avoid string +
-func BuildCondition(cond Condition) (string, []interface{}) {
+func BuildCondition(cond Condition, locationColumns ...[]string) (string, []interface{}) {
 	logic := cond.Logic
 	if logic == "" {
 		expression := cond.Children.(Expression)
@@ -39,18 +41,24 @@ func BuildCondition(cond Condition) (string, []interface{}) {
 			value = []interface{}{expression.Value}
 			operatorStr = " ?"
 		}
-		return expression.Field + " " + expression.Operator + operatorStr, value
+		fieldName := expression.Field
+		if len(locationColumns) > 0 && fieldName != "1" {
+			if !(util.Contains(locationColumns[0], fieldName) || strings.Contains(fieldName, ".")) {
+				fieldName = "content." + expression.Field
+			}
+		}
+		return fieldName + " " + expression.Operator + operatorStr, value
 	} else {
 		childrenArr := cond.Children.([]Condition)
-		var list []string
+		var expressionList []string
 		var values []interface{}
 		for _, subCondition := range childrenArr {
-			expressionStr, currentValues := BuildCondition(subCondition)
-			list = append(list, expressionStr)
+			expressionStr, currentValues := BuildCondition(subCondition, locationColumns...)
+			expressionList = append(expressionList, expressionStr)
 			values = append(values, currentValues...)
 		}
 
-		listStr := strings.Join(list, " "+cond.Logic+" ")
+		listStr := strings.Join(expressionList, " "+cond.Logic+" ")
 		str := "(" + listStr + ")"
 		return str, values
 	}

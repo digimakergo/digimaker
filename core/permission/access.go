@@ -5,11 +5,12 @@ package permission
 
 import (
 	"context"
+	"fmt"
+	"strconv"
+
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/util"
-	"fmt"
-	"strconv"
 )
 
 //If the user has acccess given matchedData(realData here)
@@ -49,7 +50,7 @@ func CanRead(userID int, content contenttype.ContentTyper, context context.Conte
 		"contenttype": content.ContentType(),
 		"under":       location.Path(),
 	}
-	if userID == content.GetLocation().Author {
+	if userID == content.Value("author").(int) {
 		data["author"] = "self"
 	}
 	result := HasAccessTo(userID, "content/read", data, context)

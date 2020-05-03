@@ -28,6 +28,16 @@ func Contains(strings []string, element string) bool {
 	return false
 }
 
+//Iterate string slice so it will be easy to do operation inside. eg. make ["1","2"] to be ["a-1", "a-2"]
+func Iterate(strings []string, f func(s string) string) []string {
+	result := []string{}
+	for _, s := range strings {
+		resultS := f(s)
+		result = append(result, resultS)
+	}
+	return result
+}
+
 func ContainsInt(ints []int, i int) bool {
 	for _, j := range ints {
 		if j == i {
