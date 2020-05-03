@@ -48,8 +48,7 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 	//get condition string for fields
 	conditions, values := BuildCondition(condition, columns)
 
-	relationQuery := ` ,
-                    CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
+	relationQuery := `,CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
                                       'to_content_id', relation.to_content_id,
                                       'to_type', relation.to_type,
                                       'from_content_id', relation.from_content_id,
@@ -71,15 +70,14 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 	}
 
 	//sort by
-	sortbyStr, err := r.getSortBy(sortby)
+	sortbyStr, err := r.getSortBy(sortby, columns)
 	if err != nil {
 		return -1, err
 	}
 
 	sqlStr := `SELECT content.*, content.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
-                   FROM ( ` + tableName + ` content
-                     INNER JOIN dm_location location
-                        ON location.content_type = '` + contentType + `' AND location.content_id=content.id )
+                   FROM (` + tableName + ` content
+                     INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=content.id)
                      LEFT JOIN dm_relation relation ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
 										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=location.author
                      WHERE ` + conditions + `
@@ -120,13 +118,17 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 	return countResult, nil
 }
 
-func (r *RMDB) getSortBy(sortby []string) (string, error) {
+//Get sort by sql based on sortby pattern(eg.[]string{"name asc", "id desc"})
+func (r *RMDB) getSortBy(sortby []string, locationColumns ...[]string) (string, error) {
 	//sort by
 	sortbyArr := []string{}
 	for _, item := range sortby {
 		if strings.TrimSpace(item) != "" {
 			itemArr := util.Split(item, " ")
 			sortByField := itemArr[0]
+			if len(locationColumns) > 0 && util.Contains(locationColumns[0], sortByField) {
+				sortByField = "location." + sortByField
+			}
 			sortByOrder := "ASC"
 
 			if len(itemArr) == 2 {
