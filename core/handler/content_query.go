@@ -198,7 +198,7 @@ func permCondition(userID int, contenttype string, context context.Context) db.C
 		//todo: current self author will override the other policy. to be fixed.
 		if author, ok := limit["author"]; ok {
 			if author.(string) == "self" {
-				authorCond := db.Cond("location.author", userID)
+				authorCond := db.Cond("author", userID)
 				if result.Children == nil {
 					result = authorCond
 				} else {
