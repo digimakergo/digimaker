@@ -62,7 +62,7 @@ func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
 
 //Get map of the all fields(including data_fields)
 //todo: cache this? (then you need a reload?)
-func (c *{{$struct_name}}) ToMap() map[string]interface{} {
+func (c *{{$struct_name}}) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
     {{range $identifier, $fieldtype := .data_fields}}
          result["{{$identifier}}"]=c.{{$identifier|UpperName}}
@@ -153,13 +153,13 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
 func (c *{{$struct_name}}) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
+		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID), transaction...)
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
 		return err
 	}
 	return nil

@@ -25,8 +25,6 @@ type ContentTyper interface {
 
 	GetName() string
 
-	ToMap() map[string]interface{}
-
 	SetValue(identifier string, value interface{}) error
 
 	Store(...*sql.Tx) error
