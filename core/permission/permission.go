@@ -6,13 +6,14 @@ package permission
 
 import (
 	"context"
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/core/log"
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/util"
 
 	"github.com/pkg/errors"
 )
@@ -82,7 +83,7 @@ func GetUserPolicies(userID int) ([]RolePolicy, error) {
 //Get user's limits
 func GetUserLimits(userID int, operation string, context context.Context) ([]map[string]interface{}, error) {
 	policyList, err := GetUserPolicies(userID)
-	log.Debug("Got policy list: "+fmt.Sprint(policyList), "permission")
+	log.Debug("Got policy list: "+fmt.Sprint(policyList), "permission", context)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
 	}
