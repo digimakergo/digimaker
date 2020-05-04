@@ -6,7 +6,6 @@ package handler
 /**
 This is a parent struct which consits of location and the content itself(eg. article).
 */
-
 import (
 	"context"
 	"database/sql"
@@ -42,7 +41,7 @@ type ContentHandler struct {
 
 var ErrorNoPermission = errors.New("The user doesn't have access to the action.")
 
-//Validate and Return a validation result.
+// Validate validates and returns a validation result.
 func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.ContentField, inputs map[string]interface{}) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
@@ -137,7 +136,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 	return nil
 }
 
-//Create a content(same behavior as Draft&Publish but store published version directly)
+// Create creates a content(same behavior as Draft&Publish but store published version directly)
 func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, userId int, parentID int) (contenttype.ContentTyper, ValidationResult, error) {
 
 	parent, _ := querier.FetchByID(parentID)
@@ -257,7 +256,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	return content, ValidationResult{}, nil
 }
 
-//Invoke callbacks based on condition match result
+//InvokeCallback invokes callbacks based on condition match result
 //see content_handler.json/yaml for conditions.
 func (ch ContentHandler) InvokeCallback(event string, stopOnError bool, matchData map[string]interface{}, content contenttype.ContentTyper, params ...interface{}) error {
 	operationHandlerList, matchInfo := GetOperationHandlerByCondition(event, matchData)
@@ -288,7 +287,7 @@ func (ch ContentHandler) InvokeCallback(event string, stopOnError bool, matchDat
 	return nil
 }
 
-//Create a new version.
+//CreateVersion creates a new version.
 //It doesn't validate version number is increment
 func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, versionNumber int, tx *sql.Tx) (int, error) {
 	log.Debug("Creating version: "+strconv.Itoa(versionNumber), "contenthandler.CreateVersion", ch.Context)

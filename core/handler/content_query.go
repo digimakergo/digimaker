@@ -65,17 +65,17 @@ func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) 
 	return result, err
 }
 
-//Fetch a content by content id.
+// FetchByContentID fetches a content by content id.
 func (cq ContentQuery) FetchByContentID(contentType string, contentID int) (contenttype.ContentTyper, error) {
 	return cq.Fetch(contentType, db.Cond("content.id", contentID))
 }
 
-//Fetch a content by content's uid(cuid)
+// FetchByContentID fetches a content by content's uid(cuid)
 func (cq ContentQuery) FetchByCUID(contentType string, cuid string) (contenttype.ContentTyper, error) {
 	return cq.Fetch(contentType, db.Cond("content.cuid", cuid))
 }
 
-//Fetch one content
+//Fetch fetches first content based on condition.
 func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (contenttype.ContentTyper, error) {
 	//todo: use limit in this case so it doesn't fetch more into memory.
 	content := contenttype.NewInstance(contentType)
@@ -115,7 +115,8 @@ func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, contentt
 	return result, countResult, err
 }
 
-//Get sub tree under rootContent, permission considered.
+// SubTree fetches content and return a tree result under rootContent, permission considered.
+// See TreeNode for the tree structure
 func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, contentTypes string, userID int, sortby []string, context context.Context) (TreeNode, error) {
 	contentTypeList := strings.Split(contentTypes, ",")
 	var list []contenttype.ContentTyper
@@ -211,9 +212,8 @@ func permCondition(userID int, contenttype string, context context.Context) db.C
 	return result
 }
 
-//Get subtree with permission considered.
+// SubList fetches content list with permission considered(only return contents the user has access to).
 func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
-
 	rootLocation := rootContent.GetLocation()
 	if depth == 1 {
 		//Direct children
