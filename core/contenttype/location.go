@@ -34,11 +34,7 @@ type Location struct {
 	path           []int  `boil:"-"`
 }
 
-// func (c *Location) Fields() map[string]fieldtype.Fieldtyper {
-// 	return nil
-// }
-
-func (c *Location) Values() map[string]interface{} {
+func (c *Location) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
 	result["id"] = c.ID
 	result["parent_id"] = c.ParentID
@@ -117,13 +113,13 @@ func (c *Location) Path() []int {
 func (c *Location) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.ID == 0 {
-		id, err := handler.Insert(c.TableName(), c.Values(), transaction...)
+		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
 		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.Values(), Cond("id", c.ID), transaction...)
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil

@@ -75,7 +75,7 @@ func (c *{{$struct_name}}) ToMap() map[string]interface{} {
         {{end}}
         {{end}}
     {{end}}
-	for key, value := range c.ContentCommon.Values() {
+	for key, value := range c.ContentCommon.ToDBValues() {
 		result[key] = value
 	}
 	return result

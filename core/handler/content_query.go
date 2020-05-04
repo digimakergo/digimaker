@@ -25,7 +25,7 @@ type TreeNode struct {
 	Children []TreeNode               `json:"children"`
 }
 
-//Fetch content by location id.
+// FetchByID fetches content by location id.
 //If no location found. it will return nil and error message.
 func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, error) {
 	//get type first by location.
@@ -46,6 +46,7 @@ func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, erro
 	return result, err
 }
 
+//FetchByUID fetches content by unique id
 func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) {
 	//get type first by location.
 	dbhandler := db.DBHanlder()
@@ -70,12 +71,12 @@ func (cq ContentQuery) FetchByContentID(contentType string, contentID int) (cont
 	return cq.Fetch(contentType, db.Cond("content.id", contentID))
 }
 
-// FetchByContentID fetches a content by content's uid(cuid)
+// FetchByCUID fetches a content by content's uid(cuid)
 func (cq ContentQuery) FetchByCUID(contentType string, cuid string) (contenttype.ContentTyper, error) {
 	return cq.Fetch(contentType, db.Cond("content.cuid", cuid))
 }
 
-//Fetch fetches first content based on condition.
+// Fetch fetches first content based on condition.
 func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (contenttype.ContentTyper, error) {
 	//todo: use limit in this case so it doesn't fetch more into memory.
 	content := contenttype.NewInstance(contentType)
@@ -90,7 +91,7 @@ func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (conten
 	return content, err
 }
 
-//Fetch a list of content based on conditions. This is a database level 'list'. Return eg. *[]Article
+// List fetches a list of content based on conditions. This is a database level 'list'. Return eg. *[]Article
 func (cq ContentQuery) List(contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
 	count := -1
@@ -105,7 +106,7 @@ func (cq ContentQuery) List(contentType string, condition db.Condition, limit []
 	return result, count, err
 }
 
-//Fetch children
+// Children fetches children content directly under the given parentContent
 func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, contenttype string, userID int, cond db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
 	contentTypeList := parentContent.Definition().AllowedTypes
 	if !util.Contains(contentTypeList, contenttype) {

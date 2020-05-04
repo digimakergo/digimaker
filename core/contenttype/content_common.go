@@ -12,12 +12,13 @@ type ContentCommon struct {
 	Relations  ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
+//IdentifierList return list of all field names
 func (c ContentCommon) IdentifierList() []string {
 	return []string{"cid", "version", "published", "modified", "author", "author_name", "cuid", "status"}
 }
 
-//Value for DB. todo: rename to DBValues()
-func (c ContentCommon) Values() map[string]interface{} {
+//Values return values for insert/update DB. todo: rename to ToDBValues()
+func (c ContentCommon) ToDBValues() map[string]interface{} {
 	result := map[string]interface{}{
 		"id":        c.CID,
 		"version":   c.Version,
@@ -72,6 +73,8 @@ func (c *ContentCommon) SetValue(identifier string, value interface{}) error {
 		c.Status = value.(int)
 	case "author":
 		c.Author = value.(int)
+	case "author_name":
+		c.AuthorName = value.(string)
 	case "cuid":
 		c.CUID = value.(string)
 	}
