@@ -18,13 +18,12 @@ import (
 )
 
 // Implement DBEntitier
-type RMDB struct {
-	Transaction *sql.Tx
+type MysqlHandler struct {
 }
 
 //Query by ID
-func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content interface{}) error {
-	_, err := rmdb.GetByFields(contentType, tableName, Cond("location.id", id), []int{}, []string{}, content, false) //todo: use table name as parameter
+func (rmdb *MysqlHandler) GetByID(contentType string, tableName string, id int, content interface{}) error {
+	_, err := rmdb.GetByFields(contentType, tableName, Cond("location.id", id), []int{}, []string{}, content, false)
 	return err
 }
 
@@ -33,10 +32,10 @@ func (rmdb *RMDB) GetByID(contentType string, tableName string, id int, content 
 //  var content contenttype.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
-func (r *RMDB) GetByFields(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
+func (r *MysqlHandler) GetByFields(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
-		return -1, errors.Wrap(err, "[RMDB.GetByFields]Error when connecting db.")
+		return -1, errors.Wrap(err, "[MysqlHandler.GetByFields]Error when connecting db.")
 	}
 
 	columns := util.GetConfigArr("internal", "location_columns")
@@ -91,7 +90,7 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 		if err == sql.ErrNoRows {
 			log.Warning(err.Error(), "GetByFields")
 		} else {
-			message := "[RMDB.GetByFields]Error when query. sql - " + sqlStr
+			message := "[MysqlHandler.GetByFields]Error when query. sql - " + sqlStr
 			return -1, errors.Wrap(err, message)
 		}
 	}
@@ -107,7 +106,7 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 
 		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
 		if err != nil {
-			message := "[RMDB.GetByFields]Error when query count. sql - " + countSqlStr
+			message := "[MysqlHandler.GetByFields]Error when query count. sql - " + countSqlStr
 			return -1, errors.Wrap(err, message)
 		}
 		rows.Next()
@@ -119,7 +118,7 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
 }
 
 //Get sort by sql based on sortby pattern(eg.[]string{"name asc", "id desc"})
-func (r *RMDB) getSortBy(sortby []string, locationColumns ...[]string) (string, error) {
+func (r *MysqlHandler) getSortBy(sortby []string, locationColumns ...[]string) (string, error) {
 	//sort by
 	sortbyArr := []string{}
 	for _, item := range sortby {
@@ -151,17 +150,17 @@ func (r *RMDB) getSortBy(sortby []string, locationColumns ...[]string) (string, 
 }
 
 // Count based on condition
-func (*RMDB) Count(tablename string, condition Condition) (int, error) {
+func (*MysqlHandler) Count(tablename string, condition Condition) (int, error) {
 	conditions, values := BuildCondition(condition)
 	sqlStr := "SELECT COUNT(*) AS count FROM " + tablename + " WHERE " + conditions
 	log.Debug(sqlStr, "db")
 	db, err := DB()
 	if err != nil {
-		return 0, errors.Wrap(err, "[RMDB.Count]Error when connecting db.")
+		return 0, errors.Wrap(err, "[MysqlHandler.Count]Error when connecting db.")
 	}
 	rows, err := queries.Raw(sqlStr, values...).QueryContext(context.Background(), db)
 	if err != nil {
-		return 0, errors.Wrap(err, "[RMDB.Count]Error when querying.")
+		return 0, errors.Wrap(err, "[MysqlHandler.Count]Error when querying.")
 	}
 	rows.Next()
 	var count int
@@ -171,7 +170,7 @@ func (*RMDB) Count(tablename string, condition Condition) (int, error) {
 }
 
 //todo: support limit.
-func (r *RMDB) GetEntity(tablename string, condition Condition, sortby []string, entity interface{}) error {
+func (r *MysqlHandler) GetEntity(tablename string, condition Condition, sortby []string, entity interface{}) error {
 	conditions, values := BuildCondition(condition)
 	sortbyStr, err := r.getSortBy(sortby)
 	if err != nil {
@@ -181,23 +180,23 @@ func (r *RMDB) GetEntity(tablename string, condition Condition, sortby []string,
 	log.Debug(sqlStr, "db")
 	db, err := DB()
 	if err != nil {
-		return errors.Wrap(err, "[RMDB.GetEntity]Error when connecting db.")
+		return errors.Wrap(err, "[MysqlHandler.GetEntity]Error when connecting db.")
 	}
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
 	if err == sql.ErrNoRows {
 		log.Warning(err.Error(), "GetEntity")
 	} else {
-		return errors.Wrap(err, "[RMDB.GetEntity]Error when query.")
+		return errors.Wrap(err, "[MysqlHandler.GetEntity]Error when query.")
 	}
 	return nil
 }
 
 //Fetch multiple enities
-func (*RMDB) GetMultiEntities(tablenames []string, condition Condition, entity interface{}) {
+func (*MysqlHandler) GetMultiEntities(tablenames []string, condition Condition, entity interface{}) {
 
 }
 
-func (RMDB) Insert(tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
+func (MysqlHandler) Insert(tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
 	sqlStr := "INSERT INTO " + tablename + " ("
 	valuesString := "VALUES("
 	var valueParameters []interface{}
@@ -223,7 +222,7 @@ func (RMDB) Insert(tablename string, values map[string]interface{}, transation .
 	if len(transation) == 0 {
 		db, err := DB()
 		if err != nil {
-			return 0, errors.Wrap(err, "[RBDM.Insert] Error when getting db connection.")
+			return 0, errors.Wrap(err, "MysqlHandler.Insert] Error when getting db connection.")
 		}
 		//todo: create context to isolate queries.
 		result, error = db.ExecContext(context.Background(), sqlStr, valueParameters...)
@@ -232,12 +231,12 @@ func (RMDB) Insert(tablename string, values map[string]interface{}, transation .
 	}
 	//execution error
 	if error != nil {
-		return 0, errors.Wrap(error, "[RBDM.Insert]Error when executing. sql - "+sqlStr)
+		return 0, errors.Wrap(error, "MysqlHandler.Insert]Error when executing. sql - "+sqlStr)
 	}
 	id, err := result.LastInsertId()
 	//Get id error
 	if err != nil {
-		return 0, errors.Wrap(err, "[RBDM.Insert]Error when inserting. sql - "+sqlStr)
+		return 0, errors.Wrap(err, "MysqlHandler.Insert]Error when inserting. sql - "+sqlStr)
 	}
 
 	log.Debug("Insert results in id: "+strconv.FormatInt(id, 10), "db")
@@ -246,7 +245,7 @@ func (RMDB) Insert(tablename string, values map[string]interface{}, transation .
 }
 
 //Generic update an entity
-func (RMDB) Update(tablename string, values map[string]interface{}, condition Condition, transation ...*sql.Tx) error {
+func (MysqlHandler) Update(tablename string, values map[string]interface{}, condition Condition, transation ...*sql.Tx) error {
 	sqlStr := "UPDATE " + tablename + " SET "
 	var valueParameters []interface{}
 	for name, value := range values {
@@ -268,14 +267,14 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition Co
 	if len(transation) == 0 {
 		db, err := DB()
 		if err != nil {
-			return errors.Wrap(err, "[RBDM.Update] Error when getting db connection.")
+			return errors.Wrap(err, "MysqlHandler.Update] Error when getting db connection.")
 		}
 		result, error = db.ExecContext(context.Background(), sqlStr, valueParameters...)
 	} else {
 		result, error = transation[0].ExecContext(context.Background(), sqlStr, valueParameters...)
 	}
 	if error != nil {
-		return errors.Wrap(error, "[RMDB.Update]Error when updating. sql - "+sqlStr)
+		return errors.Wrap(error, "[MysqlHandler.Update]Error when updating. sql - "+sqlStr)
 	}
 	resultRows, _ := result.RowsAffected()
 	log.Debug("Updated rows:"+strconv.FormatInt(resultRows, 10), "db")
@@ -283,7 +282,7 @@ func (RMDB) Update(tablename string, values map[string]interface{}, condition Co
 }
 
 //Delete based on condition
-func (*RMDB) Delete(tableName string, condition Condition, transation ...*sql.Tx) error {
+func (*MysqlHandler) Delete(tableName string, condition Condition, transation ...*sql.Tx) error {
 	conditionString, conditionValues := BuildCondition(condition)
 	sqlStr := "DELETE FROM " + tableName + " WHERE " + conditionString
 
@@ -295,22 +294,22 @@ func (*RMDB) Delete(tableName string, condition Condition, transation ...*sql.Tx
 	if len(transation) == 0 {
 		db, err := DB()
 		if err != nil {
-			return errors.Wrap(err, "[RBDM.Delete] Error when getting db connection.")
+			return errors.Wrap(err, "MysqlHandler.Delete] Error when getting db connection.")
 		}
 		result, error = db.ExecContext(context.Background(), sqlStr, conditionValues...)
 	} else {
 		result, error = transation[0].ExecContext(context.Background(), sqlStr, conditionValues...)
 	}
 	if error != nil {
-		return errors.Wrap(error, "[RMDB.Delete]Error when deleting. sql - "+sqlStr)
+		return errors.Wrap(error, "[MysqlHandler.Delete]Error when deleting. sql - "+sqlStr)
 	}
 	resultRows, _ := result.RowsAffected()
 	log.Debug("Deleted rows:"+strconv.FormatInt(resultRows, 10), "db")
 	return nil
 }
 
-var dbObject = RMDB{}
+var dbObject = MysqlHandler{}
 
-func DBHanlder() RMDB {
+func DBHanlder() MysqlHandler {
 	return dbObject
 }

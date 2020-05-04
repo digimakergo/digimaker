@@ -33,7 +33,7 @@ func TestInsert(t *testing.T) {
 }
 
 func TestCount(t *testing.T) {
-	rmdb := RMDB{}
+	rmdb := MysqlHandler{}
 	count, err := rmdb.Count("dm_location", Cond("1", 1))
 	fmt.Println(count, err)
 }

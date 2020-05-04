@@ -7,6 +7,7 @@ package db
 import (
 	"context"
 	"database/sql"
+
 	"github.com/xc/digimaker/core/util"
 
 	"github.com/pkg/errors"
@@ -53,13 +54,6 @@ func CreateTx() (*sql.Tx, error) {
 		return nil, errors.New("Can't get transaction.")
 	}
 	return tx, nil
-}
-
-type DBer interface {
-	Open() (*sql.DB, error)
-	Query(q string)
-	All(q string)
-	Execute(q string)
 }
 
 type DBEntitier interface {

@@ -13,19 +13,20 @@ type ContentCommon struct {
 }
 
 func (c ContentCommon) IdentifierList() []string {
-	return []string{"cid", "version", "published", "modified", "cuid", "status"}
+	return []string{"cid", "version", "published", "modified", "author", "author_name", "cuid", "status"}
 }
 
+//Value for DB. todo: rename to DBValues()
 func (c ContentCommon) Values() map[string]interface{} {
-	result := make(map[string]interface{})
-	result["id"] = c.CID
-	result["version"] = c.Version
-	result["published"] = c.Published
-	result["modified"] = c.Modified
-	result["status"] = c.Status
-	result["author"] = c.Author
-	result["author_name"] = c.AuthorName
-	result["cuid"] = c.CUID
+	result := map[string]interface{}{
+		"id":        c.CID,
+		"version":   c.Version,
+		"published": c.Published,
+		"modified":  c.Modified,
+		"status":    c.Status,
+		"author":    c.Author,
+		"cuid":      c.CUID,
+	}
 	for identifier, relationValue := range c.Relations.Map {
 		result[identifier] = relationValue
 	}
