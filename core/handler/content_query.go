@@ -80,7 +80,7 @@ func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (conten
 	//todo: use limit in this case so it doesn't fetch more into memory.
 	content := contenttype.NewInstance(contentType)
 	count := -1
-	err := cq.Fill(contentType, condition, []int{}, []string{}, content, &count)
+	err := cq.Fill(contentType, condition, []int{0, 1}, []string{}, content, &count)
 	if err != nil {
 		return nil, err
 	}
