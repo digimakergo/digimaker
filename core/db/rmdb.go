@@ -79,7 +79,7 @@ func (r *RMDB) GetByFields(contentType string, tableName string, condition Condi
                    FROM (` + tableName + ` content
                      INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=content.id)
                      LEFT JOIN dm_relation relation ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
-										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=location.author
+										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=content.author
                      WHERE ` + conditions + `
                      GROUP BY location.id, author_name
 										 ` + sortbyStr + " " + limitStr

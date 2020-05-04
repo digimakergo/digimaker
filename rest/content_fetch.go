@@ -137,14 +137,14 @@ func Children(w http.ResponseWriter, r *http.Request) {
 	condition := db.Cond("1", "1")
 	if author != "" {
 		if author == "self" {
-			condition = condition.Cond("location.author", userid)
+			condition = condition.Cond("author", userid)
 		} else {
 			authorInt, err := strconv.Atoi(author)
 			if err != nil {
 				HandleError(errors.New("wrong author format"), w, 410)
 				return
 			}
-			condition = condition.Cond("location.author", authorInt)
+			condition = condition.Cond("author", authorInt)
 		}
 	}
 	//todo: add more filters including field filter.
