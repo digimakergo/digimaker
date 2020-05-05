@@ -68,12 +68,12 @@ func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) 
 
 // FetchByContentID fetches a content by content id.
 func (cq ContentQuery) FetchByContentID(contentType string, contentID int) (contenttype.ContentTyper, error) {
-	return cq.Fetch(contentType, db.Cond("content.id", contentID))
+	return cq.Fetch(contentType, db.Cond("c.id", contentID))
 }
 
 // FetchByCUID fetches a content by content's uid(cuid)
 func (cq ContentQuery) FetchByCUID(contentType string, cuid string) (contenttype.ContentTyper, error) {
-	return cq.Fetch(contentType, db.Cond("content.cuid", cuid))
+	return cq.Fetch(contentType, db.Cond("c.cuid", cuid))
 }
 
 // Fetch fetches first content based on condition.

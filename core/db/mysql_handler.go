@@ -74,11 +74,11 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 		return -1, err
 	}
 
-	sqlStr := `SELECT content.*, content.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
-                   FROM (` + tableName + ` content
-                     INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=content.id)
-                     LEFT JOIN dm_relation relation ON content.id=relation.to_content_id AND relation.to_type='` + contentType + `'
-										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=content.author
+	sqlStr := `SELECT c.*, c.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
+                   FROM (` + tableName + ` c
+                     INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=c.id)
+                     LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
+										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author
                      WHERE ` + conditions + `
                      GROUP BY location.id, author_name
 										 ` + sortbyStr + " " + limitStr
@@ -99,9 +99,9 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 	countResult := 0
 	if count {
 		countSqlStr := `SELECT COUNT(*) AS count
-									 FROM ( ` + tableName + ` content
+									 FROM ( ` + tableName + ` c
 										 INNER JOIN dm_location location
-												ON location.content_type = '` + contentType + `' AND location.content_id=content.id )
+												ON location.content_type = '` + contentType + `' AND location.content_id=c.id )
 										 WHERE ` + conditions
 
 		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)

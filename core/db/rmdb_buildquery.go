@@ -44,7 +44,7 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 		fieldName := expression.Field
 		if len(locationColumns) > 0 && fieldName != "1" {
 			if !(util.Contains(locationColumns[0], fieldName) || strings.Contains(fieldName, ".")) {
-				fieldName = "content." + expression.Field
+				fieldName = "c." + expression.Field
 			}
 		}
 		return fieldName + " " + expression.Operator + operatorStr, value
