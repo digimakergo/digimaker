@@ -27,6 +27,13 @@ func TestCond(t *testing.T) {
 	fmt.Println(orCond)
 }
 
+func ExampleEmptyCond() {
+	cond := EmptyCond().Cond("author", "1")
+	built, _ := BuildCondition(cond)
+	fmt.Println(built)
+	//Output: (author = ?)
+}
+
 func TestContinueCond(t *testing.T) {
 	cond := Cond("id>", 111111).Or(Cond("modified<", 22222)).Cond("section=", "c")
 	fmt.Println(cond)

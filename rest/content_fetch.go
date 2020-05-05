@@ -134,7 +134,7 @@ func Children(w http.ResponseWriter, r *http.Request) {
 
 	//filter
 	author := getParams.Get("author")
-	condition := db.Cond("1", "1")
+	condition := db.EmptyCond()
 	if author != "" {
 		if author == "self" {
 			condition = condition.Cond("author", userid)

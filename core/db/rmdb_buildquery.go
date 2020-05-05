@@ -11,7 +11,10 @@ import (
 //todo: optimize - use pointers & avoid string +
 func BuildCondition(cond Condition, locationColumns ...[]string) (string, []interface{}) {
 	logic := cond.Logic
-	if logic == "" {
+	if logic == "" && cond.Children == nil {
+		return "", nil
+	}
+	if logic == "" { //if it's a expression
 		expression := cond.Children.(Expression)
 		value := []interface{}{}
 		operatorStr := ""
@@ -49,13 +52,16 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 		}
 		return fieldName + " " + expression.Operator + operatorStr, value
 	} else {
+		//If it's a container
 		childrenArr := cond.Children.([]Condition)
 		var expressionList []string
 		var values []interface{}
 		for _, subCondition := range childrenArr {
-			expressionStr, currentValues := BuildCondition(subCondition, locationColumns...)
-			expressionList = append(expressionList, expressionStr)
-			values = append(values, currentValues...)
+			if subCondition.Children != nil {
+				expressionStr, currentValues := BuildCondition(subCondition, locationColumns...)
+				expressionList = append(expressionList, expressionStr)
+				values = append(values, currentValues...)
+			}
 		}
 
 		listStr := strings.Join(expressionList, " "+cond.Logic+" ")

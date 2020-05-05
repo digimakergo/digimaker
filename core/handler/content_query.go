@@ -122,7 +122,7 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 	contentTypeList := strings.Split(contentTypes, ",")
 	var list []contenttype.ContentTyper
 	for _, contentType := range contentTypeList {
-		currentList, _, err := cq.SubList(rootContent, contentType, depth, userID, db.Cond("1", "1"), []int{}, sortby, false, context)
+		currentList, _, err := cq.SubList(rootContent, contentType, depth, userID, db.EmptyCond(), []int{}, sortby, false, context)
 		if err != nil {
 			return TreeNode{}, err
 		}
@@ -178,11 +178,9 @@ func permCondition(userID int, contenttype string, context context.Context) db.C
 			}
 		}
 
-		var sectionCond db.Condition
+		sectionCond := db.EmptyCond()
 		if section, ok := limit["section"]; ok {
-			sectionCond = db.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
-		} else {
-			sectionCond = db.Cond("1", "1")
+			sectionCond = sectionCond.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
 		}
 
 		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.

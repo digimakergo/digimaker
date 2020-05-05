@@ -75,8 +75,7 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 	}
 
 	sqlStr := `SELECT c.*, c.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
-                   FROM (` + tableName + ` c
-                     INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=c.id)
+                   FROM (` + tableName + ` c INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=c.id)
                      LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
 										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author
                      WHERE ` + conditions + `
