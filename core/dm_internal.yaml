@@ -1,0 +1,22 @@
+##
+## This is internal setting file, only updated when there is version change.
+##
+
+##location columns, used for sql prefix(location.xxx) and Location IdentifierList()
+location_columns:
+  - id
+  - parent_id
+  - main_id
+  - hierarchy
+  - depth
+  - content_type
+  - content_id
+  - language
+  - identifier_path
+  - name
+  - is_hidden
+  - is_invisible
+  - priority
+  - uid
+  - section
+  - p

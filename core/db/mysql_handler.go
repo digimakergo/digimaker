@@ -38,7 +38,7 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 		return -1, errors.Wrap(err, "[MysqlHandler.GetByFields]Error when connecting db.")
 	}
 
-	columns := util.GetConfigArr("internal", "location_columns")
+	columns := util.GetInternalSetting("location_columns").([]string)
 	columnsWithPrefix := util.Iterate(columns, func(s string) string {
 		return `location.` + s + ` AS "location.` + s + `"`
 	})

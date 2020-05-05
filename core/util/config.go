@@ -4,6 +4,7 @@
 package util
 
 import (
+	"os"
 	"path/filepath"
 
 	"github.com/xc/digimaker/core/log"
@@ -15,7 +16,8 @@ var defaultSettings = struct {
 	ConfigFile   string
 	ConfigFolder string
 	HomePath     string
-}{"dm", "", ""}
+	DMPath       string
+}{"dm", "", "", os.Getenv("GOPATH") + "/src/github.com/xc/digimaker"}
 
 func InitHomePath(homePath string) {
 	defaultSettings.HomePath = homePath
@@ -33,6 +35,11 @@ func AbsHomePath() string {
 
 func ConfigPath() string {
 	return defaultSettings.ConfigFolder
+}
+
+//DMPath returns folder path of the framework. It can be used to load system file(eg. internal setting file)
+func DMPath() string {
+	return defaultSettings.DMPath
 }
 
 //Get config based on section and identifer
@@ -110,4 +117,27 @@ func GetAll(config string) map[string]interface{} {
 	}
 	allSettings := viper.AllSettings()
 	return allSettings
+}
+
+var internalSettings map[string]interface{}
+
+// GetInternalSetting return setting for internal use. This setting is only changed when there is version update.
+func GetInternalSetting(setting string) interface{} {
+	if value, ok := internalSettings[setting]; ok {
+		return value
+	} else {
+		log.Error("Didn't find setting "+setting+" in dm_internal.yaml", "system")
+		return nil
+	}
+}
+
+func init() {
+	viper.SetConfigName("dm_internal")
+	viper.AddConfigPath(defaultSettings.DMPath + "/core")
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Error("Fatal error in dm_internal.yaml config file: "+err.Error(), "system")
+		return
+	}
+	internalSettings = viper.AllSettings()
 }
