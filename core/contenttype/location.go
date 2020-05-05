@@ -60,7 +60,7 @@ func (c *Location) TableName() string {
 }
 
 func (c *Location) IdentifierList() []string {
-	return util.GetInternalSetting("location_columns").([]string)
+	return util.GetInternalSettings("location_columns")
 }
 
 func (c *Location) Field(name string) interface{} {

@@ -119,25 +119,32 @@ func GetAll(config string) map[string]interface{} {
 	return allSettings
 }
 
-var internalSettings map[string]interface{}
+var internalViper *viper.Viper
 
-// GetInternalSetting return setting for internal use. This setting is only changed when there is version update.
-func GetInternalSetting(setting string) interface{} {
-	if value, ok := internalSettings[setting]; ok {
-		return value
-	} else {
+// GetInternalSettings return setting for internal use.
+func GetInternalSettings(setting string) []string {
+	result := internalViper.GetStringSlice(setting)
+	if result == nil {
 		log.Error("Didn't find setting "+setting+" in dm_internal.yaml", "system")
-		return nil
 	}
+	return result
+}
+
+func GetInternalSetting(setting string) string {
+	return internalViper.GetString(setting)
+}
+
+func GetInternalSettingInt(setting string) int {
+	return internalViper.GetInt(setting)
 }
 
 func init() {
-	viper.SetConfigName("dm_internal")
-	viper.AddConfigPath(defaultSettings.DMPath + "/core")
-	err := viper.ReadInConfig()
+	v := viper.New()
+	v.SetConfigName("dm_internal")
+	v.AddConfigPath(defaultSettings.DMPath + "/core")
+	err := v.ReadInConfig()
 	if err != nil {
 		log.Error("Fatal error in dm_internal.yaml config file: "+err.Error(), "system")
-		return
 	}
-	internalSettings = viper.AllSettings()
+	internalViper = v
 }
