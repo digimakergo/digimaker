@@ -45,7 +45,11 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 	locationColumns := strings.Join(columnsWithPrefix, ",")
 
 	//get condition string for fields
-	conditions, values := BuildCondition(condition, columns)
+	conditionStr, values := BuildCondition(condition, columns)
+	where := ""
+	if conditionStr != "" {
+		where = "WHERE " + conditionStr
+	}
 
 	relationQuery := `,CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
                                       'to_content_id', relation.to_content_id,
@@ -78,7 +82,7 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
                    FROM (` + tableName + ` c INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=c.id)
                      LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
 										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author
-                     WHERE ` + conditions + `
+                    ` + where + `
                      GROUP BY location.id, author_name
 										 ` + sortbyStr + " " + limitStr
 
@@ -99,9 +103,8 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 	if count {
 		countSqlStr := `SELECT COUNT(*) AS count
 									 FROM ( ` + tableName + ` c
-										 INNER JOIN dm_location location
-												ON location.content_type = '` + contentType + `' AND location.content_id=c.id )
-										 WHERE ` + conditions
+										 INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=c.id )
+										 ` + where
 
 		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
 		if err != nil {
