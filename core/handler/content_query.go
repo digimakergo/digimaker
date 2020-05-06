@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -154,6 +155,7 @@ func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentT
 	}
 }
 
+// add condition from permission
 func permCondition(userID int, contenttype string, context context.Context) db.Condition {
 	limits, err := permission.GetUserLimits(userID, "content/read", context)
 	if err != nil {
@@ -161,7 +163,7 @@ func permCondition(userID int, contenttype string, context context.Context) db.C
 	}
 
 	//add conditions based on limits
-	var result db.Condition
+	result := db.EmptyCond()
 	for _, limit := range limits {
 		if ctype, ok := limit["contenttype"]; ok {
 			ctypeList := ctype.([]interface{})
@@ -178,9 +180,13 @@ func permCondition(userID int, contenttype string, context context.Context) db.C
 			}
 		}
 
-		sectionCond := db.EmptyCond()
+		fmt.Println("succeed")
+		fmt.Println(limit)
+
+		currentCond := db.EmptyCond()
+
 		if section, ok := limit["section"]; ok {
-			sectionCond = sectionCond.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
+			currentCond = currentCond.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
 		}
 
 		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
@@ -189,24 +195,19 @@ func permCondition(userID int, contenttype string, context context.Context) db.C
 		// 	itemInt, _ := strconv.Atoi(item)
 		// 	subtree = append(subtree, itemInt)
 		// }
-		if result.Children == nil {
-			result = sectionCond
-		} else {
-			result = result.Or(sectionCond)
-		}
 
 		//todo: current self author will override the other policy. to be fixed.
 		if author, ok := limit["author"]; ok {
 			if author.(string) == "self" {
-				authorCond := db.Cond("author", userID)
-				if result.Children == nil {
-					result = authorCond
-				} else {
-					result = result.And(authorCond)
-				}
+				currentCond = currentCond.Cond("author", userID)
 			}
 		}
 
+		if currentCond.Children == nil { //If the condition has nothing inside, meaning the user can access all
+			result = db.EmptyCond()
+			break
+		}
+		result = result.Or(currentCond)
 	}
 	return result
 }

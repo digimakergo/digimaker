@@ -10,6 +10,9 @@ import (
 
 var Operators = []string{">", ">=", "<", "<=", "=", "in", "like"} //todo: make it extendable in loading
 
+const logicAnd = "and"
+const logicOr = "or"
+
 //Expression is a 'leaf' condition
 type Expression struct {
 	Field    string
@@ -39,7 +42,7 @@ func (c Condition) And(input interface{}, more ...interface{}) Condition {
 		for _, item := range more {
 			arr = append(arr, item.(Condition))
 		}
-		result = combineExpression("and", c, input.(Condition), arr...)
+		result = combineExpression(logicAnd, c, input.(Condition), arr...)
 	case string:
 		value := more[0]
 		result = c.And(Cond(input.(string), value)) //invoke myself with Condition type
@@ -56,7 +59,7 @@ func (c Condition) Or(input interface{}, more ...interface{}) Condition {
 		for _, item := range more {
 			arr = append(arr, item.(Condition))
 		}
-		result = combineExpression("or", c, input.(Condition), arr...)
+		result = combineExpression(logicOr, c, input.(Condition), arr...)
 	case string:
 		value := more[0]
 		result = c.Or(Cond(input.(string), value)) //invoke myself with Condition type
@@ -68,12 +71,24 @@ func (c Condition) Or(input interface{}, more ...interface{}) Condition {
 func combineExpression(operator string, input1 Condition, input2 Condition, more ...Condition) Condition {
 	condition := Condition{}
 	condition.Logic = operator
-	var arr []Condition
-	conditionArr := append(arr, input1, input2)
+	var conditions []Condition
+	conditions = append(conditions, input1, input2)
 	if more != nil {
-		conditionArr = append(conditionArr, more...)
+		conditions = append(conditions, more...)
 	}
-	condition.Children = conditionArr
+
+	//filter empty condition
+	var validConditions []Condition
+	for _, item := range conditions {
+		if item.Children != nil {
+			validConditions = append(validConditions, item)
+		}
+	}
+	if len(validConditions) == 0 {
+		condition.Logic = ""
+	} else {
+		condition.Children = validConditions
+	}
 	return condition
 }
 
@@ -165,15 +180,15 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 		var expressionList []string
 		var values []interface{}
 		for _, subCondition := range childrenArr {
-			if subCondition.Children != nil {
-				expressionStr, currentValues := BuildCondition(subCondition, locationColumns...)
-				expressionList = append(expressionList, expressionStr)
-				values = append(values, currentValues...)
-			}
+			expressionStr, currentValues := BuildCondition(subCondition, locationColumns...)
+			expressionList = append(expressionList, expressionStr)
+			values = append(values, currentValues...)
 		}
 
 		listStr := strings.Join(expressionList, " "+cond.Logic+" ")
-		str := "(" + listStr + ")"
-		return str, values
+		if len(expressionList) > 1 {
+			listStr = "(" + listStr + ")"
+		}
+		return listStr, values
 	}
 }
