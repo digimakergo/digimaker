@@ -4,25 +4,35 @@
 package fieldtype
 
 import (
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/core/log"
 	"fmt"
+	"strings"
+
+	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/util"
 )
+
+type funcNewField = func() FieldTyper
 
 //global variable for registering handlers
 //A handler is always singleton
-var handlerRegistry = map[string]FieldHandler{}
+var handlerRegistry = map[string]interface{}{}
 
-func RegisterHandler(identifier string, handler FieldtypeHandler) {
-	log.Info("Registering handler for field type " + identifier)
-	f := FieldHandler{}
-	f.Fieldtype = identifier
-	f.handler = handler
-	handlerRegistry[identifier] = f
+func RegisterFieldType(newType funcNewField) {
+	emptytype := newType()
+	fieldtype := emptytype.(FieldTyper).Type()
+	log.Info("Registering field type " + fieldtype)
+	handlerRegistry[fieldtype] = newType
 }
 
-func GetHandler(fieldType string) FieldHandler {
-	return handlerRegistry[fieldType]
+// func RegisterHandler(fieldtype string, handler Handler) {
+// 	log.Info("Registering handler for field type " + fieldtype)
+// 	handlerRegistry[fieldtype] = handler
+// }
+
+func NewField(fieldtype string) FieldTyper {
+	newtype := handlerRegistry[fieldtype]
+	field := newtype.(funcNewField)()
+	return field
 }
 
 type RelationSetting struct {
@@ -30,9 +40,13 @@ type RelationSetting struct {
 	DataPattern string `json:"data_pattern"`
 }
 
-type FieldtypeSetting struct {
+//ValidationRule defines rule for a field's validation. eg. max length
+type VaidationRule map[string]interface{}
+
+type FieldtypeDef struct {
 	Identifier       string            `json:"identifier"`
 	Name             string            `json:"name"`
+	HasVariable      bool              `json:"has_variable"`
 	Searchable       bool              `json:"searchable"`
 	Value            string            `json:"value"`
 	Translations     map[string]string `json:"translations"`
@@ -42,11 +56,11 @@ type FieldtypeSetting struct {
 }
 
 // Datatypes which defined in datatype.json
-var fieldtypeDefinition map[string]FieldtypeSetting
+var fieldtypeDefinition map[string]FieldtypeDef
 
 func LoadDefinition() error {
 	//Load datatype.json into DatatypeDefinition
-	var defMap map[string]FieldtypeSetting
+	var defMap map[string]FieldtypeDef
 	err := util.UnmarshalData(util.ConfigPath()+"/fieldtype.json", &defMap)
 	if err != nil {
 		return err
@@ -60,10 +74,39 @@ func LoadDefinition() error {
 	return nil
 }
 
-func GetDefinition(identifier string) FieldtypeSetting {
-	return fieldtypeDefinition[identifier]
+func GetDef(fieldtype string) FieldtypeDef {
+	return fieldtypeDefinition[fieldtype]
 }
 
-func GetAllDefinition() map[string]FieldtypeSetting {
+func GetAllDefinition() map[string]FieldtypeDef {
 	return fieldtypeDefinition
+}
+
+// IsEmptyInput returns if it's an empty input.
+// The input can be not string(eg. int - definately not empty)
+func IsEmptyInput(input interface{}) bool {
+	if input == nil {
+		return true
+	}
+	s := fmt.Sprint(input)
+	s = strings.TrimSpace(s)
+	return s == ""
+}
+
+//Convert input to nil when input is empty string "".
+func EmtpyToNull(input interface{}) interface{} {
+	if input == nil {
+		return nil
+	}
+	s, ok := input.(string)
+	if ok && s == "" {
+		return nil
+	}
+	return input
+}
+
+//Relation field handler can convert relations into RelationField
+type RelationFieldHandler interface {
+	ToStorage(contents interface{}) interface{}
+	UpdateOne(toContent interface{}, identifier string, from interface{})
 }
