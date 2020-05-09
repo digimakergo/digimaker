@@ -1,0 +1,12 @@
+database:
+   type: mysql
+   host: 127.0.0.1
+   username: test
+   password: test123
+   database: dm_test
+
+
+
+# image:
+#     alias: {thumbnail:{width: 30}, large:{width: 800}}
+#     generated_when_upload: "thumbnail, large"

@@ -18,27 +18,33 @@ import (
 
 type Usergroup struct{
      contenttype.ContentCommon `boil:",bind"`
-    
-     
-     
-        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+
      
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Summary  fieldtype.RichText `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+         
+        
+    
+         
+         
+         
+            Title  fieldtype.Text `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
-     contenttype.Location `boil:"location,bind"  json:"location"`
+     contenttype.Location `boil:"location,bind"`
     
 }
 
-func ( *Usergroup ) TableName() string{
+func (c *Usergroup ) TableName() string{
 	 return "dm_usergroup"
 }
 
-func ( *Usergroup ) ContentType() string{
+func (c *Usergroup ) ContentType() string{
 	 return "usergroup"
 }
 
@@ -57,33 +63,50 @@ func (c *Usergroup) GetLocation() *contenttype.Location{
     
 }
 
+func (c *Usergroup) ToMap() map[string]interface{}{
+    result := map[string]interface{}{}
+    for _, identifier := range c.IdentifierList(){
+      result[identifier] = c.Value(identifier)
+    }
+    return result
+}
 
+//Get map of the all fields(including data_fields)
 //todo: cache this? (then you need a reload?)
-func (c *Usergroup) ToMap() map[string]interface{} {
+func (c *Usergroup) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
     
+
+    
         
-        result["summary"]=c.Summary
+        
+            result["summary"]=c.Summary
+        
         
     
         
-        result["title"]=c.Title
+        
+            result["title"]=c.Title
+        
         
     
-	for key, value := range c.ContentCommon.Values() {
+	for key, value := range c.ContentCommon.ToDBValues() {
 		result[key] = value
 	}
 	return result
 }
 
+//Get identifier list of fields(NOT including data_fields )
 func (c *Usergroup) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "summary","title",}...)
 }
 
-func (c *Usergroup) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetDefinition( c.ContentType() )
+func (c *Usergroup) Definition(language ...string) contenttype.ContentType {
+	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+    return def
 }
 
+//Get field value
 func (c *Usergroup) Value(identifier string) interface{} {
     
     if util.Contains( c.Location.IdentifierList(), identifier ) {
@@ -93,15 +116,20 @@ func (c *Usergroup) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
+    
     case "summary":
         
             result = c.Summary
         
     
+    
+    
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -111,20 +139,25 @@ func (c *Usergroup) Value(identifier string) interface{} {
 	return result
 }
 
-
+//Set value to a field
 func (c *Usergroup) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
+        
+            
             
             
             case "summary":
-            c.Summary = value.(fieldtype.RichTextField)
+            c.Summary = value.(fieldtype.RichText)
+            
             
         
             
             
+            
             case "title":
-            c.Title = value.(fieldtype.TextField)
+            c.Title = value.(fieldtype.Text)
+            
             
         
 	default:
@@ -142,13 +175,13 @@ func (c *Usergroup) SetValue(identifier string, value interface{}) error {
 func (c *Usergroup) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
+		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID), transaction...)
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
 		return err
 	}
 	return nil

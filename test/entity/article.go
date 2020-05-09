@@ -18,46 +18,73 @@ import (
 
 type Article struct{
      contenttype.ContentCommon `boil:",bind"`
-    
-     
-     
-        Body  fieldtype.RichTextField `boil:"body" json:"body" toml:"body" yaml:"body"`
+
      
     
-     
-     
+         
+         
+         
+            Body  fieldtype.RichText `boil:"body" json:"body" toml:"body" yaml:"body"`
+         
+        
     
-     
-     
-        Editors  fieldtype.EditorList `boil:"editors" json:"editors" toml:"editors" yaml:"editors"`
-     
+         
+         
+         
+            Coverimage  fieldtype.Text `boil:"coverimage" json:"coverimage" toml:"coverimage" yaml:"coverimage"`
+         
+        
     
-     
-     
+         
+         
+         
+            Editors  fieldtype.Text `boil:"editors" json:"editors" toml:"editors" yaml:"editors"`
+         
+        
     
-     
-     
-        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-     
+         
+         
+         
+            RelatedArticles  fieldtype.RelationList `boil:"related_articles" json:"related_articles" toml:"related_articles" yaml:"related_articles"`
+         
+        
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+        
     
-     
-     
+         
+         
+         
+            Summary  fieldtype.RichText `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+         
+        
+    
+         
+         
+         
+            Title  fieldtype.Text `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
+    
+         
+         
+         
+            UsefulResources  fieldtype.RelationList `boil:"useful_resources" json:"useful_resources" toml:"useful_resources" yaml:"useful_resources"`
+         
+        
     
     
-     contenttype.Location `boil:"location,bind"  json:"location"`
+     contenttype.Location `boil:"location,bind"`
     
 }
 
-func ( *Article ) TableName() string{
+func (c *Article ) TableName() string{
 	 return "dm_article"
 }
 
-func ( *Article ) ContentType() string{
+func (c *Article ) ContentType() string{
 	 return "article"
 }
 
@@ -76,47 +103,84 @@ func (c *Article) GetLocation() *contenttype.Location{
     
 }
 
+func (c *Article) ToMap() map[string]interface{}{
+    result := map[string]interface{}{}
+    for _, identifier := range c.IdentifierList(){
+      result[identifier] = c.Value(identifier)
+    }
+    return result
+}
 
+//Get map of the all fields(including data_fields)
 //todo: cache this? (then you need a reload?)
-func (c *Article) ToMap() map[string]interface{} {
+func (c *Article) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
     
+
+    
         
-        result["body"]=c.Body
+        
+            result["body"]=c.Body
+        
         
     
         
-    
         
-        result["editors"]=c.Editors
+            result["coverimage"]=c.Coverimage
         
-    
         
     
         
-        result["summary"]=c.Summary
+        
+            result["editors"]=c.Editors
+        
         
     
         
-        result["title"]=c.Title
+        
+            result["related_articles"]=c.RelatedArticles
+        
         
     
         
+        
+        
     
-	for key, value := range c.ContentCommon.Values() {
+        
+        
+            result["summary"]=c.Summary
+        
+        
+    
+        
+        
+            result["title"]=c.Title
+        
+        
+    
+        
+        
+            result["useful_resources"]=c.UsefulResources
+        
+        
+    
+	for key, value := range c.ContentCommon.ToDBValues() {
 		result[key] = value
 	}
 	return result
 }
 
+//Get identifier list of fields(NOT including data_fields )
 func (c *Article) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "body","coverimage","editors","related_articles","summary","title","useful_resources",}...)
 }
 
-func (c *Article) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetDefinition( c.ContentType() )
+func (c *Article) Definition(language ...string) contenttype.ContentType {
+	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+    return def
 }
 
+//Get field value
 func (c *Article) Value(identifier string) interface{} {
     
     if util.Contains( c.Location.IdentifierList(), identifier ) {
@@ -126,40 +190,57 @@ func (c *Article) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
+    
     case "body":
         
             result = c.Body
         
     
+    
+    
     case "coverimage":
         
-            result = c.Relations.Map["coverimage"]
+            result = c.Coverimage
         
+    
+    
     
     case "editors":
         
             result = c.Editors
         
     
+    
+    
     case "related_articles":
         
-            result = c.Relations.Map["related_articles"]
+            result = c.RelatedArticles
         
+    
+    
+    
+    
     
     case "summary":
         
             result = c.Summary
         
     
+    
+    
     case "title":
         
             result = c.Title
         
     
+    
+    
     case "useful_resources":
         
-            result = c.Relations.Map["useful_resources"]
+            result = c.UsefulResources
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -169,40 +250,69 @@ func (c *Article) Value(identifier string) interface{} {
 	return result
 }
 
-
+//Set value to a field
 func (c *Article) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
+        
+            
             
             
             case "body":
-            c.Body = value.(fieldtype.RichTextField)
-            
-        
+            c.Body = value.(fieldtype.RichText)
             
             
         
+            
+            
+            
+            case "coverimage":
+            c.Coverimage = value.(fieldtype.Text)
+            
+            
+        
+            
             
             
             case "editors":
-            c.Editors = value.(fieldtype.EditorList)
+            c.Editors = value.(fieldtype.Text)
+            
+            
+        
+            
+            
+            
+            case "related_articles":
+            c.RelatedArticles = value.(fieldtype.RelationList)
+            
             
         
             
             
+            
+            
         
+            
             
             
             case "summary":
-            c.Summary = value.(fieldtype.RichTextField)
+            c.Summary = value.(fieldtype.RichText)
+            
             
         
+            
             
             
             case "title":
-            c.Title = value.(fieldtype.TextField)
+            c.Title = value.(fieldtype.Text)
+            
             
         
+            
+            
+            
+            case "useful_resources":
+            c.UsefulResources = value.(fieldtype.RelationList)
             
             
         
@@ -221,13 +331,13 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
 func (c *Article) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
+		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID), transaction...)
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
 		return err
 	}
 	return nil

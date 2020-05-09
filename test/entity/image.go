@@ -16,35 +16,35 @@ import (
 
 type Image struct{
      contenttype.ContentCommon `boil:",bind"`
-    
+
      
+          Imagetype  string `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
      
-        Imagetype  string `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
-     
-    
-     
-     
-        ParentId  int `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
+          ParentId  int `boil:"parent_id" json:"parent_id" toml:"parent_id" yaml:"parent_id"`
      
     
-     
-     
-        Path  fieldtype.TextField `boil:"path" json:"path" toml:"path" yaml:"path"`
-     
+         
+         
+         
+            Image  fieldtype.Text `boil:"image" json:"image" toml:"image" yaml:"image"`
+         
+        
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Title  fieldtype.Text `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
 }
 
-func ( *Image ) TableName() string{
+func (c *Image ) TableName() string{
 	 return "dm_image"
 }
 
-func ( *Image ) ContentType() string{
+func (c *Image ) ContentType() string{
 	 return "image"
 }
 
@@ -63,65 +63,79 @@ func (c *Image) GetLocation() *contenttype.Location{
     
 }
 
+func (c *Image) ToMap() map[string]interface{}{
+    result := map[string]interface{}{}
+    for _, identifier := range c.IdentifierList(){
+      result[identifier] = c.Value(identifier)
+    }
+    return result
+}
 
+//Get map of the all fields(including data_fields)
 //todo: cache this? (then you need a reload?)
-func (c *Image) ToMap() map[string]interface{} {
+func (c *Image) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
     
+         result["imagetype"]=c.Imagetype
+    
+         result["parent_id"]=c.ParentId
+    
+
+    
         
-        result["imagetype"]=c.Imagetype
+        
+            result["image"]=c.Image
+        
         
     
         
-        result["parent_id"]=c.ParentId
+        
+            result["title"]=c.Title
+        
         
     
-        
-        result["path"]=c.Path
-        
-    
-        
-        result["title"]=c.Title
-        
-    
-	for key, value := range c.ContentCommon.Values() {
+	for key, value := range c.ContentCommon.ToDBValues() {
 		result[key] = value
 	}
 	return result
 }
 
+//Get identifier list of fields(NOT including data_fields )
 func (c *Image) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "imagetype","parent_id","path","title",}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ "image","title",}...)
 }
 
-func (c *Image) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetDefinition( c.ContentType() )
+func (c *Image) Definition(language ...string) contenttype.ContentType {
+	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+    return def
 }
 
+//Get field value
 func (c *Image) Value(identifier string) interface{} {
     
     var result interface{}
 	switch identifier {
     
-    case "imagetype":
+      case "imagetype":
+         result = c.Imagetype
+    
+      case "parent_id":
+         result = c.ParentId
+    
+    
+    
+    case "image":
         
-            result = c.Imagetype
+            result = c.Image
         
     
-    case "parent_id":
-        
-            result = c.ParentId
-        
     
-    case "path":
-        
-            result = c.Path
-        
     
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -131,32 +145,31 @@ func (c *Image) Value(identifier string) interface{} {
 	return result
 }
 
-
+//Set value to a field
 func (c *Image) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
-            
-            
-            case "imagetype":
-            c.Imagetype = value.(string)
-            
+          case "imagetype":
+             c.Imagetype = value.(string)
+        
+          case "parent_id":
+             c.ParentId = value.(int)
+        
         
             
             
-            case "parent_id":
-            c.ParentId = value.(int)
+            
+            case "image":
+            c.Image = value.(fieldtype.Text)
+            
             
         
             
-            
-            case "path":
-            c.Path = value.(fieldtype.TextField)
-            
-        
             
             
             case "title":
-            c.Title = value.(fieldtype.TextField)
+            c.Title = value.(fieldtype.Text)
+            
             
         
 	default:
@@ -174,13 +187,13 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
 func (c *Image) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
+		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID), transaction...)
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
 		return err
 	}
 	return nil

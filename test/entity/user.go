@@ -18,37 +18,54 @@ import (
 
 type User struct{
      contenttype.ContentCommon `boil:",bind"`
-    
-     
-     
-        Firstname  fieldtype.TextField `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
+
      
     
-     
-     
-        Lastname  fieldtype.TextField `boil:"lastname" json:"lastname" toml:"lastname" yaml:"lastname"`
-     
+         
+         
+         
+            Email  fieldtype.Text `boil:"email" json:"email" toml:"email" yaml:"email"`
+         
+        
     
-     
-     
-        Login  fieldtype.TextField `boil:"login" json:"login" toml:"login" yaml:"login"`
-     
+         
+         
+         
+            Firstname  fieldtype.Text `boil:"firstname" json:"firstname" toml:"firstname" yaml:"firstname"`
+         
+        
     
-     
-     
-        Password  fieldtype.TextField `boil:"password" json:"password" toml:"password" yaml:"password"`
-     
+         
+         
+         
+            Lastname  fieldtype.Text `boil:"lastname" json:"lastname" toml:"lastname" yaml:"lastname"`
+         
+        
+    
+         
+         
+         
+            Login  fieldtype.Text `boil:"login" json:"login" toml:"login" yaml:"login"`
+         
+        
+    
+         
+         
+         
+            Password  fieldtype.Password `boil:"password" json:"-" toml:"password" yaml:"password"`
+         
+        
     
     
-     contenttype.Location `boil:"location,bind"  json:"location"`
+     contenttype.Location `boil:"location,bind"`
     
 }
 
-func ( *User ) TableName() string{
+func (c *User ) TableName() string{
 	 return "dm_user"
 }
 
-func ( *User ) ContentType() string{
+func (c *User ) ContentType() string{
 	 return "user"
 }
 
@@ -67,41 +84,68 @@ func (c *User) GetLocation() *contenttype.Location{
     
 }
 
+func (c *User) ToMap() map[string]interface{}{
+    result := map[string]interface{}{}
+    for _, identifier := range c.IdentifierList(){
+      result[identifier] = c.Value(identifier)
+    }
+    return result
+}
 
+//Get map of the all fields(including data_fields)
 //todo: cache this? (then you need a reload?)
-func (c *User) ToMap() map[string]interface{} {
+func (c *User) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
     
+
+    
         
-        result["firstname"]=c.Firstname
+        
+            result["email"]=c.Email
+        
         
     
         
-        result["lastname"]=c.Lastname
+        
+            result["firstname"]=c.Firstname
+        
         
     
         
-        result["login"]=c.Login
+        
+            result["lastname"]=c.Lastname
+        
         
     
         
-        result["password"]=c.Password
+        
+            result["login"]=c.Login
+        
         
     
-	for key, value := range c.ContentCommon.Values() {
+        
+        
+            result["password"]=c.Password
+        
+        
+    
+	for key, value := range c.ContentCommon.ToDBValues() {
 		result[key] = value
 	}
 	return result
 }
 
+//Get identifier list of fields(NOT including data_fields )
 func (c *User) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "firstname","lastname","login","password",}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ "email","firstname","lastname","login","password",}...)
 }
 
-func (c *User) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetDefinition( c.ContentType() )
+func (c *User) Definition(language ...string) contenttype.ContentType {
+	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+    return def
 }
 
+//Get field value
 func (c *User) Value(identifier string) interface{} {
     
     if util.Contains( c.Location.IdentifierList(), identifier ) {
@@ -111,25 +155,41 @@ func (c *User) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
+    
+    case "email":
+        
+            result = c.Email
+        
+    
+    
+    
     case "firstname":
         
             result = c.Firstname
         
+    
+    
     
     case "lastname":
         
             result = c.Lastname
         
     
+    
+    
     case "login":
         
             result = c.Login
         
     
+    
+    
     case "password":
         
             result = c.Password
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -139,32 +199,49 @@ func (c *User) Value(identifier string) interface{} {
 	return result
 }
 
-
+//Set value to a field
 func (c *User) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
+        
+            
+            
+            
+            case "email":
+            c.Email = value.(fieldtype.Text)
+            
+            
+        
+            
             
             
             case "firstname":
-            c.Firstname = value.(fieldtype.TextField)
+            c.Firstname = value.(fieldtype.Text)
+            
             
         
+            
             
             
             case "lastname":
-            c.Lastname = value.(fieldtype.TextField)
+            c.Lastname = value.(fieldtype.Text)
+            
             
         
+            
             
             
             case "login":
-            c.Login = value.(fieldtype.TextField)
+            c.Login = value.(fieldtype.Text)
+            
             
         
             
             
+            
             case "password":
-            c.Password = value.(fieldtype.TextField)
+            c.Password = value.(fieldtype.Password)
+            
             
         
 	default:
@@ -182,13 +259,13 @@ func (c *User) SetValue(identifier string, value interface{}) error {
 func (c *User) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
+		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID), transaction...)
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
 		return err
 	}
 	return nil

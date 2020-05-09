@@ -16,38 +16,39 @@ import (
 
 
 
-type FolderResource struct{
+type Role struct{
      contenttype.ContentCommon `boil:",bind"`
-    
-     
-     
-        ResourceType  fieldtype.TextField `boil:"resource_type" json:"resource_type" toml:"resource_type" yaml:"resource_type"`
+
      
     
-     
-     
-        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-     
+         
+         
+         
+            Summary  fieldtype.RichText `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+         
+        
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Title  fieldtype.Text `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
-     contenttype.Location `boil:"location,bind"  json:"location"`
+     contenttype.Location `boil:"location,bind"`
     
 }
 
-func ( *FolderResource ) TableName() string{
-	 return "dm_folder_resource"
+func (c *Role ) TableName() string{
+	 return "dm_role"
 }
 
-func ( *FolderResource ) ContentType() string{
-	 return "folder_resource"
+func (c *Role ) ContentType() string{
+	 return "role"
 }
 
-func (c *FolderResource ) GetName() string{
+func (c *Role ) GetName() string{
 	 location := c.GetLocation()
      if location != nil{
          return location.Name
@@ -56,44 +57,57 @@ func (c *FolderResource ) GetName() string{
      }
 }
 
-func (c *FolderResource) GetLocation() *contenttype.Location{
+func (c *Role) GetLocation() *contenttype.Location{
     
     return &c.Location
     
 }
 
+func (c *Role) ToMap() map[string]interface{}{
+    result := map[string]interface{}{}
+    for _, identifier := range c.IdentifierList(){
+      result[identifier] = c.Value(identifier)
+    }
+    return result
+}
 
+//Get map of the all fields(including data_fields)
 //todo: cache this? (then you need a reload?)
-func (c *FolderResource) ToMap() map[string]interface{} {
+func (c *Role) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
     
+
+    
         
-        result["resource_type"]=c.ResourceType
+        
+            result["summary"]=c.Summary
+        
         
     
         
-        result["summary"]=c.Summary
+        
+            result["title"]=c.Title
+        
         
     
-        
-        result["title"]=c.Title
-        
-    
-	for key, value := range c.ContentCommon.Values() {
+	for key, value := range c.ContentCommon.ToDBValues() {
 		result[key] = value
 	}
 	return result
 }
 
-func (c *FolderResource) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "resource_type","summary","title",}...)
+//Get identifier list of fields(NOT including data_fields )
+func (c *Role) IdentifierList() []string {
+	return append(c.ContentCommon.IdentifierList(),[]string{ "summary","title",}...)
 }
 
-func (c *FolderResource) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetDefinition( c.ContentType() )
+func (c *Role) Definition(language ...string) contenttype.ContentType {
+	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+    return def
 }
 
-func (c *FolderResource) Value(identifier string) interface{} {
+//Get field value
+func (c *Role) Value(identifier string) interface{} {
     
     if util.Contains( c.Location.IdentifierList(), identifier ) {
         return c.Location.Field( identifier )
@@ -102,20 +116,20 @@ func (c *FolderResource) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
-    case "resource_type":
-        
-            result = c.ResourceType
-        
+    
     
     case "summary":
         
             result = c.Summary
         
     
+    
+    
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -125,26 +139,25 @@ func (c *FolderResource) Value(identifier string) interface{} {
 	return result
 }
 
-
-func (c *FolderResource) SetValue(identifier string, value interface{}) error {
+//Set value to a field
+func (c *Role) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
-            
-            
-            case "resource_type":
-            c.ResourceType = value.(fieldtype.TextField)
-            
         
+            
             
             
             case "summary":
-            c.Summary = value.(fieldtype.RichTextField)
+            c.Summary = value.(fieldtype.RichText)
+            
             
         
             
             
+            
             case "title":
-            c.Title = value.(fieldtype.TextField)
+            c.Title = value.(fieldtype.Text)
+            
             
         
 	default:
@@ -159,27 +172,27 @@ func (c *FolderResource) SetValue(identifier string, value interface{}) error {
 
 //Store content.
 //Note: it will set id to CID after success
-func (c *FolderResource) Store(transaction ...*sql.Tx) error {
+func (c *Role) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
+		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID), transaction...)
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
 		return err
 	}
 	return nil
 }
 
-func (c *FolderResource)StoreWithLocation(){
+func (c *Role)StoreWithLocation(){
 
 }
 
 //Delete content only
-func (c *FolderResource) Delete(transaction ...*sql.Tx) error {
+func (c *Role) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	contentError := handler.Delete(c.TableName(), Cond("id", c.CID), transaction...)
 	return contentError
@@ -187,15 +200,15 @@ func (c *FolderResource) Delete(transaction ...*sql.Tx) error {
 
 func init() {
 	new := func() contenttype.ContentTyper {
-		return &FolderResource{}
+		return &Role{}
 	}
 
 	newList := func() interface{} {
-		return &[]FolderResource{}
+		return &[]Role{}
 	}
 
     toList := func(obj interface{}) []contenttype.ContentTyper {
-        contentList := *obj.(*[]FolderResource)
+        contentList := *obj.(*[]Role)
         list := make([]contenttype.ContentTyper, len(contentList))
         for i, _ := range contentList {
             list[i] = &contentList[i]
@@ -203,7 +216,7 @@ func init() {
         return list
     }
 
-	contenttype.Register("folder_resource",
+	contenttype.Register("role",
 		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,

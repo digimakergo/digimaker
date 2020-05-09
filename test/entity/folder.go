@@ -18,32 +18,40 @@ import (
 
 type Folder struct{
      contenttype.ContentCommon `boil:",bind"`
-    
-     
-     
-        FolderType  fieldtype.TextField `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
+
      
     
-     
-     
-        Summary  fieldtype.RichTextField `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
-     
+         
+         
+         
+            FolderType  fieldtype.Text `boil:"folder_type" json:"folder_type" toml:"folder_type" yaml:"folder_type"`
+         
+        
     
-     
-     
-        Title  fieldtype.TextField `boil:"title" json:"title" toml:"title" yaml:"title"`
-     
+         
+         
+         
+            Summary  fieldtype.RichText `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
+         
+        
+    
+         
+         
+         
+            Title  fieldtype.Text `boil:"title" json:"title" toml:"title" yaml:"title"`
+         
+        
     
     
-     contenttype.Location `boil:"location,bind"  json:"location"`
+     contenttype.Location `boil:"location,bind"`
     
 }
 
-func ( *Folder ) TableName() string{
+func (c *Folder ) TableName() string{
 	 return "dm_folder"
 }
 
-func ( *Folder ) ContentType() string{
+func (c *Folder ) ContentType() string{
 	 return "folder"
 }
 
@@ -62,37 +70,56 @@ func (c *Folder) GetLocation() *contenttype.Location{
     
 }
 
+func (c *Folder) ToMap() map[string]interface{}{
+    result := map[string]interface{}{}
+    for _, identifier := range c.IdentifierList(){
+      result[identifier] = c.Value(identifier)
+    }
+    return result
+}
 
+//Get map of the all fields(including data_fields)
 //todo: cache this? (then you need a reload?)
-func (c *Folder) ToMap() map[string]interface{} {
+func (c *Folder) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
     
+
+    
         
-        result["folder_type"]=c.FolderType
+        
+            result["folder_type"]=c.FolderType
+        
         
     
         
-        result["summary"]=c.Summary
+        
+            result["summary"]=c.Summary
+        
         
     
         
-        result["title"]=c.Title
+        
+            result["title"]=c.Title
+        
         
     
-	for key, value := range c.ContentCommon.Values() {
+	for key, value := range c.ContentCommon.ToDBValues() {
 		result[key] = value
 	}
 	return result
 }
 
+//Get identifier list of fields(NOT including data_fields )
 func (c *Folder) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "folder_type","summary","title",}...)
 }
 
-func (c *Folder) Definition() contenttype.ContentTypeSetting {
-	return contenttype.GetDefinition( c.ContentType() )
+func (c *Folder) Definition(language ...string) contenttype.ContentType {
+	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+    return def
 }
 
+//Get field value
 func (c *Folder) Value(identifier string) interface{} {
     
     if util.Contains( c.Location.IdentifierList(), identifier ) {
@@ -102,20 +129,27 @@ func (c *Folder) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     
+    
+    
     case "folder_type":
         
             result = c.FolderType
         
+    
+    
     
     case "summary":
         
             result = c.Summary
         
     
+    
+    
     case "title":
         
             result = c.Title
         
+    
     
 	case "cid":
 		result = c.ContentCommon.CID
@@ -125,26 +159,33 @@ func (c *Folder) Value(identifier string) interface{} {
 	return result
 }
 
-
+//Set value to a field
 func (c *Folder) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
+        
+            
             
             
             case "folder_type":
-            c.FolderType = value.(fieldtype.TextField)
+            c.FolderType = value.(fieldtype.Text)
+            
             
         
+            
             
             
             case "summary":
-            c.Summary = value.(fieldtype.RichTextField)
+            c.Summary = value.(fieldtype.RichText)
+            
             
         
             
             
+            
             case "title":
-            c.Title = value.(fieldtype.TextField)
+            c.Title = value.(fieldtype.Text)
+            
             
         
 	default:
@@ -162,13 +203,13 @@ func (c *Folder) SetValue(identifier string, value interface{}) error {
 func (c *Folder) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToMap(), transaction...)
+		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToMap(), Cond("id", c.CID), transaction...)
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
 		return err
 	}
 	return nil
