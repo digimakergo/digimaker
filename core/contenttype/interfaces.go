@@ -41,6 +41,8 @@ type ContentTyper interface {
 
 	Definition(language ...string) ContentType
 
+	ToMap() map[string]interface{}
+
 	GetRelations() *ContentRelationList
 }
 

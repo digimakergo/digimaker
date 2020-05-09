@@ -28,12 +28,12 @@ type ContentType struct {
 	Fields       ContentFieldArray `json:"fields"`
 	DataFields   []DataField       `json:"data_fields"`
 	//All fields where identifier is the key.
-	FieldMap map[string]ContentField `json:"-"`
+	FieldMap map[string]FieldDef `json:"-"`
 }
 
-func (c *ContentType) Init(fieldCallback ...func(*ContentField)) {
+func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) {
 	//set all fields into FieldMap
-	fieldMap := map[string]ContentField{}
+	fieldMap := map[string]FieldDef{}
 	for i, field := range c.Fields {
 		identifier := field.Identifier
 		if len(fieldCallback) > 0 {
@@ -51,28 +51,29 @@ func (c *ContentType) Init(fieldCallback ...func(*ContentField)) {
 	c.FieldMap = fieldMap
 }
 
-//Custom type for ContentField Array, to have more functions from the list
-type ContentFieldArray []ContentField
+//Custom type for FieldDef Array, to have more functions from the list
+type ContentFieldArray []FieldDef
 
-func (cfArray ContentFieldArray) GetField(identifier string) (ContentField, bool) {
+func (cfArray ContentFieldArray) GetField(identifier string) (FieldDef, bool) {
 	for _, field := range cfArray {
 		if field.Identifier == identifier {
 			return field, true
 		}
 	}
-	return ContentField{}, false
+	return FieldDef{}, false
 }
 
 //Content field definition
-type ContentField struct {
-	Identifier  string                 `json:"identifier"`
-	Name        string                 `json:"name"`
-	FieldType   string                 `json:"type"`
-	Required    bool                   `json:"required"`
-	Description string                 `json:"description"`
-	IsOutput    bool                   `json:"is_output"`
-	Parameters  map[string]interface{} `json:"parameters"`
-	Children    ContentFieldArray      `json:"children"`
+type FieldDef struct {
+	Identifier  string                  `json:"identifier"`
+	Name        string                  `json:"name"`
+	FieldType   string                  `json:"type"`
+	Required    bool                    `json:"required"`
+	Validation  fieldtype.VaidationRule `json:"validation"`
+	Description string                  `json:"description"`
+	IsOutput    bool                    `json:"is_output"`
+	Parameters  map[string]interface{}  `json:"parameters"`
+	Children    ContentFieldArray       `json:"children"`
 }
 
 type DataField struct {
@@ -80,15 +81,15 @@ type DataField struct {
 	FieldType  string `json:"type"`
 }
 
-func (cf *ContentField) GetSubFields(callback ...func(*ContentField)) map[string]ContentField {
+func (cf *FieldDef) GetSubFields(callback ...func(*FieldDef)) map[string]FieldDef {
 	return getSubFields(cf, callback...)
 }
 
-func getSubFields(cf *ContentField, callback ...func(*ContentField)) map[string]ContentField {
+func getSubFields(cf *FieldDef, callback ...func(*FieldDef)) map[string]FieldDef {
 	if cf.Children == nil {
 		return nil
 	} else {
-		result := map[string]ContentField{}
+		result := map[string]FieldDef{}
 		for i, field := range cf.Children {
 			identifier := field.Identifier
 			if len(callback) > 0 {
@@ -108,8 +109,8 @@ func getSubFields(cf *ContentField, callback ...func(*ContentField)) map[string]
 	}
 }
 
-func (f *ContentField) GetDefinition() fieldtype.FieldtypeSetting {
-	return fieldtype.GetDefinition(f.FieldType)
+func (f *FieldDef) GetDefinition() fieldtype.FieldtypeDef {
+	return fieldtype.GetDef(f.FieldType)
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json
@@ -181,7 +182,7 @@ func loadTranslation(def map[string]ContentType, translation map[string][]map[st
 			continue
 		}
 		origFields := contentTypeDefinition["default"][contenttype].FieldMap
-		contenttypeDef.Init(func(field *ContentField) {
+		contenttypeDef.Init(func(field *FieldDef) {
 			//translate name
 			context := "field/" + field.Identifier + "/name"
 			value := getTranslation(context, translist)
@@ -258,7 +259,7 @@ func GetDefinition(contentType string, language ...string) (ContentType, error) 
 //Get fields based on path pattern including container,
 //separated by /
 //. eg. article/relations, report/step1
-func GetFields(typePath string) (map[string]ContentField, error) {
+func GetFields(typePath string) (map[string]FieldDef, error) {
 	arr := strings.Split(typePath, "/")
 	def, err := GetDefinition(arr[0])
 	if err != nil {
@@ -269,7 +270,7 @@ func GetFields(typePath string) (map[string]ContentField, error) {
 	} else {
 		//get first level field
 		name := arr[1]
-		var currentField ContentField
+		var currentField FieldDef
 		for _, field := range def.Fields {
 			if field.Identifier == name {
 				currentField = field
@@ -303,6 +304,30 @@ func ContentToJson(content ContentTyper) (string, error) {
 	//todo: use a new tag instead of json(eg. version: 'summary', version: '-' to ignore that.)
 	result, err := json.Marshal(content)
 	return string(result), err
+}
+
+func MarchallToOutput(content ContentTyper) ([]byte, error) {
+	contentMap := content.ToMap()
+	for identifier, field := range contentMap {
+		switch field.(type) {
+		case fieldtype.FieldTyper:
+			value := field.(fieldtype.FieldTyper)
+			contentMap[identifier] = value.FieldValue()
+		}
+	}
+	//todo: use a new tag instead of json(eg. version: 'summary', version: '-' to ignore that.)
+	result, err := json.Marshal(contentMap)
+	return result, err
+}
+
+//If field has variables, replace variables with real value
+func OutputField(field fieldtype.FieldTyper) interface{} {
+	value := field.FieldValue()
+	def := fieldtype.GetDef(field.Type())
+	if def.HasVariable {
+		//todo: implement washing variable
+	}
+	return value
 }
 
 //Json to Content, used for internal content recoving. (eg. versioning, draft)

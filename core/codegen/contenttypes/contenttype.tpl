@@ -35,11 +35,11 @@ type {{$struct_name}} struct{
     {{end}}
 }
 
-func ( *{{$struct_name}} ) TableName() string{
+func (c *{{$struct_name}} ) TableName() string{
 	 return "{{.settings.TableName}}"
 }
 
-func ( *{{$struct_name}} ) ContentType() string{
+func (c *{{$struct_name}} ) ContentType() string{
 	 return "{{.name}}"
 }
 
@@ -58,6 +58,14 @@ func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
     {{else}}
     return nil
     {{end}}
+}
+
+func (c *{{$struct_name}}) ToMap() map[string]interface{}{
+    result := map[string]interface{}{}
+    for _, identifier := range c.IdentifierList(){
+      result[identifier] = c.Value(identifier)
+    }
+    return result
 }
 
 //Get map of the all fields(including data_fields)
