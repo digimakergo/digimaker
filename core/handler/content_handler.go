@@ -42,6 +42,8 @@ type ContentHandler struct {
 var ErrorNoPermission = errors.New("The user doesn't have access to the action.")
 
 // Validate validates and returns a validation result.
+// Validate is used in Create and Update, but can be also used separately
+//  eg. when you have several steps, you want to validate one step only(only the fields in that step).
 func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.FieldDef, inputs map[string]interface{}) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation

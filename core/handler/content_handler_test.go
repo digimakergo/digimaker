@@ -7,6 +7,7 @@ import (
 
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/fieldtype"
 	"github.com/xc/digimaker/test"
 	"github.com/xc/digimaker/test/entity"
 
@@ -47,9 +48,13 @@ var contentCreated contenttype.ContentTyper
 
 func TestCreate(t *testing.T) {
 	handler := ContentHandler{Context: ctx}
-	// // params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "body": "Hello"}
-	// // _, result, err := handler.Create(4, "article", params)
-	//
+
+	content, validation, err := handler.Create("article", map[string]interface{}{"title": "title only"}, 1, 3)
+
+	assert.Nil(t, err)
+	assert.Equal(t, true, validation.Passed())
+	assert.Equal(t, "title only", content.Value("title").(fieldtype.Text).FieldValue().(string))
+
 	params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "summary": "Hello"}
 	result, validation, err := handler.Create("folder", params, 1, 3)
 

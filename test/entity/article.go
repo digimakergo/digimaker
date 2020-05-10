@@ -44,10 +44,6 @@ type Article struct{
     
          
          
-         
-            RelatedArticles  fieldtype.RelationList `boil:"related_articles" json:"related_articles" toml:"related_articles" yaml:"related_articles"`
-         
-        
     
          
          
@@ -70,10 +66,6 @@ type Article struct{
     
          
          
-         
-            UsefulResources  fieldtype.RelationList `boil:"useful_resources" json:"useful_resources" toml:"useful_resources" yaml:"useful_resources"`
-         
-        
     
     
      contenttype.Location `boil:"location,bind"`
@@ -137,10 +129,6 @@ func (c *Article) ToDBValues() map[string]interface{} {
         
     
         
-        
-            result["related_articles"]=c.RelatedArticles
-        
-        
     
         
         
@@ -158,10 +146,6 @@ func (c *Article) ToDBValues() map[string]interface{} {
         
         
     
-        
-        
-            result["useful_resources"]=c.UsefulResources
-        
         
     
 	for key, value := range c.ContentCommon.ToDBValues() {
@@ -215,7 +199,7 @@ func (c *Article) Value(identifier string) interface{} {
     
     case "related_articles":
         
-            result = c.RelatedArticles
+            result = c.Relations.Map["related_articles"]
         
     
     
@@ -238,7 +222,7 @@ func (c *Article) Value(identifier string) interface{} {
     
     case "useful_resources":
         
-            result = c.UsefulResources
+            result = c.Relations.Map["useful_resources"]
         
     
     
@@ -281,11 +265,6 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
         
             
             
-            
-            case "related_articles":
-            c.RelatedArticles = *(value.(*fieldtype.RelationList))
-            
-            
         
             
             
@@ -308,11 +287,6 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
         
-            
-            
-            
-            case "useful_resources":
-            c.UsefulResources = *(value.(*fieldtype.RelationList))
             
             
         
