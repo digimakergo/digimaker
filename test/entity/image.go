@@ -160,7 +160,7 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
             
             
             case "image":
-            c.Image = value.(fieldtype.Text)
+            c.Image = *(value.(*fieldtype.Text))
             
             
         
@@ -168,7 +168,7 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = value.(fieldtype.Text)
+            c.Title = *(value.(*fieldtype.Text))
             
             
         

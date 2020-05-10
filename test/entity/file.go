@@ -160,7 +160,7 @@ func (c *File) SetValue(identifier string, value interface{}) error {
             
             
             case "filetype":
-            c.Filetype = value.(fieldtype.Text)
+            c.Filetype = *(value.(*fieldtype.Text))
             
             
         
@@ -168,7 +168,7 @@ func (c *File) SetValue(identifier string, value interface{}) error {
             
             
             case "path":
-            c.Path = value.(fieldtype.Text)
+            c.Path = *(value.(*fieldtype.Text))
             
             
         
@@ -176,7 +176,7 @@ func (c *File) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = value.(fieldtype.Text)
+            c.Title = *(value.(*fieldtype.Text))
             
             
         

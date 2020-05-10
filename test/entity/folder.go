@@ -168,7 +168,7 @@ func (c *Folder) SetValue(identifier string, value interface{}) error {
             
             
             case "folder_type":
-            c.FolderType = value.(fieldtype.Text)
+            c.FolderType = *(value.(*fieldtype.Text))
             
             
         
@@ -176,7 +176,7 @@ func (c *Folder) SetValue(identifier string, value interface{}) error {
             
             
             case "summary":
-            c.Summary = value.(fieldtype.RichText)
+            c.Summary = *(value.(*fieldtype.RichText))
             
             
         
@@ -184,7 +184,7 @@ func (c *Folder) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = value.(fieldtype.Text)
+            c.Title = *(value.(*fieldtype.Text))
             
             
         

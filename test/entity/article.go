@@ -259,7 +259,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "body":
-            c.Body = value.(fieldtype.RichText)
+            c.Body = *(value.(*fieldtype.RichText))
             
             
         
@@ -267,7 +267,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "coverimage":
-            c.Coverimage = value.(fieldtype.Text)
+            c.Coverimage = *(value.(*fieldtype.Text))
             
             
         
@@ -275,7 +275,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "editors":
-            c.Editors = value.(fieldtype.Text)
+            c.Editors = *(value.(*fieldtype.Text))
             
             
         
@@ -283,7 +283,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "related_articles":
-            c.RelatedArticles = value.(fieldtype.RelationList)
+            c.RelatedArticles = *(value.(*fieldtype.RelationList))
             
             
         
@@ -296,7 +296,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "summary":
-            c.Summary = value.(fieldtype.RichText)
+            c.Summary = *(value.(*fieldtype.RichText))
             
             
         
@@ -304,7 +304,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = value.(fieldtype.Text)
+            c.Title = *(value.(*fieldtype.Text))
             
             
         
@@ -312,7 +312,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "useful_resources":
-            c.UsefulResources = value.(fieldtype.RelationList)
+            c.UsefulResources = *(value.(*fieldtype.RelationList))
             
             
         

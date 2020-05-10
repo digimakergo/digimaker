@@ -148,7 +148,7 @@ func (c *Usergroup) SetValue(identifier string, value interface{}) error {
             
             
             case "summary":
-            c.Summary = value.(fieldtype.RichText)
+            c.Summary = *(value.(*fieldtype.RichText))
             
             
         
@@ -156,7 +156,7 @@ func (c *Usergroup) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = value.(fieldtype.Text)
+            c.Title = *(value.(*fieldtype.Text))
             
             
         

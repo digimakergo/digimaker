@@ -208,7 +208,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "email":
-            c.Email = value.(fieldtype.Text)
+            c.Email = *(value.(*fieldtype.Text))
             
             
         
@@ -216,7 +216,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "firstname":
-            c.Firstname = value.(fieldtype.Text)
+            c.Firstname = *(value.(*fieldtype.Text))
             
             
         
@@ -224,7 +224,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "lastname":
-            c.Lastname = value.(fieldtype.Text)
+            c.Lastname = *(value.(*fieldtype.Text))
             
             
         
@@ -232,7 +232,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "login":
-            c.Login = value.(fieldtype.Text)
+            c.Login = *(value.(*fieldtype.Text))
             
             
         
@@ -240,7 +240,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "password":
-            c.Password = value.(fieldtype.Password)
+            c.Password = *(value.(*fieldtype.Password))
             
             
         

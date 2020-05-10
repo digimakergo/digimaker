@@ -1,26 +1,45 @@
 {
-    "read":{
-        "permissions": [{"module":"content",
-                            "action":"read",
-                            "limited_to":{
-                                "contenttype": ["folder", "article"],
-                                "section":["public","asset"]}
-                         }
-                        ],
-        "assign_type": ["subtree","scope"]
-    },
-    "editing":{
-        "permissions": [{"module":"content",
-                         "action":"create, edit, delete",
-                         "limited_to":{}}
-                ],
-        "assign_type": ["subtree","scope"]
-    },
-    "organize":{
-            "permissions": [{"module":"content",
-                        "action":"move,delete_subtree, copy",
-                        "limited_to":{}}
-                    ],
-             "assign_type": []
+  "read": {
+    "permissions": [{
+      "operation": ["content/read"],
+      "limited_to": {
+        "contenttype": ["folder", "article"],
+        "section": ["public"]
+      }
+    }],
+    "assign_type": ["subtree", "scope"]
+  },
+  "editor_visit":{
+    "permissions":[{
+      "operation":["site/access"],
+      "limited_to": {
+        "site": ["admin"]
+      }
+      }
+    ],
+    "assign_type":[]
+  },
+  "edit": {
+    "permissions": [{
+        "operation": ["content/read"],
+        "limited_to": {
+          "contenttype": ["folder", "article", "role", "user", "usergroup"]
         }
+      },
+      {
+        "operation": ["content/create", "content/delete", "content/update"],
+        "limited_to": {
+          "contenttype": ["article", "role", "usergroup", "folder", "user"]
+        }
+      }
+    ],
+    "assign_type": ["subtree", "scope"]
+  },
+  "organize": {
+    "permissions": [{
+      "operation": ["content/move", "content/delete_subtree", "content/copy"],
+      "limited_to": {}
+    }],
+    "assign_type": []
+  }
 }

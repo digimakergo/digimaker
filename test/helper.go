@@ -9,7 +9,9 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/sirupsen/logrus"
 	"github.com/xc/digimaker/core"
+	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/util"
 )
 
@@ -22,10 +24,12 @@ var ctx context.Context
 func Start() context.Context {
 	if !started {
 		fmt.Println("Starting testing...")
-		InitData()
 		testFolder := util.DMPath() + "/test"
 		core.Bootstrap(testFolder)
+		InitData()
 		ctx = context.Background()
+		ctx = context.WithValue(ctx, "user_id", 1)
+		ctx = log.WithLogger(ctx, logrus.Fields{"ip": "127.0.0.1", "request_id": "test-request-id"})
 	}
 	return ctx
 }
