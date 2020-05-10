@@ -7,6 +7,7 @@ package test
 import (
 	"context"
 	"fmt"
+	"os/exec"
 
 	"github.com/xc/digimaker/core"
 	"github.com/xc/digimaker/core/util"
@@ -21,6 +22,7 @@ var ctx context.Context
 func Start() context.Context {
 	if !started {
 		fmt.Println("Starting testing...")
+		InitData()
 		testFolder := util.DMPath() + "/test"
 		core.Bootstrap(testFolder)
 		ctx = context.Background()
@@ -28,10 +30,28 @@ func Start() context.Context {
 	return ctx
 }
 
-func InitData() {
-
+func InitSchema() {
+	runSQL("schema.sql")
 }
 
-func CleanData() {
+func InitData() {
+	runSQL("initdata.sql")
+}
 
+func runSQL(file string) {
+	dbConfig := util.GetConfigSection("database")
+	user := dbConfig["username"]
+	password := dbConfig["password"]
+	database := dbConfig["database"]
+	host := dbConfig["host"]
+
+	dataFolder := util.DMPath() + "/data"
+	cmdStr := "mysql -h " + host + " -u " + user + " -p" + password + " " + database + " < "
+
+	dataCmd := cmdStr + dataFolder + "/" + file
+	cmd := exec.Command("bash", "-c", dataCmd)
+	err := cmd.Run()
+	if err != nil {
+		fmt.Println(fmt.Sprint(err))
+	}
 }
