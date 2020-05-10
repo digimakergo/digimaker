@@ -9,7 +9,6 @@ import (
 
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/fieldtype"
 	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/permission"
 	"github.com/xc/digimaker/core/util"
@@ -258,8 +257,7 @@ func (cq ContentQuery) Draft(author int) {
 
 //return a version content
 func (cq ContentQuery) Version(contentType string, condition db.Condition) (contenttype.Version, contenttype.ContentTyper, error) {
-
-	def, err := contenttype.GetDefinition(contentType)
+	_, err := contenttype.GetDefinition(contentType)
 	if err != nil {
 		return contenttype.Version{}, nil, err
 	}
@@ -277,22 +275,8 @@ func (cq ContentQuery) Version(contentType string, condition db.Condition) (cont
 	data := []byte(version.Data)
 	content := contenttype.NewInstance(contentType)
 	author := version.Author
-	obj := map[string]interface{}{}
 
-	if version.Version == 0 {
-		json.Unmarshal(data, &obj)
-		for name := range def.FieldMap {
-			value := obj[name]
-			if value != nil {
-				//valueStr, _ := json.Marshal(value)
-				fHandler := fieldtype.GetHandler(def.FieldMap[name].FieldType)
-				fieldValue := fHandler.NewValue(value)
-				content.SetValue(name, fieldValue)
-			}
-		}
-	} else {
-		json.Unmarshal(data, &content) //todo: change this to be same as version 0
-	}
+	json.Unmarshal(data, &content)
 
 	content.SetValue("author", author)
 	return version, content, nil
