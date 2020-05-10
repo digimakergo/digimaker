@@ -142,7 +142,7 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
             {{if not $type_settings.IsRelation}}
             {{if not $fieldtype.IsOutput}}
             case "{{$identifier}}":
-            c.{{$identifier|UpperName}} = value.(fieldtype.{{$type_settings.Value}})
+            c.{{$identifier|UpperName}} = *(value.(*fieldtype.{{$type_settings.Value}}))
             {{end}}
             {{end}}
         {{end}}

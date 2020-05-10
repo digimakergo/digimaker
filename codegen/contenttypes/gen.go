@@ -2,6 +2,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"text/template"
@@ -20,7 +21,6 @@ func main() {
 	}
 
 	contenttype.LoadDefinition()
-	fieldtype.LoadDefinition()
 
 	fmt.Println("Generating content entities for " + homePath)
 	err := Generate(homePath, "entity")
@@ -35,11 +35,19 @@ func Generate(homePath string, subFolder string) error {
 		Funcs(funcMap()).
 		ParseFiles(os.Getenv("GOPATH") + "/src/github.com/xc/digimaker/core/codegen/contenttypes/contenttype.tpl"))
 
+	fieldtypeMap := fieldtype.GetAllDefinition()
+
 	contentTypeDef := contenttype.GetDefinitionList()["default"]
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}
 		vars["def_fieldtype"] = fieldtype.GetAllDefinition()
 		vars["name"] = name
+		for _, ftype := range settings.FieldMap {
+			typeStr := ftype.FieldType
+			if _, ok := fieldtypeMap[typeStr]; !ftype.IsOutput && !ok {
+				return errors.New("field type " + typeStr + " doesn't exist.")
+			}
+		}
 		vars["fields"] = settings.FieldMap
 		datafieldMap := map[string]string{}
 		for _, item := range settings.DataFields {
