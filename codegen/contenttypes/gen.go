@@ -33,7 +33,7 @@ func Generate(homePath string, subFolder string) error {
 
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
-		ParseFiles(os.Getenv("GOPATH") + "/src/github.com/xc/digimaker/core/codegen/contenttypes/contenttype.tpl"))
+		ParseFiles(util.DMPath() + "/codegen/contenttypes/contenttype.tpl"))
 
 	fieldtypeMap := fieldtype.GetAllDefinition()
 
