@@ -4,14 +4,14 @@
 package handler
 
 import (
-	"context"
-	"github.com/xc/digimaker/admin/entity"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/util"
 	"fmt"
 	"strconv"
 	"testing"
 	"time"
+
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/test/entity"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -31,24 +31,21 @@ func TestFetchByContent(t *testing.T) {
 func TestSubList(t *testing.T) {
 	querier := Querier()
 	rootContent, _ := querier.FetchByID(1)
-	context := debug.Init(context.Background())
 	fmt.Println("=========")
-	list, _ := querier.SubList(rootContent, "article", 2, 7, context)
+	list, _, _ := querier.SubList(rootContent, "article", 2, 7, db.EmptyCond(), []int{}, []string{}, false, ctx)
 
 	//
 	for _, item := range list {
 		article := item.(*entity.Article)
 		fmt.Println(strconv.Itoa(article.ID) + ":" + article.GetName())
 	}
-	fmt.Println(debug.GetDebugger(context).List)
 }
 
 func TestSubTree(t *testing.T) {
 	querier := Querier()
 	rootContent, _ := querier.FetchByID(1)
-	context := debug.Init(context.Background())
 	fmt.Println("TREEEEEEEEEEEEE")
-	treenode, _ := querier.SubTree(rootContent, 3, "folder,article", 7, context)
+	treenode, _ := querier.SubTree(rootContent, 3, "folder,article", 7, []string{}, ctx)
 
 	fmt.Println(treenode.Content.GetName())
 	children := treenode.Children
@@ -66,22 +63,22 @@ func TestSubTree(t *testing.T) {
 
 func TestQuery(t *testing.T) {
 
-	rmdb := new(db.RMDB)
+	dbHandler := db.DBHanlder()
 	var article entity.Article
-	rmdb.GetByID("article", "dm_article", 2, &article)
+	dbHandler.GetByID("article", "dm_article", 2, &article)
 
 	assert.NotNil(t, article)
 
-	folders, _ := Querier().List("folder", db.Cond("1", "1"))
+	folders, _, _ := Querier().List("folder", db.Cond("1", "1"), []int{}, []string{}, false)
 	fmt.Println("HELLO")
 	fmt.Println(folders)
 }
 
 func TestUpdate(t *testing.T) {
-	rmdb := new(db.RMDB)
+	rmdb := db.DBHanlder()
 
 	var article entity.Article
-	rmdb.GetByFields("article", "dm_article", db.Cond("content_id", 1), &article)
+	rmdb.GetByFields("article", "dm_article", db.Cond("content_id", 1), nil, nil, &article, false)
 	//Update remote id of the article
 	fmt.Println(article)
 	uid := util.GenerateUID()
@@ -100,7 +97,7 @@ func TestUpdate(t *testing.T) {
 	err = rmdb.Update(article.TableName(), map[string]interface{}{"body": "test" + time.Now().String()}, db.Cond("id", 1))
 	assert.Nil(t, err)
 	var article2 entity.Article
-	rmdb.GetByFields("article", "dm_article", db.Cond("content_id", 1), &article2)
+	rmdb.GetByFields("article", "dm_article", db.Cond("content_id", 1), nil, nil, &article2, false)
 
 	//assert.Equal(t, article2.RemoteID, uid)
 
@@ -109,7 +106,7 @@ func TestUpdate(t *testing.T) {
 	// article3.Modified = 5555555
 	// err = article3.Store()
 
-	articles, err := Querier().List("article", db.Cond("1", "1"))
+	articles, _, err := Querier().List("article", db.Cond("1", "1"), nil, nil, false)
 	fmt.Println(articles)
 
 	fmt.Println("New article")

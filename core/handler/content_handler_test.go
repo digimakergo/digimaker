@@ -2,13 +2,14 @@ package handler
 
 import (
 	"context"
-	"github.com/xc/digimaker/admin/entity"
-	"github.com/xc/digimaker/core"
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
 	"fmt"
 	"testing"
 	"time"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/test"
+	"github.com/xc/digimaker/test/entity"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -16,38 +17,42 @@ import (
 var ctx context.Context
 
 func TestMain(m *testing.M) {
-	core.Bootstrap("/Users/xc/go/caf-prototype/src/dm/test")
-	fmt.Println("Test starting..")
-	ctx = debug.Init(context.Background())
+	ctx = test.Start()
 	m.Run()
 }
 
-func TestValidtion(t *testing.T) {
-
+func TestValidate(t *testing.T) {
 	// Test validation1
 	handler := ContentHandler{}
 	params := map[string]interface{}{"title": "ff", "body": "Hello"}
 	def, _ := contenttype.GetDefinition("article")
 	passed, result := handler.Validate("article", def.FieldMap, params)
-	assert.Equal(t, passed, true)
+	assert.Equal(t, true, passed)
 
 	// Test validation2
 	params = map[string]interface{}{"title": "", "body": "Hello"}
 	_, result = handler.Validate("article", def.FieldMap, params)
-	assert.Equal(t, result.Fields["title"], "1")
+	assert.Equal(t, "1", result.Fields["title"])
+
+	params = map[string]interface{}{"title": nil, "body": "Hello"}
+	_, result = handler.Validate("article", def.FieldMap, params)
+	assert.Equal(t, "1", result.Fields["title"])
+
+	params = map[string]interface{}{"body": "Hello"}
+	_, result = handler.Validate("article", def.FieldMap, params)
+	assert.Equal(t, "1", result.Fields["title"])
 
 }
 
 var contentCreated contenttype.ContentTyper
 
 func TestCreate(t *testing.T) {
-	ctx := debug.Init(context.Background())
 	handler := ContentHandler{Context: ctx}
 	// // params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "body": "Hello"}
 	// // _, result, err := handler.Create(4, "article", params)
 	//
 	params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "summary": "Hello"}
-	result, validation, err := handler.Create("folder", params, 1)
+	result, validation, err := handler.Create("folder", params, 1, 3)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, result)
@@ -60,17 +65,16 @@ func TestUpdate1(t *testing.T) {
 	handler := ContentHandler{Context: ctx}
 	folder, _ := querier.FetchByID(contentCreated.GetLocation().ID)
 	inputs := map[string]interface{}{"summary": "updated"}
-	pass, _, err := handler.Update(folder, inputs)
+	pass, _, err := handler.Update(folder, inputs, 1)
 	assert.Nil(t, err)
 	assert.Equal(t, true, pass)
 }
 
 func TestCreateImage(t *testing.T) {
-	ctx := debug.Init(context.Background())
 	handler := ContentHandler{Context: ctx}
 
 	params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "path": "Hello"}
-	result, validation, err := handler.Create("image", params, 1)
+	result, validation, err := handler.Create("image", params, 1, 3)
 
 	assert.Nil(t, err)
 	assert.NotNil(t, result)
@@ -92,14 +96,14 @@ func TestDelete(t *testing.T) {
 	handler.Context = ctx
 	id := contentCreated.GetLocation().ID
 	fmt.Println(id)
-	err := handler.DeleteByID(id, false)
+	err := handler.DeleteByID(id, 1, false)
 	assert.Equal(t, nil, err)
 }
 
 func TestQueryImage(t *testing.T) {
 	images := &[]entity.Image{}
 	handler := db.DBHanlder()
-	err := handler.GetEntity("dm_image", db.Cond("1", 1), images)
+	err := handler.GetEntity("dm_image", db.Cond("1", 1), []string{}, images)
 	assert.Nil(t, err)
 	assert.NotNil(t, images)
 }

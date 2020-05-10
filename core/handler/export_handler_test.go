@@ -3,17 +3,16 @@
 package handler
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
 	"fmt"
 	"testing"
+
+	"github.com/xc/digimaker/core/contenttype"
 )
 
 func TestExport(t *testing.T) {
 	contenttype.LoadDefinition()
-	fieldtype.LoadDefinition()
 
-	content, _ := Querier().FetchByID(6)
+	content, _ := Querier().FetchByID(3)
 
 	mh := ExportHandler{}
 	parent, _ := Querier().FetchByID(content.Value("parent_id").(int))

@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"errors"
+	"strings"
+
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/core/fieldtype"
 	"github.com/xc/digimaker/core/util"
-	"errors"
-	"strings"
 )
 
 //CanLogin check if the username/email and password matches
@@ -27,8 +28,8 @@ func CanLogin(usernameEmail string, password string) (error, contenttype.Content
 		//todo: user error code.
 		return errors.New("User not found"), nil
 	}
-	passwordField := user.Value("password").(fieldtype.PasswordField)
-	result := util.MatchPassword(password, passwordField.Raw)
+	passwordField := user.Value("password").(fieldtype.Password)
+	result := util.MatchPassword(password, passwordField.FieldValue().(string))
 	if result {
 		return nil, user
 	} else {
