@@ -80,27 +80,40 @@ func (i Image) Type() string {
 	return "image"
 }
 
+type RelationList struct {
+	JSON
+}
+
+func (r RelationList) Type() string {
+	return "relationlist"
+}
+
 func init() {
 	RegisterFieldType(
-		FieldtypeDef{Type: "text"},
+		FieldtypeDef{Type: "text", Value: "Text"},
 		func() FieldTyper { return &Text{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "radio"},
+		FieldtypeDef{Type: "json", Value: "JSON"},
+		func() FieldTyper { return &JSON{} })
+	RegisterFieldType(
+		FieldtypeDef{Type: "radio", Value: "Radio"},
 		func() FieldTyper { return &Radio{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "checkbox"},
+		FieldtypeDef{Type: "checkbox", Value: "Checkbox"},
 		func() FieldTyper { return &Checkbox{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "richtext"},
+		FieldtypeDef{Type: "richtext", Value: "RichText"},
 		func() FieldTyper { return &RichText{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "number"},
+		FieldtypeDef{Type: "number", Value: "Number"},
 		func() FieldTyper { return &Number{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "password"},
+		FieldtypeDef{Type: "password", Value: "Password"},
 		func() FieldTyper { return &Password{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "image"},
+		FieldtypeDef{Type: "image", Value: "Image"},
 		func() FieldTyper { return &Image{} })
-
+	RegisterFieldType(
+		FieldtypeDef{Type: "relationlist", Value: "RelationList", IsRelation: true},
+		func() FieldTyper { return &RelationList{} })
 }
