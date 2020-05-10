@@ -42,28 +42,32 @@ type ContentHandler struct {
 var ErrorNoPermission = errors.New("The user doesn't have access to the action.")
 
 // Validate validates and returns a validation result.
-func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.ContentField, inputs map[string]interface{}) (bool, ValidationResult) {
+func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.FieldDef, inputs map[string]interface{}) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
 	result := ValidationResult{Fields: map[string]string{}}
 
 	//check required
 	for identifier, fieldDef := range fieldsDef {
-		fieldHandler := fieldtype.GetHandler(fieldsDef[identifier].FieldType)
 		input, fieldExists := inputs[identifier]
 		fieldResult := ""
 		//validat both required and others together.
-		if fieldExists {
-			if fieldDef.Required && fieldHandler.IsEmpty(input) {
+		isEmpty := fieldtype.IsEmptyInput(input)
+		if fieldDef.Required {
+			if fieldExists && isEmpty || !fieldExists {
 				fieldResult = "1"
 			} else {
-				if valid, res := fieldHandler.Validate(input); !valid {
-					fieldResult = res
+				if fieldExists {
+					field := fieldtype.NewField(fieldsDef[identifier].FieldType)
+					field.LoadFromInput(input)
+					if fieldDef.Required && field.IsEmpty() { //not empty input, but empty in this fieldtype. eg. {} or [] for json fieldtype
+						fieldResult = "1"
+					} else {
+						if valid, res := field.Validate(input, fieldDef.Validation); !valid {
+							fieldResult = res
+						}
+					}
 				}
-			}
-		} else {
-			if fieldDef.Required {
-				fieldResult = "1"
 			}
 		}
 		if fieldResult != "" {
@@ -166,9 +170,9 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	for identifier, input := range inputs {
 		if fieldDef, ok := fieldsDefinition[identifier]; ok {
 			fieldType := fieldDef.FieldType
-			fieldHandler := fieldtype.GetHandler(fieldType)
-			fieldValue := fieldHandler.NewValue(input)
-			err := content.SetValue(identifier, fieldValue)
+			field := fieldtype.NewField(fieldType)
+			field.LoadFromInput(input)
+			err := content.SetValue(identifier, field)
 			if err != nil {
 				return nil, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
 			}
@@ -375,9 +379,9 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	for identifier, fieldDefinition := range fieldsDefinition {
 		if input, ok := inputs[identifier]; ok {
 			fieldType := fieldDefinition.FieldType
-			fieldtypeHandler := fieldtype.GetHandler(fieldType)
-			fieldValue := fieldtypeHandler.NewValue(input)
-			err := content.SetValue(identifier, fieldValue)
+			field := fieldtype.NewField(fieldType)
+			field.LoadFromInput(input)
+			err := content.SetValue(identifier, field)
 			if err != nil {
 				return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
 			}
@@ -571,8 +575,8 @@ func GenerateName(content contenttype.ContentTyper) string {
 		switch field.(type) {
 		//support Text for now. todo: support all fields.
 		//todo: support created, modified time
-		case fieldtype.TextField:
-			values[varName] = field.(fieldtype.TextField).Data()
+		case fieldtype.Text:
+			values[varName] = field.(fieldtype.Text).FieldValue().(string)
 		}
 	}
 
