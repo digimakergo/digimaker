@@ -202,7 +202,7 @@
         "required": true
       },
       {
-        "identifier": "image",
+        "identifier": "path",
         "type": "text",
         "name": "Image",
         "required": true

@@ -29,7 +29,7 @@
       {
         "operation": ["content/create", "content/delete", "content/update"],
         "limited_to": {
-          "contenttype": ["article", "role", "usergroup", "folder", "user"]
+          "contenttype": ["article", "role", "usergroup", "folder", "user", "image"]
         }
       }
     ],

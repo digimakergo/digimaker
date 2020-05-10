@@ -26,7 +26,7 @@ type Image struct{
          
          
          
-            Image  fieldtype.Text `boil:"image" json:"image" toml:"image" yaml:"image"`
+            Path  fieldtype.Text `boil:"path" json:"path" toml:"path" yaml:"path"`
          
         
     
@@ -84,7 +84,7 @@ func (c *Image) ToDBValues() map[string]interface{} {
     
         
         
-            result["image"]=c.Image
+            result["path"]=c.Path
         
         
     
@@ -102,7 +102,7 @@ func (c *Image) ToDBValues() map[string]interface{} {
 
 //Get identifier list of fields(NOT including data_fields )
 func (c *Image) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "image","title",}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ "path","title",}...)
 }
 
 func (c *Image) Definition(language ...string) contenttype.ContentType {
@@ -124,9 +124,9 @@ func (c *Image) Value(identifier string) interface{} {
     
     
     
-    case "image":
+    case "path":
         
-            result = c.Image
+            result = c.Path
         
     
     
@@ -159,8 +159,8 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
             
             
             
-            case "image":
-            c.Image = *(value.(*fieldtype.Text))
+            case "path":
+            c.Path = *(value.(*fieldtype.Text))
             
             
         

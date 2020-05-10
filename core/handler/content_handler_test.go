@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"testing"
 	"time"
 
@@ -61,13 +60,22 @@ func TestCreate(t *testing.T) {
 	contentCreated, _ = Querier().FetchByContentID("folder", result.GetCID())
 }
 
-func TestUpdate1(t *testing.T) {
+func TestUpdate(t *testing.T) {
 	handler := ContentHandler{Context: ctx}
 	folder, _ := querier.FetchByID(contentCreated.GetLocation().ID)
+
+	//update will fail because of lacking of title
 	inputs := map[string]interface{}{"summary": "updated"}
-	pass, _, err := handler.Update(folder, inputs, 1)
-	assert.Nil(t, err)
+	pass, vResult, err := handler.Update(folder, inputs, 1)
+	assert.Equal(t, false, pass)
+	assert.Equal(t, "1", vResult.Fields["title"])
+
+	//update will succeed
+	inputs = map[string]interface{}{"title": "test", "summary": "updated"}
+	pass, _, err = handler.Update(folder, inputs, 1)
 	assert.Equal(t, true, pass)
+	assert.Equal(t, nil, err)
+
 }
 
 func TestCreateImage(t *testing.T) {
@@ -94,8 +102,11 @@ func TestVersion(t *testing.T) {
 func TestDelete(t *testing.T) {
 	handler := ContentHandler{}
 	handler.Context = ctx
-	id := contentCreated.GetLocation().ID
-	fmt.Println(id)
+
+	//Create and delete
+	content, _, _ := handler.Create("folder", map[string]interface{}{"title": "delete"}, 1, 3)
+
+	id := content.GetLocation().ID
 	err := handler.DeleteByID(id, 1, false)
 	assert.Equal(t, nil, err)
 }
