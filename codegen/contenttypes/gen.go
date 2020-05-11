@@ -7,6 +7,8 @@ import (
 	"os"
 	"text/template"
 
+	_ "github.com/xc/digimaker/codegen/contenttypes/temp"
+
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/fieldtype"
 	"github.com/xc/digimaker/core/util"
@@ -22,14 +24,14 @@ func main() {
 
 	contenttype.LoadDefinition()
 
-	fmt.Println("Generating content entities for " + homePath)
-	err := Generate(homePath, "entity")
+	fmt.Println("Generating content entities for " + util.AbsHomePath())
+	err := Generate("entity")
 	if err != nil {
 		fmt.Println("Fail to generate: " + err.Error())
 	}
 }
 
-func Generate(homePath string, subFolder string) error {
+func Generate(subFolder string) error {
 
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
@@ -42,12 +44,19 @@ func Generate(homePath string, subFolder string) error {
 		vars := map[string]interface{}{}
 		vars["def_fieldtype"] = fieldtype.GetAllDefinition()
 		vars["name"] = name
+		imports := []string{}
 		for _, ftype := range settings.FieldMap {
 			typeStr := ftype.FieldType
 			if _, ok := fieldtypeMap[typeStr]; !ftype.IsOutput && !ok {
 				return errors.New("field type " + typeStr + " doesn't exist.")
 			}
+
+			importName := fieldtype.GetDef(ftype.FieldType).Import
+			if importName != "" && !util.Contains(imports, importName) {
+				imports = append(imports, importName)
+			}
 		}
+		vars["imports"] = imports
 		vars["fields"] = settings.FieldMap
 		datafieldMap := map[string]string{}
 		for _, item := range settings.DataFields {

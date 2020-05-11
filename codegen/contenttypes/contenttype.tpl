@@ -7,11 +7,14 @@ import (
     "database/sql"
     "github.com/xc/digimaker/core/db"
     "github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
+	  "github.com/xc/digimaker/core/fieldtype"
     {{if .settings.HasLocation}}
     "github.com/xc/digimaker/core/util"
     {{end}}
 	. "github.com/xc/digimaker/core/db"
+    {{range $i, $import := .imports }}
+    {{$import}}
+    {{end}}
 )
 
 {{$struct_name :=.name|UpperName}}
@@ -26,7 +29,7 @@ type {{$struct_name}} struct{
          {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
          {{if not $type_settings.IsRelation }}
          {{if not $fieldtype.IsOutput}}
-            {{$identifier|UpperName}}  fieldtype.{{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{if eq $fieldtype.FieldType "password"}}-{{else}}{{$identifier}}{{end}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+            {{$identifier|UpperName}}  {{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{if eq $fieldtype.FieldType "password"}}-{{else}}{{$identifier}}{{end}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
          {{end}}
         {{end}}
     {{end}}
@@ -142,7 +145,7 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
             {{if not $type_settings.IsRelation}}
             {{if not $fieldtype.IsOutput}}
             case "{{$identifier}}":
-            c.{{$identifier|UpperName}} = *(value.(*fieldtype.{{$type_settings.Value}}))
+            c.{{$identifier|UpperName}} = *(value.(*{{$type_settings.Value}}))
             {{end}}
             {{end}}
         {{end}}
