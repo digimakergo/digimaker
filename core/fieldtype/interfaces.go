@@ -9,7 +9,10 @@ import (
 // There are 2 types of datas in a field: input data, output data. They can be the same, but sometime can be different.
 // eg. for a text field, they are all the same
 //     for a richtext field, input can contains some like <a href="uid:dfdsf213123llkjjj">Test</a>, output data is <a href="test/test-22"></a>
-//There are 2 ways to init a field: by NewFromInput, Scan - from db or import
+//There are 3 ways to init a field:
+//1) by NewFromInput
+//2) Scan - from db or import
+//3) UnMarshall - from json
 //
 type FieldTyper interface {
 	//Init from db

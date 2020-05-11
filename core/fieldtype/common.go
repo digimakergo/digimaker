@@ -33,12 +33,16 @@ func (s *String) LoadFromInput(input interface{}) {
 }
 
 //Value returns string to db
-func (s *String) Value() (driver.Value, error) {
+func (s String) Value() (driver.Value, error) {
 	return s.String, nil
 }
 
 //Scan scan data from db.
 func (s *String) Scan(src interface{}) error {
+	if src == nil {
+		s.String = ""
+		return nil
+	}
 	switch src.(type) {
 	case string:
 		s.String = src.(string)
@@ -65,7 +69,7 @@ func (s String) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String)
 }
 
-// Int is a basic internal common type Int
+// Int is a basic internal common type Int, which allows empty.
 type Int struct {
 	sql.NullInt64
 }
@@ -98,4 +102,47 @@ func (i Int) MarshalJSON() ([]byte, error) {
 func (i *Int) UnMarshalJSON(data []byte) error {
 	i.Scan(data)
 	return nil
+}
+
+// JSON is a json format string. Null is allowed
+type JSON struct {
+	sql.NullString
+}
+
+//LoadFromInput loads data from input after validation
+func (j JSON) LoadFromInput(input interface{}) {
+	j.Scan(input)
+}
+
+//Get FieldValue
+func (j JSON) FieldValue() interface{} {
+	if !j.Valid {
+		return nil
+	} else {
+		return j.String //todo: improve this.
+	}
+}
+
+//IsEmpty checks if the input is empty. so ""/nil is empty,
+func (j JSON) IsEmpty() bool {
+	return !j.Valid
+}
+
+//Validate validates input.
+func (j JSON) Validate(input interface{}, rule VaidationRule) (bool, string) {
+	return true, ""
+}
+
+//MarshalJSON marshals to []byte
+func (j JSON) MarshalJSON() ([]byte, error) {
+	return json.Marshal(j.String)
+}
+
+func (j *JSON) UnMarshalJSON(data []byte) error {
+	j.Scan(data)
+	return nil
+}
+
+func (j JSON) Type() string {
+	return "json"
 }
