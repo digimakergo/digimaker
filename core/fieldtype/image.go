@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/util"
 )
 
@@ -23,10 +22,9 @@ func (i Image) Type() string {
 
 func (i *Image) LoadFromInput(input interface{}) error {
 	original := i.String.String
-	str := i.String
+	str := &(i.String)
 	err := str.LoadFromInput(input)
 	if err == nil {
-		i.String = str
 		if original != i.String.String {
 			i.changed = true
 		}
@@ -37,7 +35,6 @@ func (i *Image) LoadFromInput(input interface{}) error {
 //Image can be loaded from rest, or local api
 func (i *Image) BeforeSaving() error {
 	filepath := i.String.String
-	log.Error("GOOD", "")
 	if i.changed && filepath != "" {
 		//todo: support other image services or remote image
 		oldAbsPath := util.VarFolder() + "/" + filepath
@@ -71,7 +68,6 @@ func (i *Image) BeforeSaving() error {
 			return errors.New(errorMessage)
 		}
 		i.String = String{String: newPath}
-		log.Error(i.String.String, "")
 	}
 	return nil
 }
