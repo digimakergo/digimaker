@@ -8,6 +8,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+
+	"github.com/xc/digimaker/core/log"
 )
 
 /**
@@ -75,9 +77,15 @@ type Int struct {
 	sql.NullInt64
 }
 
-//LoadFromInput loads data from input after validation
+//LoadFromInput loads data from input before validation
 func (i Int) LoadFromInput(input interface{}) error {
-	return i.Scan(input)
+	err := i.Scan(input)
+	if err != nil {
+		inputStr := fmt.Sprintln(input)
+		log.Error("Input is not a nullable int:"+inputStr, "")
+		return errors.New("Not a valid int: " + inputStr)
+	}
+	return nil
 }
 
 //Get FieldValue
@@ -110,7 +118,7 @@ type JSON struct {
 	sql.NullString
 }
 
-//LoadFromInput loads data from input after validation
+//LoadFromInput loads data from input before validation
 func (j JSON) LoadFromInput(input interface{}) error {
 	return j.Scan(input)
 }
