@@ -25,16 +25,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Contenter interface {
-	Publish()
-
-	Create()
-
-	Edit()
-
-	Delete()
-}
-
 type ContentHandler struct {
 	Context context.Context
 }
@@ -61,12 +51,16 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 			} else {
 				if fieldExists {
 					field := fieldtype.NewField(fieldsDef[identifier].FieldType)
-					field.LoadFromInput(input)
-					if fieldDef.Required && field.IsEmpty() { //not empty input, but empty in this fieldtype. eg. {} or [] for json fieldtype
-						fieldResult = "1"
+					err := field.LoadFromInput(input)
+					if err != nil {
+						fieldResult = err.Error()
 					} else {
-						if valid, res := field.Validate(input, fieldDef.Validation); !valid {
-							fieldResult = res
+						if fieldDef.Required && field.IsEmpty() { //not empty input, but empty in this fieldtype. eg. {} or [] for json fieldtype
+							fieldResult = "1"
+						} else {
+							if valid, res := field.Validate(fieldDef.Validation); !valid {
+								fieldResult = res
+							}
 						}
 					}
 				}
@@ -174,6 +168,13 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 			fieldType := fieldDef.FieldType
 			field := fieldtype.NewField(fieldType)
 			field.LoadFromInput(input)
+			//invoke BeforeSaving
+			if fieldWithEvent, ok := field.(fieldtype.FieldTypeEvent); ok {
+				err := fieldWithEvent.BeforeSaving()
+				if err != nil {
+					return nil, ValidationResult{}, err
+				}
+			}
 			err := content.SetValue(identifier, field)
 			if err != nil {
 				return nil, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
@@ -376,17 +377,24 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	//todo: update relations
 
 	//Set content.
-
 	fieldsDefinition := contentDef.FieldMap
 	for identifier, fieldDefinition := range fieldsDefinition {
 		if input, ok := inputs[identifier]; ok {
 			fieldType := fieldDefinition.FieldType
 			field := fieldtype.NewField(fieldType)
 			field.LoadFromInput(input)
+			//invoke BeforeSaving
+			if fieldWithEvent, ok := field.(fieldtype.FieldTypeEvent); ok {
+				err = fieldWithEvent.BeforeSaving()
+				if err != nil {
+					return false, ValidationResult{}, err
+				}
+			}
 			err := content.SetValue(identifier, field)
 			if err != nil {
 				return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
 			}
+
 		}
 	}
 
@@ -408,6 +416,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 
 	//Save update content.
 	log.Debug("Saving content", "contenthandler.update", ch.Context)
+
 	err = content.Store(tx)
 	if err != nil {
 		tx.Rollback()

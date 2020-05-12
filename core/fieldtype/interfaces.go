@@ -45,3 +45,7 @@ type FieldTyper interface {
 	// Above all, creating a Type() to always return a fixed type is an easier option, than fining all the possible creating way(and set type in the method of that way).
 	Type() string
 }
+
+type FieldTypeEvent interface {
+	BeforeSaving() error
+}
