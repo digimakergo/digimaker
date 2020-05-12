@@ -10,5 +10,6 @@ if [ ! -d "${dir}/temp" ]
 then
 echo `mkdir ${dir}/temp`
 fi
+echo "Generate loader for project field types."
 echo  "package temp
 import _ \"${package}/fieldtype\"" > ./$dir/temp/project.go
