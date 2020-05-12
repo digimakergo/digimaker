@@ -1,10 +1,5 @@
 package fieldtype
 
-import (
-	"fmt"
-	"strconv"
-)
-
 /**
 * Initial types END
  */
@@ -31,17 +26,6 @@ type Number struct {
 
 func (n Number) Type() string {
 	return "number"
-}
-
-func (n Number) Validate(input interface{}, rule VaidationRule) (bool, string) {
-	s := fmt.Sprint(input)
-	if s != "" {
-		_, err := strconv.Atoi(s)
-		if err != nil {
-			return false, s + " is not a number."
-		}
-	}
-	return true, ""
 }
 
 //Radio struct represent radio type
@@ -90,30 +74,30 @@ func (r RelationList) Type() string {
 
 func init() {
 	RegisterFieldType(
-		FieldtypeDef{Type: "text", Value: "Text"},
+		FieldtypeDef{Type: "text", Value: "fieldtype.Text"},
 		func() FieldTyper { return &Text{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "json", Value: "JSON"},
+		FieldtypeDef{Type: "json", Value: "fieldtype.JSON"},
 		func() FieldTyper { return &JSON{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "radio", Value: "Radio"},
+		FieldtypeDef{Type: "radio", Value: "fieldtype.Radio"},
 		func() FieldTyper { return &Radio{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "checkbox", Value: "Checkbox"},
+		FieldtypeDef{Type: "checkbox", Value: "fieldtype.Checkbox"},
 		func() FieldTyper { return &Checkbox{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "richtext", Value: "RichText"},
+		FieldtypeDef{Type: "richtext", Value: "fieldtype.RichText"},
 		func() FieldTyper { return &RichText{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "number", Value: "Number"},
+		FieldtypeDef{Type: "number", Value: "fieldtype.Number"},
 		func() FieldTyper { return &Number{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "password", Value: "Password"},
+		FieldtypeDef{Type: "password", Value: "fieldtype.Password"},
 		func() FieldTyper { return &Password{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "image", Value: "Image"},
+		FieldtypeDef{Type: "image", Value: "fieldtype.Image"},
 		func() FieldTyper { return &Image{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "relationlist", Value: "RelationList", IsRelation: true},
+		FieldtypeDef{Type: "relationlist", Value: "fieldtype.RelationList", IsRelation: true},
 		func() FieldTyper { return &RelationList{} })
 }

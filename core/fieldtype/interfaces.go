@@ -26,13 +26,13 @@ type FieldTyper interface {
 
 	//Init from input(http input or api input)
 	//The return must be a basic type. Invoke after validation succeed.
-	LoadFromInput(input interface{})
+	LoadFromInput(input interface{}) error
 
 	//Get value when doing 'internal exchange'.same as Value() in driver.Valuer, but return a basic type(eg. string, int, datetime, or nil)
 	FieldValue() interface{}
 
 	//Validate the field, return false, error message when fails
-	Validate(input interface{}, rule VaidationRule) (bool, string)
+	Validate(rule VaidationRule) (bool, string)
 
 	//If the field is empty. eg. in a selection, 0/-1 can mean empty(not selected)
 	IsEmpty() bool

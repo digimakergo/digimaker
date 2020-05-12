@@ -23,6 +23,7 @@ type FieldtypeDef struct {
 	Name             string            `json:"name"`
 	HasVariable      bool              `json:"has_variable"`
 	Value            string            `json:"value"`
+	Import           string            `json:"import"`
 	Translations     map[string]string `json:"translations"`
 	IsRelation       bool              `json:"is_relation"`
 	RelationSettings RelationSetting   `json:"relation_settings"`

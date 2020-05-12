@@ -19,17 +19,18 @@ type String struct {
 }
 
 //Validate validates input.
-func (s String) Validate(input interface{}, rule VaidationRule) (bool, string) {
+func (s String) Validate(rule VaidationRule) (bool, string) {
 	return true, ""
 }
 
-//LoadFromInput load data from input after validation
-func (s *String) LoadFromInput(input interface{}) {
+//LoadFromInput load data from input before validation
+func (s *String) LoadFromInput(input interface{}) error {
 	if input == nil {
 		s.String = ""
 	} else {
 		s.String = input.(string)
 	}
+	return nil
 }
 
 //Value returns string to db
@@ -75,8 +76,8 @@ type Int struct {
 }
 
 //LoadFromInput loads data from input after validation
-func (i Int) LoadFromInput(input interface{}) {
-	i.Scan(input)
+func (i Int) LoadFromInput(input interface{}) error {
+	return i.Scan(input)
 }
 
 //Get FieldValue
@@ -90,7 +91,7 @@ func (i Int) IsEmpty() bool {
 }
 
 //Validate validates input.
-func (i Int) Validate(input interface{}, rule VaidationRule) (bool, string) {
+func (i Int) Validate(rule VaidationRule) (bool, string) {
 	return true, ""
 }
 
@@ -110,8 +111,8 @@ type JSON struct {
 }
 
 //LoadFromInput loads data from input after validation
-func (j JSON) LoadFromInput(input interface{}) {
-	j.Scan(input)
+func (j JSON) LoadFromInput(input interface{}) error {
+	return j.Scan(input)
 }
 
 //Get FieldValue
@@ -129,7 +130,7 @@ func (j JSON) IsEmpty() bool {
 }
 
 //Validate validates input.
-func (j JSON) Validate(input interface{}, rule VaidationRule) (bool, string) {
+func (j JSON) Validate(rule VaidationRule) (bool, string) {
 	return true, ""
 }
 
