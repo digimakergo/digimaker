@@ -1,5 +1,14 @@
 package fieldtype
 
+import (
+	"database/sql/driver"
+	"os"
+	"strings"
+
+	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/util"
+)
+
 /**
 * Initial types END
  */
@@ -58,10 +67,44 @@ func (r Password) Type() string {
 //Password struct represent password type
 type Image struct {
 	String
+	changed bool
 }
 
 func (i Image) Type() string {
 	return "image"
+}
+
+func (i *Image) LoadFromInput(input interface{}) error {
+	original := i.String.String
+	str := i.String
+	err := str.LoadFromInput(input)
+	if err == nil {
+		i.String = str
+		if i.String.String != "" && original != i.String.String {
+			i.changed = true
+		}
+	}
+	return err
+}
+
+func (i Image) Value() (driver.Value, error) {
+	filepath := i.String.String
+	if i.changed && filepath != "" {
+		oldAbsPath := util.VarFolder() + "/" + filepath
+		arr := strings.Split(filepath, "/")
+		filename := arr[len(arr)-1]
+		newPath := "uploaded/" + filename
+		newAbsPath := util.VarFolder() + "/" + newPath
+		//todo: create subfolder for it to save performance.
+		//todo: create thumbnail
+		err := os.Rename(oldAbsPath, newAbsPath)
+		if err != nil {
+			log.Error("Can not move "+filepath+". error: "+err.Error(), "")
+		}
+		//even if it failed, it will use new path(even if it failed - might because of file already been moved)
+		filepath = newPath
+	}
+	return filepath, nil
 }
 
 type RelationList struct {
