@@ -164,9 +164,8 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	//Create empty content instance and set value
 	content := contenttype.NewInstance(contentType)
 	for identifier, input := range inputs {
-		if fieldDef, ok := fieldsDefinition[identifier]; ok {
-			fieldType := fieldDef.FieldType
-			field := fieldtype.NewField(fieldType)
+		if _, ok := fieldsDefinition[identifier]; ok {
+			field := content.Value(identifier).(fieldtype.FieldTyper)
 			field.LoadFromInput(input)
 			//invoke BeforeSaving
 			if fieldWithEvent, ok := field.(fieldtype.FieldTypeEvent); ok {
@@ -174,10 +173,6 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 				if err != nil {
 					return nil, ValidationResult{}, err
 				}
-			}
-			err := content.SetValue(identifier, field)
-			if err != nil {
-				return nil, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
 			}
 		}
 	}
@@ -378,10 +373,10 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 
 	//Set content.
 	fieldsDefinition := contentDef.FieldMap
-	for identifier, fieldDefinition := range fieldsDefinition {
+	for identifier, _ := range fieldsDefinition {
 		if input, ok := inputs[identifier]; ok {
-			fieldType := fieldDefinition.FieldType
-			field := fieldtype.NewField(fieldType)
+			//get field from loaded content
+			field := content.Value(identifier).(fieldtype.FieldTyper)
 			field.LoadFromInput(input)
 			//invoke BeforeSaving
 			if fieldWithEvent, ok := field.(fieldtype.FieldTypeEvent); ok {
@@ -389,10 +384,6 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 				if err != nil {
 					return false, ValidationResult{}, err
 				}
-			}
-			err := content.SetValue(identifier, field)
-			if err != nil {
-				return false, ValidationResult{}, errors.Wrap(err, "Can not set input to "+identifier)
 			}
 
 		}
@@ -586,8 +577,8 @@ func GenerateName(content contenttype.ContentTyper) string {
 		switch field.(type) {
 		//support Text for now. todo: support all fields.
 		//todo: support created, modified time
-		case fieldtype.Text:
-			values[varName] = field.(fieldtype.Text).FieldValue().(string)
+		case *fieldtype.Text:
+			values[varName] = field.(*fieldtype.Text).FieldValue().(string)
 		}
 	}
 

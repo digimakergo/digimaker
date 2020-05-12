@@ -119,7 +119,7 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{if not $fieldtype.IsOutput}}
     case "{{$identifier}}":
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
-            result = c.{{$identifier|UpperName}}
+            result = &(c.{{$identifier|UpperName}})
         {{else}}
             result = c.Relations.Map["{{$identifier}}"]
         {{end}}
@@ -145,7 +145,7 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
             {{if not $type_settings.IsRelation}}
             {{if not $fieldtype.IsOutput}}
             case "{{$identifier}}":
-            c.{{$identifier|UpperName}} = *(value.(*{{$type_settings.Value}}))
+            c.{{$identifier|UpperName}} = value.({{$type_settings.Value}})
             {{end}}
             {{end}}
         {{end}}
