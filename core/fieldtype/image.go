@@ -23,14 +23,22 @@ func (i Image) Type() string {
 
 //Image can be loaded from rest, or local api
 func (i *Image) BeforeSaving() error {
-	filepath := i.String.String
-	if filepath != "" && filepath != i.existing { //means there is a valid image change
+	imagepath := i.String.String
+	if imagepath != "" && imagepath != i.existing { //means there is a valid image change
 		//todo: support other image services or remote image
-		oldAbsPath := util.VarFolder() + "/" + filepath
+		oldAbsPath := util.VarFolder() + "/" + imagepath
+
+		//image path should be under temp
+		temp := util.GetConfig("general", "upload_tempfolder")
+		if !strings.HasPrefix(imagepath, temp) {
+			return errors.New("Illegal image path.")
+		}
+
 		if _, err := os.Stat(oldAbsPath); err != nil {
 			return errors.New("Can't find file on " + oldAbsPath)
 		}
-		arr := strings.Split(filepath, "/")
+
+		arr := strings.Split(imagepath, "/")
 		filename := arr[len(arr)-1]
 
 		//create 2 level folder
@@ -53,7 +61,7 @@ func (i *Image) BeforeSaving() error {
 		//todo: create thumbnail
 		err = os.Rename(oldAbsPath, newPathAbs)
 		if err != nil {
-			errorMessage := "Can not move image to target " + filepath + ". error: " + err.Error()
+			errorMessage := "Can not move image to target " + imagepath + ". error: " + err.Error()
 			return errors.New(errorMessage)
 		}
 		i.String = String{String: newPath}
