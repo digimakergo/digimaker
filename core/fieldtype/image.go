@@ -11,31 +11,20 @@ import (
 	"github.com/xc/digimaker/core/util"
 )
 
+//Image stores only the orginal image path.
+//Thumbnail and image alias is generated in 'output' part(a kind of cache data).
 type Image struct {
 	String
-	changed bool
 }
 
 func (i Image) Type() string {
 	return "image"
 }
 
-func (i *Image) LoadFromInput(input interface{}) error {
-	original := i.String.String
-	str := &(i.String)
-	err := str.LoadFromInput(input)
-	if err == nil {
-		if original != i.String.String {
-			i.changed = true
-		}
-	}
-	return err
-}
-
 //Image can be loaded from rest, or local api
 func (i *Image) BeforeSaving() error {
 	filepath := i.String.String
-	if i.changed && filepath != "" {
+	if filepath != "" && filepath != i.existing { //means there is a valid image change
 		//todo: support other image services or remote image
 		oldAbsPath := util.VarFolder() + "/" + filepath
 		if _, err := os.Stat(oldAbsPath); err != nil {

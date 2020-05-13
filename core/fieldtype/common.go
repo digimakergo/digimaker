@@ -17,7 +17,8 @@ import (
  */
 //Basic String(note: null string is not allowed, all empty string should use "" - also in db)
 type String struct {
-	String string
+	String   string
+	existing string //existing value when changing. It's the 'orginal value' before LoadFromInput change the whole value.
 }
 
 //Validate validates input.
@@ -30,6 +31,7 @@ func (s *String) LoadFromInput(input interface{}) error {
 	if input == nil {
 		s.String = ""
 	} else {
+		s.existing = s.String
 		s.String = input.(string)
 	}
 	return nil
@@ -75,16 +77,19 @@ func (s String) MarshalJSON() ([]byte, error) {
 // Int is a basic internal common type Int, which allows empty.
 type Int struct {
 	sql.NullInt64
+	existing sql.NullInt64
 }
 
 //LoadFromInput loads data from input before validation
 func (i Int) LoadFromInput(input interface{}) error {
+	existing := i.NullInt64
 	err := i.Scan(input)
 	if err != nil {
 		inputStr := fmt.Sprintln(input)
 		log.Error("Input is not a nullable int:"+inputStr, "")
 		return errors.New("Not a valid int: " + inputStr)
 	}
+	i.existing = existing
 	return nil
 }
 
@@ -116,11 +121,17 @@ func (i *Int) UnMarshalJSON(data []byte) error {
 // JSON is a json format string. Null is allowed
 type JSON struct {
 	sql.NullString
+	existing sql.NullString
 }
 
 //LoadFromInput loads data from input before validation
-func (j JSON) LoadFromInput(input interface{}) error {
-	return j.Scan(input)
+func (j *JSON) LoadFromInput(input interface{}) error {
+	existing := j.NullString
+	err := j.Scan(input)
+	if err != nil {
+		j.existing = existing
+	}
+	return err
 }
 
 //Get FieldValue
