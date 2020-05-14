@@ -37,7 +37,7 @@ func GetUserAccess(userID int, operation string, context context.Context) (Acces
 	log.Debug("Got access list of "+operation+": "+fmt.Sprint(accessList), "permission", context)
 
 	//empty access list
-	if len(accessList) == 0 {
+	if accessList == nil {
 		log.Debug("No access.", "permission", context)
 		return AccessNo, accessList, nil
 	}

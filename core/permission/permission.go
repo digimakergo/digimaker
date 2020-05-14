@@ -79,7 +79,7 @@ func GetUserPolicies(userID int) ([]RolePolicy, error) {
 }
 
 func GetLimitsFromPolicy(policyList []RolePolicy, operation string) []map[string]interface{} {
-	result := []map[string]interface{}{}
+	var result []map[string]interface{}
 	for _, ugPolicy := range policyList {
 		policy := ugPolicy.GetPolicy()
 		for _, permission := range policy.Permissions {
