@@ -5,14 +5,12 @@
 package permission
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/util"
 
 	"github.com/pkg/errors"
@@ -78,19 +76,6 @@ func GetUserPolicies(userID int) ([]RolePolicy, error) {
 		}
 	}
 	return policyList, nil
-}
-
-//Get user's limits
-func GetUserLimits(userID int, operation string, context context.Context) ([]map[string]interface{}, error) {
-	policyList, err := GetUserPolicies(userID)
-	log.Debug("Got policy list: "+fmt.Sprint(policyList), "permission", context)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
-	}
-	//todo: cache limits to user, and cache anoymous globally.
-	result := GetLimitsFromPolicy(policyList, operation)
-	log.Debug("Got limits:"+fmt.Sprint(result), "permission")
-	return result, nil
 }
 
 func GetLimitsFromPolicy(policyList []RolePolicy, operation string) []map[string]interface{} {

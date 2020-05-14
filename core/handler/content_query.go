@@ -3,7 +3,6 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -91,7 +90,7 @@ func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (conten
 	return content, err
 }
 
-// List fetches a list of content based on conditions. This is a database level 'list'. Return eg. *[]Article
+// List fetches a list of content based on conditions. This is a database level 'list'. Return []contenttype.ContentTyper
 func (cq ContentQuery) List(contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
 	count := -1
@@ -154,11 +153,22 @@ func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentT
 	}
 }
 
-// add condition from permission
-func permCondition(userID int, contenttype string, context context.Context) db.Condition {
-	limits, err := permission.GetUserLimits(userID, "content/read", context)
+// add condition from permission.
+// so if matched with limit, add that limit to condition
+// if matches with a empty limit(if there is), return empty(meaning no limit)
+// if doesn't match, return a False condition(no result in query)
+func accessCondition(userID int, contenttype string, context context.Context) db.Condition {
+	accessType, limits, err := permission.GetUserAccess(userID, "content/read", context)
 	if err != nil {
 		//todo: debug messsage it
+	}
+
+	if accessType == permission.AccessNo {
+		return db.FalseCond()
+	}
+
+	if accessType == permission.AccessFull {
+		return db.EmptyCond()
 	}
 
 	//add conditions based on limits
@@ -178,9 +188,6 @@ func permCondition(userID int, contenttype string, context context.Context) db.C
 				continue
 			}
 		}
-
-		fmt.Println("succeed")
-		fmt.Println(limit)
 
 		currentCond := db.EmptyCond()
 
@@ -202,12 +209,9 @@ func permCondition(userID int, contenttype string, context context.Context) db.C
 			}
 		}
 
-		if currentCond.Children == nil { //If the condition has nothing inside, meaning the user can access all
-			result = db.EmptyCond()
-			break
-		}
 		result = result.Or(currentCond)
 	}
+
 	return result
 }
 
@@ -224,10 +228,8 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 	}
 
 	//permission condition
-	permCondition := permCondition(userID, contentType, context)
-	if permCondition.Children != nil {
-		condition = condition.And(permCondition)
-	}
+	permissionCondition := accessCondition(userID, contentType, context)
+	condition = condition.And(permissionCondition)
 
 	//fetch
 	list, count, err := cq.List(contentType, condition, limit, sortby, withCount)

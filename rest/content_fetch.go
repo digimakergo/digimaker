@@ -6,7 +6,6 @@ package rest
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -43,8 +42,8 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		w.Header().Set("content-type", "application/json")
-		data, _ := json.Marshal(content) //todo: use export for same serilization?
-		w.Write(data)
+		data, _ := contenttype.ContentToJson(content) //todo: use export for same serilization?
+		w.Write([]byte(data))
 	}
 
 }
@@ -197,22 +196,35 @@ func Children(w http.ResponseWriter, r *http.Request) {
 //Get tree menu under a node
 func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-
-	querier := handler.Querier()
-	rootContent, err := querier.FetchByID(id)
-	if err != nil {
-		//todo: handle
-	}
+	id, _ := strconv.Atoi(params["id"])
 
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
 		return
 	}
+
+	querier := handler.Querier()
+	rootContent, err := querier.FetchByID(id)
+
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	if rootContent == nil {
+		HandleError(errors.New("content Not found"), w, 403)
+		return
+	}
+
+	if !permission.CanRead(userID, rootContent, r.Context()) {
+		HandleError(errors.New("No permission"), w)
+		return
+	}
+
 	tree, err := querier.SubTree(rootContent, 5, "folder,role,usergroup", userID, []string{"id"}, r.Context())
 	if err != nil {
-		//todo: handle error
-		fmt.Println(err.Error())
+		HandleError(err, w)
+		return
 	}
 
 	data, _ := json.Marshal(tree)
