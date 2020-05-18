@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -16,7 +17,15 @@ import (
 	"github.com/xc/digimaker/core/util"
 )
 
-var key = "test123456"
+type RefreshTokenManager interface {
+	Store(id string, Expiry int64) error
+	Get(id string) interface{}
+	Delete(id string) error
+}
+
+var refreshKey = "testtesttest11111"
+var accessKey = "testtest22222"
+var tokenManager RefreshTokenManager
 
 type UserClaims struct {
 	jwt.StandardClaims
@@ -25,14 +34,23 @@ type UserClaims struct {
 }
 
 func newRefreshToken(userID int) (string, error) {
+	guid := util.GenerateGUID()
+	expiry := time.Now().Add(time.Minute * 60 * 5).Unix()
 	refreshClaims := jwt.MapClaims{
-		"user_id":      userID,
-		"security_key": "222",
-		"exp":          time.Now().Add(time.Minute * 60 * 5).Unix()} //todo: make it configurable
-	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	token, err := claims.SignedString([]byte(key)) //todo: make it configurable
+		"user_id": userID,
+		"guid":    guid,
+		"exp":     expiry} //todo: make it configurable
+	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
+	token, err := jwt.SignedString([]byte(refreshKey)) //todo: make it configurable
 	if err != nil {
 		return "", err
+	}
+
+	//store meta info
+	err = tokenManager.Store(guid, expiry)
+	if err != nil {
+		log.Error(err.Error(), "")
+		return "", errors.New("Error when storing refresh token info.")
 	}
 	//store it in db
 	return token, nil
@@ -42,13 +60,12 @@ func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 	//check refresh token
 	refreshClaims := struct {
 		jwt.StandardClaims
-		UserID      int    `json:"user_id"`
-		SecurityKey string `json:"security_key"`
+		UserID int    `json:"user_id"`
+		GUID   string `json:"guid"`
 	}{}
 
-	fmt.Println(refreshToken)
 	token, err := jwt.ParseWithClaims(refreshToken, &refreshClaims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(key), nil
+		return []byte(refreshKey), nil
 	})
 
 	if err != nil {
@@ -59,11 +76,12 @@ func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 		return "", errors.New("Invalid refresh token!")
 	}
 
-	securityKey := refreshClaims.SecurityKey
+	guid := refreshClaims.GUID
 
 	userID := refreshClaims.UserID
-	if securityKey != "222" {
-		log.Warning("Someone is trying to use revoked token. ip: "+util.GetIP(r)+". user in the refresh token: "+strconv.Itoa(userID), "")
+	existingToken := tokenManager.Get(guid)
+	if existingToken == nil {
+		log.Warning("Someone is trying to use revoked token. guid: "+guid+" ip: "+util.GetIP(r)+". user in the refresh token: "+strconv.Itoa(userID), "")
 		return "", errors.New("Invalid refresh token!")
 	}
 
@@ -76,14 +94,13 @@ func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 	}
 
 	//Generate new access token
-	atClaims := jwt.MapClaims{
+	accessClaims := jwt.MapClaims{
 		"user_id":   userID,
 		"user_name": user.GetName(),
 		"exp":       time.Now().Add(time.Minute * 5).Unix()} //todo: make it configurable
 
-	atClaims1 := jwt.NewWithClaims(jwt.SigningMethodHS256, atClaims)
-	accessTokenKey := "fdsfdsfsfsdfsdf21"
-	accessToken, err := atClaims1.SignedString([]byte(accessTokenKey))
+	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessToken, err := jwt.SignedString([]byte(accessKey))
 	if err != nil {
 		log.Error(err, "")
 		return "", err
@@ -92,7 +109,8 @@ func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 	return accessToken, nil
 }
 
-func AuthGrant(w http.ResponseWriter, r *http.Request) {
+//Grant  refresh toke and access token
+func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 	if username == "" || password == "" {
@@ -131,15 +149,63 @@ func AuthRevoke(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func Auth(w http.ResponseWriter, r *http.Request) (bool, error) {
+	authStr := r.Header.Get("Authorization")
+	if authStr == "" {
+		return false, errors.New("Empty Authentication")
+	}
+	authSlice := strings.Split(authStr, " ")
+	if authSlice[0] != "Bearer" {
+		return false, errors.New("Only bearer is supported.")
+	}
+
+	token := authSlice[1]
+	accessClaims := UserClaims{}
+	jwtToken, err := jwt.ParseWithClaims(token, &accessClaims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Wrong signing method: %v", token.Header["alg"])
+		}
+		return []byte(accessKey), nil
+	})
+	if err != nil {
+		fmt.Println(err)
+		return false, nil
+	}
+	if jwtToken.Valid {
+		return true, nil
+	} else {
+		return false, nil
+	}
+
+}
+
+func AuthVerify(w http.ResponseWriter, r *http.Request) {
+	verified, err := Auth(w, r)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	if verified {
+		w.Write([]byte("1"))
+	} else {
+		w.Write([]byte("0"))
+	}
+}
+
 func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
 }
 
+func RegisterTokenManager(manager RefreshTokenManager) {
+	tokenManager = manager
+}
+
 func init() {
-	RegisterRoute("/auth/grant", AuthGrant)
+	RegisterRoute("/auth/verify", AuthVerify)
+	RegisterRoute("/auth/auth", AuthAuthenticate)
 	RegisterRoute("/auth/revoke", AuthRevoke)
-	RegisterRoute("/auth/refresh", AuthRenewRefreshToken)
-	RegisterRoute("/auth/rewnew_access", AuthRenewAccessToken)
+	RegisterRoute("/auth/token/refresh", AuthRenewRefreshToken)
+	RegisterRoute("/auth/token/rewnew_access", AuthRenewAccessToken)
 }
