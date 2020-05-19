@@ -4,12 +4,17 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/util"
 )
+
+type key int
+
+const CtxUserKey = key(1)
 
 var routeMap map[string]func(http.ResponseWriter, *http.Request) = map[string]func(http.ResponseWriter, *http.Request){}
 
@@ -33,6 +38,7 @@ func InitRequest(next http.Handler) http.Handler {
 		ctx := r.Context()
 
 		//set user_id to context
+		userIDStr := ""
 		if r.Header.Get("Authorization") != "" {
 			success, err, claims := VerifyToken(r)
 			if err != nil {
@@ -45,12 +51,13 @@ func InitRequest(next http.Handler) http.Handler {
 				return
 			}
 
-			ctx = context.WithValue(ctx, "user_id", claims.UserID)
+			userIDStr = strconv.Itoa(claims.UserID)
+			ctx = context.WithValue(ctx, CtxUserKey, claims.UserID)
 		}
 
 		//start debug
 		requestID := util.GenerateGUID()
-		ctx = log.WithLogger(ctx, logrus.Fields{"ip": util.GetIP(r), "request_id": requestID})
+		ctx = log.WithLogger(ctx, logrus.Fields{"ip": util.GetIP(r), "user": userIDStr, "request_id": requestID})
 		log.StartTiming(ctx, "request")
 
 		w.Header().Add("DM-Request-Id", requestID)
