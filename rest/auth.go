@@ -23,8 +23,6 @@ type RefreshTokenManager interface {
 	Delete(id string) error
 }
 
-var refreshKey = "testtesttest11111"
-var accessKey = "testtest22222"
 var tokenManager RefreshTokenManager
 
 type RefreshClaims struct {
@@ -41,13 +39,16 @@ type UserClaims struct {
 
 func newRefreshToken(userID int) (string, error) {
 	guid := util.GenerateGUID()
-	expiry := time.Now().Add(time.Minute * 60 * 5).Unix()
+	refreshExpiry := util.GetConfigSectionI("auth")["refresh_token_expiry"].(int)
+	expiry := time.Now().Add(time.Minute * time.Duration(refreshExpiry)).Unix()
 	refreshClaims := jwt.MapClaims{
 		"user_id": userID,
 		"guid":    guid,
 		"exp":     expiry} //todo: make it configurable
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
-	token, err := jwt.SignedString([]byte(refreshKey)) //todo: make it configurable
+	//todo: better way to read configuration.
+	refreshKey := util.GetConfigSectionI("auth")["refresh_token_secret_key"].(string)
+	token, err := jwt.SignedString([]byte(refreshKey))
 	if err != nil {
 		return "", err
 	}
@@ -89,12 +90,14 @@ func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 	}
 
 	//Generate new access token
+	accessExpiry := util.GetConfigSectionI("auth")["access_token_expiry"].(int)
 	accessClaims := jwt.MapClaims{
 		"user_id":   userID,
 		"user_name": user.GetName(),
-		"exp":       time.Now().Add(time.Minute * 5).Unix()} //todo: make it configurable
+		"exp":       time.Now().Add(time.Minute * time.Duration(accessExpiry)).Unix()}
 
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
+	accessKey := util.GetConfigSectionI("auth")["access_token_secret_key"].(string)
 	accessToken, err := jwt.SignedString([]byte(accessKey))
 	if err != nil {
 		log.Error(err, "")
@@ -143,6 +146,7 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthRevokeRefreshToken(w http.ResponseWriter, r *http.Request) {
+	//Verify refresh token and delete.
 	token, err := getToken(r)
 	if err != nil {
 		HandleError(err, w)
@@ -189,6 +193,7 @@ func verifyRefreshToken(token string) (RefreshClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Wrong signing method: %v", token.Header["alg"])
 		}
+		refreshKey := util.GetConfigSectionI("auth")["refresh_token_secret_key"].(string)
 		return []byte(refreshKey), nil
 	})
 	if err != nil {
@@ -206,7 +211,8 @@ func verifyRefreshToken(token string) (RefreshClaims, error) {
 }
 
 //Verify access token, return true/false or something is wrong(will be false)
-func Verify(r *http.Request) (bool, error) {
+//@todo: maybe store refresh's guid in access token also to check if it's there? It will have access token revoked in refresh token is revoked.
+func VerifyToken(r *http.Request) (bool, error) {
 	token, err := getToken(r)
 	if err != nil {
 		return false, err
@@ -216,6 +222,7 @@ func Verify(r *http.Request) (bool, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Wrong signing method: %v", token.Header["alg"])
 		}
+		accessKey := util.GetConfigSectionI("auth")["access_token_secret_key"].(string)
 		return []byte(accessKey), nil
 	})
 	if err != nil {
@@ -229,7 +236,7 @@ func Verify(r *http.Request) (bool, error) {
 }
 
 func AuthVerifyAccessToken(w http.ResponseWriter, r *http.Request) {
-	verified, err := Verify(r)
+	verified, err := VerifyToken(r)
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -299,7 +306,7 @@ func RegisterTokenManager(manager RefreshTokenManager) {
 func init() {
 	RegisterRoute("/auth/auth", AuthAuthenticate)
 	RegisterRoute("/auth/token/revoke", AuthRevokeRefreshToken)
-	RegisterRoute("/auth/token/refresh", AuthRenewRefreshToken)
-	RegisterRoute("/auth/token/access", AuthRenewAccessToken)
-	RegisterRoute("/auth/token/verify", AuthVerifyAccessToken)
+	RegisterRoute("/auth/token/refresh/renew", AuthRenewRefreshToken)
+	RegisterRoute("/auth/token/access/renew", AuthRenewAccessToken)
+	RegisterRoute("/auth/token/access/verify", AuthVerifyAccessToken)
 }
