@@ -14,7 +14,8 @@ import (
 
 type key int
 
-const CtxUserKey = key(1)
+//CtxKeyUserID defines context key for user id
+const CtxKeyUserID = key(1)
 
 var routeMap map[string]func(http.ResponseWriter, *http.Request) = map[string]func(http.ResponseWriter, *http.Request){}
 
@@ -52,7 +53,7 @@ func InitRequest(next http.Handler) http.Handler {
 			}
 
 			userIDStr = strconv.Itoa(claims.UserID)
-			ctx = context.WithValue(ctx, CtxUserKey, claims.UserID)
+			ctx = context.WithValue(ctx, CtxKeyUserID, claims.UserID)
 		}
 
 		//start debug

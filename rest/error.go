@@ -19,7 +19,7 @@ func HandleError(err error, w http.ResponseWriter, httpCode ...int) {
 
 //Check if there is user id, if not output error and return 0
 func CheckUserID(context context.Context, w http.ResponseWriter) int {
-	userId := context.Value(CtxUserKey)
+	userId := context.Value(CtxKeyUserID)
 	if userId == nil {
 		HandleError(errors.New("Need to login"), w, 401)
 		return 0
