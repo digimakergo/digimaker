@@ -221,6 +221,7 @@ func AuthVerify(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Renew refresh token
 func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 	token, err := getToken(r)
 	if err != nil {
@@ -256,6 +257,7 @@ func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(newToken))
 }
 
+//Renew access token
 func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
 	token, err := getToken(r)
 	if err != nil {
