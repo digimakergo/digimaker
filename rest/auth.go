@@ -212,10 +212,10 @@ func verifyRefreshToken(token string) (RefreshClaims, error) {
 
 //Verify access token, return true/false or something is wrong(will be false)
 //@todo: maybe store refresh's guid in access token also to check if it's there? It will have access token revoked in refresh token is revoked.
-func VerifyToken(r *http.Request) (bool, error) {
+func VerifyToken(r *http.Request) (bool, error, UserClaims) {
 	token, err := getToken(r)
 	if err != nil {
-		return false, err
+		return false, err, UserClaims{}
 	}
 	accessClaims := UserClaims{}
 	jwtToken, err := jwt.ParseWithClaims(token, &accessClaims, func(token *jwt.Token) (interface{}, error) {
@@ -226,17 +226,17 @@ func VerifyToken(r *http.Request) (bool, error) {
 		return []byte(accessKey), nil
 	})
 	if err != nil {
-		return false, nil
+		return false, nil, UserClaims{}
 	}
 	if jwtToken.Valid {
-		return true, nil
+		return true, nil, accessClaims
 	} else {
-		return false, nil
+		return false, nil, UserClaims{}
 	}
 }
 
 func AuthVerifyAccessToken(w http.ResponseWriter, r *http.Request) {
-	verified, err := VerifyToken(r)
+	verified, err, _ := VerifyToken(r)
 	if err != nil {
 		HandleError(err, w)
 		return
