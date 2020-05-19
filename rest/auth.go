@@ -175,7 +175,7 @@ func AuthRevokeRefreshToken(w http.ResponseWriter, r *http.Request) {
 func getToken(r *http.Request) (string, error) {
 	authStr := r.Header.Get("Authorization")
 	if authStr == "" {
-		return "", errors.New("Empty Authentication")
+		return "", errors.New("Empty Authentication header")
 	}
 	authSlice := strings.Split(authStr, " ")
 	if len(authSlice) != 2 {
@@ -251,11 +251,12 @@ func AuthVerifyAccessToken(w http.ResponseWriter, r *http.Request) {
 //Renew refresh token
 func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 	//verify refresh token
-	token, err := getToken(r)
-	if err != nil {
-		HandleError(err, w)
+	token := r.FormValue("token")
+	if token == "" {
+		HandleError(errors.New("Token parameter is needed"), w)
 		return
 	}
+
 	refreshClaims, err := verifyRefreshToken(token)
 	if err != nil {
 		HandleError(err, w)
@@ -285,11 +286,20 @@ func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 
 //Renew access token
 func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
-	token, err := getToken(r)
-	if err != nil {
-		HandleError(err, w)
+	token := r.FormValue("token")
+	if token == "" {
+		HandleError(errors.New("Token parameter is needed"), w)
 		return
 	}
+	refreshClaims, err := verifyRefreshToken(token)
+	if err != nil || refreshClaims.GUID == "" {
+		if err != nil {
+			log.Error(err.Error(), "", r.Context())
+		}
+		HandleError(errors.New("Not valid refresh token"), w)
+		return
+	}
+
 	accessToken, err := newAccessToken(token, r)
 	if err != nil {
 		HandleError(err, w)
