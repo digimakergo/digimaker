@@ -18,7 +18,7 @@ import (
 )
 
 type RefreshTokenManager interface {
-	Store(id string, Expiry int64) error
+	Store(id string, Expiry int64, claims map[string]interface{}) error
 	Get(id string) interface{}
 	Delete(id string) error
 }
@@ -26,6 +26,12 @@ type RefreshTokenManager interface {
 var refreshKey = "testtesttest11111"
 var accessKey = "testtest22222"
 var tokenManager RefreshTokenManager
+
+type RefreshClaims struct {
+	jwt.StandardClaims
+	UserID int    `json:"user_id"`
+	GUID   string `json:"guid"`
+}
 
 type UserClaims struct {
 	jwt.StandardClaims
@@ -47,7 +53,7 @@ func newRefreshToken(userID int) (string, error) {
 	}
 
 	//store meta info
-	err = tokenManager.Store(guid, expiry)
+	err = tokenManager.Store(guid, expiry, refreshClaims)
 	if err != nil {
 		log.Error(err.Error(), "")
 		return "", errors.New("Error when storing refresh token info.")
@@ -58,21 +64,13 @@ func newRefreshToken(userID int) (string, error) {
 
 func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 	//check refresh token
-	refreshClaims := struct {
-		jwt.StandardClaims
-		UserID int    `json:"user_id"`
-		GUID   string `json:"guid"`
-	}{}
-
-	token, err := jwt.ParseWithClaims(refreshToken, &refreshClaims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(refreshKey), nil
-	})
+	refreshClaims, err := verifyRefreshToken(refreshToken)
 
 	if err != nil {
 		return "", err
 	}
 
-	if !token.Valid {
+	if refreshClaims.UserID == 0 {
 		return "", errors.New("Invalid refresh token!")
 	}
 
@@ -149,17 +147,49 @@ func AuthRevoke(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func Auth(w http.ResponseWriter, r *http.Request) (bool, error) {
+func getToken(r *http.Request) (string, error) {
 	authStr := r.Header.Get("Authorization")
 	if authStr == "" {
-		return false, errors.New("Empty Authentication")
+		return "", errors.New("Empty Authentication")
 	}
 	authSlice := strings.Split(authStr, " ")
-	if authSlice[0] != "Bearer" {
-		return false, errors.New("Only bearer is supported.")
+	if len(authSlice) != 2 {
+		return "", errors.New("Wrong format of bearer.")
 	}
+	if authSlice[0] != "Bearer" {
+		return "", errors.New("Only bearer is supported.")
+	}
+	return authSlice[1], nil
+}
 
-	token := authSlice[1]
+func verifyRefreshToken(token string) (RefreshClaims, error) {
+	claims := RefreshClaims{}
+	jwtToken, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Wrong signing method: %v", token.Header["alg"])
+		}
+		return []byte(refreshKey), nil
+	})
+	if err != nil {
+		return RefreshClaims{}, err
+	}
+	if jwtToken.Valid {
+		entity := tokenManager.Get(claims.GUID)
+		if entity == nil {
+			return claims, errors.New("Token is revoked.")
+		}
+		return claims, nil
+	} else {
+		return RefreshClaims{}, nil
+	}
+}
+
+//Verify access token, return true/false or something is wrong(will be false)
+func Verify(r *http.Request) (bool, error) {
+	token, err := getToken(r)
+	if err != nil {
+		return false, err
+	}
 	accessClaims := UserClaims{}
 	jwtToken, err := jwt.ParseWithClaims(token, &accessClaims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -168,7 +198,6 @@ func Auth(w http.ResponseWriter, r *http.Request) (bool, error) {
 		return []byte(accessKey), nil
 	})
 	if err != nil {
-		fmt.Println(err)
 		return false, nil
 	}
 	if jwtToken.Valid {
@@ -180,7 +209,7 @@ func Auth(w http.ResponseWriter, r *http.Request) (bool, error) {
 }
 
 func AuthVerify(w http.ResponseWriter, r *http.Request) {
-	verified, err := Auth(w, r)
+	verified, err := Verify(r)
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -193,9 +222,53 @@ func AuthVerify(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
+	token, err := getToken(r)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	refreshClaims, err := verifyRefreshToken(token)
+
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	if refreshClaims.UserID == 0 {
+		HandleError(errors.New("Invalid token"), w)
+		return
+	}
+
+	userID := refreshClaims.UserID
+	guid := refreshClaims.GUID
+	err = tokenManager.Delete(guid)
+	if err != nil {
+		log.Error("Error when deleting token: "+err.Error(), "", r.Context())
+		HandleError(err, w)
+	}
+	newToken, err := newRefreshToken(userID)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	w.Write([]byte(newToken))
 }
 
 func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
+	token, err := getToken(r)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	accessToken, err := newAccessToken(token, r)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	w.Write([]byte(accessToken))
 }
 
 func RegisterTokenManager(manager RefreshTokenManager) {

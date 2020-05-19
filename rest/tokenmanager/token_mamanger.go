@@ -1,7 +1,7 @@
 package tokenmanager
 
 import (
-	"fmt"
+	"time"
 
 	"github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/rest"
@@ -12,18 +12,17 @@ const tableName = "dm_token_state"
 type DBTokenManager struct {
 }
 
-func (d DBTokenManager) Store(id string, expiry int64) error {
+func (d DBTokenManager) Store(id string, expiry int64, claims map[string]interface{}) error {
 	dbHandler := db.DBHanlder()
 	tokenState := map[string]interface{}{"guid": id, "expiry": expiry}
-	sid, err := dbHandler.Insert(tableName, tokenState)
-	fmt.Println(sid)
+	_, err := dbHandler.Insert(tableName, tokenState)
 	return err
 }
 
 func (d DBTokenManager) Get(id string) interface{} {
 	dbHandler := db.DBHanlder()
 	entity := TokenState{}
-	err := dbHandler.GetEntity(tableName, db.Cond("guid", id), nil, &entity)
+	err := dbHandler.GetEntity(tableName, db.Cond("guid", id).Cond("expiry>=", time.Now().Unix()), nil, &entity)
 	if err != nil || entity.GUID == "" {
 		return nil
 	}
@@ -31,7 +30,8 @@ func (d DBTokenManager) Get(id string) interface{} {
 }
 
 func (d DBTokenManager) Delete(id string) error {
-	return nil
+	dbHandler := db.DBHanlder()
+	return dbHandler.Delete(tableName, db.Cond("guid", id))
 }
 
 type TokenState struct {
