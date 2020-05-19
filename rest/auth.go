@@ -52,35 +52,32 @@ func newRefreshToken(userID int) (string, error) {
 		return "", err
 	}
 
-	//store meta info
+	//store guid in db
 	err = tokenManager.Store(guid, expiry, refreshClaims)
 	if err != nil {
 		log.Error(err.Error(), "")
 		return "", errors.New("Error when storing refresh token info.")
 	}
-	//store it in db
 	return token, nil
 }
 
 func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 	//check refresh token
 	refreshClaims, err := verifyRefreshToken(refreshToken)
-
 	if err != nil {
 		return "", err
 	}
-
 	if refreshClaims.UserID == 0 {
-		return "", errors.New("Invalid refresh token!")
+		return "", errors.New("Invalid refresh token")
 	}
 
+	//generate new access token
 	guid := refreshClaims.GUID
-
 	userID := refreshClaims.UserID
 	existingToken := tokenManager.Get(guid)
 	if existingToken == nil {
 		log.Warning("Someone is trying to use revoked token. guid: "+guid+" ip: "+util.GetIP(r)+". user in the refresh token: "+strconv.Itoa(userID), "")
-		return "", errors.New("Invalid refresh token!")
+		return "", errors.New("Invalid refresh token")
 	}
 
 	user, err := handler.Querier().GetUser(userID)
@@ -88,7 +85,7 @@ func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 		if err != nil {
 			log.Error(err.Error(), "")
 		}
-		return "", errors.New("User not found.")
+		return "", errors.New("User not found")
 	}
 
 	//Generate new access token
@@ -107,9 +104,10 @@ func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 	return accessToken, nil
 }
 
-//Grant  refresh toke and access token
+//AuthAuthenticate generate refresh toke and access token based on username and password
 func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
-	username := r.FormValue("username")
+	//Check matches
+	username := strings.TrimSpace(r.FormValue("username"))
 	password := r.FormValue("password")
 	if username == "" || password == "" {
 		HandleError(errors.New("Please input username or password"), w)
@@ -122,18 +120,19 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Generate refresh token and access token
 	userID := user.GetCID()
 	refreshToken, err := newRefreshToken(userID)
 	if err != nil {
 		log.Error("Error in generating token on "+strconv.Itoa(userID)+": "+err.Error(), "")
-		HandleError(errors.New("Error when generating refresh token."), w)
+		HandleError(errors.New("Error when generating refresh token"), w)
 		return
 	}
 
 	accessToken, err := newAccessToken(refreshToken, r)
 	if err != nil {
 		log.Error("Error in generating token on "+strconv.Itoa(userID)+": "+err.Error(), "")
-		HandleError(errors.New("Error when generating refresh token."), w)
+		HandleError(errors.New("Error when generating refresh token"), w)
 		return
 	}
 
@@ -143,8 +142,30 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 	w.Write(result)
 }
 
-func AuthRevoke(w http.ResponseWriter, r *http.Request) {
+func AuthRevokeRefreshToken(w http.ResponseWriter, r *http.Request) {
+	token, err := getToken(r)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	claims, err := verifyRefreshToken(token)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	if claims.UserID == 0 {
+		HandleError(errors.New("No valid token"), w)
+		return
+	}
 
+	guid := claims.GUID
+	err = tokenManager.Delete(guid)
+	if err != nil {
+		log.Error("Deleting token error: "+err.Error(), "", r.Context())
+		return
+	}
+
+	w.Write([]byte("1"))
 }
 
 func getToken(r *http.Request) (string, error) {
@@ -154,10 +175,10 @@ func getToken(r *http.Request) (string, error) {
 	}
 	authSlice := strings.Split(authStr, " ")
 	if len(authSlice) != 2 {
-		return "", errors.New("Wrong format of bearer.")
+		return "", errors.New("Wrong format of bearer")
 	}
 	if authSlice[0] != "Bearer" {
-		return "", errors.New("Only bearer is supported.")
+		return "", errors.New("Only bearer is supported")
 	}
 	return authSlice[1], nil
 }
@@ -176,7 +197,7 @@ func verifyRefreshToken(token string) (RefreshClaims, error) {
 	if jwtToken.Valid {
 		entity := tokenManager.Get(claims.GUID)
 		if entity == nil {
-			return claims, errors.New("Token is revoked.")
+			return claims, errors.New("Token is revoked")
 		}
 		return claims, nil
 	} else {
@@ -205,10 +226,9 @@ func Verify(r *http.Request) (bool, error) {
 	} else {
 		return false, nil
 	}
-
 }
 
-func AuthVerify(w http.ResponseWriter, r *http.Request) {
+func AuthVerifyAccessToken(w http.ResponseWriter, r *http.Request) {
 	verified, err := Verify(r)
 	if err != nil {
 		HandleError(err, w)
@@ -223,35 +243,34 @@ func AuthVerify(w http.ResponseWriter, r *http.Request) {
 
 //Renew refresh token
 func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
+	//verify refresh token
 	token, err := getToken(r)
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
-
 	refreshClaims, err := verifyRefreshToken(token)
-
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
-
 	if refreshClaims.UserID == 0 {
 		HandleError(errors.New("Invalid token"), w)
 		return
 	}
 
+	//generate new refresh token.
 	userID := refreshClaims.UserID
 	guid := refreshClaims.GUID
-	err = tokenManager.Delete(guid)
-	if err != nil {
-		log.Error("Error when deleting token: "+err.Error(), "", r.Context())
-		HandleError(err, w)
-	}
 	newToken, err := newRefreshToken(userID)
 	if err != nil {
 		HandleError(err, w)
 		return
+	}
+	err = tokenManager.Delete(guid)
+	if err != nil {
+		log.Error("Error when deleting token: "+err.Error(), "", r.Context())
+		HandleError(err, w)
 	}
 
 	w.Write([]byte(newToken))
@@ -278,9 +297,9 @@ func RegisterTokenManager(manager RefreshTokenManager) {
 }
 
 func init() {
-	RegisterRoute("/auth/verify", AuthVerify)
 	RegisterRoute("/auth/auth", AuthAuthenticate)
-	RegisterRoute("/auth/revoke", AuthRevoke)
+	RegisterRoute("/auth/token/revoke", AuthRevokeRefreshToken)
 	RegisterRoute("/auth/token/refresh", AuthRenewRefreshToken)
-	RegisterRoute("/auth/token/rewnew_access", AuthRenewAccessToken)
+	RegisterRoute("/auth/token/access", AuthRenewAccessToken)
+	RegisterRoute("/auth/token/verify", AuthVerifyAccessToken)
 }
