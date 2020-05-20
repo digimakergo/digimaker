@@ -42,6 +42,10 @@ func DMPath() string {
 	return defaultSettings.DMPath
 }
 
+func VarFolder() string {
+	return GetConfig("general", "var_folder")
+}
+
 //Get config based on section and identifer
 func GetConfig(section string, identifier string, config ...string) string {
 	configList := GetConfigSection(section, config...)
