@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net"
 	"net/http"
 	"net/smtp"
@@ -16,7 +17,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/xc/digimaker/core/log"
 
 	"github.com/rs/xid"
@@ -42,11 +45,17 @@ func UnmarshalData(filepath string, v interface{}) error {
 	return nil
 }
 
-//Generate unique id. It should be cluster safe.
+//Generate unique id with order. It should be cluster safe.
 func GenerateUID() string {
 	guid := xid.New()
 	guidStr := guid.String()
 	return guidStr
+}
+
+//Generate a guid which is completely random without order
+func GenerateGUID() string {
+	uuid := uuid.New()
+	return uuid.String()
 }
 
 //Convert a string array to int array
@@ -119,8 +128,10 @@ func StripSQLPhrase(str string) string {
 }
 
 //Iternate condition rules to see if all are matching.
-//If there are keys in condition rules but not in realValues, match fails.
-//eg. conditions: {id: 12, type:"image"}
+//If there are keys in condition rules but not in realValues, match fails. * mean always all
+//eg.1) conditions: {id: 12, type:"image"} or {id:[11,12], type:["image", "article"]} target: {id:12,type:"article"}
+// 2) conditions: {id: [11,12], type:"image" } target: {id:[12, 13], type: ["image", "article"]}
+// 3) conditions: {id:11, type: "*"} target: {id:[11, 12], type:"image"}
 func MatchCondition(conditions map[string]interface{}, target map[string]interface{}) (bool, []string) {
 	matchResult := false
 	matchLog := []string{}
@@ -136,11 +147,15 @@ func MatchCondition(conditions map[string]interface{}, target map[string]interfa
 					matchResult = ContainsInt(realValue.([]int), conditionValue.(int))
 				}
 			case string:
-				switch realValue.(type) {
-				case string:
-					matchResult = conditionValue == realValue
-				case []string:
-					matchResult = Contains(realValue.([]string), conditionValue.(string))
+				if conditionValue.(string) == "*" {
+					matchResult = true
+				} else {
+					switch realValue.(type) {
+					case string:
+						matchResult = conditionValue == realValue
+					case []string:
+						matchResult = Contains(realValue.([]string), conditionValue.(string))
+					}
 				}
 			case []interface{}:
 				for _, item := range conditionValue.([]interface{}) {
@@ -250,6 +265,18 @@ func SendMail(to []string, subject, body string) error {
 		return err
 	}
 	return c.Quit()
+}
+
+//RandomStr generate a random string. no number only small letters.
+func RandomStr(n int) []byte {
+	rand.Seed(time.Now().UTC().UnixNano())
+	characters := "abcdefghijklmnopqrstuvwxyz"
+	str := []byte("")
+	for i := 0; i < n; i++ {
+		j := rand.Intn(len(characters))
+		str = append(str, characters[j])
+	}
+	return str
 }
 
 func GetIP(r *http.Request) string {
