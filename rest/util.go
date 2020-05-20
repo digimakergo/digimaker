@@ -72,14 +72,15 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 		return "", errors.New("File format not allowed.")
 	}
 
-	tempFolder := util.GetConfig("general", "upload_tempfolder", "dm")
-	// tempFolder = "/Users/xc/go/caf-prototype/src/dm/admin/web/var/upload_temp"
+	tempFolder := util.GetConfig("general", "upload_tempfolder")
+	tempFolderAbs := util.VarFolder() + "/" + tempFolder
+
 	//Strip file name
 	reg := regexp.MustCompile("[^-A-Za-z0-9_]]")
 	filename = reg.ReplaceAllString(filename, "_") //filter out all non word characters
 
 	//Write it to temp folder
-	tempFile, err := ioutil.TempFile(tempFolder, "upload-*-"+filename)
+	tempFile, err := ioutil.TempFile(tempFolderAbs, "upload-*-"+filename)
 	defer tempFile.Close()
 	if err != nil {
 		return "", err
@@ -92,7 +93,7 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	tempFile.Write(fileContent)
 	pathArr := strings.Split(tempFile.Name(), "/")
 	tempFilename := pathArr[len(pathArr)-1]
-	return tempFilename, nil
+	return tempFolder + "/" + tempFilename, nil
 }
 
 func ExportPDF(w http.ResponseWriter, r *http.Request) {
@@ -116,7 +117,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tpl := pongo2.Must(pongo2.FromFile(util.HomePath() + "/templates/pdf/main.html"))
+	tpl := pongo2.Must(pongo2.FromFile(util.AbsHomePath() + "/templates/pdf/main.html"))
 	variables := map[string]interface{}{}
 	variables["language"] = language
 	variables["content"] = content
@@ -178,7 +179,7 @@ func GetAllowedLimitations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	limits, err := permission.GetUserLimits(userId, operation, r.Context())
+	_, limits, err := permission.GetUserAccess(userId, operation, r.Context())
 	if err != nil {
 		HandleError(err, w)
 	} else {

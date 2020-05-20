@@ -1,10 +1,11 @@
 package rest
 
 import (
-	"github.com/xc/digimaker/core"
-	_ "github.com/xc/digimaker/eth/entity"
 	"fmt"
 	"testing"
+
+	"github.com/xc/digimaker/core"
+	_ "github.com/xc/digimaker/core/entity"
 )
 
 func TestMain(m *testing.M) {
