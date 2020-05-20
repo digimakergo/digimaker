@@ -25,13 +25,16 @@ func TestCond(t *testing.T) {
 	var1 := orCond.Children.([]Condition)[2]
 	assert.Equal(t, var1.Children.(Expression).Field, "published")
 	fmt.Println(orCond)
+
+	falseCond := FalseCond()
+	fmt.Println(BuildCondition(falseCond))
 }
 
 func ExampleEmptyCond() {
 	cond := EmptyCond().Cond("author", "1")
 	built, _ := BuildCondition(cond)
 	fmt.Println(built)
-	//Output: (author = ?)
+	//Output: author = ?
 }
 
 func TestContinueCond(t *testing.T) {

@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 
 	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
 	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/permission"
 	"github.com/xc/digimaker/core/util"
@@ -26,10 +25,7 @@ func Bootstrap(homePath string) bool {
 	if err != nil {
 		return false
 	}
-	err = fieldtype.LoadDefinition()
-	if err != nil {
-		return false
-	}
+
 	err = permission.LoadPolicies()
 	if err != nil {
 		return false

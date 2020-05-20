@@ -106,6 +106,14 @@ func EmptyCond() Condition {
 	return Condition{}
 }
 
+func TrueCond() Condition {
+	return Condition{Logic: "", Children: Expression{Field: "", Operator: "", Value: "true"}}
+}
+
+func FalseCond() Condition {
+	return Condition{Logic: "", Children: Expression{Field: "", Operator: "", Value: "false"}}
+}
+
 func separateFieldString(input string, value interface{}) [2]string {
 	input = strings.TrimSpace(input)
 	var result [2]string
@@ -164,13 +172,17 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 			operatorStr = " (" + strings.Join(operatorArr, ",") + ")"
 			//when value is string/int
 		default:
+			//when expression has no field and operator(eg. true/false)
+			if expression.Field == "" && expression.Operator == "" {
+				return expression.Value.(string), nil
+			}
 			value = []interface{}{expression.Value}
 			operatorStr = " ?"
 		}
 		fieldName := expression.Field
 		if len(locationColumns) > 0 {
 			if !(util.Contains(locationColumns[0], fieldName) || strings.Contains(fieldName, ".")) {
-				fieldName = "c." + expression.Field
+				fieldName = "c." + fieldName
 			}
 		}
 		return fieldName + " " + expression.Operator + operatorStr, value
@@ -185,7 +197,7 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 			values = append(values, currentValues...)
 		}
 
-		listStr := strings.Join(expressionList, " "+cond.Logic+" ")
+		listStr := strings.Join(expressionList, " "+strings.ToUpper(cond.Logic)+" ")
 		if len(expressionList) > 1 {
 			listStr = "(" + listStr + ")"
 		}

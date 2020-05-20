@@ -90,7 +90,8 @@ func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (conten
 	return content, err
 }
 
-// List fetches a list of content based on conditions. This is a database level 'list'. Return []contenttype.ContentTyper
+// List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
+//
 func (cq ContentQuery) List(contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
 	count := -1

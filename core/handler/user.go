@@ -28,7 +28,7 @@ func CanLogin(usernameEmail string, password string) (error, contenttype.Content
 		//todo: user error code.
 		return errors.New("User not found"), nil
 	}
-	passwordField := user.Value("password").(fieldtype.Password)
+	passwordField := user.Value("password").(*fieldtype.Password)
 	result := util.MatchPassword(password, passwordField.FieldValue().(string))
 	if result {
 		return nil, user
