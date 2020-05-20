@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+const StatusUnauthed = 403
+const StatusExpired = 440
+const StatusNotFound = 404
+
 func HandleError(err error, w http.ResponseWriter, httpCode ...int) {
 	//todo: output debug info if needed.
 	if len(httpCode) == 0 {

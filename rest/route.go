@@ -41,14 +41,15 @@ func InitRequest(next http.Handler) http.Handler {
 		//set user_id to context
 		userIDStr := ""
 		if r.Header.Get("Authorization") != "" {
-			success, err, claims := VerifyToken(r)
+			err, claims := VerifyToken(r)
+
 			if err != nil {
-				log.Error("Error for authentication: "+err.Error(), "", ctx)
-				HandleError(errors.New("Error for authenticatoin"), w)
-				return
-			}
-			if !success {
-				w.Write([]byte("Authorization failed."))
+				if err == TokenErrorExpired {
+					HandleError(err, w, StatusExpired)
+				} else {
+					log.Error("Token verification error: "+err.Error(), "")
+					HandleError(errors.New("Invalid token"), w, StatusUnauthed)
+				}
 				return
 			}
 
@@ -62,6 +63,7 @@ func InitRequest(next http.Handler) http.Handler {
 		log.StartTiming(ctx, "request")
 
 		w.Header().Add("DM-Request-Id", requestID)
+		w.Header().Set("Access-Control-Allow-Origin", "*") //todo: make host configurable
 
 		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)

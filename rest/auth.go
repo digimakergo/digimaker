@@ -210,12 +210,16 @@ func verifyRefreshToken(token string) (RefreshClaims, error) {
 	}
 }
 
-//Verify access token, return true/false or something is wrong(will be false)
+var (
+	TokenErrorExpired = errors.New("Expired token")
+)
+
+//Verify access token, return nil, TokenErrorExpired or other err
 //@todo: maybe store refresh's guid in access token also to check if it's there? It will have access token revoked in refresh token is revoked.
-func VerifyToken(r *http.Request) (bool, error, UserClaims) {
+func VerifyToken(r *http.Request) (error, UserClaims) {
 	token, err := getToken(r)
 	if err != nil {
-		return false, err, UserClaims{}
+		return err, UserClaims{}
 	}
 	accessClaims := UserClaims{}
 	jwtToken, err := jwt.ParseWithClaims(token, &accessClaims, func(token *jwt.Token) (interface{}, error) {
@@ -225,27 +229,30 @@ func VerifyToken(r *http.Request) (bool, error, UserClaims) {
 		accessKey := util.GetConfigSectionI("auth")["access_token_secret_key"].(string)
 		return []byte(accessKey), nil
 	})
-	if err != nil {
-		return false, nil, UserClaims{}
-	}
+
 	if jwtToken.Valid {
-		return true, nil, accessClaims
+		return nil, accessClaims
 	} else {
-		return false, nil, UserClaims{}
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			switch ve.Errors {
+			case jwt.ValidationErrorExpired:
+				return TokenErrorExpired, UserClaims{}
+			default:
+				return err, UserClaims{}
+			}
+		} else {
+			return err, UserClaims{}
+		}
 	}
 }
 
 func AuthVerifyAccessToken(w http.ResponseWriter, r *http.Request) {
-	verified, err, _ := VerifyToken(r)
+	err, _ := VerifyToken(r)
 	if err != nil {
-		HandleError(err, w)
+		HandleError(err, w, StatusUnauthed)
 		return
 	}
-	if verified {
-		w.Write([]byte("1"))
-	} else {
-		w.Write([]byte("0"))
-	}
+	w.Write([]byte("1"))
 }
 
 //Renew refresh token
