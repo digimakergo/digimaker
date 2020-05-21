@@ -187,6 +187,7 @@ func getToken(r *http.Request) (string, error) {
 	return authSlice[1], nil
 }
 
+//if failed there will be always err
 func verifyRefreshToken(token string) (RefreshClaims, error) {
 	claims := RefreshClaims{}
 	jwtToken, err := jwt.ParseWithClaims(token, &claims, func(token *jwt.Token) (interface{}, error) {
@@ -202,16 +203,25 @@ func verifyRefreshToken(token string) (RefreshClaims, error) {
 	if jwtToken.Valid {
 		entity := tokenManager.Get(claims.GUID)
 		if entity == nil {
-			return claims, errors.New("Token is revoked")
+			return claims, TokenErrorRevoked
 		}
 		return claims, nil
 	} else {
-		return RefreshClaims{}, nil
+		if ve, ok := err.(*jwt.ValidationError); ok {
+			switch ve.Errors {
+			case jwt.ValidationErrorExpired:
+				return RefreshClaims{}, TokenErrorExpired
+			default:
+				return RefreshClaims{}, err
+			}
+		}
+		return RefreshClaims{}, err
 	}
 }
 
 var (
 	TokenErrorExpired = errors.New("Expired token")
+	TokenErrorRevoked = errors.New("Expired revoked")
 )
 
 //Verify access token, return nil, TokenErrorExpired or other err
@@ -260,17 +270,18 @@ func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 	//verify refresh token
 	token := r.FormValue("token")
 	if token == "" {
-		HandleError(errors.New("Token parameter is needed"), w)
+		HandleError(errors.New("Token parameter is needed"), w, StatusUnauthed)
 		return
 	}
 
 	refreshClaims, err := verifyRefreshToken(token)
 	if err != nil {
-		HandleError(err, w)
-		return
-	}
-	if refreshClaims.UserID == 0 {
-		HandleError(errors.New("Invalid token"), w)
+		log.Error(err.Error(), "", r.Context())
+		if err == TokenErrorExpired || err == TokenErrorRevoked {
+			HandleError(err, w, StatusExpired)
+			return
+		}
+		HandleError(errors.New("Invalid token"), w, StatusUnauthed)
 		return
 	}
 
@@ -303,7 +314,7 @@ func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Error(err.Error(), "", r.Context())
 		}
-		HandleError(errors.New("Not valid refresh token"), w)
+		HandleError(errors.New("Not valid refresh token"), w, StatusUnauthed)
 		return
 	}
 
