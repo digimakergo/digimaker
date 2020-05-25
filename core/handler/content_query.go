@@ -19,8 +19,7 @@ type ContentQuery struct{}
 
 //TreeNode is a query result when querying SubTree
 type TreeNode struct {
-	*contenttype.Location
-	Content  contenttype.ContentTyper `json:"-"`
+	Content  contenttype.ContentTyper `json:""`
 	Children []TreeNode               `json:"children"`
 }
 
@@ -131,7 +130,7 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 		}
 	}
 
-	treenode := TreeNode{Content: rootContent, Location: rootContent.GetLocation()}
+	treenode := TreeNode{Content: rootContent}
 	cq.buildTree(&treenode, list)
 	return treenode, nil
 }
@@ -144,7 +143,7 @@ func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentT
 	for _, item := range list {
 		location := item.GetLocation()
 		if location.Depth == parentLocation.Depth+1 && location.ParentID == parentLocation.ID {
-			treenode.Children = append(treenode.Children, TreeNode{Content: item, Location: location})
+			treenode.Children = append(treenode.Children, TreeNode{Content: item})
 		}
 	}
 
