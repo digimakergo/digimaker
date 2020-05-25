@@ -19,8 +19,19 @@ type ContentQuery struct{}
 
 //TreeNode is a query result when querying SubTree
 type TreeNode struct {
-	Content  contenttype.ContentTyper `json:""`
+	*contenttype.Location
+	Fields   interface{}              `json:"fields"` //todo: maybe more generaic attributes instead of hard coded 'Fields' here, or use custom MarshalJSON(remove *Locatoin then)?
+	Content  contenttype.ContentTyper `json:"-"`
 	Children []TreeNode               `json:"children"`
+}
+
+//iterate all nodes
+func (tn *TreeNode) Iterate(operation func(node *TreeNode)) {
+	operation(tn)
+	for i, child := range tn.Children {
+		child.Iterate(operation)
+		tn.Children[i] = child
+	}
 }
 
 // FetchByID fetches content by location id.
@@ -130,7 +141,7 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 		}
 	}
 
-	treenode := TreeNode{Content: rootContent}
+	treenode := TreeNode{Content: rootContent, Location: rootContent.GetLocation()}
 	cq.buildTree(&treenode, list)
 	return treenode, nil
 }
@@ -143,7 +154,7 @@ func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentT
 	for _, item := range list {
 		location := item.GetLocation()
 		if location.Depth == parentLocation.Depth+1 && location.ParentID == parentLocation.ID {
-			treenode.Children = append(treenode.Children, TreeNode{Content: item})
+			treenode.Children = append(treenode.Children, TreeNode{Content: item, Location: location})
 		}
 	}
 

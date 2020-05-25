@@ -50,6 +50,12 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 
 func GetVersion(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
+
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
 	querier := handler.Querier()
 	id, _ := strconv.Atoi(params["id"])
 
@@ -64,6 +70,11 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 
 	if content == nil {
 		HandleError(errors.New("Content doesn't exist"), w)
+		return
+	}
+
+	if !permission.CanRead(userID, content, r.Context()) {
+		HandleError(errors.New("No permisison to the content."), w)
 		return
 	}
 
@@ -226,6 +237,13 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w)
 		return
 	}
+
+	//todo: make this configurable
+	tree.Iterate(func(node *handler.TreeNode) {
+		if node.ContentType == "folder" {
+			node.Fields = map[string]interface{}{"folder_type": node.Content.Value("folder_type")}
+		}
+	})
 
 	data, _ := json.Marshal(tree)
 	w.Write([]byte(data))
