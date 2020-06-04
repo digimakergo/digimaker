@@ -4,10 +4,6 @@
 package rest
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/handler"
-	"github.com/xc/digimaker/core/util"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,7 +11,13 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/util"
 
 	"github.com/gorilla/mux"
 )
@@ -205,16 +207,28 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	params := mux.Vars(r)
-	id := params["id"]
-	idInt, _ := strconv.Atoi(id)
-	handler := handler.ContentHandler{}
-	handler.Context = r.Context()
-	err := handler.DeleteByID(idInt, userID, true)
-	if err != nil {
-		HandleError(err, w)
-		return
+	idStr := r.FormValue("id")
+	idSlice := strings.Split(idStr, ",")
+	for _, id := range idSlice {
+		_, err := strconv.Atoi(id)
+		if err != nil {
+			HandleError(errors.New("Illegal id"), w, StatusWrongParams)
+			return
+		}
 	}
+
+	for _, id := range idSlice {
+		idInt, _ := strconv.Atoi(id)
+		handler := handler.ContentHandler{}
+		handler.Context = r.Context()
+		//todo: use Delete by ids to support one transaction with roll back
+		err := handler.DeleteByID(idInt, userID, true)
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
+	}
+
 	w.Write([]byte("1"))
 }
 
@@ -222,6 +236,6 @@ func init() {
 
 	RegisterRoute("/content/new/{parent}/{contenttype}", New)
 	RegisterRoute("/content/update/{id}", Update)
-	RegisterRoute("/content/delete/{id}", Delete)
+	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/savedraft/{id}/{type}", SaveDraft)
 }

@@ -7,6 +7,7 @@ import (
 )
 
 const StatusUnauthed = 403
+const StatusWrongParams = 400
 const StatusExpired = 440
 const StatusNotFound = 404
 
