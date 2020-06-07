@@ -1,13 +1,13 @@
--- MySQL dump 10.13  Distrib 8.0.17, for osx10.15 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.30, for Linux (x86_64)
 --
--- Host: 127.0.0.1    Database: dm_test
+-- Host: localhost    Database: selvaag
 -- ------------------------------------------------------
 -- Server version	5.7.30-0ubuntu0.16.04.1
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!50503 SET NAMES utf8mb4 */;
+/*!40101 SET NAMES utf8 */;
 /*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
 /*!40103 SET TIME_ZONE='+00:00' */;
 /*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `dm_article`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_article` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `status` int(11) NOT NULL DEFAULT '0',
@@ -55,7 +55,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_draft`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_draft` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author` int(11) NOT NULL,
@@ -82,7 +82,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_folder`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_folder` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `folder_type` varchar(30) NOT NULL DEFAULT '',
@@ -114,7 +114,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_image`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_image` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `author` int(11) NOT NULL DEFAULT '0',
@@ -146,7 +146,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_location`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_location` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `parent_id` int(11) NOT NULL DEFAULT '-1',
@@ -186,7 +186,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_log_operation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_log_operation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user` int(11) NOT NULL DEFAULT '0',
@@ -212,7 +212,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_relation`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_relation` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `to_content_id` int(11) NOT NULL DEFAULT '0',
@@ -244,7 +244,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_role` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL DEFAULT '',
@@ -274,7 +274,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_role_policy`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_role_policy` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `role_id` int(11) NOT NULL,
@@ -296,12 +296,34 @@ INSERT INTO `dm_role_policy` VALUES (1,8,'editor_visit','',''),(2,8,'edit','',''
 UNLOCK TABLES;
 
 --
+-- Table structure for table `dm_token_state`
+--
+
+DROP TABLE IF EXISTS `dm_token_state`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `dm_token_state` (
+  `guid` varchar(50) NOT NULL DEFAULT '',
+  `expiry` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `dm_token_state`
+--
+
+LOCK TABLES `dm_token_state` WRITE;
+/*!40000 ALTER TABLE `dm_token_state` DISABLE KEYS */;
+/*!40000 ALTER TABLE `dm_token_state` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `dm_user`
 --
 
 DROP TABLE IF EXISTS `dm_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_user` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `login` varchar(50) DEFAULT NULL,
@@ -334,7 +356,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_user_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_user_role` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
@@ -359,7 +381,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_user_usergroup`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_user_usergroup` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
@@ -384,7 +406,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_usergroup`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_usergroup` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL DEFAULT '',
@@ -414,7 +436,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_usergroup_policy`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_usergroup_policy` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `usergroup_id` int(11) NOT NULL,
@@ -441,7 +463,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `dm_version`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
+/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `dm_version` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `content_type` varchar(50) NOT NULL,
@@ -475,4 +497,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-05-10 12:22:54
+-- Dump completed on 2020-06-07 17:25:56
