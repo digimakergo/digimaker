@@ -14,7 +14,7 @@
 {% endmacro %}
 
 {% macro output_field( field ) export%}
-    {%with "fieldtype/"|add:field.Definition.Identifier|add:".html"|dm_tpl_path:"github.com/xc/digimaker/sitekit" as path%}
+    {%with "fieldtype/"|add:field.Type()|add:".html"|dm_tpl_path:"github.com/xc/digimaker/sitekit" as path%}
         {%include path with field=field%}
     {%endwith%}
 {% endmacro %}
