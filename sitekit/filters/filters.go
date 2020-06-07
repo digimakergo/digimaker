@@ -21,7 +21,7 @@ import (
 func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	querier := handler.Querier()
 	parent := in.Interface().(contenttype.ContentTyper)
-	children, _, _ := querier.Children(parent, param.String(), 2, db.Cond("1", "1"), []int{}, []string{}, false, context.Background())
+	children, _, _ := querier.Children(parent, param.String(), 2, db.EmptyCond(), []int{}, []string{}, false, context.Background())
 	return pongo2.AsValue(children), nil
 }
 
