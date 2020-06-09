@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
@@ -214,6 +215,20 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	types := r.FormValue("type")
+	if types == "" {
+		HandleError(errors.New("Wrong parameters"), w, StatusWrongParams)
+		return
+	}
+	typeList := util.Split(types)
+	contenttypeList := contenttype.GetDefinitionList()["default"]
+	for _, ctype := range typeList {
+		if _, ok := contenttypeList[ctype]; !ok {
+			HandleError(errors.New("Invalid type"), w, StatusWrongParams)
+			return
+		}
+	}
+
 	querier := handler.Querier()
 	rootContent, err := querier.FetchByID(id)
 
@@ -232,7 +247,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tree, err := querier.SubTree(rootContent, 5, "folder,role,usergroup", userID, []string{"id"}, r.Context())
+	tree, err := querier.SubTree(rootContent, 5, strings.Join(typeList, ","), userID, []string{"id"}, r.Context())
 	if err != nil {
 		HandleError(err, w)
 		return

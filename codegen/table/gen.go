@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/xc/digimaker/core"
 	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
 	"github.com/xc/digimaker/core/util"
 )
 
@@ -19,8 +19,7 @@ func main() {
 		tableName = os.Args[2]
 	}
 
-	contenttype.LoadDefinition()
-	fieldtype.LoadDefinition()
+	core.Bootstrap(homePath)
 
 	fmt.Println("Generating table " + tableName + " in " + homePath)
 	err := GenerateTable(tableName)
@@ -44,17 +43,17 @@ func GenerateTable(ctype string) error {
 		case "text":
 			dbType = "varchar(255) NOT NULL DEFAULT ''"
 		case "richtext":
-			dbType = "TEXT NOT NULL DEFAULT ''"
+			dbType = "TEXT"
 		case "container":
 			continue
-		case "eth_indicator":
+		case "relationlist":
 			continue
 		default:
 			return errors.New("Not supported fieldtype." + value.FieldType)
 		}
 		result += identifier + " " + dbType + ", "
 	}
-	result += "published int NOT NULL DEFAULT 0, modified int NOT NULL DEFAULT 0, cuid varchar(30) NOT NULL DEFAULT '')"
+	result += "author int, published int NOT NULL DEFAULT 0, modified int NOT NULL DEFAULT 0, cuid varchar(30) NOT NULL DEFAULT '')"
 	fmt.Println(result)
 	return nil
 }
