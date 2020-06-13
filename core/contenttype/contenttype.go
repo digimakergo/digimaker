@@ -31,6 +31,17 @@ type ContentType struct {
 	FieldMap map[string]FieldDef `json:"-"`
 }
 
+func (c *ContentType) HasDataField(identifier string) bool {
+	result := false
+	for _, item := range c.DataFields {
+		if item.Identifier == identifier {
+			result = true
+			break
+		}
+	}
+	return result
+}
+
 func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) {
 	//set all fields into FieldMap
 	fieldMap := map[string]FieldDef{}

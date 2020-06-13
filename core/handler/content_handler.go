@@ -82,9 +82,14 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
-func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, userId int, tx *sql.Tx, parentID ...int) error {
+func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, userId int, tx *sql.Tx, parentID int) error {
 	if content.GetCID() == 0 {
 		log.Debug("Content is new.", "contenthandler.StoreCreatedContent", ch.Context)
+	}
+
+	contentDefinition := content.Definition()
+	if !contentDefinition.HasLocation {
+		content.SetValue("location_id", parentID)
 	}
 	err := content.Store(tx)
 	if err != nil {
@@ -95,20 +100,15 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 
 	//todo: deal with relations
 
-	contentDefinition := content.Definition()
 	if contentDefinition.HasLocation {
-		if len(parentID) == 0 {
-			return errors.New("Need parent location id.")
-		}
-		parentIDInt := parentID[0]
-		parent, err := contenttype.GetLocationByID(parentIDInt)
+		parent, err := contenttype.GetLocationByID(parentID)
 		if err != nil {
-			return errors.Wrap(err, "Can not get parent location with "+strconv.Itoa(parentIDInt))
+			return errors.Wrap(err, "Can not get parent location with "+strconv.Itoa(parentID))
 		}
 
 		//Save location
 		location := content.GetLocation()
-		location.ParentID = parentIDInt
+		location.ParentID = parentID
 		location.ContentID = content.GetCID()
 		location.ContentType = content.ContentType()
 		location.UID = util.GenerateUID()
@@ -143,17 +143,22 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	if parent == nil {
 		return nil, ValidationResult{}, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
 	}
+
+	contentDefinition, _ := contenttype.GetDefinition(contentType)
+	fieldsDefinition := contentDefinition.FieldMap
+
 	realData := map[string]interface{}{
-		"under":       strings.Split(parent.GetLocation().Hierarchy, "/"),
 		"contenttype": contentType,
 	} //todo: support more conditions
+	if contentDefinition.HasLocation {
+		realData["under"] = strings.Split(parent.GetLocation().Hierarchy, "/")
+	}
+
 	if !permission.HasAccessTo(userId, "content/create", realData, ch.Context) {
 		return nil, ValidationResult{}, errors.New("User doesn't have access to create")
 	}
 
 	//todo: add validation callback.
-	contentDefinition, _ := contenttype.GetDefinition(contentType)
-	fieldsDefinition := contentDefinition.FieldMap
 
 	//Validate
 	valid, validationResult := ch.Validate(contentType, fieldsDefinition, inputs)
@@ -176,11 +181,20 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 			}
 		}
 	}
+
 	now := int(time.Now().Unix())
-	content.SetValue("published", now)
-	content.SetValue("modified", now)
-	content.SetValue("author", userId)
-	content.SetValue("cuid", util.GenerateUID())
+	if contentDefinition.HasLocation || contentDefinition.HasDataField("published") {
+		content.SetValue("published", now)
+	}
+	if contentDefinition.HasLocation || contentDefinition.HasDataField("modified") {
+		content.SetValue("modified", now)
+	}
+	if contentDefinition.HasLocation || contentDefinition.HasDataField("author") {
+		content.SetValue("author", userId)
+	}
+	if contentDefinition.HasLocation || contentDefinition.HasDataField("cuid") {
+		content.SetValue("cuid", util.GenerateUID())
+	}
 
 	log.StartTiming(ch.Context, "contenthandler_create.database")
 	log.Debug("Validation passed. Start saving content.", "contenthandler.Create", ch.Context)
@@ -342,11 +356,15 @@ func (ch ContentHandler) UpdateByID(id int, inputs map[string]interface{}, userI
 //The inputs doesn't need to include all required fields. However if it's there,
 // it will check if it's required&empty
 func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[string]interface{}, userId int) (bool, ValidationResult, error) {
-	accessRealData := map[string]interface{}{
-		"contenttype": content.ContentType(),
-		"under":       content.GetLocation().ID,
+	contentType := content.ContentType()
+	contentDef, _ := contenttype.GetDefinition(contentType)
+
+	accessRealData := map[string]interface{}{"contenttype": contentType}
+
+	if contentDef.HasLocation {
+		accessRealData["under"] = content.GetLocation().ID
 	}
-	if content.Value("author").(int) == userId {
+	if (contentDef.HasLocation || contentDef.HasDataField("author")) && content.Value("author").(int) == userId {
 		accessRealData["author"] = "self"
 	}
 	if !permission.HasAccessTo(userId, "content/update", accessRealData, ch.Context) {
@@ -355,8 +373,6 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 
 	//Validate
 	log.Debug("Validating", "contenthandler.update", ch.Context)
-	contentType := content.ContentType()
-	contentDef, _ := contenttype.GetDefinition(contentType)
 
 	valid, result := ch.Validate(contentType, contentDef.FieldMap, inputs)
 	if !valid {
@@ -385,7 +401,6 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 					return false, ValidationResult{}, err
 				}
 			}
-
 		}
 	}
 
@@ -402,8 +417,11 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		log.Debug("New version created", "contenthandler.update", ch.Context)
 		content.SetValue("version", version)
 	}
-	now := int(time.Now().Unix())
-	content.SetValue("modified", now)
+
+	if contentDef.HasLocation || contentDef.HasDataField("modified") {
+		now := int(time.Now().Unix())
+		content.SetValue("modified", now)
+	}
 
 	//Save update content.
 	log.Debug("Saving content", "contenthandler.update", ch.Context)

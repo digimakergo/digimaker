@@ -32,6 +32,7 @@ func (rmdb *MysqlHandler) GetByID(contentType string, tableName string, id int, 
 //  var content contenttype.Article
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
+//todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
 func (r *MysqlHandler) GetByFields(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
@@ -51,17 +52,7 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 		where = "WHERE " + conditionStr
 	}
 
-	relationQuery := `,CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
-                                      'to_content_id', relation.to_content_id,
-                                      'to_type', relation.to_type,
-                                      'from_content_id', relation.from_content_id,
-                                      'from_type', relation.from_type,
-                                      'from_location', relation.from_location,
-                                      'priority', relation.priority,
-                                      'uid', relation.uid,
-                                      'description',relation.description,
-                                      'data' ,relation.data )
-                         ORDER BY relation.priority ), ']') AS relations`
+	relationQuery := r.getRelationQuery()
 
 	//limit
 	limitStr := ""
@@ -117,6 +108,91 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 	}
 
 	return countResult, nil
+}
+
+//Get non-location content
+//todo: possible to have more joins between entities, or ingegrate with ORM
+//todo: support select multiple entity once.
+//todo: support query without involing location at all.
+func (r *MysqlHandler) GetEntityContent(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
+	db, err := DB()
+	if err != nil {
+		return -1, errors.Wrap(err, "[MysqlHandler.GetByFields]Error when connecting db.")
+	}
+	//get condition string for fields
+	conditionStr, values := BuildCondition(condition)
+	where := ""
+	if conditionStr != "" {
+		where = "WHERE " + conditionStr
+	}
+
+	relationQuery := r.getRelationQuery()
+
+	//limit
+	limitStr := ""
+	if len(limit) > 0 {
+		if len(limit) != 2 {
+			return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
+		}
+		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+	}
+
+	//sort by
+	sortbyStr, err := r.getSortBy(sortby)
+	if err != nil {
+		return -1, err
+	}
+
+	sqlStr := `SELECT c.*` + relationQuery + `
+                   FROM (` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id )
+                     LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
+                    ` + where + `
+                     GROUP BY c.id
+										 ` + sortbyStr + " " + limitStr
+
+	log.Debug(sqlStr+","+fmt.Sprintln(values), "db")
+	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Warning(err.Error(), "GetByFields")
+		} else {
+			message := "[MysqlHandler.GetByFields]Error when query. sql - " + sqlStr
+			return -1, errors.Wrap(err, message)
+		}
+	}
+
+	//count if there is
+	countResult := 0
+	if count {
+		countSqlStr := `SELECT COUNT(*) AS count FROM ` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id ` + where
+
+		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
+		if err != nil {
+			message := "[MysqlHandler.GetByFields]Error when query count. sql - " + countSqlStr
+			return -1, errors.Wrap(err, message)
+		}
+		rows.Next()
+		rows.Scan(&countResult)
+		rows.Close()
+	}
+
+	return countResult, nil
+}
+
+func (r *MysqlHandler) getRelationQuery() string {
+	relationQuery := `,CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
+                                      'to_content_id', relation.to_content_id,
+                                      'to_type', relation.to_type,
+                                      'from_content_id', relation.from_content_id,
+                                      'from_type', relation.from_type,
+                                      'from_location', relation.from_location,
+                                      'priority', relation.priority,
+                                      'uid', relation.uid,
+                                      'description',relation.description,
+                                      'data' ,relation.data )
+                         ORDER BY relation.priority ), ']') AS relations`
+	return relationQuery
 }
 
 //Get sort by sql based on sortby pattern(eg.[]string{"name asc", "id desc"})

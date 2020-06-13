@@ -231,7 +231,12 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 	rootLocation := rootContent.GetLocation()
 	if depth == 1 {
 		//Direct children
-		condition = condition.Cond("location.parent_id", rootLocation.ID)
+		def, _ := contenttype.GetDefinition(contentType)
+		if def.HasLocation {
+			condition = condition.Cond("location.parent_id", rootLocation.ID)
+		} else {
+			condition = condition.Cond("location_id", rootLocation.ID)
+		}
 	} else {
 		rootHierarchy := rootLocation.Hierarchy
 		rootDepth := rootLocation.Depth
@@ -253,7 +258,14 @@ func (cq ContentQuery) Fill(contentType string, condition db.Condition, limit []
 	def, _ := contenttype.GetDefinition(contentType)
 	tableName := def.TableName
 	hasCount := *count != -1
-	countResult, err := dbhandler.GetByFields(contentType, tableName, condition, limit, sortby, content, hasCount)
+
+	var countResult int
+	var err error
+	if def.HasLocation {
+		countResult, err = dbhandler.GetByFields(contentType, tableName, condition, limit, sortby, content, hasCount)
+	} else {
+		countResult, err = dbhandler.GetEntityContent(contentType, tableName, condition, limit, sortby, content, hasCount)
+	}
 	if err != nil {
 		message := "[List]Content Query error"
 		log.Error(message+err.Error(), "")
