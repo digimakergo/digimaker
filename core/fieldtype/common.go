@@ -81,7 +81,7 @@ type Int struct {
 }
 
 //LoadFromInput loads data from input before validation
-func (i Int) LoadFromInput(input interface{}) error {
+func (i *Int) LoadFromInput(input interface{}) error {
 	existing := i.NullInt64
 	err := i.Scan(input)
 	if err != nil {
