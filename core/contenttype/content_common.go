@@ -1,5 +1,12 @@
 package contenttype
 
+import (
+	"database/sql"
+	"encoding/json"
+
+	"github.com/xc/digimaker/core/db"
+)
+
 type ContentCommon struct {
 	CID        int                 `boil:"cid" json:"cid" toml:"cid" yaml:"cid"`
 	Version    int                 `boil:"version" json:"version" toml:"version" yaml:"version"`
@@ -27,9 +34,6 @@ func (c ContentCommon) ToDBValues() map[string]interface{} {
 		"status":    c.Status,
 		"author":    c.Author,
 		"cuid":      c.CUID,
-	}
-	for identifier, relationValue := range c.Relations.Map {
-		result[identifier] = relationValue
 	}
 	return result
 }
@@ -87,6 +91,33 @@ func (c *ContentCommon) GetCID() int {
 
 func (c *ContentCommon) GetRelations() *ContentRelationList {
 	return &c.Relations
+}
+
+func (c *ContentCommon) StoreRelations(transaction ...*sql.Tx) error {
+	dbHandler := db.DBHanlder()
+
+	//delete
+	err := dbHandler.Delete("dm_relation", db.Cond("to_content_id", c.CID), transaction...)
+	if err != nil {
+		return nil
+	}
+
+	//insert
+	for identifier, list := range c.Relations.Map {
+		for _, relation := range *list {
+			data, _ := json.Marshal(relation)
+			dataMap := map[string]interface{}{}
+			json.Unmarshal(data, &dataMap)
+			dataMap["to_content_id"] = c.CID
+			dataMap["identifier"] = identifier
+			_, err := dbHandler.Insert("dm_relation", dataMap, transaction...)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
 //TODO: add more common methods related to content here.

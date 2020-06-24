@@ -121,7 +121,7 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
             result = &(c.{{$identifier|UpperName}})
         {{else}}
-            result = c.Relations.Map["{{$identifier}}"]
+            result = c.Relations.GetField("{{$identifier}}")
         {{end}}
     {{end}}
     {{end}}
@@ -171,8 +171,16 @@ func (c *{{$struct_name}}) Store(transaction ...*sql.Tx) error {
 		}
 	} else {
 		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
+    if err != nil {
+			return err
+		}
+	}
+
+	err := c.StoreRelations(transaction...)
+	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
