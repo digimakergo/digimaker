@@ -1,10 +1,5 @@
 package fieldtype
 
-import (
-	"database/sql"
-	"database/sql/driver"
-)
-
 // FieldTyper defines a field type data
 // There are 2 types of datas in a field: input data, output data. They can be the same, but sometime can be different.
 // eg. for a text field, they are all the same
@@ -15,14 +10,14 @@ import (
 //3) UnMarshall - from json
 //
 type FieldTyper interface {
-	//Init from db
-	//Scan(src interface{}) error
-	sql.Scanner
-
-	//Get value when insert/update to DB.
-	//same as database.sql.driver.Valuer
-	//Value() (Value, error)
-	driver.Valuer
+	// //Init from db
+	// //Scan(src interface{}) error
+	// sql.Scanner
+	//
+	// //Get value when insert/update to DB.
+	// //same as database.sql.driver.Valuer
+	// //Value() (Value, error)
+	// driver.Valuer
 
 	//Init from input(http input or api input)
 	//The return must be a basic type. Invoke after validation succeed.
