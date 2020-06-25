@@ -229,7 +229,9 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 // SubList fetches content list with permission considered(only return contents the user has access to).
 func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
 	rootLocation := rootContent.GetLocation()
-	if depth == 1 {
+	if depth == 0 {
+		//no limit
+	} else if depth == 1 {
 		//Direct children
 		def, _ := contenttype.GetDefinition(contentType)
 		if def.HasLocation {
