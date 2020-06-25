@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -102,6 +103,51 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(data))
 }
 
+func buildCondition(userid int, def contenttype.ContentType, query url.Values) (db.Condition, error) {
+	author := query.Get("author")
+	condition := db.EmptyCond()
+	if author != "" {
+		if author == "self" {
+			condition = condition.Cond("author", userid)
+		} else {
+			authorInt, err := strconv.Atoi(author)
+			if err != nil {
+				return db.EmptyCond(), errors.New("wrong author format")
+			}
+			condition = condition.Cond("author", authorInt)
+		}
+	}
+
+	//id
+	idStr := query.Get("id")
+	if idStr != "" {
+		ids, err := util.ArrayStrToInt(strings.Split(idStr, ","))
+		if err != nil {
+			return db.EmptyCond(), errors.New("Wrong id format")
+		}
+		condition = condition.And("location.id", ids)
+	}
+
+	//cid
+	cidStr := query.Get("cid")
+	if cidStr != "" {
+		cids, err := util.ArrayStrToInt(strings.Split(cidStr, ","))
+		if err != nil {
+			return db.EmptyCond(), errors.New("Wrong cid format")
+		}
+		condition = condition.And("c.id", cids)
+	}
+
+	for field := range def.FieldMap {
+		value := query.Get("field." + field)
+		if value != "" {
+			condition = condition.And("c."+field, value) //todo: support operator //todo: support more value type(eg. array)
+		}
+	}
+
+	return condition, nil
+}
+
 //Get children of a content(eg. folder)
 func Children(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -132,6 +178,12 @@ func Children(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctype := params["contenttype"]
+	def, err := contenttype.GetDefinition(ctype)
+	if err != nil {
+		HandleError(errors.New("Cann't get content type"), w)
+		return
+	}
+
 	querier := handler.Querier()
 	rootContent, err := querier.FetchByID(id)
 	if err != nil {
@@ -144,21 +196,11 @@ func Children(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//filter
-	author := getParams.Get("author")
-	condition := db.EmptyCond()
-	if author != "" {
-		if author == "self" {
-			condition = condition.Cond("author", userid)
-		} else {
-			authorInt, err := strconv.Atoi(author)
-			if err != nil {
-				HandleError(errors.New("wrong author format"), w, 410)
-				return
-			}
-			condition = condition.Cond("author", authorInt)
-		}
+	condition, err := buildCondition(userid, def, r.URL.Query())
+	if err != nil {
+		HandleError(err, w, 410)
+		return
 	}
-	//todo: add more filters including field filter.
 
 	limitArr := []int{}
 	if offsetStr != "" && limitStr != "" {
@@ -166,6 +208,7 @@ func Children(w http.ResponseWriter, r *http.Request) {
 	}
 
 	list, count, err := querier.Children(rootContent, ctype, userid, condition, limitArr, sortbyArr, true, cxt)
+	// list, count, err := querier.SubList(rootContent, ctype, 100, userid, condition, limitArr, sortbyArr, true, cxt)
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -200,6 +243,78 @@ func Children(w http.ResponseWriter, r *http.Request) {
 	} else {
 		result.List = list
 	}
+
+	data, _ := json.Marshal(result)
+	w.Write([]byte(data))
+}
+
+//List
+//todo: merge with Children/allback
+func List(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	getParams := r.URL.Query()
+
+	//offset and limit
+	offsetStr := getParams.Get("offset")
+	offset, err := strconv.Atoi(offsetStr)
+	if offsetStr != "" && err != nil {
+		HandleError(errors.New("Invalid offset"), w)
+		return
+	}
+
+	limitStr := getParams.Get("limit")
+	limit, err := strconv.Atoi(limitStr)
+	if limitStr != "" && err != nil {
+		HandleError(errors.New("Invalid limit"), w)
+		return
+	}
+
+	//sort by
+	sortbyStr := getParams.Get("sortby")
+	sortbyArr := util.Split(sortbyStr, ";")
+
+	ctype := params["contenttype"]
+	def, err := contenttype.GetDefinition(ctype)
+	if err != nil {
+		HandleError(errors.New("Cann't get content type"), w)
+		return
+	}
+
+	querier := handler.Querier()
+	rootContent, err := querier.FetchByID(3)
+	if err != nil {
+		//todo: handle
+	}
+	cxt := r.Context()
+	userid := CheckUserID(cxt, w)
+	if userid == 0 {
+		return
+	}
+
+	//filter
+	condition, err := buildCondition(userid, def, r.URL.Query())
+	if err != nil {
+		HandleError(err, w, 410)
+		return
+	}
+
+	limitArr := []int{}
+	if offsetStr != "" && limitStr != "" {
+		limitArr = []int{offset, limit}
+	}
+
+	list, count, err := querier.SubList(rootContent, ctype, 0, userid, condition, limitArr, sortbyArr, true, cxt)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	result := struct {
+		List  interface{} `json:"list"`
+		Count int         `json:"count"`
+	}{Count: count}
+
+	result.List = list
 
 	data, _ := json.Marshal(result)
 	w.Write([]byte(data))
@@ -270,4 +385,5 @@ func init() {
 
 	RegisterRoute("/content/treemenu/{id:[0-9]+}", TreeMenu)
 	RegisterRoute("/content/list/{id:[0-9]+}/{contenttype}", Children)
+	RegisterRoute("/content/list/{contenttype}", List)
 }
