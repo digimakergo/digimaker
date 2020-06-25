@@ -105,7 +105,7 @@ func (c *Location) Field(name string) interface{} {
 func (c *Location) Path() []int {
 	if len(c.path) == 0 {
 		path := strings.Split(c.Hierarchy, "/")
-		c.path = util.ArrayStrToInt(path)
+		c.path, _ = util.ArrayStrToInt(path)
 	}
 	return c.path
 }

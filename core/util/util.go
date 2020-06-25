@@ -59,13 +59,17 @@ func GenerateGUID() string {
 }
 
 //Convert a string array to int array
-func ArrayStrToInt(strArray []string) []int {
+func ArrayStrToInt(strArray []string) ([]int, error) {
 	size := len(strArray)
 	var result = make([]int, size)
 	for i, str := range strArray {
-		result[i], _ = strconv.Atoi(str)
+		value, err := strconv.Atoi(str)
+		result[i] = value
+		if err != nil {
+			return []int{}, err
+		}
 	}
-	return result
+	return result, nil
 }
 
 var varBrakets = []string{"{", "}"}
