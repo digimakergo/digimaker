@@ -93,11 +93,11 @@ func (c *ContentCommon) GetRelations() *ContentRelationList {
 	return &c.Relations
 }
 
-func (c *ContentCommon) StoreRelations(transaction ...*sql.Tx) error {
+func (c *ContentCommon) StoreRelations(thisContenttype string, transaction ...*sql.Tx) error {
 	dbHandler := db.DBHanlder()
 
 	//delete
-	err := dbHandler.Delete("dm_relation", db.Cond("to_content_id", c.CID), transaction...)
+	err := dbHandler.Delete("dm_relation", db.Cond("to_content_id", c.CID).Cond("to_type", thisContenttype), transaction...)
 	if err != nil {
 		return nil
 	}
@@ -108,8 +108,9 @@ func (c *ContentCommon) StoreRelations(transaction ...*sql.Tx) error {
 			data, _ := json.Marshal(relation)
 			dataMap := map[string]interface{}{}
 			json.Unmarshal(data, &dataMap)
-			dataMap["to_content_id"] = c.CID
 			dataMap["identifier"] = identifier
+			dataMap["to_content_id"] = c.CID
+			dataMap["to_type"] = thisContenttype
 			_, err := dbHandler.Insert("dm_relation", dataMap, transaction...)
 			if err != nil {
 				return err

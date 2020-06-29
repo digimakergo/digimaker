@@ -18,15 +18,26 @@ type RelationList []Relation
 //LoadFromInput load data from input before validation
 func (rl *RelationList) LoadFromInput(input interface{}) error {
 	s := fmt.Sprint(input)
-	arrInt, err := util.ArrayStrToInt(strings.Split(s, ","))
+
+	arr := strings.Split(s, ";")
+	if len(arr) != 2 {
+		return errors.New("wrong format.")
+	}
+	arrInt, err := util.ArrayStrToInt(strings.Split(arr[0], ","))
+
 	if err != nil {
 		return errors.New("Not int(s)")
 	}
+	arrType := strings.Split(arr[1], ",")
+	if len(arrType) != len(arrInt) {
+		return errors.New("id and type are not same length")
+	}
 
 	relationlist := []Relation{}
-	for _, v := range arrInt {
+	for i, v := range arrInt {
 		r := Relation{}
 		r.FromContentID = v
+		r.FromType = arrType[i]
 		relationlist = append(relationlist, r)
 	}
 	*rl = relationlist
@@ -113,6 +124,9 @@ func (relations ContentRelationList) MarshalJSON() ([]byte, error) {
 //Get relationlist field, create if it's not in map.
 //nb: does't checking if it's a relationlist type.
 func (relations *ContentRelationList) GetField(identifier string) *RelationList {
+	if relations.Map == nil {
+		relations.Map = map[string]*RelationList{}
+	}
 	if rl, ok := relations.Map[identifier]; ok {
 		return rl
 	} else {
