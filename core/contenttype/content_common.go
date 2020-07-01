@@ -111,6 +111,7 @@ func (c *ContentCommon) StoreRelations(thisContenttype string, transaction ...*s
 			dataMap["identifier"] = identifier
 			dataMap["to_content_id"] = c.CID
 			dataMap["to_type"] = thisContenttype
+			dataMap["priority"] = relation.Priority
 			_, err := dbHandler.Insert("dm_relation", dataMap, transaction...)
 			if err != nil {
 				return err

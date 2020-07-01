@@ -39,6 +39,7 @@ func (rl *RelationList) LoadFromInput(input interface{}) error {
 		r := Relation{}
 		r.FromContentID = v
 		r.FromType = arrType[i]
+		r.Priority = len(arrInt) - i
 		relationlist = append(relationlist, r)
 	}
 	*rl = relationlist
