@@ -269,6 +269,17 @@ func List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//level
+	levelStr := getParams.Get("level")
+	level := 0
+	if levelStr != "" {
+		level, err = strconv.Atoi(levelStr)
+		if err != nil {
+			HandleError(errors.New("Invalid level"), w)
+			return
+		}
+	}
+
 	//sort by
 	sortbyStr := getParams.Get("sortby")
 	sortbyArr := util.Split(sortbyStr, ";")
@@ -281,10 +292,23 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	querier := handler.Querier()
-	rootContent, err := querier.FetchByID(3)
-	if err != nil {
-		//todo: handle
+
+	rootStr := getParams.Get("parent")
+	var rootContent contenttype.ContentTyper
+	if rootStr != "" {
+		rootID, err := strconv.Atoi(rootStr)
+		if err != nil {
+			HandleError(errors.New("Invalid parent"), w)
+			return
+		}
+		rootContent, err = querier.FetchByID(rootID)
+		if err != nil {
+			log.Error(err.Error(), "", r.Context())
+			HandleError(errors.New("Can't get parent"), w, 410)
+			return
+		}
 	}
+
 	cxt := r.Context()
 	userid := CheckUserID(cxt, w)
 	if userid == 0 {
@@ -301,9 +325,13 @@ func List(w http.ResponseWriter, r *http.Request) {
 	limitArr := []int{}
 	if offsetStr != "" && limitStr != "" {
 		limitArr = []int{offset, limit}
+	} else {
+		if condition.Children == nil {
+			limitArr = []int{0, 10} //todo: use configuration
+		}
 	}
 
-	list, count, err := querier.SubList(rootContent, ctype, 0, userid, condition, limitArr, sortbyArr, true, cxt)
+	list, count, err := querier.SubList(rootContent, ctype, level, userid, condition, limitArr, sortbyArr, true, cxt)
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -362,7 +390,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tree, err := querier.SubTree(rootContent, 5, strings.Join(typeList, ","), userID, []string{"id"}, r.Context())
+	tree, err := querier.SubTree(rootContent, 5, strings.Join(typeList, ","), userID, []string{"priority desc", "id"}, r.Context())
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -384,6 +412,6 @@ func init() {
 	RegisterRoute("/content/version/{id:[0-9]+}/{version:[0-9]+}", GetVersion)
 
 	RegisterRoute("/content/treemenu/{id:[0-9]+}", TreeMenu)
-	RegisterRoute("/content/list/{id:[0-9]+}/{contenttype}", Children)
+	RegisterRoute("/content/children/{id:[0-9]+}/{contenttype}", Children)
 	RegisterRoute("/content/list/{contenttype}", List)
 }
