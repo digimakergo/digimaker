@@ -6,6 +6,7 @@ package contenttype
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -79,13 +80,17 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 	default:
 		return errors.New("Unknow scan value.")
 	}
-	//relationData := "[" + source + "]"
 
 	var relationList []Relation
 	err := json.Unmarshal([]byte(source), &relationList)
 	if err != nil {
 		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+source)
 	}
+
+	//Sort by priority (highest will be on top)
+	sort.Slice(relationList, func(i int, j int) bool {
+		return relationList[i].Priority > relationList[j].Priority
+	})
 
 	//If not empty relation(only one record by everything is null/"")
 	// if !(len(relationList) == 1 && relationList[0].Identifier == "") {

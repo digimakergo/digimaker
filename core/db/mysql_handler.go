@@ -181,7 +181,7 @@ func (r *MysqlHandler) GetEntityContent(contentType string, tableName string, co
 }
 
 func (r *MysqlHandler) getRelationQuery() string {
-	relationQuery := `,CONCAT( '[', GROUP_CONCAT( JSON_OBJECT( 'identifier', relation.identifier,
+	relationQuery := `,JSON_ARRAYAGG( JSON_OBJECT( 'identifier', relation.identifier,
                                       'to_content_id', relation.to_content_id,
                                       'to_type', relation.to_type,
                                       'from_content_id', relation.from_content_id,
@@ -190,8 +190,7 @@ func (r *MysqlHandler) getRelationQuery() string {
                                       'priority', relation.priority,
                                       'uid', relation.uid,
                                       'description',relation.description,
-                                      'data' ,relation.data )
-                         ORDER BY relation.priority ), ']') AS relations`
+                                      'data' ,relation.data ) ) AS relations`
 	return relationQuery
 }
 
