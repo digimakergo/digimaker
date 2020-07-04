@@ -1,7 +1,7 @@
 package contenttype
 
 type ContentEntity struct {
-	ID        int                 `boil:"cid" json:"cid" toml:"cid" yaml:"cid"`
+	ID        int                 `boil:"id" json:"id" toml:"id" yaml:"id"`
 	Relations ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
