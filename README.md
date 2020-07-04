@@ -3,14 +3,14 @@ Digimaker Content Management Framework
 Written in Go language, Digimaker is a simple, high performance and flexible Content Management(but not limited to) Framework to develop your web site and web application.
 
 The framework emphasizes below design principles:
-- minimal core+plugin design, avoiding over-engineering.
-- providing features with good balance of simplicity and flexibility
-- important to make everything easy to maintain(eg. good logging, debug info, error message)
+- minimal design, avoiding over-engineering.
+- balance of simplicity, performance and flexibility
+- easy to maintain(eg. good logging, debug info, error message)
 
 Typical application cases are like website, document management system, cloud based application, also some generic software like workflow systems, even CRM systems.
 
 ### Simple
-- [website]Django/Twig-syntax like templating
+- [website]simple templating syntax
 - [website]clear template structure
 - [website]easily support multi side
 - Go style api
@@ -24,13 +24,11 @@ Thanks to performance of Go language, with performance-prioritied design, Digima
 - Support database partition from model so querying > 10 millions of data can have same performance as querying under 1 million.
 Benchmark reference:xxxx.
 
-### Powerful&Flexible
+### Flexible
 - rest api to query/change contents
-- most common features are set in configuration, no coding needed.
-- reuse built-in modules like login, displaying content
 - extendable permission&user system
 - powerful content model(content type&field type) to extending&operating content fitting your need
-- clear & beautiful callback & debug mechanisms.
+- clear callback & debug mechanisms.
 - online debug so administrator can monitor request's processing data, time spent, etc.
 
 
@@ -42,4 +40,12 @@ See [Progress](core/doc/9.Progress.md) for progresses.
 
 License
 --------
-Digimaker uses MIT license. There are Paid Digimaker Plugins providing additional valuable features(eg. maintenance tools), check more on [www.digimaker.com](http://www.digimaker.com).
+MIT license. 
+
+Support & Services
+--------
+Almost all activites can be done via community. 
+
+For specific support/service you can contact Digimaker Go AS. Also there are paid plugins providing specific features(eg. maintenance tools). 
+
+Check more on [www.digimaker.com](http://www.digimaker.com).
