@@ -7,7 +7,7 @@ The framework emphasizes below design principles:
 - balance of simplicity, performance and flexibility
 - easy to maintain(eg. good logging, debug info, error message)
 
-Typical application cases are like website, document management system, cloud based application, also some generic software like workflow systems, even CRM systems.
+Typical application cases are like website, document management system, cloud based application, also some generic software like workflow systems, even small CRM systems or similar.
 
 ### Simple
 - [website]simple templating syntax
