@@ -143,7 +143,7 @@ func (r *MysqlHandler) GetEntityContent(contentType string, tableName string, co
 		return -1, err
 	}
 
-	sqlStr := `SELECT c.*` + relationQuery + `
+	sqlStr := `SELECT c.*, c.id as cid` + relationQuery + `
                    FROM (` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id )
                      LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
                     ` + where + `
