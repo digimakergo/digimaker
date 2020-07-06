@@ -7,6 +7,7 @@ package util
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -14,6 +15,8 @@ import (
 	"net/http"
 	"net/smtp"
 	"os"
+	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -283,6 +286,35 @@ func RandomStr(n int) []byte {
 	return str
 }
 
+//Generate a resized image
+func ResizeImage(from string, to string, size string) error {
+	folder := filepath.Dir(to)
+	if _, err := os.Stat(folder); os.IsNotExist(err) {
+		err = os.MkdirAll(folder, 0775)
+		if err != nil {
+			return err
+		}
+	}
+
+	var args = []string{
+		"--size", size,
+		"--output", to,
+		from,
+	}
+	path, err := exec.LookPath("vipsthumbnail")
+	if err != nil {
+		return err
+	}
+	cmd := exec.Command(path, args...)
+	err = cmd.Run()
+
+	if err != nil {
+		log.Error("Can not resize image. args:"+fmt.Sprint(args), "")
+		return errors.New("Can not resize image " + from + ": " + err.Error())
+	}
+	return nil
+}
+
 func GetIP(r *http.Request) string {
 	forwarded := r.Header.Get("X-FORWARDED-FOR")
 	if forwarded != "" {
@@ -290,4 +322,13 @@ func GetIP(r *http.Request) string {
 	}
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 	return ip
+}
+
+func init() {
+	path, err := exec.LookPath("vipsthumbnail")
+	if err != nil {
+		log.Warning("vipsthumbnail not found for image proceeding.", "")
+	} else {
+		log.Info("Vipsthumbnail found in " + path)
+	}
 }

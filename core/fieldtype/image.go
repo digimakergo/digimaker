@@ -55,18 +55,31 @@ func (i *Image) BeforeSaving() error {
 				return err
 			}
 		}
+
 		newPath := newFolder + "/" + filename
 		newPathAbs := util.VarFolder() + "/" + newPath
 
-		//todo: create thumbnail
 		err = os.Rename(oldAbsPath, newPathAbs)
 		if err != nil {
 			errorMessage := "Can not move image to target " + imagepath + ". error: " + err.Error()
 			return errors.New(errorMessage)
 		}
+
+		err = GenerateThumbnail(newPath)
+		if err != nil {
+			return err
+		}
+
 		i.String = String{String: newPath}
 	}
 	return nil
+}
+
+func GenerateThumbnail(imagePath string) error {
+	varFolder := util.VarFolder()
+	size := util.GetConfig("general", "image_thumbnail_size")
+	thumbCacheFolder := varFolder + "/" + util.GetConfig("general", "image_thumbnail_folder")
+	return util.ResizeImage(varFolder+"/"+imagePath, thumbCacheFolder+"/"+imagePath, size)
 }
 
 func init() {
