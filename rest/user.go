@@ -8,9 +8,7 @@ import (
 	"strconv"
 	"time"
 
-        "github.com/xc/digimaker/core/entity"
 	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/fieldtype"
 	"github.com/xc/digimaker/core/handler"
 	"github.com/xc/digimaker/core/permission"
 	"github.com/xc/digimaker/core/util"
@@ -24,10 +22,10 @@ func CurrentUser(w http.ResponseWriter, r *http.Request) {
 	site := params["site"]
 
 	ctx := r.Context()
-	value := ctx.Value("user")
-	if value != nil {
-		user := value.(*entity.User)
-		userID := user.CID
+	userID := ctx.Value(CtxKeyUserID).(int)
+
+	user, _ := handler.Querier().GetUser(userID)
+	if user != nil {
 		hasAccess := permission.HasAccessTo(userID, "site/access", map[string]interface{}{"site": site}, ctx)
 		if hasAccess {
 			data, _ := json.Marshal(user)
