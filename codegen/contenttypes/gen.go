@@ -32,10 +32,13 @@ func main() {
 }
 
 func Generate(subFolder string) error {
-
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
 		ParseFiles(util.DMPath() + "/codegen/contenttypes/contenttype.tpl"))
+
+	tplEntity := template.Must(template.New("contenttype_entity.tpl").
+		Funcs(funcMap()).
+		ParseFiles(util.DMPath() + "/codegen/contenttypes/contenttype_entity.tpl"))
 
 	fieldtypeMap := fieldtype.GetAllDefinition()
 
@@ -71,7 +74,12 @@ func Generate(subFolder string) error {
 		//and if there is error remove that folder
 		fmt.Println("Generating " + name)
 		file, _ := os.Create(path)
-		err := tpl.Execute(file, vars)
+		var err error
+		if settings.HasLocation {
+			err = tpl.Execute(file, vars)
+		} else {
+			err = tplEntity.Execute(file, vars)
+		}
 		if err != nil {
 			return err
 		}

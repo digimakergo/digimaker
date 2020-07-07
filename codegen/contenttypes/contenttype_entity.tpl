@@ -20,7 +20,7 @@ import (
 {{$struct_name :=.name|UpperName}}
 
 type {{$struct_name}} struct{
-     contenttype.ContentCommon `boil:",bind"`
+     contenttype.ContentEntity `boil:",bind"`
 
      {{range $identifier, $fieldtype := .data_fields}}
           {{$identifier|UpperName}}  {{$fieldtype}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
@@ -33,9 +33,6 @@ type {{$struct_name}} struct{
          {{end}}
         {{end}}
     {{end}}
-    {{if .settings.HasLocation}}
-     contenttype.Location `boil:"location,bind"`
-    {{end}}
 }
 
 func (c *{{$struct_name}} ) TableName() string{
@@ -47,20 +44,11 @@ func (c *{{$struct_name}} ) ContentType() string{
 }
 
 func (c *{{$struct_name}} ) GetName() string{
-	 location := c.GetLocation()
-     if location != nil{
-         return location.Name
-     }else{
-         return ""
-     }
+	 return ""
 }
 
 func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
-    {{if .settings.HasLocation}}
-    return &c.Location
-    {{else}}
     return nil
-    {{end}}
 }
 
 func (c *{{$struct_name}}) ToMap() map[string]interface{}{
@@ -86,15 +74,12 @@ func (c *{{$struct_name}}) ToDBValues() map[string]interface{} {
         {{end}}
         {{end}}
     {{end}}
-	for key, value := range c.ContentCommon.ToDBValues() {
-		result[key] = value
-	}
 	return result
 }
 
 //Get identifier list of fields(NOT including data_fields )
 func (c *{{$struct_name}}) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ {{range $identifier, $fieldtype := .fields}}{{if not $fieldtype.IsOutput}}"{{$identifier}}",{{end}}{{end}}}...)
+	return []string{ {{range $identifier, $fieldtype := .fields}}{{if not $fieldtype.IsOutput}}"{{$identifier}}",{{end}}{{end}}}
 }
 
 func (c *{{$struct_name}}) Definition(language ...string) contenttype.ContentType {
@@ -121,14 +106,12 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
         {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
             result = &(c.{{$identifier|UpperName}})
         {{else}}
-            result = c.Relations.GetField("{{$identifier}}")
+            result = c.Relations.Map["{{$identifier}}"]
         {{end}}
     {{end}}
     {{end}}
-	case "cid":
-		result = c.ContentCommon.CID
+
     default:
-    	result = c.ContentCommon.Value( identifier )
     }
 	return result
 }
@@ -150,39 +133,29 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
             {{end}}
         {{end}}
 	default:
-		err := c.ContentCommon.SetValue(identifier, value)
-        if err != nil{
-            return err
-        }
+
 	}
 	//todo: check if identifier exist
 	return nil
 }
 
 //Store content.
-//Note: it will set id to CID after success
+//Note: it will set id to ID after success
 func (c *{{$struct_name}}) Store(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
-	if c.CID == 0 {
+	if c.ID == 0 {
 		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
-		c.CID = id
+		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
-    if err != nil {
-			return err
-		}
-	}
-
-	err := c.StoreRelations(c.ContentType(), transaction...)
-	if err != nil {
+		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
 		return err
 	}
-
 	return nil
 }
+
 
 func (c *{{$struct_name}})StoreWithLocation(){
 
@@ -191,7 +164,7 @@ func (c *{{$struct_name}})StoreWithLocation(){
 //Delete content only
 func (c *{{$struct_name}}) Delete(transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
-	contentError := handler.Delete(c.TableName(), Cond("id", c.CID), transaction...)
+	contentError := handler.Delete(c.TableName(), Cond("id", c.ID), transaction...)
 	return contentError
 }
 
