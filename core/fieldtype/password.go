@@ -35,3 +35,9 @@ func (p *Password) Validate(rule VaidationRule) (bool, string) {
 
 	return true, ""
 }
+
+func init() {
+	RegisterFieldType(
+		FieldtypeDef{Type: "password", Value: "fieldtype.Password"},
+		func() FieldTyper { return &Password{} })
+}

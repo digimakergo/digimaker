@@ -74,9 +74,6 @@ func init() {
 		FieldtypeDef{Type: "number", Value: "fieldtype.Number"},
 		func() FieldTyper { return &Number{} })
 	RegisterFieldType(
-		FieldtypeDef{Type: "password", Value: "fieldtype.Password"},
-		func() FieldTyper { return &Password{} })
-	RegisterFieldType(
 		FieldtypeDef{Type: "relationlist", Value: "fieldtype.RelationList", IsRelation: true},
 		func() FieldTyper { return &RelationList{} })
 }
