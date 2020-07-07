@@ -46,15 +46,6 @@ func (c Checkbox) Type() string {
 	return "checkbox"
 }
 
-//Password struct represent password type
-type Password struct {
-	String
-}
-
-func (r Password) Type() string {
-	return "password"
-}
-
 type RelationList struct {
 	JSON
 }
