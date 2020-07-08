@@ -1,5 +1,7 @@
 package fieldtype
 
+import "database/sql/driver"
+
 /**
 * Initial types END
  */
@@ -46,6 +48,23 @@ func (c Checkbox) Type() string {
 	return "checkbox"
 }
 
+//Radio struct represent radio type
+type Datetime struct {
+	String
+}
+
+func (dt Datetime) Type() string {
+	return "datetime"
+}
+
+func (dt Datetime) Value() (driver.Value, error) {
+	if dt.String.String == "" {
+		return nil, nil
+	} else {
+		return dt.String, nil
+	}
+}
+
 type RelationList struct {
 	JSON
 }
@@ -73,6 +92,9 @@ func init() {
 	RegisterFieldType(
 		FieldtypeDef{Type: "number", Value: "fieldtype.Number"},
 		func() FieldTyper { return &Number{} })
+	RegisterFieldType(
+		FieldtypeDef{Type: "datetime", Value: "fieldtype.Datetime"},
+		func() FieldTyper { return &Datetime{} })
 	RegisterFieldType(
 		FieldtypeDef{Type: "relationlist", Value: "fieldtype.RelationList", IsRelation: true},
 		func() FieldTyper { return &RelationList{} })

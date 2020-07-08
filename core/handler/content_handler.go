@@ -50,17 +50,13 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 				fieldResult = "1"
 			} else {
 				if fieldExists {
-					field := fieldtype.NewField(fieldsDef[identifier].FieldType)
-					err := field.LoadFromInput(input)
+					field := fieldtype.NewField(fieldDef.FieldType)
+					err := field.LoadFromInput(input, fieldDef.Parameters)
 					if err != nil {
 						fieldResult = err.Error()
 					} else {
 						if fieldDef.Required && field.IsEmpty() { //not empty input, but empty in this fieldtype. eg. {} or [] for json fieldtype
 							fieldResult = "1"
-						} else {
-							if valid, res := field.Validate(fieldDef.Validation); !valid {
-								fieldResult = res
-							}
 						}
 					}
 				}
@@ -171,7 +167,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	for identifier, input := range inputs {
 		if _, ok := fieldsDefinition[identifier]; ok {
 			field := content.Value(identifier).(fieldtype.FieldTyper)
-			field.LoadFromInput(input)
+			field.LoadFromInput(input, fieldsDefinition[identifier].Parameters)
 			//invoke BeforeSaving
 			if fieldWithEvent, ok := field.(fieldtype.FieldTypeEvent); ok {
 				err := fieldWithEvent.BeforeSaving()
@@ -393,7 +389,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 		if input, ok := inputs[identifier]; ok {
 			//get field from loaded content
 			field := content.Value(identifier).(fieldtype.FieldTyper)
-			field.LoadFromInput(input)
+			field.LoadFromInput(input, fieldsDefinition[identifier].Parameters)
 			//invoke BeforeSaving
 			if fieldWithEvent, ok := field.(fieldtype.FieldTypeEvent); ok {
 				err = fieldWithEvent.BeforeSaving()

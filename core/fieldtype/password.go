@@ -12,7 +12,7 @@ func (p Password) Type() string {
 }
 
 //LoadFromInput load data from input before validation
-func (p *Password) LoadFromInput(input interface{}) error {
+func (p *Password) LoadFromInput(input interface{}, params FieldParameters) error {
 	if input != nil {
 		str := input.(string)
 		if str != "" {

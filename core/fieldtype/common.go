@@ -27,7 +27,7 @@ func (s String) Validate(rule VaidationRule) (bool, string) {
 }
 
 //LoadFromInput load data from input before validation
-func (s *String) LoadFromInput(input interface{}) error {
+func (s *String) LoadFromInput(input interface{}, params FieldParameters) error {
 	if input == nil {
 		s.String = ""
 	} else {
@@ -81,7 +81,7 @@ type Int struct {
 }
 
 //LoadFromInput loads data from input before validation
-func (i *Int) LoadFromInput(input interface{}) error {
+func (i *Int) LoadFromInput(input interface{}, params FieldParameters) error {
 	existing := i.NullInt64
 	err := i.Scan(input)
 	if err != nil {
@@ -125,7 +125,7 @@ type JSON struct {
 }
 
 //LoadFromInput loads data from input before validation
-func (j *JSON) LoadFromInput(input interface{}) error {
+func (j *JSON) LoadFromInput(input interface{}, params FieldParameters) error {
 	existing := j.NullString
 	err := j.Scan(input)
 	if err != nil {

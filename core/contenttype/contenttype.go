@@ -76,15 +76,15 @@ func (cfArray ContentFieldArray) GetField(identifier string) (FieldDef, bool) {
 
 //Content field definition
 type FieldDef struct {
-	Identifier  string                  `json:"identifier"`
-	Name        string                  `json:"name"`
-	FieldType   string                  `json:"type"`
-	Required    bool                    `json:"required"`
-	Validation  fieldtype.VaidationRule `json:"validation"`
-	Description string                  `json:"description"`
-	IsOutput    bool                    `json:"is_output"`
-	Parameters  map[string]interface{}  `json:"parameters"`
-	Children    ContentFieldArray       `json:"children"`
+	Identifier  string                    `json:"identifier"`
+	Name        string                    `json:"name"`
+	FieldType   string                    `json:"type"`
+	Required    bool                      `json:"required"`
+	Validation  fieldtype.VaidationRule   `json:"validation"`
+	Description string                    `json:"description"`
+	IsOutput    bool                      `json:"is_output"`
+	Parameters  fieldtype.FieldParameters `json:"parameters"`
+	Children    ContentFieldArray         `json:"children"`
 }
 
 type DataField struct {

@@ -348,6 +348,40 @@ func List(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(data))
 }
 
+//Get content list from relation definition
+func RelationOptionList(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	contenttype := params["contenttype"]
+	fieldIdentifier := params["field"]
+	if contenttype == "" || fieldIdentifier == "" {
+		HandleError(errors.New("Need type and field"), w, 410)
+		return
+	}
+
+	cxt := r.Context()
+	userid := CheckUserID(cxt, w)
+	if userid == 0 {
+		return
+	}
+
+	querier := handler.Querier()
+	list, count, err := querier.RelationOptions(contenttype, fieldIdentifier, nil, nil, false)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	result := struct {
+		List  interface{} `json:"list"`
+		Count int         `json:"count"`
+	}{Count: count}
+
+	result.List = list
+
+	data, _ := json.Marshal(result)
+	w.Write([]byte(data))
+}
+
 //Get tree menu under a node
 func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
@@ -414,4 +448,5 @@ func init() {
 	RegisterRoute("/content/treemenu/{id:[0-9]+}", TreeMenu)
 	RegisterRoute("/content/children/{id:[0-9]+}/{contenttype}", Children)
 	RegisterRoute("/content/list/{contenttype}", List)
+	RegisterRoute("/relation/optionlist/{contenttype}/{field}", RelationOptionList)
 }

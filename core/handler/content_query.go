@@ -8,6 +8,7 @@ import (
 
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/fieldtype"
 	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/permission"
 	"github.com/xc/digimaker/core/util"
@@ -322,6 +323,30 @@ func (cq ContentQuery) GetContentAuthor(content contenttype.ContentTyper) (conte
 	authorID := content.Value("author").(int)
 	user, err := cq.GetUser(authorID)
 	return user, err
+}
+
+//GetRelationOptions get content list based on relation parameters
+func (cq ContentQuery) RelationOptions(ctype string, identifier string, limit []int, sortby []string, hasCount bool) ([]contenttype.ContentTyper, int, error) {
+	contentDef, err := contenttype.GetDefinition(ctype)
+	if err != nil {
+		return nil, 0, errors.New("Can not get content defintion of " + ctype)
+	}
+	field, ok := contentDef.FieldMap[identifier]
+	if !ok {
+		return nil, 0, errors.New("Can not find filed " + identifier + " from content " + ctype)
+	}
+	if field.FieldType != "relation" {
+		return nil, 0, errors.New("Not a relation type")
+	}
+	params, err := fieldtype.ConvertRelationParams(field.Parameters)
+	if err != nil {
+		return nil, 0, err
+	}
+	condition := db.EmptyCond()
+	for cKey, cValue := range params.Condition {
+		condition = condition.And(cKey, cValue)
+	}
+	return cq.List(params.Type, condition, limit, sortby, hasCount)
 }
 
 //todo: use method instead of global variable

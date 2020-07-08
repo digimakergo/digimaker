@@ -17,7 +17,7 @@ import (
 type RelationList []Relation
 
 //LoadFromInput load data from input before validation
-func (rl *RelationList) LoadFromInput(input interface{}) error {
+func (rl *RelationList) LoadFromInput(input interface{}, params fieldtype.FieldParameters) error {
 	s := fmt.Sprint(input)
 
 	arr := strings.Split(s, ";")
@@ -141,18 +141,17 @@ func (relations *ContentRelationList) GetField(identifier string) *RelationList 
 	}
 }
 
-//LoadFromInput load data from input before validation
-//This method will be invoked several times. For uninvoked identifier, it will use exising data.
+//LoadFromInput load data from input
 func (relations *ContentRelationList) LoadFromInput(identifier string, input interface{}) error {
 	if relationlist, ok := relations.Map[identifier]; ok {
-		err := relationlist.LoadFromInput(input)
+		err := relationlist.LoadFromInput(input, nil)
 		if err != nil {
 			return err
 		}
 		relations.Map[identifier] = relationlist
 	} else {
 		relationlist := RelationList{}
-		relationlist.LoadFromInput(input)
+		relationlist.LoadFromInput(input, nil) //todo: use definition instead of nil
 		relations.Map[identifier] = &relationlist
 	}
 	return nil

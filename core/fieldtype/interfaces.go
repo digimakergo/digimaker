@@ -20,8 +20,7 @@ type FieldTyper interface {
 	// driver.Valuer
 
 	//Init from input(http input or api input)
-	//The return must be a basic type. Invoke after validation succeed.
-	LoadFromInput(input interface{}) error
+	LoadFromInput(input interface{}, params FieldParameters) error
 
 	//Get value when doing 'internal exchange'.same as Value() in driver.Valuer, but return a basic type(eg. string, int, datetime, or nil)
 	FieldValue() interface{}
@@ -44,3 +43,5 @@ type FieldTyper interface {
 type FieldTypeEvent interface {
 	BeforeSaving() error
 }
+
+type FieldParameters map[string]interface{}
