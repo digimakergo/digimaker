@@ -147,11 +147,7 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 
 func AuthRevokeRefreshToken(w http.ResponseWriter, r *http.Request) {
 	//Verify refresh token and delete.
-	token, err := getToken(r)
-	if err != nil {
-		HandleError(err, w)
-		return
-	}
+	token := r.FormValue("token")
 	claims, err := verifyRefreshToken(token)
 	if err != nil {
 		HandleError(err, w)
