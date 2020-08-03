@@ -25,6 +25,14 @@ func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.E
 	return pongo2.AsValue(children), nil
 }
 
+func dmParent(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	querier := handler.Querier()
+	content := in.Interface().(contenttype.ContentTyper)
+	parentID := content.Value("parent_id").(int)
+	parent, _ := querier.FetchByID(parentID)
+	return pongo2.AsValue(parent), nil
+}
+
 func dmNiceurl(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	content := in.Interface().(contenttype.ContentTyper)
 	niceurl := niceurl.GenerateUrl(content)
@@ -140,6 +148,7 @@ func dmSplit(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Erro
 
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
+	pongo2.RegisterFilter("dm_parent", dmParent)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_tpl_matched", dmTplMatched)
 	pongo2.RegisterFilter("dm_tpl_path", dmTplPath)
