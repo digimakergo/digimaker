@@ -21,8 +21,15 @@ import (
 func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	querier := handler.Querier()
 	parent := in.Interface().(contenttype.ContentTyper)
-	children, _, _ := querier.Children(parent, param.String(), 2, db.EmptyCond(), []int{}, []string{}, false, context.Background())
+	children, _, _ := querier.Children(parent, param.String(), 1, db.EmptyCond(), []int{}, []string{}, false, context.Background())
 	return pongo2.AsValue(children), nil
+}
+
+func dmFetch(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	querier := handler.Querier()
+	id := in.Interface().(int)
+	content, _ := querier.FetchByID(id)
+	return pongo2.AsValue(content), nil
 }
 
 func dmParent(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
@@ -149,6 +156,7 @@ func dmSplit(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Erro
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_parent", dmParent)
+	pongo2.RegisterFilter("dm_fetch", dmFetch)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_tpl_matched", dmTplMatched)
 	pongo2.RegisterFilter("dm_tpl_path", dmTplPath)
