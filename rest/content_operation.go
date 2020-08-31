@@ -17,6 +17,7 @@ import (
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/util"
 
 	"github.com/gorilla/mux"
@@ -201,6 +202,43 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("1"))
 }
 
+func SetPriority(w http.ResponseWriter, r *http.Request) {
+	params := r.FormValue("params")
+	paramArr := strings.Split(params, ";")
+	for _, paramStr := range paramArr {
+		arr := strings.Split(paramStr, ",")
+		id, err := strconv.Atoi(arr[0])
+		if err != nil {
+			HandleError(errors.New("Invalid params format on id"), w)
+			return
+		}
+		priority, err := strconv.Atoi(arr[1])
+		if err != nil {
+			HandleError(errors.New("Invalid params format on priority"), w)
+			return
+		}
+		querier := handler.Querier()
+		content, err := querier.FetchByID(id)
+		if err != nil {
+			log.Error(err.Error(), "")
+			HandleError(errors.New("Can't find content"), w)
+			return
+		}
+
+		//todo: create transction once.
+		//update priority
+		location := content.GetLocation()
+		location.Priority = priority
+		err = location.Store()
+		if err != nil {
+			log.Error(err.Error(), "")
+			HandleError(errors.New("Something wrong"), w)
+			return
+		}
+	}
+	w.Write([]byte("1"))
+}
+
 func Delete(w http.ResponseWriter, r *http.Request) {
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
@@ -237,5 +275,6 @@ func init() {
 	RegisterRoute("/content/new/{parent}/{contenttype}", New)
 	RegisterRoute("/content/update/{id}", Update)
 	RegisterRoute("/content/delete", Delete)
+	RegisterRoute("/content/setpriority", SetPriority)
 	RegisterRoute("/content/savedraft/{id}/{type}", SaveDraft)
 }
