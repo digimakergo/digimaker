@@ -118,7 +118,11 @@ func separateFieldString(input string, value interface{}) [2]string {
 	input = strings.TrimSpace(input)
 	var result [2]string
 	for _, operator := range Operators {
-		if strings.HasSuffix(input, operator) {
+		suffix := operator
+		if operator == "in" { //todo: support more other than in
+			suffix = " " + operator
+		}
+		if strings.HasSuffix(input, suffix) {
 			result[0] = strings.TrimSpace(strings.TrimSuffix(input, operator))
 			result[1] = operator
 			break
