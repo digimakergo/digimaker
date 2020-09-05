@@ -239,6 +239,38 @@ func SetPriority(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("1"))
 }
 
+func Move(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	userID := CheckUserID(ctx, w)
+	if userID == 0 {
+		return
+	}
+
+	params := mux.Vars(r)
+	contentStr := params["contents"]
+	contentIds := []int{}
+
+	contentIdStrs := strings.Split(contentStr, ",")
+	for _, str := range contentIdStrs {
+		contentId, err := strconv.Atoi(str)
+		if err != nil {
+			HandleError(errors.New("Invalid content format"), w, 410)
+			return
+		}
+		contentIds = append(contentIds, contentId)
+	}
+	targetId, _ := strconv.Atoi(params["target"])
+
+	handler := handler.ContentHandler{}
+	err := handler.Move(ctx, contentIds, targetId, userID)
+	if err != nil {
+		HandleError(err, w, 410)
+		return
+	}
+
+	w.Write([]byte("1"))
+}
+
 func Delete(w http.ResponseWriter, r *http.Request) {
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
@@ -273,6 +305,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 func init() {
 
 	RegisterRoute("/content/new/{parent}/{contenttype}", New)
+	RegisterRoute("/content/move/{contents}/{target}", Move)
 	RegisterRoute("/content/update/{id}", Update)
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)

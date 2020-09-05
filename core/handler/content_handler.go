@@ -470,6 +470,77 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	return true, ValidationResult{}, nil
 }
 
+//Move moves contents to target
+//Check delete&create permission.
+//note: it dosn't check if target can create sub-children(only check if it can create direct children)
+func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId int, userId int) error {
+	querier := Querier()
+	target, err := querier.FetchByID(targetId)
+	targetLocation := target.GetLocation()
+	if err != nil {
+		log.Error(err.Error(), "")
+		return errors.New("Target not found")
+	}
+
+	contents := []contenttype.ContentTyper{}
+	for _, id := range contentIds {
+		content, err := querier.FetchByID(id)
+		if err != nil {
+			log.Error(err.Error(), "")
+			return errors.New("Content id " + strconv.Itoa(id) + " is not found for this user.")
+		}
+		contents = append(contents, content)
+	}
+
+	//update content
+	tx, err := db.CreateTx(ctx)
+	if err != nil {
+		return errors.New("Internal error")
+	}
+
+	for _, content := range contents {
+		location := content.GetLocation()
+
+		if !permission.CanDelete(ctx, content, userId) {
+			log.Warning("No permission to delete when moving "+strconv.Itoa(location.ID), "")
+			tx.Rollback() //error if no commit?
+			return ErrorNoPermission
+		}
+		if !permission.CanCreate(ctx, target, content.ContentType(), userId) {
+			log.Warning("No permission to create when moving "+strconv.Itoa(location.ID), "")
+			tx.Rollback() //error if no commit?
+			return ErrorNoPermission
+		}
+
+		location.ParentID = targetId
+		oldHiearachy := location.Hierarchy
+		newHiearachy := targetLocation.Hierarchy + "/" + strconv.Itoa(location.ID)
+		location.Hierarchy = newHiearachy
+		newPath := targetLocation.IdentifierPath + "/" + util.NameToIdentifier(location.Name)
+		location.IdentifierPath = newPath
+		location.Store(tx)
+
+		//update location
+		subLocations := []contenttype.Location{}
+		dbhandler := db.DBHanlder()
+		dbhandler.GetEntity("dm_location", db.Cond("hierachy like", oldHiearachy+"/%"), nil, subLocations)
+		for _, subLocation := range subLocations {
+			subContent, _ := querier.FetchByID(subLocation.ID)
+			if !permission.CanDelete(ctx, subContent, userId) {
+				tx.Rollback()
+				log.Warning("No permission to delete "+strconv.Itoa(location.ID), "")
+				return ErrorNoPermission
+			}
+
+			subLocation.Hierarchy = newHiearachy + "/" + strconv.Itoa(location.ID)
+			subLocation.IdentifierPath = newPath + "/" + util.NameToIdentifier(location.Name)
+			subLocation.Store(tx)
+		}
+	}
+	tx.Commit()
+	return nil
+}
+
 //Delete content by location id
 func (ch ContentHandler) DeleteByID(id int, userId int, toTrash bool) error {
 	content, err := Querier().FetchByID(id)
