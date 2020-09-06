@@ -44,12 +44,18 @@ func DB() (*sql.DB, error) {
 
 //Create transaction.
 //todo: maybe some pararmeters for options
-func CreateTx() (*sql.Tx, error) {
+func CreateTx(ctx ...context.Context) (*sql.Tx, error) {
 	database, err := DB()
 	if err != nil {
 		return nil, errors.New("Can't get db connection.")
 	}
-	tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
+	var ctxValue context.Context
+	if len(ctx) == 0 {
+		ctxValue = context.Background()
+	} else {
+		ctxValue = ctx[0]
+	}
+	tx, err := database.BeginTx(ctxValue, &sql.TxOptions{Isolation: sql.LevelSerializable})
 	if err != nil {
 		return nil, errors.New("Can't get transaction.")
 	}
