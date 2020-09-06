@@ -9,6 +9,7 @@ This is a parent struct which consits of location and the content itself(eg. art
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -516,14 +517,18 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 		oldHiearachy := location.Hierarchy
 		newHiearachy := targetLocation.Hierarchy + "/" + strconv.Itoa(location.ID)
 		location.Hierarchy = newHiearachy
+
+		oldPath := location.IdentifierPath
 		newPath := targetLocation.IdentifierPath + "/" + util.NameToIdentifier(location.Name)
 		location.IdentifierPath = newPath
+
+		location.Depth = len(strings.Split(newHiearachy, "/"))
 		location.Store(tx)
 
 		//update location
 		subLocations := []contenttype.Location{}
 		dbhandler := db.DBHanlder()
-		dbhandler.GetEntity("dm_location", db.Cond("hierachy like", oldHiearachy+"/%"), nil, subLocations)
+		dbhandler.GetEntity("dm_location", db.Cond("hierarchy like", oldHiearachy+"/%"), nil, &subLocations)
 		for _, subLocation := range subLocations {
 			subContent, _ := querier.FetchByID(subLocation.ID)
 			if !permission.CanDelete(ctx, subContent, userId) {
@@ -532,8 +537,13 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 				return ErrorNoPermission
 			}
 
-			subLocation.Hierarchy = newHiearachy + "/" + strconv.Itoa(location.ID)
-			subLocation.IdentifierPath = newPath + "/" + util.NameToIdentifier(location.Name)
+			fmt.Println(subLocation.Hierarchy)
+			fmt.Println(oldHiearachy)
+			fmt.Println(newHiearachy)
+			subLocation.Hierarchy = newHiearachy + strings.TrimPrefix(subLocation.Hierarchy, oldHiearachy)
+			fmt.Println(subLocation.Hierarchy)
+			subLocation.IdentifierPath = newPath + strings.TrimPrefix(subLocation.IdentifierPath, oldPath)
+			subLocation.Depth = len(strings.Split(subLocation.Hierarchy, "/"))
 			subLocation.Store(tx)
 		}
 	}
