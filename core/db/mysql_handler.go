@@ -82,7 +82,7 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Warning(err.Error(), "GetByFields")
+			log.Debug(err.Error(), "GetByFields")
 		} else {
 			message := "[MysqlHandler.GetByFields]Error when query. sql - " + sqlStr
 			return -1, errors.Wrap(err, message)
@@ -143,7 +143,7 @@ func (r *MysqlHandler) GetEntityContent(contentType string, tableName string, co
 		return -1, err
 	}
 
-	sqlStr := `SELECT c.*, c.id as cid` + relationQuery + `
+	sqlStr := `SELECT c.*, c.id as cid, '` + contentType + `' as content_type` + relationQuery + `
                    FROM (` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id )
                      LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
                     ` + where + `
@@ -247,13 +247,18 @@ func (*MysqlHandler) Count(tablename string, condition Condition) (int, error) {
 }
 
 //todo: support limit.
-func (r *MysqlHandler) GetEntity(tablename string, condition Condition, sortby []string, entity interface{}) error {
+func (r *MysqlHandler) GetEntity(tablename string, condition Condition, sortby []string, limit []int, entity interface{}) error {
 	conditions, values := BuildCondition(condition)
 	sortbyStr, err := r.getSortBy(sortby)
 	if err != nil {
 		return err
 	}
-	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions + " " + sortbyStr
+
+	limitStr := ""
+	if limit != nil && len(limit) == 2 {
+		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+	}
+	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions + " " + sortbyStr + limitStr
 	log.Debug(sqlStr, "db")
 	db, err := DB()
 	if err != nil {

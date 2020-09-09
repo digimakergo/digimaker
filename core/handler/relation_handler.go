@@ -1,12 +1,13 @@
 package handler
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	. "github.com/xc/digimaker/core/db"
 	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/db"
+	. "github.com/xc/digimaker/core/db"
 
 	"github.com/pkg/errors"
 )
@@ -36,7 +37,7 @@ func (handler *RelationHandler) AddContent(to contenttype.ContentTyper, from con
 	dbHandler.GetEntity("dm_relation", Cond("to_content_id", contentID).
 		Cond("from_location", fromLocationID).
 		Cond("identifier", identifier),
-		[]string{},
+		[]string{}, nil,
 		&currentRelation)
 
 	if currentRelation.ID != 0 {

@@ -527,7 +527,7 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 		//update location
 		subLocations := []contenttype.Location{}
 		dbhandler := db.DBHanlder()
-		dbhandler.GetEntity("dm_location", db.Cond("hierarchy like", oldHiearachy+"/%"), nil, &subLocations)
+		dbhandler.GetEntity("dm_location", db.Cond("hierarchy like", oldHiearachy+"/%"), nil, nil, &subLocations)
 		for _, subLocation := range subLocations {
 			subContent, _ := querier.FetchByID(subLocation.ID)
 			if !permission.CanDelete(ctx, subContent, userId) {

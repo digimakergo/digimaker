@@ -156,7 +156,7 @@ func (l *Location) GetParentLocation() (*Location, error) {
 func GetLocations(contenttype string, cid int) (*[]Location, error) {
 	handler := db.DBHanlder()
 	locations := &[]Location{}
-	err := handler.GetEntity("dm_location", Cond("content_type", contenttype).And("content_id", cid), []string{}, locations)
+	err := handler.GetEntity("dm_location", Cond("content_type", contenttype).And("content_id", cid), []string{}, nil, locations)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func GetLocations(contenttype string, cid int) (*[]Location, error) {
 func GetLocationByID(locationID int) (*Location, error) {
 	handler := db.DBHanlder()
 	location := &Location{}
-	err := handler.GetEntity("dm_location", Cond("id", locationID), []string{}, location)
+	err := handler.GetEntity("dm_location", Cond("id", locationID), []string{}, nil, location)
 	if err != nil {
 		return nil, err
 	}
