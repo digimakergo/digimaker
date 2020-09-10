@@ -3,10 +3,11 @@
 package rest
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
 	"encoding/json"
 	"net/http"
 	"strings"
+
+	"github.com/xc/digimaker/core/contenttype"
 
 	"github.com/gorilla/mux"
 )
@@ -25,9 +26,16 @@ func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	data, _ := json.Marshal(definition)
 	resultMap := map[string]interface{}{}
 	json.Unmarshal(data, &resultMap)
+	fields := resultMap["fields"].([]interface{})
+	dataFieldsObj := resultMap["data_fields"]
+	if dataFieldsObj != nil {
+		dataFields := dataFieldsObj.([]interface{})
+		fields = append(fields, dataFields...)
+	}
+	resultMap["fields"] = fields
 	delete(resultMap, "table_name")
-	delete(resultMap, "has_location")
 	delete(resultMap, "has_version")
+	delete(resultMap, "data_fields")
 	result, _ := json.Marshal(resultMap)
 
 	w.Header().Set("content-type", "application/json")

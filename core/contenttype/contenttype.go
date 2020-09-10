@@ -89,7 +89,9 @@ type FieldDef struct {
 
 type DataField struct {
 	Identifier string `json:"identifier"`
-	FieldType  string `json:"type"`
+	FieldType  string `json:"fieldtype"`
+	Type       string `json:"type"`
+	Name       string `json:"name"`
 }
 
 func (cf *FieldDef) GetSubFields(callback ...func(*FieldDef)) map[string]FieldDef {
