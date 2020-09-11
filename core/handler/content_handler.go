@@ -573,103 +573,86 @@ func (ch ContentHandler) DeleteByID(id int, userId int, toTrash bool) error {
 func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userId int, toTrash bool) error {
 	//todo: check delete children. There should be more consideration if there are more children.
 
+	if !permission.CanDelete(ch.Context, content, userId) {
+		return errors.New("User " + strconv.Itoa(userId) + " Doesn't have access to delete. cid: " + strconv.Itoa(content.GetCID()))
+	}
+
+	tx, err := db.CreateTx()
+	if err != nil {
+		tx.Rollback()
+		message := "[handler.deleteByContent]Can not create transaction."
+		log.Error(message+err.Error(), "", ch.Context)
+		return errors.New(message)
+	}
+
 	def := content.Definition()
 	if !def.HasLocation {
-		accessRealData := map[string]interface{}{
-			"contenttype": content.ContentType(),
+		err := content.Delete(tx)
+		if err != nil {
+			return err
 		}
-
-		if !permission.HasAccessTo(userId, "content/delete", accessRealData, ch.Context) {
-			return errors.New("User " + strconv.Itoa(userId) + " Doesn't have access to delete")
-		}
-
-		return content.Delete()
-	}
-
-	accessRealData := map[string]interface{}{
-		"contenttype": content.ContentType(),
-		"under":       strings.Split(content.GetLocation().Hierarchy, "/"),
-	}
-	if content.Value("author").(int) == userId {
-		accessRealData["author"] = "self"
-	}
-	if !permission.HasAccessTo(userId, "content/delete", accessRealData, ch.Context) {
-		return errors.New("User " + strconv.Itoa(userId) + " Doesn't have access to delete")
-	}
-
-	//Delete location
-	location := content.GetLocation()
-	if location.CountLocations() > 1 {
-		return errors.New("There are more than 1 location. Remove location first.")
 	} else {
-		database, err := db.DB()
-		if err != nil {
-			log.Error(err.Error(), "", ch.Context)
-			return errors.New("[handler.deleteByContent]Can not create connection.")
-		}
-		tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
-		if err != nil {
-			tx.Rollback()
-			message := "[handler.deleteByContent]Can not create transaction."
-			log.Error(message+err.Error(), "", ch.Context)
-			return errors.New(message)
-		}
-
-		//Delete relation first.
-		relations := content.GetRelations()
-		if len(relations.Map) > 0 {
-			dbHandler := db.DBHanlder()
-			err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
-			if err != nil {
-				tx.Rollback()
-				message := "[handler.deleteByContent]Can not delete relation."
-				log.Error(message+err.Error(), "", ch.Context)
-				return errors.New(message)
-			}
-		}
-
 		//Delete location
-		err = content.GetLocation().Delete(tx)
-		if err != nil {
-			tx.Rollback()
+		location := content.GetLocation()
+		if location.CountLocations() > 1 {
+			return errors.New("There are more than 1 location. Remove location first.")
 		} else {
-			//delete versions
-			if content.Definition().HasVersion {
-				dbHanlder := db.DBHanlder()
-				dbHanlder.Delete("dm_version", db.Cond("content_type", content.ContentType()).
-					Cond("content_id", content.GetCID()), tx)
+			//Delete relation first.
+			relations := content.GetRelations()
+			if len(relations.Map) > 0 {
+				dbHandler := db.DBHanlder()
+				err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
+				if err != nil {
+					tx.Rollback()
+					message := "[handler.deleteByContent]Can not delete relation."
+					log.Error(message+err.Error(), "", ch.Context)
+					return errors.New(message)
+				}
 			}
 
-			//Delete content
-			err = content.Delete(tx)
+			//Delete location
+			err = content.GetLocation().Delete(tx)
 			if err != nil {
 				tx.Rollback()
+			} else {
+				//delete versions
+				if content.Definition().HasVersion {
+					dbHanlder := db.DBHanlder()
+					dbHanlder.Delete("dm_version", db.Cond("content_type", content.ContentType()).
+						Cond("content_id", content.GetCID()), tx)
+				}
+
+				//Delete content
+				err = content.Delete(tx)
+				if err != nil {
+					tx.Rollback()
+				}
 			}
 		}
-
-		//Invoke callback
-		matchData := map[string]interface{}{"content_type": content.ContentType()}
-		if content.Definition().HasLocation {
-			hierachy := content.GetLocation().Hierarchy
-			matchData["under"] = strings.Split(hierachy, "/")
-		}
-		err = ch.InvokeCallback("delete", true, matchData, content, tx)
-		if err != nil {
-			tx.Rollback()
-			return errors.Wrap(err, "Invoking callback error.")
-		}
-
-		err = tx.Commit()
-		if err != nil {
-			message := "[handler.deleteByContent]Can not commit."
-			log.Error(message+err.Error(), "", ch.Context)
-			return errors.New(message)
-		}
-
-		//invoke callback
-		err = ch.InvokeCallback("deleted", false, matchData, content)
-
 	}
+
+	//Invoke callback
+	matchData := map[string]interface{}{"content_type": content.ContentType()}
+	if content.Definition().HasLocation {
+		hierachy := content.GetLocation().Hierarchy
+		matchData["under"] = strings.Split(hierachy, "/")
+	}
+	err = ch.InvokeCallback("delete", true, matchData, content, tx)
+	if err != nil {
+		tx.Rollback()
+		return errors.Wrap(err, "Invoking callback error.")
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		message := "[handler.deleteByContent]Can not commit."
+		log.Error(message+err.Error(), "", ch.Context)
+		return errors.New(message)
+	}
+
+	//invoke callback
+	err = ch.InvokeCallback("deleted", false, matchData, content)
+
 	return nil
 }
 
