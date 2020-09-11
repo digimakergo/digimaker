@@ -12,6 +12,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//todo: check permission
 func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	typeStr := strings.TrimSpace(params["contentype"])
@@ -23,6 +24,14 @@ func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	containers := strings.Split(typeStr, "/")
 	definition, _ := contenttype.GetDefinition(containers[0], language)
 
+	resultMap := filterDefinition(definition)
+	result, _ := json.Marshal(resultMap)
+
+	w.Header().Set("content-type", "application/json")
+	w.Write(result)
+}
+
+func filterDefinition(definition contenttype.ContentType) map[string]interface{} {
 	data, _ := json.Marshal(definition)
 	resultMap := map[string]interface{}{}
 	json.Unmarshal(data, &resultMap)
@@ -36,13 +45,30 @@ func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	delete(resultMap, "table_name")
 	delete(resultMap, "has_version")
 	delete(resultMap, "data_fields")
-	result, _ := json.Marshal(resultMap)
+	return resultMap
+}
 
+func GetAllDefinitions(w http.ResponseWriter, r *http.Request) {
+	language := r.URL.Query().Get("language")
+	if language == "" {
+		language = "default"
+	}
+
+	definitionList := contenttype.GetDefinitionList()
+	list := definitionList[language]
+	result := map[string]interface{}{}
+	for contenttype, definition := range list {
+		resultMap := filterDefinition(definition)
+		result[contenttype] = resultMap
+	}
+
+	data, _ := json.Marshal(result)
 	w.Header().Set("content-type", "application/json")
 
-	w.Write(result)
+	w.Write(data)
 }
 
 func init() {
+	RegisterRoute("/contenttype/get", GetAllDefinitions)
 	RegisterRoute("/contenttype/get/{contentype}", GetDefinition)
 }
