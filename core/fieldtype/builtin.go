@@ -61,7 +61,7 @@ func (dt Datetime) Value() (driver.Value, error) {
 	if dt.String.String == "" {
 		return nil, nil
 	} else {
-		return dt.String, nil
+		return dt.String.String, nil
 	}
 }
 
