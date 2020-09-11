@@ -120,7 +120,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 	dbHandler := db.DBHanlder()
 	dbHandler.GetEntity(version.TableName(),
 		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
-		[]string{}, &version)
+		[]string{}, nil, &version)
 	if version.ID == 0 {
 		version.ContentType = ctype
 		version.ContentID = id
@@ -146,7 +146,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 	newVersion := contenttype.Version{}
 	dbHandler.GetEntity(version.TableName(),
 		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
-		[]string{}, &newVersion)
+		[]string{}, nil, &newVersion)
 	if newVersion.ID == 0 || newVersion.ID > 0 && newVersion.Created != createdTime {
 		message := "Not saved. new id:" + strconv.Itoa(newVersion.ID) + " .new saved time:" +
 			strconv.Itoa(newVersion.Created) + ", should saved time:" + strconv.Itoa(createdTime)
@@ -278,25 +278,51 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	idStr := r.FormValue("id")
-	idSlice := strings.Split(idStr, ",")
-	for _, id := range idSlice {
-		_, err := strconv.Atoi(id)
-		if err != nil {
-			HandleError(errors.New("Illegal id"), w, StatusWrongParams)
-			return
+	cidStr := r.FormValue("cid")
+	contenttype := r.FormValue("type")
+	if idStr != "" {
+		idSlice := strings.Split(idStr, ",")
+		for _, id := range idSlice {
+			_, err := strconv.Atoi(id)
+			if err != nil {
+				HandleError(errors.New("Illegal id"), w, StatusWrongParams)
+				return
+			}
 		}
-	}
 
-	for _, id := range idSlice {
-		idInt, _ := strconv.Atoi(id)
-		handler := handler.ContentHandler{}
-		handler.Context = r.Context()
-		//todo: use Delete by ids to support one transaction with roll back
-		err := handler.DeleteByID(idInt, userID, true)
-		if err != nil {
-			HandleError(err, w)
-			return
+		for _, id := range idSlice {
+			idInt, _ := strconv.Atoi(id)
+			handler := handler.ContentHandler{}
+			handler.Context = r.Context()
+			//todo: use Delete by ids to support one transaction with roll back
+			err := handler.DeleteByID(idInt, userID, true)
+			if err != nil {
+				HandleError(err, w)
+				return
+			}
 		}
+	} else if cidStr != "" && contenttype != "" {
+		cids := strings.Split(cidStr, ",")
+		for _, cid := range cids {
+			_, err := strconv.Atoi(cid)
+			if err != nil {
+				HandleError(errors.New("Invalid cid"), w, StatusWrongParams)
+				return
+			}
+		}
+		for _, cid := range cids {
+			cidInt, _ := strconv.Atoi(cid)
+			handler := handler.ContentHandler{}
+			handler.Context = r.Context()
+			err := handler.DeleteByCID(cidInt, contenttype, userID)
+			if err != nil {
+				HandleError(err, w)
+				return
+			}
+		}
+	} else {
+		HandleError(errors.New("Invalid parameters"), w, StatusWrongParams)
+		return
 	}
 
 	w.Write([]byte("1"))

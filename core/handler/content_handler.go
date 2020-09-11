@@ -546,6 +546,16 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 	return nil
 }
 
+//Delete content by content id
+func (ch ContentHandler) DeleteByCID(cid int, contenttype string, userId int) error {
+	content, err := Querier().FetchByContentID(contenttype, cid)
+	if err != nil {
+		return errors.New("[handler.delete]Content doesn't exist with cid: " + strconv.Itoa(cid))
+	}
+	err = ch.DeleteByContent(content, userId, false)
+	return err
+}
+
 //Delete content by location id
 func (ch ContentHandler) DeleteByID(id int, userId int, toTrash bool) error {
 	content, err := Querier().FetchByID(id)
@@ -562,6 +572,19 @@ func (ch ContentHandler) DeleteByID(id int, userId int, toTrash bool) error {
 //  You need to judge if there are more than one locations before invoking this.
 func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userId int, toTrash bool) error {
 	//todo: check delete children. There should be more consideration if there are more children.
+
+	def := content.Definition()
+	if !def.HasLocation {
+		accessRealData := map[string]interface{}{
+			"contenttype": content.ContentType(),
+		}
+
+		if !permission.HasAccessTo(userId, "content/delete", accessRealData, ch.Context) {
+			return errors.New("User " + strconv.Itoa(userId) + " Doesn't have access to delete")
+		}
+
+		return content.Delete()
+	}
 
 	accessRealData := map[string]interface{}{
 		"contenttype": content.ContentType(),
