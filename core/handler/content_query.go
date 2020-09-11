@@ -41,7 +41,7 @@ func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, erro
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEntity("dm_location", db.Cond("id", locationID), []string{}, &location)
+	err := dbhandler.GetEntity("dm_location", db.Cond("id", locationID), []string{}, nil, &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
 	}
@@ -61,7 +61,7 @@ func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) 
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEntity("dm_location", db.Cond("uid", uid), []string{}, &location)
+	err := dbhandler.GetEntity("dm_location", db.Cond("uid", uid), []string{}, nil, &location)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyuid]Can not fetch location by uid "+uid)
 	}
@@ -115,6 +115,20 @@ func (cq ContentQuery) List(contentType string, condition db.Condition, limit []
 	}
 	result := contenttype.ToList(contentType, contentList)
 	return result, count, err
+}
+
+func (cq ContentQuery) LocationList(condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.Location, int, error) {
+	locations := []contenttype.Location{}
+	dbHandler := db.DBHanlder()
+	err := dbHandler.GetEntity("dm_location", condition, sortby, limit, &locations)
+	count := 0
+	if withCount {
+		count, _ = dbHandler.Count("dm_location", condition)
+	}
+	if err != nil {
+		return locations, 0, err
+	}
+	return locations, count, nil
 }
 
 // Children fetches children content directly under the given parentContent
@@ -229,26 +243,30 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 
 // SubList fetches content list with permission considered(only return contents the user has access to).
 func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
-	if rootContent != nil {
-		rootLocation := rootContent.GetLocation()
-		if depth == 1 {
-			//Direct children
-			def, _ := contenttype.GetDefinition(contentType)
-			if def.HasLocation {
-				condition = condition.Cond("location.parent_id", rootLocation.ID)
-			} else {
-				condition = condition.Cond("location_id", rootLocation.ID)
-			}
+	rootLocation := rootContent.GetLocation()
+	if depth == 1 {
+		//Direct children
+		def, _ := contenttype.GetDefinition(contentType)
+		if def.HasLocation {
+			condition = condition.Cond("location.parent_id", rootLocation.ID)
 		} else {
-			rootHierarchy := rootLocation.Hierarchy
-			rootDepth := rootLocation.Depth
-			condition = condition.Cond("location.hierarchy like", rootHierarchy+"/%")
-			if depth > 0 {
-				condition = condition.Cond("location.depth <=", rootDepth+depth)
-			}
+			condition = condition.Cond("location_id", rootLocation.ID)
+		}
+	} else {
+		rootHierarchy := rootLocation.Hierarchy
+		rootDepth := rootLocation.Depth
+		condition = condition.Cond("location.hierarchy like", rootHierarchy+"/%")
+		if depth > 0 {
+			condition = condition.Cond("location.depth <=", rootDepth+depth)
 		}
 	}
 
+	//fetch
+	list, count, err := cq.ListForUser(context, userID, contentType, condition, limit, sortby, withCount)
+	return list, count, err
+}
+
+func (cq ContentQuery) ListForUser(context context.Context, userID int, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	//permission condition
 	permissionCondition := accessCondition(userID, contentType, context)
 	condition = condition.And(permissionCondition)
@@ -295,7 +313,7 @@ func (cq ContentQuery) Version(contentType string, condition db.Condition) (cont
 
 	version := contenttype.Version{}
 	dbHandler := db.DBHanlder()
-	err = dbHandler.GetEntity("dm_version", condition.Cond("content_type", contentType), []string{}, &version)
+	err = dbHandler.GetEntity("dm_version", condition.Cond("content_type", contentType), []string{}, nil, &version)
 	if err != nil {
 		return contenttype.Version{}, nil, err
 	}
