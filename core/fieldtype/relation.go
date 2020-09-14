@@ -39,6 +39,10 @@ func (r *Relation) LoadFromInput(input interface{}, params FieldParameters) erro
 		return err
 	}
 
+	if r.String.String == "" {
+		return nil
+	}
+
 	rParams, err := ConvertRelationParams(params)
 	if err != nil {
 		return err

@@ -82,6 +82,9 @@ type Int struct {
 
 //LoadFromInput loads data from input before validation
 func (i *Int) LoadFromInput(input interface{}, params FieldParameters) error {
+	if input == "" {
+		input = nil
+	}
 	existing := i.NullInt64
 	err := i.Scan(input)
 	if err != nil {
@@ -95,6 +98,7 @@ func (i *Int) LoadFromInput(input interface{}, params FieldParameters) error {
 
 //Get FieldValue
 func (i Int) FieldValue() interface{} {
+	//todo: fix nil and 0 difference
 	return int(i.Int64)
 }
 
