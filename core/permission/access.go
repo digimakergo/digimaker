@@ -118,14 +118,17 @@ func CanCreate(ctx context.Context, parent contenttype.ContentTyper, contenttype
 }
 
 func GetMatchData(content contenttype.ContentTyper, userId int) MatchData {
-	location := content.GetLocation()
+	def := content.Definition()
 	data := MatchData{}
-	data["id"] = location.ID
-	data["under"] = location.Path()
-	data["contenttype"] = location.ContentType
-	author := content.Value("author")
-	if author != nil && (userId == author.(int)) {
-		data["author"] = "self"
+	data["contenttype"] = content.ContentType()
+	if def.HasLocation {
+		location := content.GetLocation()
+		data["id"] = location.ID
+		data["under"] = location.Path()
+		author := content.Value("author")
+		if author != nil && (userId == author.(int)) {
+			data["author"] = "self"
+		}
 	}
 	return data
 }
