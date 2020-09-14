@@ -45,22 +45,22 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 		fieldResult := ""
 		//validat both required and others together.
 		isEmpty := fieldtype.IsEmptyInput(input)
-		if fieldDef.Required {
-			if fieldExists && isEmpty || !fieldExists {
+		if fieldExists {
+			if fieldDef.Required && isEmpty {
 				fieldResult = "1"
 			} else {
-				if fieldExists {
-					field := fieldtype.NewField(fieldDef.FieldType)
-					err := field.LoadFromInput(input, fieldDef.Parameters)
-					if err != nil {
-						fieldResult = err.Error()
-					} else {
-						if fieldDef.Required && field.IsEmpty() { //not empty input, but empty in this fieldtype. eg. {} or [] for json fieldtype
-							fieldResult = "1"
-						}
+				field := fieldtype.NewField(fieldDef.FieldType)
+				err := field.LoadFromInput(input, fieldDef.Parameters)
+				if err != nil {
+					fieldResult = err.Error()
+				} else {
+					if fieldDef.Required && field.IsEmpty() { //not empty input, but empty in this fieldtype. eg. {} or [] for json fieldtype
+						fieldResult = "1"
 					}
 				}
 			}
+		} else if fieldDef.Required {
+			fieldResult = "1"
 		}
 		if fieldResult != "" {
 			result.Fields[identifier] = fieldResult
