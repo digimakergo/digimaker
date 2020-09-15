@@ -14,6 +14,7 @@ import (
 	"github.com/xc/digimaker/core/util"
 	"github.com/xc/digimaker/sitekit"
 	"github.com/xc/digimaker/sitekit/niceurl"
+	"golang.org/x/text/message"
 
 	"gopkg.in/flosch/pongo2.v2"
 )
@@ -23,6 +24,13 @@ func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.E
 	parent := in.Interface().(contenttype.ContentTyper)
 	children, _, _ := querier.Children(parent, param.String(), 1, db.EmptyCond(), []int{}, []string{}, false, context.Background())
 	return pongo2.AsValue(children), nil
+}
+
+func dmWashNumber(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	language := param.String()
+	p := message.NewPrinter(message.MatchLanguage(language))
+	result := p.Sprintln(in.Interface())
+	return pongo2.AsValue(result), nil
 }
 
 func dmFetch(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
@@ -162,11 +170,11 @@ func init() {
 	pongo2.RegisterFilter("dm_tpl_path", dmTplPath)
 	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
 	pongo2.RegisterFilter("dm_format_number", dmFormatNumber)
+	pongo2.RegisterFilter("dm_wash_number", dmWashNumber)
 	pongo2.RegisterFilter("dm_config", dmConfig)
 	pongo2.RegisterFilter("dm_json", dmJson)
 	pongo2.RegisterFilter("dm_str", dmStr)
 	pongo2.RegisterFilter("dm_value", dmValue)
 	pongo2.RegisterFilter("dm_now", dmNow)
 	pongo2.RegisterFilter("dm_split", dmSplit)
-
 }
