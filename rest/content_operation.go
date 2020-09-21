@@ -181,8 +181,17 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 	//todo: add value based on definition
 
-	handler := handler.ContentHandler{Context: r.Context()}
-	result, validationResult, err := handler.UpdateByID(idInt, inputs, userID)
+	updateHandler := handler.ContentHandler{Context: r.Context()}
+
+	contenttype := params["contenttype"]
+	var result bool
+	var validationResult handler.ValidationResult
+
+	if contenttype == "" {
+		result, validationResult, err = updateHandler.UpdateByID(idInt, inputs, userID)
+	} else {
+		result, validationResult, err = updateHandler.UpdateByContentID(contenttype, idInt, inputs, userID)
+	}
 
 	if !result {
 		w.Header().Set("content-type", "application/json")
@@ -333,6 +342,7 @@ func init() {
 	RegisterRoute("/content/new/{parent}/{contenttype}", New)
 	RegisterRoute("/content/move/{contents}/{target}", Move)
 	RegisterRoute("/content/update/{id}", Update)
+	RegisterRoute("/content/update/{contenttype}/{id}", Update)
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)
 	RegisterRoute("/content/savedraft/{id}/{type}", SaveDraft)
