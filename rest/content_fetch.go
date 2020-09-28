@@ -34,7 +34,13 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 		HandleError(errors.New("Invalid id"), w)
 		return
 	}
-	content, err := querier.FetchByID(id)
+	var content contenttype.ContentTyper
+	contentType := params["contenttype"]
+	if contentType != "" {
+		content, err = querier.FetchByContentID(contentType, id)
+	} else {
+		content, err = querier.FetchByID(id)
+	}
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -92,6 +98,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 	dbHandler.GetEntity(version.TableName(),
 		db.Cond("content_id", content.GetCID()).Cond("content_type", content.ContentType()).Cond("version", versionNo),
 		[]string{},
+		nil,
 		&version)
 	if version.ID == 0 {
 		HandleError(errors.New("version doesn't exist."), w)
@@ -148,141 +155,42 @@ func buildCondition(userid int, def contenttype.ContentType, query url.Values) (
 	return condition, nil
 }
 
-//Get children of a content(eg. folder)
-func Children(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
+func BuildSortby(r *http.Request) []string {
 	getParams := r.URL.Query()
+	sortbyStr := getParams.Get("sortby")
+	sortbyArr := util.Split(sortbyStr, ";")
+	return sortbyArr
+}
 
-	//offset and limit
+func BuildLimit(r *http.Request) ([]int, error) {
+	getParams := r.URL.Query()
 	offsetStr := getParams.Get("offset")
 	offset, err := strconv.Atoi(offsetStr)
 	if offsetStr != "" && err != nil {
-		HandleError(errors.New("Invalid offset"), w)
-		return
+		return nil, errors.New("Invalid offset")
 	}
 
 	limitStr := getParams.Get("limit")
 	limit, err := strconv.Atoi(limitStr)
 	if limitStr != "" && err != nil {
-		HandleError(errors.New("Invalid limit"), w)
-		return
+		return nil, errors.New("Invalid limit")
 	}
 
-	//sort by
-	sortbyStr := getParams.Get("sortby")
-	sortbyArr := util.Split(sortbyStr, ";")
+	return []int{offset, limit}, nil
+}
 
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		HandleError(errors.New("Invalid id"), w)
-		return
-	}
-	ctype := params["contenttype"]
-	def, err := contenttype.GetDefinition(ctype)
-	if err != nil {
-		HandleError(errors.New("Cann't get content type"), w)
-		return
-	}
+//List
+func List(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	getParams := r.URL.Query()
 
-	querier := handler.Querier()
-	rootContent, err := querier.FetchByID(id)
-	if err != nil {
-		//todo: handle
-	}
-	cxt := r.Context()
-	userid := CheckUserID(cxt, w)
-	if userid == 0 {
-		return
-	}
-
-	//filter
-	condition, err := buildCondition(userid, def, r.URL.Query())
-	if err != nil {
-		HandleError(err, w, 410)
-		return
-	}
-
-	limitArr := []int{}
-	if offsetStr != "" && limitStr != "" {
-		limitArr = []int{offset, limit}
-	}
-
-	list, count, err := querier.Children(rootContent, ctype, userid, condition, limitArr, sortbyArr, true, cxt)
-	// list, count, err := querier.SubList(rootContent, ctype, 100, userid, condition, limitArr, sortbyArr, true, cxt)
+	limit, err := BuildLimit(r)
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
 
-	result := struct {
-		List  interface{} `json:"list"`
-		Count int         `json:"count"`
-	}{Count: count}
-
-	configFields := util.GetConfigArr("rest_list_fields", ctype)
-	if configFields != nil {
-		//output needed fields
-		outputList := []map[string]interface{}{}
-		for _, content := range list {
-			//get a map based content
-			outputContent, err := contenttype.ContentToMap(content)
-			if err != nil {
-				log.Error("Marshall content error: "+err.Error(), "", cxt)
-				HandleError(errors.New("Error when converting data."), w)
-				return
-			}
-
-			for _, field := range content.IdentifierList() {
-				if !util.Contains(configFields, field) {
-					delete(outputContent, field)
-				}
-			}
-			outputList = append(outputList, outputContent)
-		}
-		result.List = outputList
-	} else {
-		result.List = list
-	}
-
-	data, _ := json.Marshal(result)
-	w.Write([]byte(data))
-}
-
-//List
-//todo: merge with Children/allback
-func List(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	getParams := r.URL.Query()
-
-	//offset and limit
-	offsetStr := getParams.Get("offset")
-	offset, err := strconv.Atoi(offsetStr)
-	if offsetStr != "" && err != nil {
-		HandleError(errors.New("Invalid offset"), w)
-		return
-	}
-
-	limitStr := getParams.Get("limit")
-	limit, err := strconv.Atoi(limitStr)
-	if limitStr != "" && err != nil {
-		HandleError(errors.New("Invalid limit"), w)
-		return
-	}
-
-	//level
-	levelStr := getParams.Get("level")
-	level := 0
-	if levelStr != "" {
-		level, err = strconv.Atoi(levelStr)
-		if err != nil {
-			HandleError(errors.New("Invalid level"), w)
-			return
-		}
-	}
-
-	//sort by
-	sortbyStr := getParams.Get("sortby")
-	sortbyArr := util.Split(sortbyStr, ";")
+	sortby := BuildSortby(r)
 
 	ctype := params["contenttype"]
 	def, err := contenttype.GetDefinition(ctype)
@@ -293,9 +201,28 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 	querier := handler.Querier()
 
+	ctx := r.Context()
+	userID := CheckUserID(ctx, w)
+	if userID == 0 {
+		return
+	}
+
+	//filter
+	condition, err := buildCondition(userID, def, r.URL.Query())
+	if err != nil {
+		HandleError(err, w, 410)
+		return
+	}
+
+	if limit[0] == 0 && limit[1] == 0 {
+		limit = []int{0, 10} //todo: use configuration
+	}
+
 	rootStr := getParams.Get("parent")
-	var rootContent contenttype.ContentTyper
+	var list []contenttype.ContentTyper
+	var count int
 	if rootStr != "" {
+		var rootContent contenttype.ContentTyper
 		rootID, err := strconv.Atoi(rootStr)
 		if err != nil {
 			HandleError(errors.New("Invalid parent"), w)
@@ -307,34 +234,29 @@ func List(w http.ResponseWriter, r *http.Request) {
 			HandleError(errors.New("Can't get parent"), w, 410)
 			return
 		}
-	}
 
-	cxt := r.Context()
-	userid := CheckUserID(cxt, w)
-	if userid == 0 {
-		return
-	}
-
-	//filter
-	condition, err := buildCondition(userid, def, r.URL.Query())
-	if err != nil {
-		HandleError(err, w, 410)
-		return
-	}
-
-	limitArr := []int{}
-	if offsetStr != "" && limitStr != "" {
-		limitArr = []int{offset, limit}
-	} else {
-		if condition.Children == nil {
-			limitArr = []int{0, 10} //todo: use configuration
+		//level
+		levelStr := getParams.Get("level")
+		level := 0
+		if levelStr != "" {
+			level, err = strconv.Atoi(levelStr)
+			if err != nil {
+				HandleError(errors.New("Invalid level"), w)
+				return
+			}
 		}
-	}
 
-	list, count, err := querier.SubList(rootContent, ctype, level, userid, condition, limitArr, sortbyArr, true, cxt)
-	if err != nil {
-		HandleError(err, w)
-		return
+		list, count, err = querier.SubList(rootContent, ctype, level, userID, condition, limit, sortby, true, ctx)
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
+	} else {
+		list, count, err = querier.ListForUser(ctx, userID, ctype, condition, limit, sortby, true)
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
 	}
 
 	result := struct {
@@ -443,10 +365,10 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	RegisterRoute("/content/get/{id:[0-9]+}", GetContent)
+	RegisterRoute("/content/get/{contenttype}/{id:[0-9]+}", GetContent)
 	RegisterRoute("/content/version/{id:[0-9]+}/{version:[0-9]+}", GetVersion)
 
 	RegisterRoute("/content/treemenu/{id:[0-9]+}", TreeMenu)
-	RegisterRoute("/content/children/{id:[0-9]+}/{contenttype}", Children)
 	RegisterRoute("/content/list/{contenttype}", List)
 	RegisterRoute("/relation/optionlist/{contenttype}/{field}", RelationOptionList)
 }
