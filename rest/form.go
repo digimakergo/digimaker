@@ -4,12 +4,13 @@
 package rest
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/handler"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/handler"
 
 	"github.com/gorilla/mux"
 )
@@ -42,7 +43,7 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 
 	handler := handler.ContentHandler{Context: r.Context()}
 	arr := strings.Split(contentType, "/")
-	result, validationResult := handler.Validate(arr[0], fieldMap, inputs)
+	result, validationResult := handler.Validate(arr[0], fieldMap, inputs, true)
 	if result {
 		w.Write([]byte("1"))
 	} else {
