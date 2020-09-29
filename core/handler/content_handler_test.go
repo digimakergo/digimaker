@@ -26,20 +26,20 @@ func TestValidate(t *testing.T) {
 	handler := ContentHandler{}
 	params := map[string]interface{}{"title": "ff", "body": "Hello"}
 	def, _ := contenttype.GetDefinition("article")
-	passed, result := handler.Validate("article", def.FieldMap, params)
+	passed, result := handler.Validate("article", def.FieldMap, params, true)
 	assert.Equal(t, true, passed)
 
 	// Test validation2
 	params = map[string]interface{}{"title": "", "body": "Hello"}
-	_, result = handler.Validate("article", def.FieldMap, params)
+	_, result = handler.Validate("article", def.FieldMap, params, true)
 	assert.Equal(t, "1", result.Fields["title"])
 
 	params = map[string]interface{}{"title": nil, "body": "Hello"}
-	_, result = handler.Validate("article", def.FieldMap, params)
+	_, result = handler.Validate("article", def.FieldMap, params, true)
 	assert.Equal(t, "1", result.Fields["title"])
 
 	params = map[string]interface{}{"body": "Hello"}
-	_, result = handler.Validate("article", def.FieldMap, params)
+	_, result = handler.Validate("article", def.FieldMap, params, true)
 	assert.Equal(t, "1", result.Fields["title"])
 
 }
@@ -53,7 +53,7 @@ func TestCreate(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, true, validation.Passed())
-	assert.Equal(t, "title only", content.Value("title").(fieldtype.Text).FieldValue().(string))
+	assert.Equal(t, "title only", content.Value("title").(*fieldtype.Text).FieldValue().(string))
 
 	params := map[string]interface{}{"title": "Test " + time.Now().Format("02.01.2006 15:04"), "summary": "Hello"}
 	result, validation, err := handler.Create("folder", params, 1, 3)
@@ -119,7 +119,7 @@ func TestDelete(t *testing.T) {
 func TestQueryImage(t *testing.T) {
 	images := &[]entity.Image{}
 	handler := db.DBHanlder()
-	err := handler.GetEntity("dm_image", db.Cond("1", 1), []string{}, images)
+	err := handler.GetEntity("dm_image", db.Cond("1", 1), []string{}, nil, images)
 	assert.Nil(t, err)
 	assert.NotNil(t, images)
 }

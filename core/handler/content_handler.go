@@ -34,7 +34,7 @@ var ErrorNoPermission = errors.New("The user doesn't have access to the action."
 // Validate validates and returns a validation result.
 // Validate is used in Create and Update, but can be also used separately
 //  eg. when you have several steps, you want to validate one step only(only the fields in that step).
-func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.FieldDef, inputs map[string]interface{}) (bool, ValidationResult) {
+func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.FieldDef, inputs map[string]interface{}, checkAllRequired bool) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
 	result := ValidationResult{Fields: map[string]string{}}
@@ -59,7 +59,7 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 					}
 				}
 			}
-		} else if fieldDef.Required {
+		} else if fieldDef.Required && checkAllRequired {
 			fieldResult = "1"
 		}
 		if fieldResult != "" {
@@ -157,7 +157,7 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	//todo: add validation callback.
 
 	//Validate
-	valid, validationResult := ch.Validate(contentType, fieldsDefinition, inputs)
+	valid, validationResult := ch.Validate(contentType, fieldsDefinition, inputs, true)
 	if !valid {
 		return nil, validationResult, nil
 	}
@@ -370,7 +370,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	//Validate
 	log.Debug("Validating", "contenthandler.update", ch.Context)
 
-	valid, result := ch.Validate(contentType, contentDef.FieldMap, inputs)
+	valid, result := ch.Validate(contentType, contentDef.FieldMap, inputs, false)
 	if !valid {
 		return valid, result, nil
 	}
