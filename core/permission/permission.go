@@ -60,7 +60,7 @@ func GetUserPolicies(userID int) ([]RolePolicy, error) {
 	dbHandler := db.DBHanlder()
 
 	list := []UserRole{}
-	err := dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID), []string{}, &list)
+	err := dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID), nil, nil, &list)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
 	}
@@ -126,7 +126,7 @@ func GetPermissions(usergroupID int) ([]RolePolicy, error) {
 	dbHandler := db.DBHanlder()
 	location := contenttype.Location{}
 	//todo: maybe better to use content id
-	err := dbHandler.GetEntity("dm_location", db.Cond("id", usergroupID), []string{}, &location) //note: use this instead of handler.Querier() to avoid cycle dependency because handler package rely on permission
+	err := dbHandler.GetEntity("dm_location", db.Cond("id", usergroupID), nil, nil, &location) //note: use this instead of handler.Querier() to avoid cycle dependency because handler package rely on permission
 	if err != nil {
 		fmt.Println(err) //todo: make it generic
 	}
@@ -140,7 +140,7 @@ func GetPermissions(usergroupID int) ([]RolePolicy, error) {
 		roleIDs = append(roleIDs, itemInt)
 	}
 	policyList := []RolePolicy{}
-	err = dbHandler.GetEntity("dm_role_policy", db.Cond("role_id", roleIDs), []string{}, &policyList)
+	err = dbHandler.GetEntity("dm_role_policy", db.Cond("role_id", roleIDs), nil, nil, &policyList)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not fetch dm_usergroup_policy. usergroup_id :"+strings.Join(ids, ","))
 	}

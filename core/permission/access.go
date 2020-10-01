@@ -117,6 +117,11 @@ func CanCreate(ctx context.Context, parent contenttype.ContentTyper, contenttype
 	return HasAccessTo(userId, "content/create", data, ctx)
 }
 
+func CanUpdate(ctx context.Context, content contenttype.ContentTyper, userId int) bool {
+	data := GetMatchData(content, userId)
+	return HasAccessTo(userId, "content/update", data, ctx)
+}
+
 func GetMatchData(content contenttype.ContentTyper, userId int) MatchData {
 	def := content.Definition()
 	data := MatchData{}
@@ -131,4 +136,33 @@ func GetMatchData(content contenttype.ContentTyper, userId int) MatchData {
 		}
 	}
 	return data
+}
+
+//Get update fields for this user. If content is a user content, it supports "cid":"self"
+//return fields list, if all matches, return ["*"]
+//Note: fields can not be set in different rules, meaning first matches will get the fields
+func GetUpdateFields(context context.Context, content contenttype.ContentTyper, userID int) ([]string, error) {
+	accessType, accessMap, err := GetUserAccess(userID, "content/update_fields", context)
+	if err != nil {
+		return nil, err
+	}
+	result := []string{}
+	if accessType == AccessFull {
+		result = append(result, "*")
+	} else if accessType == AccessWithLimit {
+		matchData := GetMatchData(content, userID)
+		if content.ContentType() == "user" && content.GetCID() == userID { //todo: make "user" configurable
+			matchData["cid"] = "self"
+		}
+		matchData["fields"] = nil          //todo: maybe a better way to get fields instead of using nil to match pass
+		for _, limits := range accessMap { //todo: is it sure it will be the first one(golang's random order on map)?
+			matched, _ := util.MatchCondition(limits, matchData) //todo: set log
+			if matched {
+				fieldsI := limits["fields"]
+				result = util.InterfaceToStringArray(fieldsI.([]interface{}))
+				break
+			}
+		}
+	}
+	return result, nil
 }

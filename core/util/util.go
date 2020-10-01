@@ -139,49 +139,54 @@ func StripSQLPhrase(str string) string {
 //eg.1) conditions: {id: 12, type:"image"} or {id:[11,12], type:["image", "article"]} target: {id:12,type:"article"}
 // 2) conditions: {id: [11,12], type:"image" } target: {id:[12, 13], type: ["image", "article"]}
 // 3) conditions: {id:11, type: "*"} target: {id:[11, 12], type:"image"}
+// 4) conditions: {id:11, type: "image"} target: {id:[11, 12], type:nil} //nil will be treated as pass
 func MatchCondition(conditions map[string]interface{}, target map[string]interface{}) (bool, []string) {
 	matchResult := false
 	matchLog := []string{}
 	for key, conditionValue := range conditions {
 		realValue, ok := target[key]
 		if ok {
-			switch conditionValue.(type) {
-			case int:
-				switch realValue.(type) {
+			if realValue == nil {
+				matchResult = true //if target has key but nil value, treat same as pass
+			} else {
+				switch conditionValue.(type) {
 				case int:
-					matchResult = conditionValue == realValue
-				case []int: //real value contains condition int
-					matchResult = ContainsInt(realValue.([]int), conditionValue.(int))
-				}
-			case string:
-				if conditionValue.(string) == "*" {
-					matchResult = true
-				} else {
 					switch realValue.(type) {
-					case string:
+					case int:
 						matchResult = conditionValue == realValue
-					case []string:
-						matchResult = Contains(realValue.([]string), conditionValue.(string))
+					case []int: //real value contains condition int
+						matchResult = ContainsInt(realValue.([]int), conditionValue.(int))
 					}
-				}
-			case []interface{}:
-				for _, item := range conditionValue.([]interface{}) {
-					if _, ok := item.(string); ok {
-						if _, ok := realValue.(string); ok {
-							matchResult = item.(string) == realValue.(string)
-						} else {
-							matchLog = append(matchLog, "Target value should be string.")
+				case string:
+					if conditionValue.(string) == "*" {
+						matchResult = true
+					} else {
+						switch realValue.(type) {
+						case string:
+							matchResult = conditionValue == realValue
+						case []string:
+							matchResult = Contains(realValue.([]string), conditionValue.(string))
 						}
 					}
-					if _, ok := item.(int); ok {
-						if _, ok := realValue.(int); ok {
-							matchResult = item.(int) == realValue.(int)
-						} else {
-							matchLog = append(matchLog, "Target value should be int")
+				case []interface{}:
+					for _, item := range conditionValue.([]interface{}) {
+						if _, ok := item.(string); ok {
+							if _, ok := realValue.(string); ok {
+								matchResult = item.(string) == realValue.(string)
+							} else {
+								matchLog = append(matchLog, "Target value should be string.")
+							}
 						}
-					}
-					if matchResult {
-						break
+						if _, ok := item.(int); ok {
+							if _, ok := realValue.(int); ok {
+								matchResult = item.(int) == realValue.(int)
+							} else {
+								matchLog = append(matchLog, "Target value should be int")
+							}
+						}
+						if matchResult {
+							break
+						}
 					}
 				}
 			}

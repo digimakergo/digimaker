@@ -355,16 +355,21 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	contentType := content.ContentType()
 	contentDef, _ := contenttype.GetDefinition(contentType)
 
-	accessRealData := map[string]interface{}{"contenttype": contentType}
-
-	if contentDef.HasLocation {
-		accessRealData["under"] = content.GetLocation().ID
-	}
-	if (contentDef.HasLocation || contentDef.HasDataField("author")) && content.Value("author").(int) == userId {
-		accessRealData["author"] = "self"
-	}
-	if !permission.HasAccessTo(userId, "content/update", accessRealData, ch.Context) {
+	//permission check
+	if !permission.CanUpdate(ch.Context, content, userId) {
 		return false, ValidationResult{}, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
+	}
+
+	allowedFields, err := permission.GetUpdateFields(ch.Context, content, userId)
+	if err != nil {
+		return false, ValidationResult{}, err
+	}
+	if len(allowedFields) > 0 && allowedFields[0] != "*" {
+		for field, _ := range inputs {
+			if !util.Contains(allowedFields, field) {
+				return false, ValidationResult{}, errors.New("User doesn't have permission to update field " + field + ".")
+			}
+		}
 	}
 
 	//Validate
