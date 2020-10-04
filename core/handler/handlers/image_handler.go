@@ -5,7 +5,6 @@
 package handlers
 
 import (
-	"database/sql"
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/handler"
 )
@@ -13,13 +12,10 @@ import (
 type ImageHandler struct {
 }
 
-func (ih ImageHandler) New(content contenttype.ContentTyper, tx *sql.Tx, parentID ...int) error {
-	content.SetValue("parent_id", parentID[0]) //todo: validate more
+//When creating on server side, or import.
+func (ih ImageHandler) Create(content contenttype.ContentTyper, inputs handler.InputMap, parentID int) error {
+	content.SetValue("parent_id", parentID)
 	return nil
-}
-
-func (ih ImageHandler) Validate(inputs map[string]interface{}, result *handler.ValidationResult) {
-
 }
 
 func init() {

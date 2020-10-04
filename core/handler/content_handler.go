@@ -25,6 +25,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+type InputMap map[string]interface{}
+
 type ContentHandler struct {
 	Context context.Context
 }
@@ -34,7 +36,7 @@ var ErrorNoPermission = errors.New("The user doesn't have access to the action."
 // Validate validates and returns a validation result.
 // Validate is used in Create and Update, but can be also used separately
 //  eg. when you have several steps, you want to validate one step only(only the fields in that step).
-func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.FieldDef, inputs map[string]interface{}, checkAllRequired bool) (bool, ValidationResult) {
+func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.FieldDef, inputs InputMap, checkAllRequired bool) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
 	result := ValidationResult{Fields: map[string]string{}}
@@ -67,12 +69,6 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 		}
 	}
 
-	//validate from contenttype handler
-	contentTypeHanlder := GetContentTypeHandler(contentType)
-	if contentTypeHanlder != nil {
-		log.Debug("Validating from content type handler", "contenthandler.validate", ch.Context)
-		contentTypeHanlder.Validate(inputs, &result)
-	}
 	return result.Passed(), result
 }
 
@@ -133,8 +129,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 }
 
 // Create creates a content(same behavior as Draft&Publish but store published version directly)
-func (ch *ContentHandler) Create(contentType string, inputs map[string]interface{}, userId int, parentID int) (contenttype.ContentTyper, ValidationResult, error) {
-
+func (ch *ContentHandler) Create(contentType string, inputs InputMap, userId int, parentID int) (contenttype.ContentTyper, ValidationResult, error) {
 	parent, _ := querier.FetchByID(parentID)
 	if parent == nil {
 		return nil, ValidationResult{}, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
@@ -154,12 +149,20 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 		return nil, ValidationResult{}, errors.New("User doesn't have access to create")
 	}
 
-	//todo: add validation callback.
-
 	//Validate
 	valid, validationResult := ch.Validate(contentType, fieldsDefinition, inputs, true)
 	if !valid {
 		return nil, validationResult, nil
+	}
+
+	//validate from contenttype handler
+	contentTypeHandler := GetContentTypeHandler(contentType)
+	if validator, ok := contentTypeHandler.(ContentTypeHandlerValidate); ok {
+		log.Debug("Validating from content type handler", "contenthandler.validate", ch.Context)
+		valid, validationResult = validator.ValidateCreate(inputs, parentID)
+		if !valid {
+			return nil, validationResult, nil
+		}
 	}
 
 	//Create empty content instance and set value
@@ -195,25 +198,9 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 	log.StartTiming(ch.Context, "contenthandler_create.database")
 	log.Debug("Validation passed. Start saving content.", "contenthandler.Create", ch.Context)
 	//Create transaction
-	database, err := db.DB()
-	if err != nil {
-		return nil, ValidationResult{}, errors.New("Can't get db connection.")
-	}
-	tx, err := database.BeginTx(context.Background(), &sql.TxOptions{Isolation: sql.LevelSerializable})
+	tx, err := db.CreateTx()
 	if err != nil {
 		return nil, ValidationResult{}, errors.New("Can't get transaction.")
-	}
-
-	//call content type handler
-	contentTypeHandler := GetContentTypeHandler(contentType)
-	if contentTypeHandler != nil {
-		log.Debug("Calling handler for "+contentType, "contenthandler.create", ch.Context)
-		err := contentTypeHandler.New(content, tx, parentID)
-		if err != nil {
-			tx.Rollback()
-			log.Error("Error from callback: "+err.Error(), "contenthandler.create", ch.Context)
-			return nil, ValidationResult{}, err
-		}
 	}
 
 	//Save content and location if needed
@@ -238,6 +225,17 @@ func (ch *ContentHandler) Create(contentType string, inputs map[string]interface
 			return nil, ValidationResult{}, errors.Wrap(err, "Create version error.")
 		}
 		log.Debug("Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create", ch.Context)
+	}
+
+	//call content type handler
+	if creater, ok := contentTypeHandler.(ContentTypeHandlerCreate); ok {
+		log.Debug("Calling handler for "+contentType, "contenthandler.create", ch.Context)
+		err := creater.Create(content, inputs, parentID)
+		if err != nil {
+			tx.Rollback()
+			log.Error("Error from callback: "+err.Error(), "contenthandler.create", ch.Context)
+			return nil, ValidationResult{}, err
+		}
 	}
 
 	//Invoke callback
@@ -324,7 +322,7 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 	return version.ID, nil
 }
 
-func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, inputs map[string]interface{}, userId int) (bool, ValidationResult, error) {
+func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, inputs InputMap, userId int) (bool, ValidationResult, error) {
 	content, err := Querier().FetchByContentID(contentType, contentID)
 	if err != nil {
 		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via content id.")
@@ -336,7 +334,7 @@ func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, in
 	return ch.Update(content, inputs, userId)
 }
 
-func (ch ContentHandler) UpdateByID(id int, inputs map[string]interface{}, userId int) (bool, ValidationResult, error) {
+func (ch ContentHandler) UpdateByID(id int, inputs InputMap, userId int) (bool, ValidationResult, error) {
 	content, err := Querier().FetchByID(id)
 	if err != nil {
 		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via id.")
@@ -351,22 +349,23 @@ func (ch ContentHandler) UpdateByID(id int, inputs map[string]interface{}, userI
 //Update content.
 //The inputs doesn't need to include all required fields. However if it's there,
 // it will check if it's required&empty
-func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[string]interface{}, userId int) (bool, ValidationResult, error) {
+func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs InputMap, userId int) (bool, ValidationResult, error) {
 	contentType := content.ContentType()
 	contentDef, _ := contenttype.GetDefinition(contentType)
+	fieldsDefinition := contentDef.FieldMap
 
 	//permission check
 	if !permission.CanUpdate(ch.Context, content, userId) {
 		return false, ValidationResult{}, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
 	}
-
+	//todo: think about merging 'content/update' and 'content/fields_update'
 	allowedFields, err := permission.GetUpdateFields(ch.Context, content, userId)
 	if err != nil {
 		return false, ValidationResult{}, err
 	}
 	if len(allowedFields) > 0 && allowedFields[0] != "*" {
 		for field, _ := range inputs {
-			if !util.Contains(allowedFields, field) {
+			if _, ok := fieldsDefinition[field]; ok && !util.Contains(allowedFields, field) {
 				return false, ValidationResult{}, errors.New("User doesn't have permission to update field " + field + ".")
 			}
 		}
@@ -374,10 +373,19 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 
 	//Validate
 	log.Debug("Validating", "contenthandler.update", ch.Context)
-
-	valid, result := ch.Validate(contentType, contentDef.FieldMap, inputs, false)
+	valid, validationResult := ch.Validate(contentType, fieldsDefinition, inputs, false)
 	if !valid {
-		return valid, result, nil
+		return false, validationResult, nil
+	}
+
+	//validate from contenttype handler
+	contentTypeHandler := GetContentTypeHandler(contentType)
+	if validator, ok := contentTypeHandler.(ContentTypeHandlerValidate); ok {
+		log.Debug("Validating from update handler", "contenthandler.validate", ch.Context)
+		valid, validationResult = validator.ValidateUpdate(inputs, content)
+		if !valid {
+			return false, validationResult, nil
+		}
 	}
 
 	//Save to new version
@@ -387,9 +395,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 	}
 
 	//todo: update relations
-
 	//Set content.
-	fieldsDefinition := contentDef.FieldMap
 	for identifier, _ := range fieldsDefinition {
 		if input, ok := inputs[identifier]; ok {
 			//get field from loaded content
@@ -448,6 +454,17 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs map[str
 			return false, ValidationResult{}, errors.Wrap(err, "Updating location info error.")
 		}
 		log.Debug("Location updated", "contenthandler.update", ch.Context)
+	}
+
+	//call content type handler
+	if updater, ok := contentTypeHandler.(ContentTypeHandlerUpdate); ok {
+		log.Debug("Calling handler for "+contentType, "contenthandler.update", ch.Context)
+		err := updater.Update(content, inputs)
+		if err != nil {
+			tx.Rollback()
+			log.Error("Error from callback: "+err.Error(), "contenthandler.update", ch.Context)
+			return false, ValidationResult{}, err
+		}
 	}
 
 	//Invoke callback
@@ -633,6 +650,14 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 					tx.Rollback()
 				}
 			}
+		}
+	}
+
+	contentTypeHandler := GetContentTypeHandler(content.ContentType())
+	if deleter, ok := contentTypeHandler.(ContentTypeHandlerDelete); ok {
+		err = deleter.Delete(content)
+		if err != nil {
+			tx.Rollback()
 		}
 	}
 
