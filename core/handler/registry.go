@@ -5,20 +5,37 @@
 package handler
 
 import (
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/core/log"
 	"strconv"
 	"strings"
+
+	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/util"
 )
 
 //Content type handler registeration list
-var contentTypeHandlerList map[string]ContentTypeHandler = map[string]ContentTypeHandler{}
+var contentTypeHandlerList map[string]interface{} = map[string]interface{}{}
 
-func RegisterContentTypeHandler(contentType string, handler ContentTypeHandler) {
+func RegisterContentTypeHandler(contentType string, handler interface{}) {
+	handlerType := []string{}
+	if _, ok := handler.(ContentTypeHandlerValidate); ok {
+		handlerType = append(handlerType, "validate")
+	}
+
+	if _, ok := handler.(ContentTypeHandlerCreate); ok {
+		handlerType = append(handlerType, "create")
+	}
+	if _, ok := handler.(ContentTypeHandlerUpdate); ok {
+		handlerType = append(handlerType, "update")
+	}
+	if _, ok := handler.(ContentTypeHandlerDelete); ok {
+		handlerType = append(handlerType, "delete")
+	}
+
+	log.Info("Registering contenttype handler for " + contentType + ", implemented: " + strings.Join(handlerType, ","))
 	contentTypeHandlerList[contentType] = handler
 }
 
-func GetContentTypeHandler(contentType string) ContentTypeHandler {
+func GetContentTypeHandler(contentType string) interface{} {
 	return contentTypeHandlerList[contentType]
 }
 
