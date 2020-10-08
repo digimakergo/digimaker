@@ -5,6 +5,7 @@
 package permission
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/xc/digimaker/core/contenttype"
@@ -29,19 +30,29 @@ type Policy struct {
 type PolicyList []Policy
 
 var policyDefinition map[string]PolicyList
+var rolePolicyMap map[string][]string
 
 func LoadPolicies() error {
-	policies := map[string]PolicyList{}
-	err := util.UnmarshalData(util.ConfigPath()+"/policies.json", &policies)
+	policyRoles := struct {
+		Policies map[string]PolicyList `json:"policies"`
+		Roles    map[string][]string   `json:"roles"`
+	}{}
+
+	err := util.UnmarshalData(util.ConfigPath()+"/policies.json", &policyRoles)
 	if err != nil {
 		return err
 	}
-	policyDefinition = policies
-	return nil
-}
+	policyDefinition = policyRoles.Policies
+	rolePolicyMap = policyRoles.Roles
 
-func GetPolicy(identifier string) PolicyList {
-	return policyDefinition[identifier]
+	for _, policies := range policyRoles.Roles {
+		for _, policyIdentifer := range policies {
+			if _, ok := policyDefinition[policyIdentifer]; !ok {
+				return errors.New("policelist " + policyIdentifer + " doen't exist.")
+			}
+		}
+	}
+	return nil
 }
 
 func GetPolicyDefinition() map[string]PolicyList {
@@ -57,10 +68,11 @@ type UserRole struct {
 	RoleID int `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
 }
 
+//todo: cache in context?
 func GetUserPolicies(userID int) ([]Policy, error) {
-	//get usergroups
 	dbHandler := db.DBHanlder()
 
+	//get roles of user
 	userRoleList := []UserRole{}
 	err := dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID), nil, nil, &userRoleList)
 	if err != nil {
@@ -68,12 +80,16 @@ func GetUserPolicies(userID int) ([]Policy, error) {
 	}
 	//get permissions
 	policyList := []Policy{}
+	roleIDs := []int{}
 	for _, userRole := range userRoleList {
-		currentPolicyList := GetRolePolicies(userRole.RoleID)
-		for _, policy := range currentPolicyList {
-			policyList = append(policyList, policy)
-		}
+		roleIDs = append(roleIDs, userRole.RoleID)
 	}
+
+	currentPolicyList := GetRolePolicies(roleIDs)
+	for _, policy := range currentPolicyList {
+		policyList = append(policyList, policy)
+	}
+
 	return policyList, nil
 }
 
@@ -91,19 +107,36 @@ func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]int
 	return result
 }
 
-func GetRolePolicies(roleID int) PolicyList {
-	role := contenttype.NewInstance("role")
+func GetRolePolicies(roleIDs []int) []Policy {
+	roles := contenttype.NewList("role")
 	dbHandler := db.DBHanlder()
-	dbHandler.GetByFields("role", "dm_role", db.Cond("c.id", roleID), nil, nil, role, false)
-	if role == nil {
-		log.Warning("Role doesn't exist on ID"+strconv.Itoa(roleID), "")
+	dbHandler.GetByFields("role", "dm_role", db.Cond("c.id", roleIDs), nil, nil, roles, false)
+	if roles == nil {
+		log.Warning("Role doesn't exist on ID(s)"+fmt.Sprint(roleIDs), "")
 		return PolicyList{}
 	}
 
-	policyField := role.Value("policies").(*fieldtype.Text)
-	policyStr := policyField.String.String
+	roleList := contenttype.ToList("role", roles)
+	policyIdentifiers := []string{}
+	policies := []Policy{}
+	for _, role := range roleList {
+		roleIdentifierField := role.Value("policies").(*fieldtype.Text)
+		roleIdentifier := roleIdentifierField.String.String
 
-	policies := GetPolicy(policyStr)
+		//loop policies under the role
+		for _, policyIdentifier := range rolePolicyMap[roleIdentifier] {
+			if util.Contains(policyIdentifiers, policyIdentifier) {
+				log.Debug("Policelist "+policyIdentifier+" is duplicated on roles. Ignored", "")
+				continue
+			}
+			policyIdentifiers = append(policyIdentifiers, policyIdentifier)
+
+			currentPolicies := policyDefinition[policyIdentifier]
+			policies = append(policies, currentPolicies...)
+		}
+	}
+
+	log.Debug("Got policylist: "+fmt.Sprintln(policyIdentifiers), "permission")
 	return policies
 }
 
