@@ -120,7 +120,7 @@ func GetRolePolicies(roleIDs []int) []Policy {
 	policyIdentifiers := []string{}
 	policies := []Policy{}
 	for _, role := range roleList {
-		roleIdentifierField := role.Value("policies").(*fieldtype.Text)
+		roleIdentifierField := role.Value("identifier").(*fieldtype.Text)
 		roleIdentifier := roleIdentifierField.String.String
 
 		//loop policies under the role
