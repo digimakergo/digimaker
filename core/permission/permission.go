@@ -5,12 +5,12 @@
 package permission
 
 import (
-	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/xc/digimaker/core/contenttype"
 	"github.com/xc/digimaker/core/db"
+	"github.com/xc/digimaker/core/fieldtype"
+	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/util"
 
 	"github.com/pkg/errors"
@@ -20,20 +20,18 @@ import (
 Policy & Permission
 *************/
 
-type Permission struct {
-	Operation []string               `json:"operation"`
-	LimitedTo map[string]interface{} `json:"limited_to"`
-}
-
 type Policy struct {
-	AssignType  []string     `json:"limited_to"`
-	Permissions []Permission `json:"permissions"`
+	Operation []string               `json:"operation"`
+	LimitedTo map[string]interface{} `json:"limited_to"` //todo: use a type Limitations/Limits?
 }
 
-var policyDefinition map[string]Policy
+//Policy collection. For merge Policy list, use []Policy
+type PolicyList []Policy
+
+var policyDefinition map[string]PolicyList
 
 func LoadPolicies() error {
-	policies := map[string]Policy{}
+	policies := map[string]PolicyList{}
 	err := util.UnmarshalData(util.ConfigPath()+"/policies.json", &policies)
 	if err != nil {
 		return err
@@ -42,8 +40,12 @@ func LoadPolicies() error {
 	return nil
 }
 
-func GetPolicy(identifier string) Policy {
+func GetPolicy(identifier string) PolicyList {
 	return policyDefinition[identifier]
+}
+
+func GetPolicyDefinition() map[string]PolicyList {
+	return policyDefinition
 }
 
 /*************
@@ -55,22 +57,19 @@ type UserRole struct {
 	RoleID int `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
 }
 
-func GetUserPolicies(userID int) ([]RolePolicy, error) {
+func GetUserPolicies(userID int) ([]Policy, error) {
 	//get usergroups
 	dbHandler := db.DBHanlder()
 
-	list := []UserRole{}
-	err := dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID), nil, nil, &list)
+	userRoleList := []UserRole{}
+	err := dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID), nil, nil, &userRoleList)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
 	}
 	//get permissions
-	policyList := []RolePolicy{}
-	for _, userRole := range list {
-		currentPolicyList, err := GetPermissions(userRole.RoleID)
-		if err != nil {
-			return nil, errors.Wrap(err, "Can not get permission on usergroup: "+strconv.Itoa(userRole.RoleID))
-		}
+	policyList := []Policy{}
+	for _, userRole := range userRoleList {
+		currentPolicyList := GetRolePolicies(userRole.RoleID)
 		for _, policy := range currentPolicyList {
 			policyList = append(policyList, policy)
 		}
@@ -78,22 +77,13 @@ func GetUserPolicies(userID int) ([]RolePolicy, error) {
 	return policyList, nil
 }
 
-func GetLimitsFromPolicy(policyList []RolePolicy, operation string) []map[string]interface{} {
+func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]interface{} {
 	var result []map[string]interface{}
-	for _, ugPolicy := range policyList {
-		policy := ugPolicy.GetPolicy()
-		for _, permission := range policy.Permissions {
-			for _, item := range permission.Operation {
-				if item == operation {
-					limit := permission.LimitedTo
-					if ugPolicy.Scope != "" {
-						limit["scope"] = ugPolicy.Scope
-					}
-					if ugPolicy.Under != "" {
-						limit["under"] = ugPolicy.Under
-					}
-					result = append(result, limit)
-				}
+	for _, policy := range policyList {
+		for _, item := range policy.Operation {
+			if item == operation {
+				limit := policy.LimitedTo
+				result = append(result, limit) //todo: nil limit is handled?
 			}
 		}
 	}
@@ -101,48 +91,34 @@ func GetLimitsFromPolicy(policyList []RolePolicy, operation string) []map[string
 	return result
 }
 
-/*************
-Role policy
-*************/
-type RolePolicy struct {
-	ID     int    `boil:"id" json:"id" toml:"id" yaml:"id"`
-	RoleID string `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
-	Policy string `boil:"policy" json:"policy" toml:"policy" yaml:"policy"`
-	Under  string `boil:"under" json:"under" toml:"under" yaml:"under"`
-	Scope  string `boil:"scope" json:"scope" toml:"scope" yaml:"scope"`
-	policy Policy `boil:"-"` //cache for Policy instance
-}
-
-//Get policy detail of current usergroup policy.
-func (rp RolePolicy) GetPolicy() Policy {
-	if len(rp.policy.Permissions) == 0 {
-		rp.policy = GetPolicy(rp.Policy)
-	}
-	return rp.policy
-}
-
-//Get UsergroupPolicy slice based on usergroupID including inhertated permissions.
-func GetPermissions(usergroupID int) ([]RolePolicy, error) {
+func GetRolePolicies(roleID int) PolicyList {
+	role := contenttype.NewInstance("role")
 	dbHandler := db.DBHanlder()
-	location := contenttype.Location{}
-	//todo: maybe better to use content id
-	err := dbHandler.GetEntity("dm_location", db.Cond("id", usergroupID), nil, nil, &location) //note: use this instead of handler.Querier() to avoid cycle dependency because handler package rely on permission
-	if err != nil {
-		fmt.Println(err) //todo: make it generic
+	dbHandler.GetByFields("role", "dm_role", db.Cond("c.id", roleID), nil, nil, role, false)
+	if role == nil {
+		log.Warning("Role doesn't exist on ID"+strconv.Itoa(roleID), "")
+		return PolicyList{}
 	}
 
-	hierarchy := location.Hierarchy
-	ids := strings.Split(hierarchy, "/")
+	policyField := role.Value("policies").(*fieldtype.Text)
+	policyStr := policyField.String.String
 
-	roleIDs := []int{}
-	for _, item := range ids {
-		itemInt, _ := strconv.Atoi(item)
-		roleIDs = append(roleIDs, itemInt)
+	policies := GetPolicy(policyStr)
+	return policies
+}
+
+func AssignToUser(roleID int, userID int) error {
+	//todo: check if role exisit. maybe need role entity?
+	//todo: check if user exist.
+	useRole := UserRole{}
+	dbHandler := db.DBHanlder()
+	dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID), nil, nil, &useRole)
+	if useRole.ID > 0 {
+		return errors.New("Already assigned.")
 	}
-	policyList := []RolePolicy{}
-	err = dbHandler.GetEntity("dm_role_policy", db.Cond("role_id", roleIDs), nil, nil, &policyList)
+	_, err := dbHandler.Insert("dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
 	if err != nil {
-		return nil, errors.Wrap(err, "Can not fetch dm_usergroup_policy. usergroup_id :"+strings.Join(ids, ","))
+		return err
 	}
-	return policyList, nil
+	return nil
 }

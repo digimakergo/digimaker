@@ -34,23 +34,23 @@ func GetUserAccess(userID int, operation string, context context.Context) (Acces
 		return AccessNo, nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
 	}
 	//todo: cache limits to user, and cache anoymous globally.
-	accessList := GetLimitsFromPolicy(policyList, operation)
-	log.Debug("Got access list of "+operation+": "+fmt.Sprint(accessList), "permission")
+	limitList := GetLimitsFromPolicy(policyList, operation)
+	log.Debug("Got access list of "+operation+": "+fmt.Sprint(limitList), "permission")
 
 	//empty access list
-	if accessList == nil {
+	if limitList == nil {
 		log.Debug("No access.", "permission")
 		fmt.Println(userID)
-		return AccessNo, accessList, nil
+		return AccessNo, limitList, nil
 	}
 	//check if there is an access with no limit.
-	for i, access := range accessList {
-		if access == nil {
+	for i, limit := range limitList {
+		if limit == nil {
 			log.Debug("Full access on "+strconv.Itoa(i+1), "permission")
-			return AccessFull, accessList, nil
+			return AccessFull, limitList, nil
 		}
 	}
-	return AccessWithLimit, accessList, nil
+	return AccessWithLimit, limitList, nil
 }
 
 //If the user has acccess given matchedData(realData here)
@@ -151,6 +151,7 @@ func GetUpdateFields(context context.Context, content contenttype.ContentTyper, 
 		result = append(result, "*")
 	} else if accessType == AccessWithLimit {
 		matchData := GetMatchData(content, userID)
+		fmt.Println(matchData)
 		if content.ContentType() == "user" && content.GetCID() == userID { //todo: make "user" configurable
 			matchData["cid"] = "self"
 		}
