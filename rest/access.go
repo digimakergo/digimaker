@@ -83,15 +83,23 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	params := mux.Vars(r)
+	roleID, _ := strconv.Atoi(params["role"])
+	assignedUserID, _ := strconv.Atoi(params["user"])
+
 	if !permission.HasAccessTo(userID, "access/assign-user", permission.MatchData{}, r.Context()) {
 		HandleError(errors.New("No access"), w)
 		return
 	}
 
-	params := mux.Vars(r)
-	roleID, _ := strconv.Atoi(params["role"])
-	assignedUserID, _ := strconv.Atoi(params["user"])
-	err := permission.AssignToUser(roleID, assignedUserID)
+	querier := handler.Querier()
+	role, _ := querier.FetchByID(roleID)
+	if role == nil {
+		HandleError(errors.New("Role not found"), w, 400)
+		return
+	}
+
+	err := permission.AssignToUser(role.GetCID(), assignedUserID)
 
 	if err != nil {
 		log.Error("Error when assigning: "+err.Error(), "")
