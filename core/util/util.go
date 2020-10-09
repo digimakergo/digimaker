@@ -141,70 +141,86 @@ func StripSQLPhrase(str string) string {
 // 3) conditions: {id:11, type: "*"} target: {id:[11, 12], type:"image"}
 // 4) conditions: {id:11, type: "image"} target: {id:[11, 12], type:nil} //nil will be treated as pass
 func MatchCondition(conditions map[string]interface{}, target map[string]interface{}) (bool, []string) {
-	matchResult := false
 	matchLog := []string{}
 	for key, conditionValue := range conditions {
+		matchResult := false
 		realValue, ok := target[key]
-		if ok {
+		if !ok {
+			matchResult = false
+			matchLog = append(matchLog, "Mismatch since key "+key+" doesn't exist in target.")
+		} else {
 			if realValue == nil {
 				matchResult = true //if target has key but nil value, treat same as pass
+				matchLog = append(matchLog, "Matched on "+key+"since the real value is nil")
+			} else if str, ok := conditionValue.(string); ok && str == "*" {
+				matchResult = true
 			} else {
 				switch conditionValue.(type) {
-				case int:
-					switch realValue.(type) {
-					case int:
-						matchResult = conditionValue == realValue
-					case []int: //real value contains condition int
-						matchResult = ContainsInt(realValue.([]int), conditionValue.(int))
-					}
-				case string:
-					if conditionValue.(string) == "*" {
-						matchResult = true
-					} else {
-						switch realValue.(type) {
-						case string:
-							matchResult = conditionValue == realValue
-						case []string:
-							matchResult = Contains(realValue.([]string), conditionValue.(string))
-						}
-					}
 				case []interface{}:
 					for _, item := range conditionValue.([]interface{}) {
-						if _, ok := item.(string); ok {
-							if _, ok := realValue.(string); ok {
-								matchResult = item.(string) == realValue.(string)
-							} else {
-								matchLog = append(matchLog, "Target value should be string.")
-							}
-						}
-						if _, ok := item.(int); ok {
-							if _, ok := realValue.(int); ok {
-								matchResult = item.(int) == realValue.(int)
-							} else {
-								matchLog = append(matchLog, "Target value should be int")
-							}
-						}
+						//[]string or []int
+						errorLog := ""
+						matchResult, errorLog = matchItem(item, realValue)
 						if matchResult {
 							break
 						}
+						if errorLog != "" {
+							matchLog = append(matchLog, errorLog)
+						}
+					}
+				default:
+					errorLog := ""
+					matchResult, errorLog = matchItem(conditionValue, realValue)
+					if errorLog != "" {
+						matchLog = append(matchLog, errorLog)
 					}
 				}
 			}
-
 			if !matchResult {
 				matchLog = append(matchLog, "Mismatch on "+key+", expecting: "+fmt.Sprint(conditionValue)+", real: "+fmt.Sprint(realValue))
 			} else {
 				matchLog = append(matchLog, "Matched on "+key)
 			}
-		} else {
-			matchResult = false
-			matchLog = append(matchLog, "Mismatch since key "+key+" doesn't exist in target.")
 		}
+
 		if !matchResult {
-			break
+			return false, matchLog
 		}
 	}
-	return matchResult, matchLog
+	return true, matchLog
+}
+
+//condition value: int|string
+//target value: int|[]int|string|[]string
+func matchItem(conditionValue interface{}, realValue interface{}) (bool, string) {
+	result := false
+	if _, ok := conditionValue.(float64); ok {
+		conditionValue = int(conditionValue.(float64))
+	}
+
+	switch conditionValue.(type) {
+	case string:
+		switch realValue.(type) {
+		case string:
+			result = conditionValue.(string) == realValue.(string)
+		case []string:
+			result = Contains(realValue.([]string), conditionValue.(string))
+		default:
+			return false, "Target is not string/[]string"
+		}
+	case int:
+		switch realValue.(type) {
+		case int:
+			result = conditionValue.(int) == realValue.(int)
+		case []int: //real value contains condition int
+			result = ContainsInt(realValue.([]int), conditionValue.(int))
+		default:
+			return false, "Target is not int/[]int"
+		}
+	default:
+		return false, "unsupported condition type:" + fmt.Sprintf("%T", conditionValue)
+	}
+	return result, ""
 }
 
 //Split with triming space. "," is the default separator if no seperator is provided.
