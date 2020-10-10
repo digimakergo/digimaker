@@ -18,6 +18,7 @@ import (
 	"github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/core/handler"
 	"github.com/xc/digimaker/core/log"
+	"github.com/xc/digimaker/core/permission"
 	"github.com/xc/digimaker/core/util"
 
 	"github.com/gorilla/mux"
@@ -212,8 +213,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func SetPriority(w http.ResponseWriter, r *http.Request) {
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
 	params := r.FormValue("params")
 	paramArr := strings.Split(params, ";")
+	tx, _ := db.CreateTx()
 	for _, paramStr := range paramArr {
 		arr := strings.Split(paramStr, ",")
 		id, err := strconv.Atoi(arr[0])
@@ -234,17 +241,25 @@ func SetPriority(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if !permission.CanUpdate(r.Context(), content, userID) {
+			HandleError(errors.New("No permision for "+strconv.Itoa(id)), w)
+			tx.Rollback()
+			return
+		}
+
 		//todo: create transction once.
 		//update priority
 		location := content.GetLocation()
 		location.Priority = priority
-		err = location.Store()
+		err = location.Store(tx)
 		if err != nil {
+			tx.Rollback()
 			log.Error(err.Error(), "")
 			HandleError(errors.New("Something wrong"), w)
 			return
 		}
 	}
+	tx.Commit()
 	w.Write([]byte("1"))
 }
 
