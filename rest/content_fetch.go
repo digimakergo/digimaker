@@ -6,6 +6,7 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -144,6 +145,19 @@ func buildCondition(userid int, def contenttype.ContentType, query url.Values) (
 		}
 		condition = condition.And("c.id", cids)
 	}
+	//contain savan
+	nameStr := query.Get("name")
+
+	if nameStr != "" {
+		contains := util.Split(nameStr, ":")
+		if len(contains) > 0 && contains[0] == "contain" {
+			fmt.Printf("savan" + contains[1])
+			//todo: esc % to inside in condition
+			cValue := "%" + contains[1] + "%"
+			condition = condition.And("location.name like", cValue)
+		}
+	}
+	//filter
 
 	for field := range def.FieldMap {
 		value := query.Get("field." + field)
