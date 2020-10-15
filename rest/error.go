@@ -14,7 +14,7 @@ const StatusNotFound = 404
 func HandleError(err error, w http.ResponseWriter, httpCode ...int) {
 	//todo: output debug info if needed.
 	if len(httpCode) == 0 {
-		w.WriteHeader(500)
+		w.WriteHeader(StatusWrongParams)
 	} else {
 		w.WriteHeader(httpCode[0])
 	}
