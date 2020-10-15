@@ -98,8 +98,11 @@ func (i *Int) LoadFromInput(input interface{}, params FieldParameters) error {
 
 //Get FieldValue
 func (i Int) FieldValue() interface{} {
-	//todo: fix nil and 0 difference
-	return int(i.Int64)
+	if i.NullInt64.Valid {
+		return int(i.Int64)
+	} else {
+		return nil
+	}
 }
 
 //IsEmpty checks if the input is empty. so ""/nil is empty,
@@ -114,6 +117,9 @@ func (i Int) Validate(rule VaidationRule) (bool, string) {
 
 //MarshalJSON marshals to []byte
 func (i Int) MarshalJSON() ([]byte, error) {
+	if !i.NullInt64.Valid {
+		return json.Marshal("")
+	}
 	return json.Marshal(i.Int64)
 }
 
@@ -130,12 +136,19 @@ type JSON struct {
 
 //LoadFromInput loads data from input before validation
 func (j *JSON) LoadFromInput(input interface{}, params FieldParameters) error {
+	//todo: validate if it's a json structure([],{})
 	existing := j.NullString
-	err := j.Scan(input)
-	if err != nil {
-		j.existing = existing
+	if str, ok := input.(string); ok {
+		j.Scan(str)
+		return nil
+	} else {
+		bytes, _ := json.Marshal(input)
+		err := j.Scan(string(bytes))
+		if err != nil {
+			j.existing = existing
+		}
+		return err
 	}
-	return err
 }
 
 //Get FieldValue
@@ -159,7 +172,10 @@ func (j JSON) Validate(rule VaidationRule) (bool, string) {
 
 //MarshalJSON marshals to []byte
 func (j JSON) MarshalJSON() ([]byte, error) {
-	return json.Marshal(j.String)
+	if j.String == "" {
+		return json.Marshal("")
+	}
+	return []byte(j.String), nil
 }
 
 func (j *JSON) UnMarshalJSON(data []byte) error {
