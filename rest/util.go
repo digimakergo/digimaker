@@ -97,7 +97,11 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 }
 
 func ExportPDF(w http.ResponseWriter, r *http.Request) {
-	//todo: permission check
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
 	params := mux.Vars(r)
 	id := params["id"]
 	language := r.FormValue("language")
@@ -114,6 +118,10 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	content, err := querier.FetchByID(idInt)
 	if err != nil {
 		HandleError(errors.New("Content not found"), w)
+		return
+	}
+	if !permission.CanRead(userID, content, r.Context()) {
+		HandleError(errors.New("Need permission"), w)
 		return
 	}
 
@@ -139,7 +147,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/var/"+pdfFile, 302)
+	w.Write([]byte("/var/" + pdfFile))
 }
 
 func HtmlToPDF(html string, name string) (string, error) {
