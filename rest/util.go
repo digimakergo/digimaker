@@ -147,7 +147,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("/var/" + pdfFile))
+	w.Write([]byte(pdfFile))
 }
 
 func HtmlToPDF(html string, name string) (string, error) {
