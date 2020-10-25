@@ -142,7 +142,7 @@ func (ch *ContentHandler) Create(contentType string, inputs InputMap, userId int
 		"contenttype": contentType,
 	} //todo: support more conditions
 	if contentDefinition.HasLocation {
-		realData["under"] = strings.Split(parent.GetLocation().Hierarchy, "/")
+		realData["under"] = parent.GetLocation().Path()
 	}
 
 	if !permission.HasAccessTo(userId, "content/create", realData, ch.Context) {
