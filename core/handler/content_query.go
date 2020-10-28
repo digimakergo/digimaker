@@ -325,7 +325,10 @@ func (cq ContentQuery) Version(contentType string, condition db.Condition) (cont
 	content := contenttype.NewInstance(contentType)
 	author := version.Author
 
-	json.Unmarshal(data, &content)
+	err = json.Unmarshal(data, &content)
+	if err != nil {
+		return version, nil, errors.New("Not valid data for content")
+	}
 
 	content.SetValue("author", author)
 	return version, content, nil

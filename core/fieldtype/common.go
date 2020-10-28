@@ -74,6 +74,16 @@ func (s String) MarshalJSON() ([]byte, error) {
 	return json.Marshal(s.String)
 }
 
+func (s *String) UnmarshalJSON(data []byte) error {
+	str := ""
+	err := json.Unmarshal(data, &str)
+	if err != nil {
+		return err
+	}
+	s.Scan(str)
+	return nil
+}
+
 // Int is a basic internal common type Int, which allows empty.
 type Int struct {
 	sql.NullInt64
@@ -123,9 +133,14 @@ func (i Int) MarshalJSON() ([]byte, error) {
 	return json.Marshal(i.Int64)
 }
 
-func (i *Int) UnMarshalJSON(data []byte) error {
-	i.Scan(data)
-	return nil
+func (i *Int) UnmarshalJSON(data []byte) error {
+	str := ""
+	err := json.Unmarshal(data, &str)
+	if err == nil {
+		return i.LoadFromInput(str, FieldParameters{})
+	} else {
+		return i.Scan(data)
+	}
 }
 
 // JSON is a json format string. Null is allowed
@@ -178,7 +193,7 @@ func (j JSON) MarshalJSON() ([]byte, error) {
 	return []byte(j.String), nil
 }
 
-func (j *JSON) UnMarshalJSON(data []byte) error {
+func (j *JSON) UnmarshalJSON(data []byte) error {
 	j.Scan(data)
 	return nil
 }

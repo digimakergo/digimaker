@@ -1,6 +1,8 @@
 package fieldtype
 
-import "database/sql/driver"
+import (
+	"database/sql/driver"
+)
 
 /**
 * Initial types END
