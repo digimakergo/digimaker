@@ -125,6 +125,11 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			if password == "" {
+				HandleError(errors.New("Password is empty"), w)
+				return
+			}
+
 			cHandler := handler.ContentHandler{}
 			cHandler.Context = r.Context()
 			success, validateResult, err := cHandler.Update(user, handler.InputMap{"password": password}, 1)
@@ -134,8 +139,8 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 					HandleError(errors.New(validateResult.Fields["password"]), w)
 					return
 				}
-
 				HandleError(err, w)
+				return
 			}
 
 			dbHanldler.Delete("dm_activation", db.Cond("id", activation.ID))
