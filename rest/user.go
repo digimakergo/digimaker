@@ -10,6 +10,7 @@ import (
 
 	"github.com/xc/digimaker/core/db"
 	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/log"
 	"github.com/xc/digimaker/core/permission"
 	"github.com/xc/digimaker/core/util"
 
@@ -28,7 +29,10 @@ func CurrentUser(w http.ResponseWriter, r *http.Request) {
 	if user != nil {
 		hasAccess := permission.HasAccessTo(userID, "site/access", map[string]interface{}{"site": site}, ctx)
 		if hasAccess {
-			data, _ := json.Marshal(user)
+			data, err := json.Marshal(user)
+			if err != nil {
+				log.Error(err.Error(), "")
+			}
 			w.Write(data)
 		} else {
 			HandleError(errors.New("Doesn't have access"), w, 403)
@@ -95,7 +99,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 	hash := params["hash"]
 	dbHanldler := db.DBHanlder()
 	activation := Activiation{}
-	dbHanldler.GetEntity("dm_activation", db.Cond("hash", hash).Cond("type", "resetpassword"), []string{}, &activation)
+	dbHanldler.GetEntity("dm_activation", db.Cond("hash", hash).Cond("type", "resetpassword"), []string{}, nil, &activation)
 	if activation.ID == 0 {
 		HandleError(errors.New("Wrong hash?"), w)
 		return
@@ -120,18 +124,20 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 				HandleError(errors.New("No user found"), w)
 				return
 			}
-			pHandler := fieldtype.GetHandler("password")
-			valid, message := pHandler.Validate(password)
-			if !valid {
-				HandleError(errors.New(message), w)
-				return
+
+			cHandler := handler.ContentHandler{}
+			success, validateResult, err := cHandler.Update(user, handler.InputMap{"password": password}, 1)
+
+			if !success {
+				if !validateResult.Passed() {
+					HandleError(errors.New(validateResult.Fields["password"]), w)
+					return
+				}
+
+				HandleError(err, w)
 			}
-			value := pHandler.NewValue(password)
-			user.SetValue("password", value)
-			user.Store()
 
 			dbHanldler.Delete("dm_activation", db.Cond("id", activation.ID))
-			//todo: use transaction
 
 			w.Write([]byte("1"))
 		}
