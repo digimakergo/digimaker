@@ -26,6 +26,10 @@ import (
 )
 
 func UploadFile(w http.ResponseWriter, r *http.Request) {
+	userId := CheckUserID(r.Context(), w)
+	if userId == 0 {
+		return
+	}
 	filename, err := HandleUploadFile(r, "*")
 	result := ""
 	if err != nil {
@@ -39,6 +43,10 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 
 //Upload image, return path or error
 func UploadImage(w http.ResponseWriter, r *http.Request) {
+	userId := CheckUserID(r.Context(), w)
+	if userId == 0 {
+		return
+	}
 	filename, err := HandleUploadFile(r, ".gif,.jpg,.jpeg,.png")
 	result := ""
 	if err != nil {
