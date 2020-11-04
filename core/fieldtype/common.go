@@ -175,6 +175,13 @@ func (j JSON) FieldValue() interface{} {
 	}
 }
 
+func (j JSON) ToObject(obj interface{}) error {
+	if j.NullString.Valid {
+		return json.Unmarshal([]byte(j.NullString.String), obj)
+	}
+	return nil
+}
+
 //IsEmpty checks if the input is empty. so ""/nil is empty,
 func (j JSON) IsEmpty() bool {
 	return !j.Valid
