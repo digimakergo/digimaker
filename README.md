@@ -1,6 +1,6 @@
 Digimaker Content Management Framework
 ----------------
-A dev-effective CMF which balances simplicity & flexibility with high performance. Written in Golang.
+A dev-friendly CMF which balances simplicity & flexibility with high performance. Written in Golang.
 
 
 ### Highlights
@@ -32,8 +32,6 @@ License
 --------
 MIT license.
 
-Support & Services
+Contact
 --------
-Almost all technical activities can be done via github.
-
-For specific support/service you can contact Digimaker Go AS. Also there are paid plugins providing specific features(eg. maintenance tools).  Check more on [www.digimaker.com](http://www.digimaker.com), or contact post@digimaker.com.
+Check [@xc](https://www.github.com/xc) to send email.
