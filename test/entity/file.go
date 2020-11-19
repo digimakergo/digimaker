@@ -7,9 +7,10 @@ import (
     "database/sql"
     "github.com/xc/digimaker/core/db"
     "github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
+	  "github.com/xc/digimaker/core/fieldtype"
     
 	. "github.com/xc/digimaker/core/db"
+    
 )
 
 
@@ -125,21 +126,21 @@ func (c *File) Value(identifier string) interface{} {
     
     case "filetype":
         
-            result = c.Filetype
+            result = &(c.Filetype)
         
     
     
     
     case "path":
         
-            result = c.Path
+            result = &(c.Path)
         
     
     
     
     case "title":
         
-            result = c.Title
+            result = &(c.Title)
         
     
     
@@ -160,7 +161,7 @@ func (c *File) SetValue(identifier string, value interface{}) error {
             
             
             case "filetype":
-            c.Filetype = *(value.(*fieldtype.Text))
+            c.Filetype = value.(fieldtype.Text)
             
             
         
@@ -168,7 +169,7 @@ func (c *File) SetValue(identifier string, value interface{}) error {
             
             
             case "path":
-            c.Path = *(value.(*fieldtype.Text))
+            c.Path = value.(fieldtype.Text)
             
             
         
@@ -176,7 +177,7 @@ func (c *File) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = *(value.(*fieldtype.Text))
+            c.Title = value.(fieldtype.Text)
             
             
         

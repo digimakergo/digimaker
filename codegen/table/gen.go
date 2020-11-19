@@ -44,6 +44,10 @@ func GenerateTable(ctype string) error {
 			dbType = "varchar(255) NOT NULL DEFAULT ''"
 		case "richtext":
 			dbType = "TEXT"
+		case "json":
+			dbType = "JSON"
+		case "number":
+			dbType = "INT NOT NULL DEFAULT 0"
 		case "container":
 			continue
 		case "relationlist":

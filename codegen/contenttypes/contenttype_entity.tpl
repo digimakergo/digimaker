@@ -170,7 +170,9 @@ func (c *{{$struct_name}}) Delete(transaction ...*sql.Tx) error {
 
 func init() {
 	new := func() contenttype.ContentTyper {
-		return &{{$struct_name}}{}
+    entity := &{{$struct_name}}{}
+    entity.ContentEntity.ContentType = "{{$struct_name}}"
+    return entity
 	}
 
 	newList := func() interface{} {

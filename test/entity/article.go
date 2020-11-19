@@ -7,11 +7,12 @@ import (
     "database/sql"
     "github.com/xc/digimaker/core/db"
     "github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
+	  "github.com/xc/digimaker/core/fieldtype"
     
     "github.com/xc/digimaker/core/util"
     
 	. "github.com/xc/digimaker/core/db"
+    
 )
 
 
@@ -178,21 +179,21 @@ func (c *Article) Value(identifier string) interface{} {
     
     case "body":
         
-            result = c.Body
+            result = &(c.Body)
         
     
     
     
     case "coverimage":
         
-            result = c.Coverimage
+            result = &(c.Coverimage)
         
     
     
     
     case "editors":
         
-            result = c.Editors
+            result = &(c.Editors)
         
     
     
@@ -208,14 +209,14 @@ func (c *Article) Value(identifier string) interface{} {
     
     case "summary":
         
-            result = c.Summary
+            result = &(c.Summary)
         
     
     
     
     case "title":
         
-            result = c.Title
+            result = &(c.Title)
         
     
     
@@ -243,7 +244,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "body":
-            c.Body = *(value.(*fieldtype.RichText))
+            c.Body = value.(fieldtype.RichText)
             
             
         
@@ -251,7 +252,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "coverimage":
-            c.Coverimage = *(value.(*fieldtype.Text))
+            c.Coverimage = value.(fieldtype.Text)
             
             
         
@@ -259,7 +260,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "editors":
-            c.Editors = *(value.(*fieldtype.Text))
+            c.Editors = value.(fieldtype.Text)
             
             
         
@@ -275,7 +276,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "summary":
-            c.Summary = *(value.(*fieldtype.RichText))
+            c.Summary = value.(fieldtype.RichText)
             
             
         
@@ -283,7 +284,7 @@ func (c *Article) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = *(value.(*fieldtype.Text))
+            c.Title = value.(fieldtype.Text)
             
             
         

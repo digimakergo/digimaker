@@ -7,11 +7,12 @@ import (
     "database/sql"
     "github.com/xc/digimaker/core/db"
     "github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
+	  "github.com/xc/digimaker/core/fieldtype"
     
     "github.com/xc/digimaker/core/util"
     
 	. "github.com/xc/digimaker/core/db"
+    
 )
 
 
@@ -120,14 +121,14 @@ func (c *Role) Value(identifier string) interface{} {
     
     case "summary":
         
-            result = c.Summary
+            result = &(c.Summary)
         
     
     
     
     case "title":
         
-            result = c.Title
+            result = &(c.Title)
         
     
     
@@ -148,7 +149,7 @@ func (c *Role) SetValue(identifier string, value interface{}) error {
             
             
             case "summary":
-            c.Summary = *(value.(*fieldtype.RichText))
+            c.Summary = value.(fieldtype.RichText)
             
             
         
@@ -156,7 +157,7 @@ func (c *Role) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = *(value.(*fieldtype.Text))
+            c.Title = value.(fieldtype.Text)
             
             
         

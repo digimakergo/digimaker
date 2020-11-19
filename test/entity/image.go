@@ -7,9 +7,10 @@ import (
     "database/sql"
     "github.com/xc/digimaker/core/db"
     "github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
+	  "github.com/xc/digimaker/core/fieldtype"
     
 	. "github.com/xc/digimaker/core/db"
+    
 )
 
 
@@ -126,14 +127,14 @@ func (c *Image) Value(identifier string) interface{} {
     
     case "path":
         
-            result = c.Path
+            result = &(c.Path)
         
     
     
     
     case "title":
         
-            result = c.Title
+            result = &(c.Title)
         
     
     
@@ -160,7 +161,7 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
             
             
             case "path":
-            c.Path = *(value.(*fieldtype.Text))
+            c.Path = value.(fieldtype.Text)
             
             
         
@@ -168,7 +169,7 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
             
             
             case "title":
-            c.Title = *(value.(*fieldtype.Text))
+            c.Title = value.(fieldtype.Text)
             
             
         

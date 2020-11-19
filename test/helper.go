@@ -26,7 +26,7 @@ func Start() context.Context {
 		fmt.Println("Starting testing...")
 		testFolder := util.DMPath() + "/test"
 		core.Bootstrap(testFolder)
-		InitData()
+		// InitData()
 		ctx = context.Background()
 		ctx = context.WithValue(ctx, "user_id", 1)
 		ctx = log.WithLogger(ctx, logrus.Fields{"ip": "127.0.0.1", "request_id": "test-request-id"})

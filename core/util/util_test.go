@@ -1,6 +1,7 @@
 package util
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -11,12 +12,20 @@ func TestUtil(t *testing.T) {
 	assert.Equal(t, "hello-world-test-dd", NameToIdentifier(str))
 }
 
-func TestNameToIdentifier(t *testing.T) {
+func ExampleNameToIdentifier() {
 	result := GetStrVar("{this} is {good}")
-	assert.Equal(t, result[0], "this")
+	fmt.Println(result[0])
+	//Output: this
 }
 
-func TestReplaceStrVar(t *testing.T) {
+func ExampleReplaceStrVar() {
 	result := ReplaceStrVar("{this} is {value}", map[string]string{"this": "test", "value": "test1"})
-	assert.Equal(t, "test is test1", result)
+	fmt.Println(result)
+	//Output: test is test1
+}
+
+func ExampleUpperName() {
+	result := UpperName("hello_world")
+	fmt.Println(result)
+	//Output: HelloWorld
 }

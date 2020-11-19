@@ -8,7 +8,7 @@ import (
 	"github.com/xc/digimaker/core/util"
 )
 
-var Operators = []string{">", ">=", "<", "<=", "=", "in", "like"} //todo: make it extendable in loading
+var Operators = []string{">", ">=", "<", "<=", "!=", "=", "in", "like"} //todo: make it extendable in loading
 
 const logicAnd = "and"
 const logicOr = "or"

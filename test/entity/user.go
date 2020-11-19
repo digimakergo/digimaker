@@ -7,11 +7,12 @@ import (
     "database/sql"
     "github.com/xc/digimaker/core/db"
     "github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
+	  "github.com/xc/digimaker/core/fieldtype"
     
     "github.com/xc/digimaker/core/util"
     
 	. "github.com/xc/digimaker/core/db"
+    
 )
 
 
@@ -159,35 +160,35 @@ func (c *User) Value(identifier string) interface{} {
     
     case "email":
         
-            result = c.Email
+            result = &(c.Email)
         
     
     
     
     case "firstname":
         
-            result = c.Firstname
+            result = &(c.Firstname)
         
     
     
     
     case "lastname":
         
-            result = c.Lastname
+            result = &(c.Lastname)
         
     
     
     
     case "login":
         
-            result = c.Login
+            result = &(c.Login)
         
     
     
     
     case "password":
         
-            result = c.Password
+            result = &(c.Password)
         
     
     
@@ -208,7 +209,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "email":
-            c.Email = *(value.(*fieldtype.Text))
+            c.Email = value.(fieldtype.Text)
             
             
         
@@ -216,7 +217,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "firstname":
-            c.Firstname = *(value.(*fieldtype.Text))
+            c.Firstname = value.(fieldtype.Text)
             
             
         
@@ -224,7 +225,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "lastname":
-            c.Lastname = *(value.(*fieldtype.Text))
+            c.Lastname = value.(fieldtype.Text)
             
             
         
@@ -232,7 +233,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "login":
-            c.Login = *(value.(*fieldtype.Text))
+            c.Login = value.(fieldtype.Text)
             
             
         
@@ -240,7 +241,7 @@ func (c *User) SetValue(identifier string, value interface{}) error {
             
             
             case "password":
-            c.Password = *(value.(*fieldtype.Password))
+            c.Password = value.(fieldtype.Password)
             
             
         

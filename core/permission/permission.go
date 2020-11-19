@@ -125,6 +125,7 @@ func GetRolePolicies(roleIDs []int) []Policy {
 
 		//loop policies under the role
 		for _, policyIdentifier := range rolePolicyMap[roleIdentifier] {
+			//todo: different roles may have different context(eg. target) under which the policies shouldn't merge
 			if util.Contains(policyIdentifiers, policyIdentifier) {
 				log.Debug("Policelist "+policyIdentifier+" is duplicated on roles. Ignored", "")
 				continue

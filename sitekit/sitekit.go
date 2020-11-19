@@ -1,15 +1,16 @@
 package sitekit
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/handler"
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/sitekit/niceurl"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strconv"
+
+	"github.com/xc/digimaker/core/contenttype"
+	"github.com/xc/digimaker/core/handler"
+	"github.com/xc/digimaker/core/util"
+	"github.com/xc/digimaker/sitekit/niceurl"
 
 	"github.com/pkg/errors"
 
@@ -128,7 +129,7 @@ func Output(w io.Writer, siteIdentifier string, templatePath string, variables m
 	pongo2.DefaultSet.Debug = true
 	// pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
 	gopath := os.Getenv("GOPATH")
-	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/dm/sitekit/templates/main.html"))
+	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/github.com/xc/digimaker/sitekit/templates/main.html"))
 
 	variables["site"] = siteIdentifier
 
