@@ -8,7 +8,7 @@ import (
 	"context"
 	"database/sql"
 
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/pkg/errors"
 )

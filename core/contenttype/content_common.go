@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 
-	"github.com/xc/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/db"
 )
 
 type ContentCommon struct {

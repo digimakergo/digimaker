@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/xc/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/log"
 )
 
 type funcNewField = func() FieldTyper

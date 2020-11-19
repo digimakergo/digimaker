@@ -7,10 +7,10 @@ package handlers
 import (
 	"fmt"
 
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/handler"
 )
 
 type UserHandler struct {

@@ -9,9 +9,9 @@ import (
 	"strconv"
 
 	"github.com/pkg/errors"
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/log"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 type AccessType int

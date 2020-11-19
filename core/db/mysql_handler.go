@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xc/digimaker/core/log"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/util"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
 	"github.com/pkg/errors"

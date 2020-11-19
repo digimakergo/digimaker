@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 type RelationList []Relation

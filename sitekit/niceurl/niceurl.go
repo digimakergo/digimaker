@@ -5,7 +5,7 @@
 package niceurl
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/contenttype"
 	"net/http"
 	"strconv"
 	"strings"

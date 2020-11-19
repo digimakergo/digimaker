@@ -9,7 +9,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/xc/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/log"
 )
 
 /**

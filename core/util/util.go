@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/xc/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/log"
 
 	"github.com/rs/xid"
 	"golang.org/x/crypto/bcrypt"

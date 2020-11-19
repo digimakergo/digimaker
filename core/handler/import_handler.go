@@ -3,10 +3,10 @@
 package handler
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/log"
 	"encoding/json"
 	"strconv"
 

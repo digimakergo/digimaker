@@ -3,7 +3,7 @@
 package handler
 
 import (
-	"github.com/xc/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/contenttype"
 	"encoding/json"
 	"strconv"
 

@@ -9,8 +9,8 @@ import (
 	"log"
 	"strings"
 
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"

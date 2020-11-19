@@ -5,9 +5,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	. "github.com/xc/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
+	. "github.com/digimakergo/digimaker/core/db"
 
 	"github.com/pkg/errors"
 )

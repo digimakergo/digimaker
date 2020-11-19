@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/xc/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/log"
 
 	"github.com/spf13/viper"
 )
@@ -17,7 +17,7 @@ var defaultSettings = struct {
 	ConfigFolder string
 	HomePath     string
 	DMPath       string
-}{"dm", "", "", os.Getenv("GOPATH") + "/src/github.com/xc/digimaker"}
+}{"dm", "", "", os.Getenv("GOPATH") + "/src/github.com/digimakergo/digimaker"}
 
 func InitHomePath(homePath string) {
 	defaultSettings.HomePath = homePath

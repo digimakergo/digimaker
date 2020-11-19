@@ -10,9 +10,9 @@ import (
 	"os/exec"
 
 	"github.com/sirupsen/logrus"
-	"github.com/xc/digimaker/core"
-	"github.com/xc/digimaker/core/log"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 var RootID = 3

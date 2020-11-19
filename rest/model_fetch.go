@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/xc/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/contenttype"
 
 	"github.com/gorilla/mux"
 )

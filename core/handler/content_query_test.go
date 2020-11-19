@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/test/entity"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/test/entity"
 
 	"github.com/stretchr/testify/assert"
 )

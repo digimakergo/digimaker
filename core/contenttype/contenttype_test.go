@@ -8,7 +8,7 @@ import (
 )
 
 func TestLoad(t *testing.T) {
-	// util.SetPackageName("github.com/xc/digimaker/admin")
+	// util.SetPackageName("github.com/digimakergo/digimaker/admin")
 	// err := LoadDefinition()
 	// if err != nil {
 	// 	t.Fail()

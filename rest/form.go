@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/handler"
 
 	"github.com/gorilla/mux"
 )

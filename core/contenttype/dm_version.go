@@ -13,8 +13,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/xc/digimaker/core/db"
-	. "github.com/xc/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/db"
+	. "github.com/digimakergo/digimaker/core/db"
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"

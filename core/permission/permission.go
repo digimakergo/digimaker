@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/log"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/pkg/errors"
 )

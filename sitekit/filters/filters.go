@@ -8,12 +8,12 @@ import (
 	"strings"
 	"time"
 
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/handler"
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/sitekit"
-	"github.com/xc/digimaker/sitekit/niceurl"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/util"
+	"github.com/digimakergo/digimaker/sitekit"
+	"github.com/digimakergo/digimaker/sitekit/niceurl"
 	"golang.org/x/text/message"
 
 	"gopkg.in/flosch/pongo2.v2"

@@ -8,7 +8,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 //Image stores only the orginal image path.

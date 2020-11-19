@@ -8,11 +8,11 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/handler"
-	"github.com/xc/digimaker/core/log"
-	"github.com/xc/digimaker/core/permission"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/gorilla/mux"
 )

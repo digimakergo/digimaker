@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/test"
-	"github.com/xc/digimaker/test/entity"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/test"
+	"github.com/digimakergo/digimaker/test/entity"
 
 	"github.com/stretchr/testify/assert"
 )

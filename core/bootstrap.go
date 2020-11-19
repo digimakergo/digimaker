@@ -4,10 +4,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/log"
-	"github.com/xc/digimaker/core/permission"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 func Bootstrap(homePath string) bool {

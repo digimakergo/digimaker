@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 func TestCanLogin(t *testing.T) {

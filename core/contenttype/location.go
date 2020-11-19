@@ -7,9 +7,9 @@ import (
 	"database/sql"
 	"strings"
 
-	"github.com/xc/digimaker/core/db"
-	. "github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/db"
+	. "github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 // Location is an object representing the database table.

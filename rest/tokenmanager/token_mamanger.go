@@ -3,8 +3,8 @@ package tokenmanager
 import (
 	"time"
 
-	"github.com/xc/digimaker/core/db"
-	"github.com/xc/digimaker/rest"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/rest"
 )
 
 const tableName = "dm_token_state"

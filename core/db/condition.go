@@ -5,7 +5,7 @@ package db
 import (
 	"strings"
 
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 var Operators = []string{">", ">=", "<", "<=", "!=", "=", "in", "like"} //todo: make it extendable in loading

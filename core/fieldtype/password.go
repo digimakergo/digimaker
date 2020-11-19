@@ -1,6 +1,6 @@
 package fieldtype
 
-import "github.com/xc/digimaker/core/util"
+import "github.com/digimakergo/digimaker/core/util"
 
 //Password struct represent password type
 type Password struct {

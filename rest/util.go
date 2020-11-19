@@ -15,11 +15,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/xc/digimaker/core/handler"
-	"github.com/xc/digimaker/core/permission"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/util"
 
-	_ "github.com/xc/digimaker/sitekit/filters"
+	_ "github.com/digimakergo/digimaker/sitekit/filters"
 
 	"github.com/gorilla/mux"
 	pongo2 "gopkg.in/flosch/pongo2.v2"

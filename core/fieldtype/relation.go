@@ -5,7 +5,7 @@ import (
 	"errors"
 	"strconv"
 
-	"github.com/xc/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/db"
 )
 
 type RelationParameters struct {

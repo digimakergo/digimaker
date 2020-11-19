@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/xc/digimaker/core"
-	"github.com/xc/digimaker/core/log"
-	"github.com/xc/digimaker/core/util"
-	"github.com/xc/digimaker/test"
+	"github.com/digimakergo/digimaker/core"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/util"
+	"github.com/digimakergo/digimaker/test"
 )
 
 func main() {

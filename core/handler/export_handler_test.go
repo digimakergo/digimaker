@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/xc/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/contenttype"
 )
 
 func TestExport(t *testing.T) {
