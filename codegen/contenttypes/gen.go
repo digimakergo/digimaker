@@ -7,11 +7,11 @@ import (
 	"os"
 	"text/template"
 
-	_ "github.com/xc/digimaker/codegen/contenttypes/temp"
+	_ "github.com/digimakergo/digimaker/codegen/contenttypes/temp"
 
-	"github.com/xc/digimaker/core/contenttype"
-	"github.com/xc/digimaker/core/fieldtype"
-	"github.com/xc/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/util"
 )
 
 //Generate content types

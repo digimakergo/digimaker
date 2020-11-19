@@ -5,13 +5,13 @@ package entity
 
 import (
     "database/sql"
-    "github.com/xc/digimaker/core/db"
-    "github.com/xc/digimaker/core/contenttype"
-	  "github.com/xc/digimaker/core/fieldtype"
+    "github.com/digimakergo/digimaker/core/db"
+    "github.com/digimakergo/digimaker/core/contenttype"
+	  "github.com/digimakergo/digimaker/core/fieldtype"
     {{if .settings.HasLocation}}
-    "github.com/xc/digimaker/core/util"
+    "github.com/digimakergo/digimaker/core/util"
     {{end}}
-	. "github.com/xc/digimaker/core/db"
+	. "github.com/digimakergo/digimaker/core/db"
     {{range $i, $import := .imports }}
     {{$import}}
     {{end}}
