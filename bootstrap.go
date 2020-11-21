@@ -1,4 +1,4 @@
-package core
+package digimaker
 
 import (
 	"os"
@@ -10,6 +10,8 @@ import (
 	"github.com/digimakergo/digimaker/core/util"
 )
 
+//Bootstrap digimaker:
+//set related path, load definition, load policies
 func Bootstrap(homePath string) bool {
 
 	if _, err := os.Stat(homePath); os.IsNotExist(err) {
@@ -23,11 +25,13 @@ func Bootstrap(homePath string) bool {
 	util.InitHomePath(homePath)
 	err := contenttype.LoadDefinition()
 	if err != nil {
+		log.Fatal(err.Error())
 		return false
 	}
 
 	err = permission.LoadPolicies()
 	if err != nil {
+		log.Fatal("Loading policies error: " + err.Error())
 		return false
 	}
 	return true
