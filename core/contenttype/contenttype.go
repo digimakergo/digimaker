@@ -21,6 +21,7 @@ type ContentTypeList map[string]map[string]ContentType
 type ContentType struct {
 	Name         string            `json:"name"`
 	TableName    string            `json:"table_name"`
+	RelationData []string          `json:"relation_data"`
 	NamePattern  string            `json:"name_pattern"`
 	HasVersion   bool              `json:"has_version"`
 	HasLocation  bool              `json:"has_location"`

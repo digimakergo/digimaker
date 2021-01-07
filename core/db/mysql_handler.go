@@ -17,6 +17,9 @@ import (
 	"github.com/volatiletech/sqlboiler/queries"
 )
 
+type Datamap map[string]interface{}
+type DatamapList []Datamap
+
 // Implement DBEntitier
 type MysqlHandler struct {
 }
@@ -155,7 +158,7 @@ func (r *MysqlHandler) GetEntityContent(contentType string, tableName string, co
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Warning(err.Error(), "GetByFields")
+			// log.Warning(err.Error(), "GetByFields")
 		} else {
 			message := "[MysqlHandler.GetByFields]Error when query. sql - " + sqlStr
 			return -1, errors.Wrap(err, message)
@@ -264,18 +267,51 @@ func (r *MysqlHandler) GetEntity(tablename string, condition Condition, sortby [
 	if err != nil {
 		return errors.Wrap(err, "[MysqlHandler.GetEntity]Error when connecting db.")
 	}
-	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
+
+	if entityList, ok := entity.(*DatamapList); ok {
+		rows, rowError := queries.Raw(sqlStr, values...).QueryContext(context.Background(), db)
+		cols, _ := rows.Columns()
+		err = rowError
+		defer rows.Close()
+		list := DatamapList{}
+
+		for rows.Next() {
+			//scan to columnpointers
+			columns := make([]interface{}, len(cols))
+			columnPointers := make([]interface{}, len(cols))
+			for i, _ := range columns {
+				columnPointers[i] = &columns[i]
+			}
+
+			if err := rows.Scan(columnPointers...); err != nil {
+				return err
+			}
+
+			//set to datamap
+			datamap := Datamap{}
+			for i, colName := range cols {
+				val := columnPointers[i].(*interface{})
+				v := *val
+				switch v.(type) {
+				case []byte:
+					datamap[colName] = string(v.([]byte))
+				default:
+					datamap[colName] = v
+				}
+			}
+			list = append(list, datamap)
+		}
+
+		*entityList = list
+	} else {
+		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
+	}
 	if err == sql.ErrNoRows {
-		log.Warning(err.Error(), "GetEntity")
+		// log.Warning(err.Error(), "GetEntity")
 	} else {
 		return errors.Wrap(err, "[MysqlHandler.GetEntity]Error when query.")
 	}
 	return nil
-}
-
-//Fetch multiple enities
-func (*MysqlHandler) GetMultiEntities(tablenames []string, condition Condition, entity interface{}) {
-
 }
 
 func (MysqlHandler) Insert(tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {

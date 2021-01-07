@@ -52,15 +52,15 @@ func (rl *RelationList) LoadFromInput(input interface{}, params fieldtype.FieldP
 		r.FromType = fromType
 		r.Priority = len(arrInt) - i
 
-		//get content
-		contents := []map[string]interface{}{}
-		dbHandler.GetEntity(def.TableName, db.Cond("id", fromCid), nil, nil, &contents)
-		if len(contents) == 0 {
-			return errors.New("No content found on " + strconv.Itoa(fromCid))
-		}
-
 		relationDataFields := def.RelationData
 		if len(relationDataFields) > 0 {
+			//get content
+			contents := db.DatamapList{}
+			dbHandler.GetEntity(def.TableName, db.Cond("id", fromCid), nil, nil, &contents)
+			if len(contents) == 0 {
+				return errors.New("No content found on " + strconv.Itoa(fromCid))
+			}
+
 			//If there is one field, use it on data, otherwise use json map as data
 			if len(relationDataFields) == 1 {
 				r.Data = fmt.Sprint(contents[0][relationDataFields[0]])
