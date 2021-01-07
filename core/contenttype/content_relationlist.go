@@ -7,11 +7,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 
-	"github.com/pkg/errors"
+	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/pkg/errors"
 )
 
 type RelationList []Relation
@@ -34,12 +36,44 @@ func (rl *RelationList) LoadFromInput(input interface{}, params fieldtype.FieldP
 		return errors.New("id and type are not same length")
 	}
 
+	dbHandler := db.DBHanlder()
 	relationlist := []Relation{}
 	for i, v := range arrInt {
+		fromType := arrType[i]
+		fromCid := v
+		def, err := GetDefinition(fromType)
+		if err != nil {
+			return err
+		}
+
 		r := Relation{}
-		r.FromContentID = v
-		r.FromType = arrType[i]
+
+		r.FromContentID = fromCid
+		r.FromType = fromType
 		r.Priority = len(arrInt) - i
+
+		//get content
+		contents := []map[string]interface{}{}
+		dbHandler.GetEntity(def.TableName, db.Cond("id", fromCid), nil, nil, &contents)
+		if len(contents) == 0 {
+			return errors.New("No content found on " + strconv.Itoa(fromCid))
+		}
+
+		relationDataFields := def.RelationData
+		if len(relationDataFields) > 0 {
+			//If there is one field, use it on data, otherwise use json map as data
+			if len(relationDataFields) == 1 {
+				r.Data = fmt.Sprint(contents[0][relationDataFields[0]])
+			} else {
+				datamap := map[string]interface{}{}
+				for _, field := range relationDataFields {
+					datamap[field] = contents[0][field]
+				}
+				data, _ := json.Marshal(datamap)
+				r.Data = string(data)
+			}
+		}
+
 		relationlist = append(relationlist, r)
 	}
 	*rl = relationlist
