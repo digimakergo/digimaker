@@ -179,15 +179,26 @@ func BuildSortby(r *http.Request) []string {
 func BuildLimit(r *http.Request) ([]int, error) {
 	getParams := r.URL.Query()
 	offsetStr := getParams.Get("offset")
+	limitStr := getParams.Get("limit")
+
+	//if there is no offset&limit, use default limit
+	if offsetStr == "" && limitStr == "" {
+		return []int{0, 10}, nil //todo: use configuration
+	}
+
 	offset, err := strconv.Atoi(offsetStr)
 	if offsetStr != "" && err != nil {
 		return nil, errors.New("Invalid offset")
 	}
 
-	limitStr := getParams.Get("limit")
 	limit, err := strconv.Atoi(limitStr)
 	if limitStr != "" && err != nil {
 		return nil, errors.New("Invalid limit")
+	}
+
+	//if limit is 0, set no limit
+	if limit == 0 {
+		return []int{offset, 1000000}, nil //max one fetch without limit is 1000000
 	}
 
 	return []int{offset, limit}, nil
@@ -226,10 +237,6 @@ func List(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		HandleError(err, w, 410)
 		return
-	}
-
-	if limit[0] == 0 && limit[1] == 0 {
-		limit = []int{0, 10} //todo: use configuration
 	}
 
 	rootStr := getParams.Get("parent")
