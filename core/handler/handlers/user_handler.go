@@ -46,7 +46,7 @@ func (uh UserHandler) ValidateUpdate(inputs handler.InputMap, content contenttyp
 	loginField := content.Value("login").(*fieldtype.Text)
 	if loginField.String.String != login {
 		existing, _ := querier.Fetch("user", db.Cond("login", login))
-		if existing != nil {
+		if existing != nil && existing.GetCID() != content.GetCID() { //NB. uppcase change is allowed
 			result.Fields["login"] = "Username is used already"
 		}
 	}
@@ -54,7 +54,7 @@ func (uh UserHandler) ValidateUpdate(inputs handler.InputMap, content contenttyp
 	emailField := content.Value("email").(*fieldtype.Text)
 	if emailField.String.String != email {
 		existing, _ := querier.Fetch("user", db.Cond("email", email))
-		if existing != nil {
+		if existing != nil && existing.GetCID() != content.GetCID() { //NB. uppcase change is allowed
 			result.Fields["email"] = "Email is used already"
 		}
 	}
