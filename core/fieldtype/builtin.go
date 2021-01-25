@@ -97,7 +97,4 @@ func init() {
 	RegisterFieldType(
 		FieldtypeDef{Type: "datetime", Value: "fieldtype.Datetime"},
 		func() FieldTyper { return &Datetime{} })
-	RegisterFieldType(
-		FieldtypeDef{Type: "relationlist", Value: "fieldtype.RelationList", IsRelation: true},
-		func() FieldTyper { return &RelationList{} })
 }

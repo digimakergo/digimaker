@@ -16,12 +16,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+//RelationList is field type which is in relations in ContentCommon
 type RelationList []Relation
 
 //LoadFromInput load data from input before validation
 func (rl *RelationList) LoadFromInput(input interface{}, params fieldtype.FieldParameters) error {
 	s := fmt.Sprint(input)
-
+	if s == "" {
+		*rl = []Relation{}
+		return nil
+	}
 	arr := strings.Split(s, ";")
 	if len(arr) != 2 {
 		return errors.New("wrong format.")
@@ -78,6 +82,7 @@ func (rl *RelationList) LoadFromInput(input interface{}, params fieldtype.FieldP
 	}
 	*rl = relationlist
 	return nil
+	//todo: update data after updating from_content
 }
 
 func (rl RelationList) FieldValue() interface{} {
@@ -136,7 +141,7 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 	return nil
 }
 
-//Convert list into Map
+//Convert list into Map when scaning
 func (relations *ContentRelationList) groupRelations() {
 	//todo: validate keys and make sure it's pre defined
 	groupedList := map[string]*RelationList{}
@@ -175,18 +180,8 @@ func (relations *ContentRelationList) GetField(identifier string) *RelationList 
 	}
 }
 
-//LoadFromInput load data from input
-func (relations *ContentRelationList) LoadFromInput(identifier string, input interface{}) error {
-	if relationlist, ok := relations.Map[identifier]; ok {
-		err := relationlist.LoadFromInput(input, nil)
-		if err != nil {
-			return err
-		}
-		relations.Map[identifier] = relationlist
-	} else {
-		relationlist := RelationList{}
-		relationlist.LoadFromInput(input, nil) //todo: use definition instead of nil
-		relations.Map[identifier] = &relationlist
-	}
-	return nil
+func init() {
+	fieldtype.RegisterFieldType(
+		fieldtype.FieldtypeDef{Type: "relationlist", Value: "contenttype.RelationList", IsRelation: true},
+		func() fieldtype.FieldTyper { return &RelationList{} })
 }

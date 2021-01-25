@@ -99,7 +99,7 @@ func (c *ContentCommon) StoreRelations(thisContenttype string, transaction ...*s
 	//delete
 	err := dbHandler.Delete("dm_relation", db.Cond("to_content_id", c.CID).Cond("to_type", thisContenttype), transaction...)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	//insert
