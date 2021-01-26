@@ -156,3 +156,13 @@ func AssignToUser(roleID int, userID int) error {
 	}
 	return nil
 }
+
+//Remove a user from role assignment
+func RemoveAssignment(userID int, roleID int) error {
+	dbHandler := db.DBHanlder()
+	err := dbHandler.Delete("dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
+	if err != nil {
+		return err
+	}
+	return nil
+}

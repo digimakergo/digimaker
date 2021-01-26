@@ -8,11 +8,12 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
+	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/gorilla/mux"
 )
 
 //Get current user's updatefields on him/herself
@@ -73,7 +74,14 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 
 	list, count, _ := querier.List("user", db.Cond("c.id", userIDs), nil, nil, true)
 
-	data, _ := json.Marshal(map[string]interface{}{"list": list, "count": count})
+	resultList := []interface{}{}
+	for _, item := range list {
+		cmap, _ := contenttype.ContentToMap(item)
+		cmap["role_id"] = roleID
+		resultList = append(resultList, cmap)
+	}
+
+	data, _ := json.Marshal(map[string]interface{}{"list": resultList, "count": count})
 	w.Write(data)
 }
 
@@ -109,8 +117,34 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("1"))
 }
 
+//unassign user from role
+func UnassignUser(w http.ResponseWriter, r *http.Request) {
+	loginUserID := CheckUserID(r.Context(), w)
+	if loginUserID == 0 {
+		return
+	}
+
+	//todo: move all this to handler
+	if !permission.HasAccessTo(loginUserID, "access/unassign-user", permission.MatchData{}, r.Context()) {
+		HandleError(errors.New("No access"), w)
+		return
+	}
+
+	params := mux.Vars(r)
+	userID, _ := strconv.Atoi(params["user"])
+	roleID, _ := strconv.Atoi(params["role"])
+
+	err := permission.RemoveAssignment(userID, roleID)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	w.Write([]byte("1"))
+}
+
 func init() {
 	RegisterRoute("/access/update-fields/current-user", CurrentUserEditField)
 	RegisterRoute("/access/assigned-users", AssignedUsers)
 	RegisterRoute("/access/assign/{role}/{user}", AssignUser)
+	RegisterRoute("/access/unassign/{user}/{role}", UnassignUser)
 }
