@@ -142,6 +142,16 @@ func GetInternalSettingInt(setting string) int {
 	return internalViper.GetInt(setting)
 }
 
+//convert viper map interface{} configuration into array map.
+func ConvertToMap(config interface{}) map[string]interface{} {
+	configMap := config.(map[interface{}]interface{})
+	result := map[string]interface{}{}
+	for identifier, value := range configMap {
+		result[identifier.(string)] = value
+	}
+	return result
+}
+
 func init() {
 	v := viper.New()
 	v.SetConfigName("dm_internal")
