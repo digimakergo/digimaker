@@ -3,6 +3,7 @@ package sitekit
 import "github.com/digimakergo/digimaker/core/contenttype"
 
 var siteSettings = map[string]SiteSettings{}
+var siteIdentifiers = []string{}
 
 //a basic setting to run a site.
 type SiteSettings struct {
@@ -18,13 +19,10 @@ func GetSiteSettings(identifier string) SiteSettings {
 }
 
 func GetSites() []string {
-	var result []string
-	for key, _ := range siteSettings {
-		result = append(result, key)
-	}
-	return result
+	return siteIdentifiers
 }
 
 func SetSiteSettings(identifier string, settings SiteSettings) {
 	siteSettings[identifier] = settings
+	siteIdentifiers = append(siteIdentifiers, identifier)
 }
