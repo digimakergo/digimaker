@@ -155,7 +155,7 @@ func ConvertToMap(config interface{}) map[string]interface{} {
 func init() {
 	v := viper.New()
 	v.SetConfigName("dm_internal")
-	v.AddConfigPath(defaultSettings.DMPath + "/core")
+	v.AddConfigPath(os.Getenv("GOPATH") + "/src/github.com/digimakergo/digimaker/core") //todo: use better way for this.
 	err := v.ReadInConfig()
 	if err != nil {
 		log.Error("Fatal error in dm_internal.yaml config file: "+err.Error(), "system")
