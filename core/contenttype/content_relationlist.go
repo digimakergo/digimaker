@@ -148,7 +148,6 @@ func (relations *ContentRelationList) groupRelations() {
 	for _, relation := range relations.List {
 		if relation.Identifier != "" {
 			identifier := relation.Identifier
-			fmt.Println(identifier)
 			if _, ok := groupedList[identifier]; ok {
 				rl := groupedList[identifier]
 				*rl = append(*rl, relation)
