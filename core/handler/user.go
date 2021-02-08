@@ -29,9 +29,9 @@ func CanLogin(usernameEmail string, password string) (error, contenttype.Content
 		return errors.New("User not found"), nil
 	}
 
-	enabled := user.Value("enabled")
-	if enabled != nil {
-		if enabled.(*fieldtype.Checkbox).FieldValue().(int) != 1 {
+	disabled := user.Value("disabled")
+	if disabled != nil {
+		if disabled.(*fieldtype.Checkbox).FieldValue().(int) == 1 {
 			return errors.New("User is disabled"), nil
 		}
 	}

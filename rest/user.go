@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
@@ -64,6 +65,15 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	if user == nil {
 		HandleError(errors.New("User not found."), w)
 		return
+	}
+
+	disabled := user.Value("disabled")
+	if disabled != nil {
+		if disabled.(*fieldtype.Checkbox).FieldValue().(int) == 1 {
+			log.Info("User is disabled")
+			HandleError(errors.New("User not found."), w)
+			return
+		}
 	}
 
 	//create hash
