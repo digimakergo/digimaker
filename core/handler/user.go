@@ -28,6 +28,14 @@ func CanLogin(usernameEmail string, password string) (error, contenttype.Content
 		//todo: user error code.
 		return errors.New("User not found"), nil
 	}
+
+	enabled := user.Value("enabled")
+	if enabled != nil {
+		if enabled.(*fieldtype.Checkbox).FieldValue().(int) != 1 {
+			return errors.New("User is disabled"), nil
+		}
+	}
+
 	passwordField := user.Value("password").(*fieldtype.Password)
 	result := util.MatchPassword(password, passwordField.FieldValue().(string))
 	if result {
