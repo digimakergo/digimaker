@@ -30,9 +30,6 @@ func (i *Image) BeforeSaving() error {
 
 		//image path should be under temp
 		temp := util.GetConfig("general", "upload_tempfolder")
-		if !strings.HasPrefix(imagepath, temp) {
-			return errors.New("Illegal image path.")
-		}
 
 		if _, err := os.Stat(oldAbsPath); err != nil {
 			return errors.New("Can't find file on " + oldAbsPath)
@@ -59,9 +56,14 @@ func (i *Image) BeforeSaving() error {
 		newPath := newFolder + "/" + filename
 		newPathAbs := util.VarFolder() + "/" + newPath
 
-		err = os.Rename(oldAbsPath, newPathAbs)
+		underTemp := strings.HasPrefix(imagepath, temp)
+		if underTemp {
+			err = os.Rename(oldAbsPath, newPathAbs)
+		} else {
+			err = os.Link(oldAbsPath, newPathAbs)
+		}
 		if err != nil {
-			errorMessage := "Can not move image to target " + imagepath + ". error: " + err.Error()
+			errorMessage := "Can not copy/move image to target " + imagepath + ". error: " + err.Error()
 			return errors.New(errorMessage)
 		}
 
