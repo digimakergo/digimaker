@@ -84,7 +84,7 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	tempFolderAbs := util.VarFolder() + "/" + tempFolder
 
 	//Strip file name
-	reg := regexp.MustCompile("[^-A-Za-z0-9_]")
+	reg := regexp.MustCompile("[^-A-Za-z0-9_.]")
 	filename = reg.ReplaceAllString(filename, "_") //filter out all non word characters
 
 	//Write it to temp folder
