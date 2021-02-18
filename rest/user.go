@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/handler"
@@ -161,8 +163,52 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func EnableUser(w http.ResponseWriter, r *http.Request) {
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
+	params := mux.Vars(r)
+	ids := strings.Split(r.FormValue("id"), ",")
+	enableType := params["type"]
+
+	querier := handler.Querier()
+	users := []contenttype.ContentTyper{}
+	var err error
+	for _, id := range ids {
+		idInt, conErr := strconv.Atoi(id)
+		if conErr != nil {
+			HandleError(conErr, w)
+			return
+		}
+		user, _ := querier.FetchByContentID("user", idInt)
+		if user == nil {
+			err = errors.New("User not found: " + id)
+		} else {
+			users = append(users, user)
+		}
+	}
+
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	for _, user := range users {
+		err = handler.Enable(user, enableType == "1", userID, r.Context())
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
+	}
+
+	w.Write([]byte("1"))
+}
+
 func init() {
 	RegisterRoute("/user/current/{site}", CurrentUser)
 	RegisterRoute("/user/resetpassword/{email}", ResetPassword)
+	RegisterRoute("/user/enable/{type}", EnableUser)
 	RegisterRoute("/user/resetpassword-confirm/{hash}", ResetPasswordDone)
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"errors"
 	"strings"
 
@@ -43,4 +44,28 @@ func CanLogin(usernameEmail string, password string) (error, contenttype.Content
 	} else {
 		return errors.New("Password is wrong"), nil
 	}
+}
+
+//enable or disable user(enable = false means disable)
+func Enable(user contenttype.ContentTyper, enable bool, userId int, ctx context.Context) error {
+	disabledField := user.Value("disabled")
+	if disabledField == nil {
+		return errors.New("No disabled feature")
+	}
+	disabled := disabledField.(*fieldtype.Checkbox).FieldValue().(int)
+	if disabled == 1 && enable || disabled == 0 && !enable {
+		handler := ContentHandler{}
+		handler.Context = ctx
+		disableInt := 1
+		if enable {
+			disableInt = 0
+		}
+		result, _, err := handler.Update(user, map[string]interface{}{"disabled": disableInt}, userId)
+		if result {
+			return nil
+		} else if err != nil {
+			return err
+		}
+	}
+	return nil
 }
