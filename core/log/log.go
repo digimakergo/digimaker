@@ -4,12 +4,25 @@ package log
 
 import (
 	"context"
-	"io/ioutil"
 	"os"
 	"strconv"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
+
+type ContextInfo struct {
+	DebugID   string
+	IP        string
+	RequestID string
+	UserID    int
+	Timers    map[string]TimePoint
+}
+
+type TimePoint struct {
+	Start int64
+	End   int64
+}
 
 //system info
 func Info(message interface{}) {
@@ -18,10 +31,8 @@ func Info(message interface{}) {
 
 func Warning(message interface{}, label string, ctx ...context.Context) {
 	if len(ctx) == 1 {
-		logger := GetLogger(ctx[0])
-		//write warning to context log and global log
-		logger.Warning(message, label)
-		log.WithFields(logger.Data).Warning(message, label)
+		fields := GetContextFields(ctx[0])
+		log.WithFields(fields).Warning(message, label)
 	} else {
 		log.Warning(message)
 	}
@@ -30,10 +41,8 @@ func Warning(message interface{}, label string, ctx ...context.Context) {
 //Write error
 func Error(message interface{}, label string, ctx ...context.Context) {
 	if len(ctx) == 1 {
-		logger := GetLogger(ctx[0])
-		//white both to context log and global log
-		logger.Error(message)
-		log.WithFields(logger.Data).Error(message, label)
+		fields := GetContextFields(ctx[0])
+		log.WithFields(fields).Error(message, label)
 	} else {
 		log.Error(message, label)
 	}
@@ -45,48 +54,63 @@ func Fatal(message interface{}) {
 
 //Output debug info with on category.
 func Debug(message interface{}, category string, ctx ...context.Context) {
-		if len(ctx) == 1 {
-			logger := GetLogger(ctx[0])
-			logger.Debug(message, "["+category+"]")
-		} else {
-			log.Debug(message, "["+category+"]")
-		}
-}
-
-type loggerKey struct{}
-type timerKey struct{}
-
-//Init before request.
-func WithLogger(ctx context.Context, fields log.Fields) context.Context {
-	//create a new context logger
-	logger := log.New()
-	logger.SetOutput(ioutil.Discard)
-	ip := fields["ip"].(string)
-	if CanDebug(ip) {  //output debug when can debug
-		logger.AddHook(&ContextHook{})
+	if len(ctx) == 1 {
+		fields := GetContextFields(ctx[0])
+		log.WithFields(fields).Debug(message, "["+category+"]")
+	} else {
+		log.Debug(message, "["+category+"]")
 	}
-	logger.SetLevel(log.DebugLevel)
-	entry := logger.WithFields(fields)
-	result := context.WithValue(ctx, loggerKey{}, entry)
-	result = context.WithValue(result, timerKey{}, TimerCategory{})
-	return result
 }
 
-func GetLogger(ctx context.Context) *log.Entry {
-	value := ctx.Value(loggerKey{})
-	logger := value.(*log.Entry)
-	return logger
+func GetContextFields(ctx context.Context) log.Fields {
+	info := GetContextInfo(ctx)
+	fields := log.Fields{}
+	fields["ip"] = info.IP
+	fields["request_id"] = info.RequestID
+	fields["user_id"] = info.UserID
+	return fields
 }
 
-func GetTimer(ctx context.Context) TimerCategory {
-	timers := ctx.Value(timerKey{}).(TimerCategory)
-	return timers
+type logKey struct{}
+
+// init a context log
+func InitContext(ctx context.Context, info *ContextInfo) context.Context {
+	newContext := context.WithValue(ctx, logKey{}, info)
+	return newContext
 }
 
+func GetContextInfo(ctx context.Context) *ContextInfo {
+	return ctx.Value(logKey{}).(*ContextInfo)
+}
+
+//start timing
+func StartTiming(ctx context.Context, category string) {
+	info := GetContextInfo(ctx)
+	now := time.Now().UnixNano()
+	timer := TimePoint{Start: now}
+	if info.Timers == nil {
+		info.Timers = map[string]TimePoint{}
+	}
+
+	info.Timers[category] = timer
+}
+
+//End timing on a category
+func EndTiming(ctx context.Context, category string) {
+	info := GetContextInfo(ctx)
+
+	now := time.Now().UnixNano()
+	timer := info.Timers[category]
+	timer.End = now
+
+	info.Timers[category] = timer
+}
+
+//Log all timing, usually done in the end of request
 func LogTiming(ctx context.Context) {
-	timer := GetTimer(ctx)
-	for category, _ := range timer {
-		duration, _ := GetDuration(ctx, category)
+	info := GetContextInfo(ctx)
+	for category, timer := range info.Timers {
+		duration := int((timer.End - timer.Start) / 1000000)
 		Debug(strconv.Itoa(duration)+"ms", category, ctx)
 	}
 }
