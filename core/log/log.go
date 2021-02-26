@@ -5,6 +5,7 @@ package log
 import (
 	"context"
 	"os"
+	"runtime"
 	"strconv"
 	"time"
 
@@ -15,6 +16,7 @@ type ContextInfo struct {
 	DebugID   string
 	IP        string
 	RequestID string
+	URI       string
 	UserID    int
 	Timers    map[string]TimePoint
 }
@@ -40,11 +42,15 @@ func Warning(message interface{}, label string, ctx ...context.Context) {
 
 //Write error
 func Error(message interface{}, label string, ctx ...context.Context) {
+	caller := getCallerInfo(runtime.Caller(1))
 	if len(ctx) == 1 {
 		fields := GetContextFields(ctx[0])
+		fields["caller"] = caller
 		log.WithFields(fields).Error(message, label)
 	} else {
-		log.Error(message, label)
+		fields := log.Fields{}
+		fields["caller"] = caller
+		log.WithFields(fields).Error(message, label)
 	}
 }
 
@@ -54,12 +60,23 @@ func Fatal(message interface{}) {
 
 //Output debug info with on category.
 func Debug(message interface{}, category string, ctx ...context.Context) {
+	caller := getCallerInfo(runtime.Caller(1))
 	if len(ctx) == 1 {
 		fields := GetContextFields(ctx[0])
-		log.WithFields(fields).Debug(message, "["+category+"]")
+		fields["caller"] = caller
+		fields["category"] = category
+		log.WithFields(fields).Debug(message)
 	} else {
-		log.Debug(message, "["+category+"]")
+		fields := getFields(category)
+		fields["caller"] = caller
+		log.WithFields(fields).Debug(message)
 	}
+}
+
+func getFields(category string) log.Fields {
+	fields := log.Fields{}
+	fields["category"] = category
+	return fields
 }
 
 func GetContextFields(ctx context.Context) log.Fields {
@@ -68,6 +85,8 @@ func GetContextFields(ctx context.Context) log.Fields {
 	fields["ip"] = info.IP
 	fields["request_id"] = info.RequestID
 	fields["user_id"] = info.UserID
+	fields["debug_id"] = info.DebugID
+	fields["uri"] = info.URI
 	return fields
 }
 
@@ -111,7 +130,20 @@ func LogTiming(ctx context.Context) {
 	info := GetContextInfo(ctx)
 	for category, timer := range info.Timers {
 		duration := int((timer.End - timer.Start) / 1000000)
-		Debug(strconv.Itoa(duration)+"ms", category, ctx)
+		fields := GetContextFields(ctx)
+		fields["type"] = "timing"
+		fields["category"] = category
+		log.WithFields(fields).Debug(strconv.Itoa(duration) + "ms")
+	}
+}
+
+func getCallerInfo(pc uintptr, file string, line int, ok bool) string {
+	if ok {
+		name := runtime.FuncForPC(pc).Name()
+		result := name + ": " + strconv.Itoa(line)
+		return result
+	} else {
+		return ""
 	}
 }
 
