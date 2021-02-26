@@ -4,12 +4,10 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 	"github.com/digimakergo/digimaker/core/log"
-	"github.com/digimakergo/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/log/httplog"
+	"github.com/gorilla/mux"
 )
 
 type key int
@@ -39,7 +37,7 @@ func InitRequest(next http.Handler) http.Handler {
 		ctx := r.Context()
 
 		//set user_id to context
-		userIDStr := ""
+		userID := 0
 		if r.Header.Get("Authorization") != "" {
 			err, claims := VerifyToken(r)
 
@@ -53,23 +51,16 @@ func InitRequest(next http.Handler) http.Handler {
 				return
 			}
 
-			userIDStr = strconv.Itoa(claims.UserID)
+			userID = claims.UserID
 			ctx = context.WithValue(ctx, CtxKeyUserID, claims.UserID)
 		}
 
-		//start debug
-		requestID := util.GenerateGUID()
-		ctx = log.WithLogger(ctx, logrus.Fields{"ip": util.GetIP(r), "user": userIDStr, "request_id": requestID})
-		log.StartTiming(ctx, "request")
+		//start http log
+		r = httplog.InitLog(r, ctx, userID)
 
-		w.Header().Add("DM-Request-Id", requestID)
-		w.Header().Set("Access-Control-Allow-Origin", "*") //todo: make host configurable
-
-		r = r.WithContext(ctx)
 		next.ServeHTTP(w, r)
 
-		//close debug
-		log.TickTiming(ctx, "request")
-		log.LogTiming(ctx)
+		//write http log
+		httplog.LogRequest(w, r)
 	})
 }
