@@ -8,9 +8,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-//filters that send log to log server
-var filters []map[string]string
-
 type RemoteHook struct {
 }
 
@@ -19,6 +16,7 @@ func (hook *RemoteHook) Fire(entry *log.Entry) error {
 	if err != nil {
 		return err
 	}
+
 	//todo: based on settings(eg. debug by ip/user), output context log information.
 	f, err := os.OpenFile("request-debug.log",
 		os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

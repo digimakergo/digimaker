@@ -27,7 +27,7 @@ func InitLog(r *http.Request, ctx context.Context, userID int) *http.Request {
 		IP:        util.GetIP(r),
 		UserID:    userID,
 		URI:       r.RequestURI,
-		DebugID:   debugID, //todo: get debug ip
+		DebugID:   debugID,
 	}
 
 	ctx = log.InitContext(ctx, &info)
