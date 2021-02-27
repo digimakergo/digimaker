@@ -38,7 +38,9 @@ func InitLog(r *http.Request, ctx context.Context, userID int) *http.Request {
 }
 
 func LogRequest(w http.ResponseWriter, r *http.Request) {
-	log.EndTiming(r.Context(), "total")
-	log.LogTiming(r.Context())
-	// w.Header().Add("DM-Request-Id", requestID)
+	ctx := r.Context()
+	log.EndTiming(ctx, "total")
+	log.LogTiming(ctx)
+	requestID := log.GetContextInfo(ctx).RequestID
+	w.Header().Add("DM-Request-Id", requestID)
 }

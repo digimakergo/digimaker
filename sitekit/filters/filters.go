@@ -3,6 +3,7 @@ package pongo2
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -16,7 +17,7 @@ import (
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
 	"golang.org/x/text/message"
 
-	"gopkg.in/flosch/pongo2.v2"
+	"github.com/flosch/pongo2"
 )
 
 func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
@@ -110,7 +111,7 @@ func dmFormatNumber(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pong
 func dmConfig(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	filename := in.String()
 	if param.IsNil() {
-		err := pongo2.Error{ErrorMsg: "Need section param."}
+		err := pongo2.Error{OrigError: errors.New("Need section param.")}
 		return pongo2.AsValue(""), &err
 	}
 	section := param.String()
@@ -125,10 +126,12 @@ func dmValue(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Erro
 		input := in.Interface().([]interface{})
 		key := param.Integer()
 		result = input[key]
-	default:
+	case map[string]interface{}:
 		input := in.Interface().(map[string]interface{})
 		key := param.String()
 		result = input[key]
+	default:
+		return pongo2.AsValue(nil), nil
 	}
 
 	return pongo2.AsValue(result), nil

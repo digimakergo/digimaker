@@ -61,10 +61,12 @@ func Error(message interface{}, label string, ctx ...context.Context) {
 	if len(ctx) == 1 {
 		fields := GetContextFields(ctx[0])
 		fields["caller"] = caller
+		fields["category"] = label
 		logrus.WithFields(fields).Error(message, label)
 	} else {
 		fields := logrus.Fields{}
 		fields["caller"] = caller
+		fields["category"] = label
 		logrus.WithFields(fields).Error(message, label)
 	}
 }

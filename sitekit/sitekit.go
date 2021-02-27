@@ -1,7 +1,6 @@
 package sitekit
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -9,13 +8,14 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
 
 	"github.com/pkg/errors"
 
+	"github.com/flosch/pongo2"
 	"github.com/gorilla/mux"
-	"gopkg.in/flosch/pongo2.v2"
 )
 
 func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
@@ -72,7 +72,12 @@ func HandleContent(r *mux.Router) error {
 			if path, ok := vars["path"]; ok {
 				prefix = path
 			}
-			OutputContent(w, id, site, prefix)
+			err := OutputContent(w, id, site, prefix)
+			if err != nil {
+				log.Error(err.Error(), "template", r.Context())
+				requestID := log.GetContextInfo(r.Context()).RequestID
+				http.Error(w, "Error occurred. request id: "+requestID, http.StatusInternalServerError)
+			}
 		}
 
 		//site route and get sub route
@@ -101,31 +106,31 @@ func HandleContent(r *mux.Router) error {
 }
 
 //Output content using conent template
-func OutputContent(w io.Writer, id int, siteIdentifier string, prefix string) {
+func OutputContent(w io.Writer, id int, siteIdentifier string, prefix string) error {
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
 	//todo: handle error, template compiling much better.
-	if err != nil {
-		fmt.Println(err)
+	if content == nil {
+		return errors.New("Content not found")
 	}
 
 	siteSettings := GetSiteSettings(siteIdentifier)
 	if !util.ContainsInt(content.GetLocation().Path(), siteSettings.RootContent.GetLocation().ID) {
-		w.Write([]byte("Not valid content"))
-		return
+		return errors.New("Content not availebl under this site")
 	}
 
 	data := map[string]interface{}{"content": content,
 		"root":     siteSettings.RootContent,
 		"viewmode": "full",
 		"prefix":   prefix}
-	Output(w, siteIdentifier, "content/view", data)
+	err = Output(w, siteIdentifier, "content/view", data)
+	return err
 }
 
 //Output using template
-func Output(w io.Writer, siteIdentifier string, templatePath string, variables map[string]interface{}, matchedData ...map[string]interface{}) {
+func Output(w io.Writer, siteIdentifier string, templatePath string, variables map[string]interface{}, matchedData ...map[string]interface{}) error {
 	// siteSettings := GetSiteSettings(siteIdentifier)
-	pongo2.DefaultSet.Debug = true
+	// pongo2.DefaultSet.Debug = true
 	// pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
 	gopath := os.Getenv("GOPATH")
 	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/github.com/digimakergo/digimaker/sitekit/templates/main.html"))
@@ -140,6 +145,7 @@ func Output(w io.Writer, siteIdentifier string, templatePath string, variables m
 	}
 	err := tpl.ExecuteWriter(pongo2.Context(variables), w)
 	if err != nil {
-		w.Write([]byte(err.Error()))
+		return errors.New(templatePath + ": " + err.Error())
 	}
+	return nil
 }
