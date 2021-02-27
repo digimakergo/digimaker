@@ -4,12 +4,15 @@ package log
 
 import (
 	"context"
+	"io/ioutil"
+	"log"
 	"os"
 	"runtime"
 	"strconv"
 	"time"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus/hooks/writer"
 )
 
 type ContextInfo struct {
@@ -28,15 +31,15 @@ type TimePoint struct {
 
 //system info
 func Info(message interface{}) {
-	log.Info(message)
+	logrus.Info(message)
 }
 
 func Warning(message interface{}, label string, ctx ...context.Context) {
 	if len(ctx) == 1 {
 		fields := GetContextFields(ctx[0])
-		log.WithFields(fields).Warning(message, label)
+		logrus.WithFields(fields).Warning(message, label)
 	} else {
-		log.Warning(message)
+		logrus.Warning(message)
 	}
 }
 
@@ -46,16 +49,16 @@ func Error(message interface{}, label string, ctx ...context.Context) {
 	if len(ctx) == 1 {
 		fields := GetContextFields(ctx[0])
 		fields["caller"] = caller
-		log.WithFields(fields).Error(message, label)
+		logrus.WithFields(fields).Error(message, label)
 	} else {
-		fields := log.Fields{}
+		fields := logrus.Fields{}
 		fields["caller"] = caller
-		log.WithFields(fields).Error(message, label)
+		logrus.WithFields(fields).Error(message, label)
 	}
 }
 
 func Fatal(message interface{}) {
-	log.Fatal(message)
+	logrus.Fatal(message)
 }
 
 //Output debug info with on category.
@@ -65,23 +68,25 @@ func Debug(message interface{}, category string, ctx ...context.Context) {
 		fields := GetContextFields(ctx[0])
 		fields["caller"] = caller
 		fields["category"] = category
-		log.WithFields(fields).Debug(message)
+		fields["type"] = "message"
+		logrus.WithFields(fields).Debug(message)
 	} else {
 		fields := getFields(category)
 		fields["caller"] = caller
-		log.WithFields(fields).Debug(message)
+		fields["type"] = "message"
+		logrus.WithFields(fields).Debug(message)
 	}
 }
 
-func getFields(category string) log.Fields {
-	fields := log.Fields{}
+func getFields(category string) logrus.Fields {
+	fields := logrus.Fields{}
 	fields["category"] = category
 	return fields
 }
 
-func GetContextFields(ctx context.Context) log.Fields {
+func GetContextFields(ctx context.Context) logrus.Fields {
 	info := GetContextInfo(ctx)
-	fields := log.Fields{}
+	fields := logrus.Fields{}
 	fields["ip"] = info.IP
 	fields["request_id"] = info.RequestID
 	fields["user_id"] = info.UserID
@@ -133,7 +138,7 @@ func LogTiming(ctx context.Context) {
 		fields := GetContextFields(ctx)
 		fields["type"] = "timing"
 		fields["category"] = category
-		log.WithFields(fields).Debug(strconv.Itoa(duration) + "ms")
+		logrus.WithFields(fields).Debug(strconv.Itoa(duration) + "ms")
 	}
 }
 
@@ -148,10 +153,37 @@ func getCallerInfo(pc uintptr, file string, line int, ok bool) string {
 }
 
 func init() {
-	//todo: log it to file based on parameters
-	log.SetOutput(os.Stdout)
-	log.SetFormatter(&log.TextFormatter{
-		DisableColors:   false,
-		FullTimestamp:   true,
-		TimestampFormat: "2006-01-02 15:04:05.0000"})
+	environment := "prod" //todo: read from env/flat/config
+
+	logrus.SetLevel(logrus.DebugLevel)
+
+	if environment == "prod" {
+		logrus.SetOutput(ioutil.Discard)
+		//log server output
+		logrus.AddHook(&RemoteHook{})
+
+		//default output
+		//todo: create /var/log/digimaker/digimaker.log automatically. need to think about permission
+		file, err := os.OpenFile("digimaker.log",
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY,
+			0644)
+		if err != nil {
+			log.Fatal("Log folder doesn't exist")
+		}
+
+		logrus.AddHook(&writer.Hook{
+			Writer: file,
+			LogLevels: []logrus.Level{
+				logrus.InfoLevel,
+				logrus.WarnLevel,
+				logrus.ErrorLevel,
+			},
+		})
+	} else {
+		logrus.SetFormatter(&logrus.TextFormatter{
+			DisableColors:   false,
+			FullTimestamp:   true,
+			TimestampFormat: "2006-01-02 15:04:05.0000"})
+	}
+
 }
