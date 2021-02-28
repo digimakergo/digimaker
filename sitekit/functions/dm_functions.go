@@ -6,7 +6,7 @@ import (
 	"github.com/digimakergo/digimaker/sitekit"
 )
 
-//default functions
+//default dm functions
 type DMFunctions struct {
 	context sitekit.TemplateContext
 }
