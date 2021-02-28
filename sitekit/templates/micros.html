@@ -1,20 +1,16 @@
 {% macro output_content( content, viewmode) export%}
-    {%with viewmode|add:","|add:site as params%}
     {%with dm.tpl_content(content, viewmode) as path%}
         {% if path=="" %}
             {OVERRIDE NOT FOUND, PLEASE OVERRIDE. {{content.ID}},{{content.Name}},{{viewmode}}}
         {%else%}
-            {% with path|dm_tpl_path as absolute_path %}
-                <!-- {{path}} -->
-                {%include absolute_path %}
-            {%endwith%}
+                {% if debug %}<!-- {{path}} -->{%endif%}
+                {%include path|dm_abs_path %}
         {% endif %}
-    {%endwith%}
     {%endwith%}
 {% endmacro %}
 
 {% macro output_field( field ) export%}
-    {%with "fieldtype/"|add:field.Type()|add:".html"|dm_tpl_path:"github.com/digimakergo/digimaker/sitekit" as path%}
+    {%with "fieldtype/"|add:field.Type()|add:".html"|dm_abs_path:"github.com/digimakergo/digimaker/sitekit" as path%}
         {%include path with field=field%}
     {%endwith%}
 {% endmacro %}

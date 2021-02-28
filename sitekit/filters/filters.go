@@ -65,12 +65,11 @@ func dmTplMatched(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2
 	return pongo2.AsValue(path), nil
 }
 
-func dmTplPath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+func dmAbsolutePath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	path := ""
 	if !param.IsNil() {
 		//get path under gopath
 		packageName := param.String()
-
 		path = os.Getenv("GOPATH") + "/src/" + packageName + "/templates/" + in.String()
 	} else {
 		//get path under current package
@@ -170,7 +169,7 @@ func init() {
 	pongo2.RegisterFilter("dm_fetch", dmFetch)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_tpl_matched", dmTplMatched)
-	pongo2.RegisterFilter("dm_tpl_path", dmTplPath)
+	pongo2.RegisterFilter("dm_abs_path", dmAbsolutePath)
 	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
 	pongo2.RegisterFilter("dm_format_number", dmFormatNumber)
 	pongo2.RegisterFilter("dm_wash_number", dmWashNumber)

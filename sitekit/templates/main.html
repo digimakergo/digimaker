@@ -3,21 +3,23 @@
 {% comment %}
 Available varilables:
 
-For content(content/view):
+For content:
 - site
 - content
 - root
 - viewmode
 - prefix
+- debug
 
-For non content:
+For non content(tbd):
 - site
 - parameter given in handler/controller
 {% endcomment %}
 
-
-{%if template == "content/view" %}
-    {{output_content( content, "full" )}}
+{%if error != nil %}
+  {{error}} {%comment%} todo: use include {%endcomment%}
 {%else%}
-    {{output( template, match_data )}}
+  {%if content != nil %}
+    {{output_content( content, viewmode )}}
+   {% endif %}
 {%endif%}

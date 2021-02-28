@@ -77,7 +77,7 @@ func HandleContent(r *mux.Router) error {
 			err := OutputContent(w, id, site, prefix, ctx)
 			if err != nil {
 				log.Error(err.Error(), "template", r.Context())
-				requestID := log.GetContextInfo(r.Context()).RequestID
+				requestID := log.GetContextInfo(ctx).RequestID
 				http.Error(w, "Error occurred. request id: "+requestID, http.StatusInternalServerError)
 			}
 		}
@@ -109,23 +109,26 @@ func HandleContent(r *mux.Router) error {
 
 //Output content using conent template
 func OutputContent(w io.Writer, id int, siteIdentifier string, prefix string, ctx context.Context) error {
+	siteSettings := GetSiteSettings(siteIdentifier)
+	data := map[string]interface{}{
+		"root":     siteSettings.RootContent,
+		"viewmode": "full",
+		"prefix":   prefix}
+
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
 	//todo: handle error, template compiling much better.
 	if content == nil {
-		return errors.New("Content not found")
+		data["error"] = "Content not found" //todo: use error code so can we customize it in template
+	} else {
+		if !util.ContainsInt(content.GetLocation().Path(), siteSettings.RootContent.GetLocation().ID) {
+			data["error"] = "Content not found in this site"
+		}
 	}
+	data["content"] = content
 
-	siteSettings := GetSiteSettings(siteIdentifier)
-	if !util.ContainsInt(content.GetLocation().Path(), siteSettings.RootContent.GetLocation().ID) {
-		return errors.New("Content not availebl under this site")
-	}
-
-	data := map[string]interface{}{"content": content,
-		"root":     siteSettings.RootContent,
-		"viewmode": "full",
-		"prefix":   prefix}
-	err = Output(w, siteIdentifier, "content/view", data, nil, ctx)
+	//todo: use anoymouse user id and check permission
+	err = Output(w, siteIdentifier, data, ctx)
 	return err
 }
 
@@ -135,16 +138,18 @@ type TemplateContext struct {
 }
 
 //Output using template
-func Output(w io.Writer, siteIdentifier string, templatePath string, variables map[string]interface{}, matchData map[string]interface{}, ctx context.Context) error {
+func Output(w io.Writer, siteIdentifier string, variables map[string]interface{}, ctx context.Context) error {
 	// siteSettings := GetSiteSettings(siteIdentifier)
-	// pongo2.DefaultSet.Debug = true
+
 	// pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
+	if log.GetContextInfo(ctx).CanDebug() {
+		variables["debug"] = true
+	}
 	gopath := os.Getenv("GOPATH")
 	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/github.com/digimakergo/digimaker/sitekit/templates/main.html"))
 
 	variables["site"] = siteIdentifier
 
-	variables["template"] = templatePath
 	tCtx := TemplateContext{RequestContext: ctx, Site: siteIdentifier}
 
 	for name, newFunctions := range allFunctions {
@@ -154,11 +159,6 @@ func Output(w io.Writer, siteIdentifier string, templatePath string, variables m
 		variables[name] = functionMap
 	}
 
-	variables["match_data"] = matchData
-
 	err := tpl.ExecuteWriter(pongo2.Context(variables), w)
-	if err != nil {
-		return errors.New(templatePath + ": " + err.Error())
-	}
-	return nil
+	return err
 }
