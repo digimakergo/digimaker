@@ -1,9 +1,10 @@
 package sitekit
 
 import (
+	"fmt"
+
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/util"
-	"fmt"
 )
 
 const templateViewContent = "content_view"
@@ -31,7 +32,6 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 	for _, folder := range templateFolders {
 		if path != "" {
 			pathWithTemplateFolder := folder + "/" + path
-			fmt.Println(templateFolders)
 			if util.FileExists(templateRootFolder + "/" + pathWithTemplateFolder) {
 				result = pathWithTemplateFolder
 				break
