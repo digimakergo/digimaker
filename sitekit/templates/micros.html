@@ -1,6 +1,6 @@
 {% macro output_content( content, viewmode) export%}
     {%with viewmode|add:","|add:site as params%}
-    {%with content|dm_tpl_matched:params as path%}
+    {%with dm.tpl_content(content, viewmode) as path%}
         {% if path=="" %}
             {OVERRIDE NOT FOUND, PLEASE OVERRIDE. {{content.ID}},{{content.Name}},{{viewmode}}}
         {%else%}
@@ -20,7 +20,7 @@
 {% endmacro %}
 
 {#include path from override #}
-{% macro output( path, matched_data ) export%}
+{% macro output( path, match_data ) export%}
     {#todo: match it#}
     {%with "../default/"|add:path|add:".html" as template%}
         {%include template%}

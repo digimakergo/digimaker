@@ -1,6 +1,7 @@
 package sitekit
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"os"
@@ -72,7 +73,8 @@ func HandleContent(r *mux.Router) error {
 			if path, ok := vars["path"]; ok {
 				prefix = path
 			}
-			err := OutputContent(w, id, site, prefix)
+			ctx := r.Context()
+			err := OutputContent(w, id, site, prefix, ctx)
 			if err != nil {
 				log.Error(err.Error(), "template", r.Context())
 				requestID := log.GetContextInfo(r.Context()).RequestID
@@ -106,7 +108,7 @@ func HandleContent(r *mux.Router) error {
 }
 
 //Output content using conent template
-func OutputContent(w io.Writer, id int, siteIdentifier string, prefix string) error {
+func OutputContent(w io.Writer, id int, siteIdentifier string, prefix string, ctx context.Context) error {
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
 	//todo: handle error, template compiling much better.
@@ -123,12 +125,17 @@ func OutputContent(w io.Writer, id int, siteIdentifier string, prefix string) er
 		"root":     siteSettings.RootContent,
 		"viewmode": "full",
 		"prefix":   prefix}
-	err = Output(w, siteIdentifier, "content/view", data)
+	err = Output(w, siteIdentifier, "content/view", data, nil, ctx)
 	return err
 }
 
+type TemplateContext struct {
+	RequestContext context.Context
+	Site           string
+}
+
 //Output using template
-func Output(w io.Writer, siteIdentifier string, templatePath string, variables map[string]interface{}, matchedData ...map[string]interface{}) error {
+func Output(w io.Writer, siteIdentifier string, templatePath string, variables map[string]interface{}, matchData map[string]interface{}, ctx context.Context) error {
 	// siteSettings := GetSiteSettings(siteIdentifier)
 	// pongo2.DefaultSet.Debug = true
 	// pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
@@ -138,11 +145,17 @@ func Output(w io.Writer, siteIdentifier string, templatePath string, variables m
 	variables["site"] = siteIdentifier
 
 	variables["template"] = templatePath
-	if len(matchedData) == 0 {
-		variables["matched_data"] = nil
-	} else {
-		variables["matched_data"] = matchedData[0]
+	tCtx := TemplateContext{RequestContext: ctx, Site: siteIdentifier}
+
+	for name, newFunctions := range allFunctions {
+		functions := newFunctions()
+		functions.SetContext(tCtx)
+		functionMap := functions.GetMap()
+		variables[name] = functionMap
 	}
+
+	variables["match_data"] = matchData
+
 	err := tpl.ExecuteWriter(pongo2.Context(variables), w)
 	if err != nil {
 		return errors.New(templatePath + ": " + err.Error())
