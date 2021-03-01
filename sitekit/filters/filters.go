@@ -33,19 +33,21 @@ func dmWashNumber(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2
 	return pongo2.AsValue(result), nil
 }
 
-func dmFetch(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	querier := handler.Querier()
-	id := in.Interface().(int)
-	content, _ := querier.FetchByID(id)
-	return pongo2.AsValue(content), nil
-}
-
 func dmParent(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	querier := handler.Querier()
 	content := in.Interface().(contenttype.ContentTyper)
 	parentID := content.Value("parent_id").(int)
 	parent, _ := querier.FetchByID(parentID)
 	return pongo2.AsValue(parent), nil
+}
+
+func dmShow(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
+	resultByte, err := json.Marshal(in.Interface())
+	result := string(resultByte)
+	if err != nil {
+		result = "error: not marshalable"
+	}
+	return pongo2.AsValue(result), nil
 }
 
 func dmNiceurl(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
@@ -155,7 +157,7 @@ func dmSplit(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Erro
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_parent", dmParent)
-	pongo2.RegisterFilter("dm_fetch", dmFetch)
+	pongo2.RegisterFilter("dm_show", dmShow)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_abs_path", dmAbsolutePath)
 	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
