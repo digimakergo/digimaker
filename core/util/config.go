@@ -12,34 +12,47 @@ import (
 	"github.com/spf13/viper"
 )
 
-var defaultSettings = struct {
-	ConfigFile   string
-	ConfigFolder string
-	AppPath      string
-	DMPath       string
-}{"dm", "", "", os.Getenv("GOPATH") + "/src/github.com/digimakergo/digimaker"}
+var appFolder = ""
+var configFile = "dm"
+var configFolder = "configs"
 
-func InitConfig(homePath string) {
-	defaultSettings.AppPath = homePath
-	defaultSettings.ConfigFolder = defaultSettings.AppPath + "/configs"
+func AppFolder() string {
+	if appFolder == "" {
+		//Init App config
+		appPath := os.Getenv("DMApp")
+		if appPath == "" {
+			log.Fatal("Please set DMApp environment variable to run the application.")
+		}
+
+		if _, err := os.Stat(appPath); os.IsNotExist(err) {
+			log.Fatal("Folder " + appPath + " doesn't exist.")
+		}
+
+		abs, _ := filepath.Abs(appPath)
+		log.Info("Set configurations under " + abs)
+
+		appFolder = appPath
+	}
+	return appFolder
 }
 
 func HomePath() string {
-	return defaultSettings.AppPath
+	return AppFolder()
 }
 
 func AbsHomePath() string {
-	abs, _ := filepath.Abs(defaultSettings.AppPath)
+	path := HomePath()
+	abs, _ := filepath.Abs(path)
 	return abs
 }
 
 func ConfigPath() string {
-	return defaultSettings.ConfigFolder
+	return HomePath() + "/" + configFolder
 }
 
 //DMPath returns folder path of the framework. It can be used to load system file(eg. internal setting file)
 func DMPath() string {
-	return defaultSettings.DMPath
+	return os.Getenv("GOPATH") + "/src/github.com/digimakergo/digimaker"
 }
 
 func VarFolder() string {
@@ -83,7 +96,7 @@ func GetConfigSection(section string, config ...string) map[string]string {
 func GetConfigSectionI(section string, config ...string) map[string]interface{} {
 	var filename string
 	if config == nil {
-		filename = defaultSettings.ConfigFile
+		filename = configFile
 	} else {
 		filename = config[0]
 	}
@@ -111,7 +124,7 @@ func GetConfigSectionAll(section string, config string) interface{} {
 
 func GetAll(config string) map[string]interface{} {
 	viper.SetConfigName(config)
-	viper.AddConfigPath(defaultSettings.ConfigFolder)
+	viper.AddConfigPath(ConfigPath())
 	//todo: support override in section&setting level with order.
 	//todo: did viper cached all? need to verify.
 	err := viper.ReadInConfig()
@@ -153,26 +166,10 @@ func ConvertToMap(config interface{}) map[string]interface{} {
 }
 
 func init() {
-	//Init App config
-	appPath := os.Getenv("DMApp")
-	if appPath == "" {
-		log.Fatal("Please set DMApp environment variable to run the application.")
-	}
-
-	if _, err := os.Stat(appPath); os.IsNotExist(err) {
-		log.Fatal("Folder " + appPath + " doesn't exist.")
-	}
-
-	abs, _ := filepath.Abs(appPath)
-
-	log.Info("Setting configurations from " + abs)
-
-	InitConfig(appPath)
-
 	//Init internal
 	v := viper.New()
 	v.SetConfigName("dm_internal")
-	v.AddConfigPath(defaultSettings.DMPath + "/core") //todo: use better way for this.
+	v.AddConfigPath(DMPath() + "/core") //todo: use better way for this.
 	err := v.ReadInConfig()
 	if err != nil {
 		log.Error("Fatal error in dm_internal.yaml config file: "+err.Error(), "system")
