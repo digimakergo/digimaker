@@ -15,21 +15,21 @@ import (
 var defaultSettings = struct {
 	ConfigFile   string
 	ConfigFolder string
-	HomePath     string
+	AppPath      string
 	DMPath       string
 }{"dm", "", "", os.Getenv("GOPATH") + "/src/github.com/digimakergo/digimaker"}
 
-func InitHomePath(homePath string) {
-	defaultSettings.HomePath = homePath
-	defaultSettings.ConfigFolder = defaultSettings.HomePath + "/configs"
+func InitConfig(homePath string) {
+	defaultSettings.AppPath = homePath
+	defaultSettings.ConfigFolder = defaultSettings.AppPath + "/configs"
 }
 
 func HomePath() string {
-	return defaultSettings.HomePath
+	return defaultSettings.AppPath
 }
 
 func AbsHomePath() string {
-	abs, _ := filepath.Abs(defaultSettings.HomePath)
+	abs, _ := filepath.Abs(defaultSettings.AppPath)
 	return abs
 }
 
@@ -153,9 +153,26 @@ func ConvertToMap(config interface{}) map[string]interface{} {
 }
 
 func init() {
+	//Init App config
+	appPath := os.Getenv("DMApp")
+	if appPath == "" {
+		log.Fatal("Please set DMApp environment variable to run the application.")
+	}
+
+	if _, err := os.Stat(appPath); os.IsNotExist(err) {
+		log.Fatal("Folder " + appPath + " doesn't exist.")
+	}
+
+	abs, _ := filepath.Abs(appPath)
+
+	log.Info("Setting configurations from " + abs)
+
+	InitConfig(appPath)
+
+	//Init internal
 	v := viper.New()
 	v.SetConfigName("dm_internal")
-	v.AddConfigPath(os.Getenv("GOPATH") + "/src/github.com/digimakergo/digimaker/core") //todo: use better way for this.
+	v.AddConfigPath(defaultSettings.DMPath + "/core") //todo: use better way for this.
 	err := v.ReadInConfig()
 	if err != nil {
 		log.Error("Fatal error in dm_internal.yaml config file: "+err.Error(), "system")

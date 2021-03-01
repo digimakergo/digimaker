@@ -195,6 +195,7 @@ func init() {
 				logrus.InfoLevel,
 				logrus.WarnLevel,
 				logrus.ErrorLevel,
+				logrus.FatalLevel,
 			},
 		})
 	} else {

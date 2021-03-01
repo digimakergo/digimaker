@@ -12,10 +12,9 @@ import (
 )
 
 const templateViewContent = "content_view"
-const templateFolder = "templates"
 
 func TemplateFolder() string {
-	path := util.AbsHomePath() + "/" + templateFolder
+	path := util.AbsHomePath() + "/" + util.GetConfig("general", "template_folder")
 	return path
 }
 
