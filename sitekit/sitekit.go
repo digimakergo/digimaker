@@ -174,7 +174,7 @@ func Output(w io.Writer, siteIdentifier string, variables map[string]interface{}
 		variables["debug"] = true
 	}
 	gopath := os.Getenv("GOPATH")
-	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/github.com/digimakergo/digimaker/sitekit/templates/main.html"))
+	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/github.com/digimakergo/digimaker/sitekit/templates/main.html")) //todo: use configuration
 
 	variables["site"] = siteIdentifier
 

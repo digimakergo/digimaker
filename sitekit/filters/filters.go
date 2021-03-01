@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
@@ -13,6 +12,7 @@ import (
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/digimakergo/digimaker/sitekit"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
 	"golang.org/x/text/message"
 
@@ -57,16 +57,8 @@ func dmNiceurl(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Er
 }
 
 func dmAbsolutePath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	path := ""
-	if !param.IsNil() {
-		//get path under gopath
-		packageName := param.String()
-		path = os.Getenv("GOPATH") + "/src/" + packageName + "/templates/" + in.String()
-	} else {
-		//get path under current package
-		path = util.AbsHomePath() + "/templates/" + in.String()
-	}
-
+	//get path under current package
+	path := sitekit.TemplateFolder() + "/" + in.String()
 	return pongo2.AsValue(path), nil
 }
 

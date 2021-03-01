@@ -12,10 +12,16 @@ import (
 )
 
 const templateViewContent = "content_view"
+const templateFolder = "templates"
+
+func TemplateFolder() string {
+	path := util.AbsHomePath() + "/" + templateFolder
+	return path
+}
 
 //Get content view template.
 func GetContentTemplate(content contenttype.ContentTyper, viewmode string, settings SiteSettings, ctx context.Context) string {
-	templateRootFolder := util.ConfigPath() + "/../templates"
+	templateFolder := TemplateFolder()
 
 	matchData := map[string]interface{}{}
 	matchData["viewmode"] = viewmode
@@ -38,7 +44,7 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 	for _, folder := range templateFolders {
 		if path != "" {
 			pathWithTemplateFolder := folder + "/" + path
-			if util.FileExists(templateRootFolder + "/" + pathWithTemplateFolder) {
+			if util.FileExists(templateFolder + "/" + pathWithTemplateFolder) {
 				result = pathWithTemplateFolder
 				break
 			}
@@ -75,14 +81,4 @@ func MatchTemplate(source string, matchData map[string]interface{}) (string, []s
 	}
 
 	return result, matchLog
-}
-
-//Get template folder list based on site identifier
-func TemplateFolders(siteIdentifier string) []string {
-	folders := util.GetConfigSectionI("template")["folder"].([]interface{})
-	var result = make([]string, len(folders))
-	for i, value := range folders {
-		result[i] = value.(string)
-	}
-	return result
 }

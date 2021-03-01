@@ -33,6 +33,16 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			return content
 		},
 
+		"parent": func(content contenttype.ContentTyper) contenttype.ContentTyper {
+			querier := handler.Querier()
+			parentID := content.Value("parent_id").(int)
+			parent, err := querier.FetchByID(parentID)
+			if err != nil {
+				log.Debug("Error when fetch parent", "tempalte", dm.context.RequestContext)
+			}
+			return parent
+		},
+
 		"children": func(parent contenttype.ContentTyper, contenttype string) []contenttype.ContentTyper {
 			querier := handler.Querier()
 			children, _, err := querier.Children(parent, contenttype, 1, db.EmptyCond(), nil, nil, false, dm.context.RequestContext)
