@@ -19,6 +19,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//Initialize all the sites
 func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 
 	siteIdentifier := siteConfig["identifier"].(string)
@@ -62,6 +63,7 @@ func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 	return nil
 }
 
+//Handle contents after initialization
 func HandleContent(r *mux.Router) error {
 	//loop sites and route
 	sites := GetSites()
@@ -74,6 +76,7 @@ func HandleContent(r *mux.Router) error {
 				prefix = path
 			}
 			ctx := r.Context()
+
 			err := OutputContent(w, id, site, prefix, ctx)
 			if err != nil {
 				log.Error(err.Error(), "template", r.Context())

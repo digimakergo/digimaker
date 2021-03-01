@@ -13,7 +13,6 @@ import (
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/util"
-	"github.com/digimakergo/digimaker/sitekit"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
 	"golang.org/x/text/message"
 
@@ -53,16 +52,6 @@ func dmNiceurl(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Er
 	content := in.Interface().(contenttype.ContentTyper)
 	niceurl := niceurl.GenerateUrl(content)
 	return pongo2.AsValue(niceurl), nil
-}
-
-func dmTplMatched(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	paramArr := util.Split(param.String())
-	settings := sitekit.GetSiteSettings(paramArr[1])
-	fmt.Println(param)
-	fmt.Println(settings)
-	path := sitekit.GetContentTemplate(in.Interface().(contenttype.ContentTyper), strings.TrimSpace(paramArr[0]), settings)
-	fmt.Println(path)
-	return pongo2.AsValue(path), nil
 }
 
 func dmAbsolutePath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
@@ -168,7 +157,6 @@ func init() {
 	pongo2.RegisterFilter("dm_parent", dmParent)
 	pongo2.RegisterFilter("dm_fetch", dmFetch)
 	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
-	pongo2.RegisterFilter("dm_tpl_matched", dmTplMatched)
 	pongo2.RegisterFilter("dm_abs_path", dmAbsolutePath)
 	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
 	pongo2.RegisterFilter("dm_format_number", dmFormatNumber)
