@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/handler"
@@ -96,10 +97,7 @@ func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 func HandleContent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
-	sitePath := ""
-	if path, ok := vars["path"]; ok {
-		sitePath = path
-	}
+	sitePath := GetSitePath(r)
 	site := vars["site"]
 
 	ctx := r.Context()
@@ -109,6 +107,17 @@ func HandleContent(w http.ResponseWriter, r *http.Request) {
 		requestID := log.GetContextInfo(ctx).RequestID
 		http.Error(w, "Error occurred. request id: "+requestID, http.StatusInternalServerError)
 	}
+}
+
+// remove / if path has / in the end
+func GetSitePath(r *http.Request) string {
+	sitePath := ""
+	vars := mux.Vars(r)
+	if path, ok := vars["path"]; ok {
+		sitePath = path
+	}
+	result := strings.TrimSuffix(sitePath, "/")
+	return result
 }
 
 func handleRoot(w http.ResponseWriter, r *http.Request) {
