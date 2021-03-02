@@ -85,6 +85,7 @@ func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 		DefaultContent:  defaultContent,
 		Routes:          routesConfig}
 	SetSiteSettings(siteIdentifier, siteSettings)
+	log.Info("Site loaded: " + siteIdentifier)
 	return nil
 }
 
@@ -130,8 +131,8 @@ func RouteContent(r *mux.Router) error {
 		if err != nil {
 			return err
 		}
-
 	}
+	log.Info("Sites routered")
 	return nil
 }
 
