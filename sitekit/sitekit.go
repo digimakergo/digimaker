@@ -28,7 +28,8 @@ type SiteSettings struct {
 	TemplateFolders []string
 	RootContent     contenttype.ContentTyper
 	DefaultContent  contenttype.ContentTyper
-	Routes          []interface{} //host, path.
+	Host            string
+	Path            string
 }
 
 func GetSiteSettings(identifier string) SiteSettings {
@@ -77,18 +78,22 @@ func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 		}
 	}
 
-	routesConfig := siteConfig["routes"].([]interface{})
-	siteSettings := SiteSettings{TemplateBase: templateFolder[0],
+	host := siteConfig["host"].(string)
+	path := siteConfig["path"].(string)
+	siteSettings := SiteSettings{
+		TemplateBase:    templateFolder[0],
 		TemplateFolders: templateFolder,
 		RootContent:     rootContent,
 		DefaultContent:  defaultContent,
-		Routes:          routesConfig}
+		Host:            host,
+		Path:            path}
 	SetSiteSettings(siteIdentifier, siteSettings)
 	log.Info("Site loaded: " + siteIdentifier)
 	return nil
 }
 
-func handleContent(w http.ResponseWriter, r *http.Request) {
+//Handle content, given mux variables: site: <site>, path: <site path>, id: <content id>
+func HandleContent(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, _ := strconv.Atoi(vars["id"])
 	sitePath := ""
@@ -109,12 +114,13 @@ func handleContent(w http.ResponseWriter, r *http.Request) {
 func handleRoot(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	site := vars["site"]
+
 	defaultContent := siteSettings[site].DefaultContent
 	defaultContentID := defaultContent.GetLocation().ID
-
 	vars["id"] = strconv.Itoa(defaultContentID)
+
 	r = mux.SetURLVars(r, vars)
-	handleContent(w, r)
+	HandleContent(w, r)
 }
 
 func setVar(r *http.Request, key string, value string) *http.Request {
@@ -124,38 +130,53 @@ func setVar(r *http.Request, key string, value string) *http.Request {
 	return r
 }
 
-//Handle contents after initialization
-func RouteContent(r *mux.Router) error {
+type SiteRouters map[string]*mux.Router
+
+func GetSiteRouters(r *mux.Router) SiteRouters {
 	//loop sites and route
 	sites := GetSites()
+
+	result := SiteRouters{}
 	for _, identifier := range sites {
-		//site route and get sub route
-		err := HandleOnSite(r, identifier, func(subRouter *mux.Router, site string) {
-			subRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				r = setVar(r, "site", identifier)
-				handleRoot(w, r)
-			})
+		settings := GetSiteSettings(identifier)
+		host := settings.Host
+		path := settings.Path
 
-			subRouter.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
-				r = setVar(r, "site", identifier)
-				handleRoot(w, r)
-			})
-
-			subRouter.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
-				r = setVar(r, "site", identifier)
-				handleContent(w, r)
-			})
-			subRouter.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				r = setVar(r, "site", identifier)
-				handleContent(w, r)
-			})
-		})
-		if err != nil {
-			return err
+		var subRouter *mux.Router
+		//use subrouter which is better for performance
+		if path != "" {
+			subRouter = r.Host(host).PathPrefix("/{path:" + path + "}").Subrouter()
+		} else {
+			subRouter = r.Host(host).Subrouter()
 		}
+		result[identifier] = subRouter
 	}
-	log.Info("Sites routered")
-	return nil
+	return result
+}
+
+//Handle contents after initialization
+func RouteContent(siteRouters SiteRouters) {
+	for site, subRouter := range siteRouters {
+		subRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			r = setVar(r, "site", site)
+			handleRoot(w, r)
+		})
+
+		subRouter.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
+			r = setVar(r, "site", site)
+			handleRoot(w, r)
+		})
+
+		subRouter.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
+			r = setVar(r, "site", site)
+			HandleContent(w, r)
+		})
+
+		subRouter.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			r = setVar(r, "site", site)
+			HandleContent(w, r)
+		})
+	}
 }
 
 //Output content using conent template

@@ -33,13 +33,15 @@ func Bootstrap(router *mux.Router) {
 			}
 		}
 
-		//todo: route custom url before content
+		siteRouters := sitekit.GetSiteRouters(router)
+
+		//todo: route custom url before content, eg. using handler registration?
 
 		//Handle content
-		err := sitekit.RouteContent(router)
-		if err != nil {
-			log.Error("Error when routing sites. Error: "+err.Error(), "")
-		}
+		sitekit.RouteContent(siteRouters)
+
+		log.Info("Sites routered")
+
 	}
 }
 
