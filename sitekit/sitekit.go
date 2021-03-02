@@ -144,11 +144,12 @@ func setVar(r *http.Request, key string, value string) *http.Request {
 
 type SiteRouters map[string]*mux.Router
 
-func GetSiteRouters(r *mux.Router) SiteRouters {
+func GetSiteRouters(r *mux.Router) (SiteRouters, SiteRouters) {
 	//loop sites and route
 	sites := GetSites()
 
-	result := SiteRouters{}
+	subRouters := SiteRouters{}
+	defaultRouters := SiteRouters{}
 	for _, identifier := range sites {
 		settings := GetSiteSettings(identifier)
 		host := settings.Host
@@ -157,37 +158,42 @@ func GetSiteRouters(r *mux.Router) SiteRouters {
 		var subRouter *mux.Router
 		//use subrouter which is better for performance
 		if path != "" {
-			subRouter = r.Host(host).PathPrefix("/{path:" + path + "}").Subrouter()
+			subRouter = r.Host(host).PathPrefix("/{path:" + path + "}/").Subrouter()
+
+			defaultRouter := r.Host(host).PathPrefix("/{path:" + path + "}").Subrouter()
+			defaultRouters[identifier] = defaultRouter
 		} else {
 			subRouter = r.Host(host).Subrouter()
 		}
-		result[identifier] = subRouter
+		subRouters[identifier] = subRouter
 	}
-	return result
+	return subRouters, defaultRouters
 }
 
 //Handle contents after initialization
-func RouteContent(siteRouters SiteRouters) {
+func RouteContent(siteRouters SiteRouters, defaultRouters SiteRouters) {
 	for site, subRouter := range siteRouters {
-		subRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			r = setVar(r, "site", site)
-			handleRoot(w, r)
-		})
-
-		subRouter.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
-			r = setVar(r, "site", site)
-			handleRoot(w, r)
-		})
-
 		subRouter.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
-			r = setVar(r, "site", site)
+			r = setVar(r, "site", mux.CurrentRoute(r).GetName())
 			HandleContent(w, r)
-		})
+		}).Name(site)
 
 		subRouter.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			r = setVar(r, "site", site)
+			r = setVar(r, "site", mux.CurrentRoute(r).GetName())
 			HandleContent(w, r)
-		})
+		}).Name(site)
+	}
+
+	for site, router := range defaultRouters {
+		router.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			r = setVar(r, "site", mux.CurrentRoute(r).GetName())
+			handleRoot(w, r)
+		}).Name(site)
+
+		router.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
+			r = setVar(r, "site", mux.CurrentRoute(r).GetName())
+			handleRoot(w, r)
+		}).Name(site)
 	}
 }
 
