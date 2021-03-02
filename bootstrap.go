@@ -3,9 +3,7 @@ package digimaker
 import (
 	"strconv"
 
-	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/log"
-	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/rest"
 	"github.com/digimakergo/digimaker/sitekit"
@@ -17,16 +15,6 @@ import (
 //Route rest and site
 func Bootstrap(router *mux.Router) {
 	log.Info("Starting from " + util.AbsHomePath())
-
-	err := contenttype.LoadDefinition()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	err = permission.LoadPolicies()
-	if err != nil {
-		log.Fatal("Loading policies error: " + err.Error())
-	}
 
 	router.Use(rest.InitRequest)
 
@@ -44,8 +32,11 @@ func Bootstrap(router *mux.Router) {
 				log.Error("Error when loading site "+strconv.Itoa(i)+". Detail: "+err.Error(), "")
 			}
 		}
+
+		//todo: route custom url before content
+
 		//Handle content
-		err = sitekit.RouteContent(router)
+		err := sitekit.RouteContent(router)
 		if err != nil {
 			log.Error("Error when routing sites. Error: "+err.Error(), "")
 		}
