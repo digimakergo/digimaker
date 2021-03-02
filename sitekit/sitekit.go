@@ -89,7 +89,7 @@ func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 }
 
 //Handle contents after initialization
-func HandleContent(r *mux.Router) error {
+func RouteContent(r *mux.Router) error {
 	//loop sites and route
 	sites := GetSites()
 	for _, identifier := range sites {
