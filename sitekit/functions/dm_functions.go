@@ -6,6 +6,7 @@ import (
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/sitekit"
+	"github.com/digimakergo/digimaker/sitekit/niceurl"
 )
 
 //default dm functions
@@ -50,6 +51,20 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 				log.Debug("Error when fetch ", "tempalte", dm.context.RequestContext)
 			}
 			return children
+		},
+
+		"niceurl": func(content contenttype.ContentTyper) string {
+			root := sitekit.GetSiteSettings(dm.context.Site).RootContent
+			url := niceurl.GenerateUrl(content, root, dm.context.SitePath)
+			return url
+		},
+
+		"root": func(url string) string {
+			result := "/" + dm.context.SitePath
+			if url != "/" {
+				result = result + "/" + url
+			}
+			return result
 		},
 	}
 

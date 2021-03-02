@@ -5,28 +5,31 @@
 package niceurl
 
 import (
-	"github.com/digimakergo/digimaker/core/contenttype"
 	"net/http"
 	"strconv"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/contenttype"
+
 	"github.com/gorilla/mux"
 )
 
-func GenerateUrl(content contenttype.ContentTyper) string { //todo: add prefix
+func GenerateUrl(content contenttype.ContentTyper, root contenttype.ContentTyper, prefix string) string { //todo: add prefix
 	location := content.GetLocation()
 	result := ""
 	if location != nil {
-		path := location.IdentifierPath
+		path := strings.TrimPrefix(location.IdentifierPath, root.GetLocation().IdentifierPath)
 		pattern := "digit" //todo: read from config file.
 		switch pattern {
 		case "digit":
 			result = path + "-" + strconv.Itoa(location.ID)
 		default:
-
 		}
 	} else {
 		//todo: give a warning.
+	}
+	if prefix != "" {
+		result = "/" + prefix + result
 	}
 	return result
 }
@@ -34,14 +37,16 @@ func GenerateUrl(content contenttype.ContentTyper) string { //todo: add prefix
 //Matches pattern *-1231 and set mux Vars["id"] as 1231 if matches
 func ViewContentMatcher(r *http.Request, rm *mux.RouteMatch) bool {
 	uri := r.RequestURI
-	index := strings.LastIndex(uri, "-") //todo: read pattern from config file related to GenerateUrl
 	result := false
-	if index != -1 {
-		str := uri[index+1:]
-		_, err := strconv.Atoi(str)
-		if err == nil {
-			rm.Vars = map[string]string{"id": str}
-			result = true
+	if strings.HasPrefix(uri, "/") {
+		index := strings.LastIndex(uri, "-") //todo: read pattern from config file related to GenerateUrl
+		if index != -1 {
+			str := uri[index+1:]
+			_, err := strconv.Atoi(str)
+			if err == nil {
+				rm.Vars = map[string]string{"id": str}
+				result = true
+			}
 		}
 	}
 	return result
