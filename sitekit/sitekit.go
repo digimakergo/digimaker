@@ -44,9 +44,8 @@ func SetSiteSettings(identifier string, settings SiteSettings) {
 	siteIdentifiers = append(siteIdentifiers, identifier)
 }
 
-//Initialize all the sites
+//Initialize sites setting to memory
 func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
-
 	siteIdentifier := siteConfig["identifier"].(string)
 
 	if _, ok := siteConfig["template_folder"]; !ok {
@@ -89,43 +88,66 @@ func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 	return nil
 }
 
+func handleContent(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := strconv.Atoi(vars["id"])
+	sitePath := ""
+	if path, ok := vars["path"]; ok {
+		sitePath = path
+	}
+	site := vars["site"]
+
+	ctx := r.Context()
+	err := OutputContent(w, id, site, sitePath, ctx)
+	if err != nil {
+		log.Error(err.Error(), "template", r.Context())
+		requestID := log.GetContextInfo(ctx).RequestID
+		http.Error(w, "Error occurred. request id: "+requestID, http.StatusInternalServerError)
+	}
+}
+
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	site := vars["site"]
+	defaultContent := siteSettings[site].DefaultContent
+	defaultContentID := defaultContent.GetLocation().ID
+
+	vars["id"] = strconv.Itoa(defaultContentID)
+	r = mux.SetURLVars(r, vars)
+	handleContent(w, r)
+}
+
+func setVar(r *http.Request, key string, value string) *http.Request {
+	vars := mux.Vars(r)
+	vars[key] = value
+	r = mux.SetURLVars(r, vars)
+	return r
+}
+
 //Handle contents after initialization
 func RouteContent(r *mux.Router) error {
 	//loop sites and route
 	sites := GetSites()
 	for _, identifier := range sites {
-		var handleContentView = func(w http.ResponseWriter, r *http.Request, site string) {
-			vars := mux.Vars(r)
-			id, _ := strconv.Atoi(vars["id"])
-			prefix := ""
-			if path, ok := vars["path"]; ok {
-				prefix = path
-			}
-			ctx := r.Context()
-
-			err := OutputContent(w, id, site, prefix, ctx)
-			if err != nil {
-				log.Error(err.Error(), "template", r.Context())
-				requestID := log.GetContextInfo(ctx).RequestID
-				http.Error(w, "Error occurred. request id: "+requestID, http.StatusInternalServerError)
-			}
-		}
-
 		//site route and get sub route
-		err := SiteRouter(r, identifier, func(s *mux.Router, site string) {
-			s.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
-				handleContentView(w, r, site)
-			})
-			s.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-				handleContentView(w, r, site)
+		err := HandleOnSite(r, identifier, func(subRouter *mux.Router, site string) {
+			subRouter.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+				r = setVar(r, "site", identifier)
+				handleRoot(w, r)
 			})
 
-			//default page to same as handling content/view/<default>
-			s.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-				defaultContent := siteSettings[identifier].DefaultContent
-				defaultContentID := defaultContent.GetLocation().ID
-				r = mux.SetURLVars(r, map[string]string{"id": strconv.Itoa(defaultContentID)})
-				handleContentView(w, r, site)
+			subRouter.HandleFunc("", func(w http.ResponseWriter, r *http.Request) {
+				r = setVar(r, "site", identifier)
+				handleRoot(w, r)
+			})
+
+			subRouter.HandleFunc("/content/view/{id}", func(w http.ResponseWriter, r *http.Request) {
+				r = setVar(r, "site", identifier)
+				handleContent(w, r)
+			})
+			subRouter.MatcherFunc(niceurl.ViewContentMatcher).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				r = setVar(r, "site", identifier)
+				handleContent(w, r)
 			})
 		})
 		if err != nil {
@@ -137,37 +159,39 @@ func RouteContent(r *mux.Router) error {
 }
 
 //Output content using conent template
-func OutputContent(w io.Writer, id int, siteIdentifier string, prefix string, ctx context.Context) error {
+func OutputContent(w io.Writer, id int, siteIdentifier string, sitePath string, ctx context.Context) error {
 	siteSettings := GetSiteSettings(siteIdentifier)
-	data := map[string]interface{}{
+	variables := map[string]interface{}{
 		"root":     siteSettings.RootContent,
 		"viewmode": "full",
-		"prefix":   prefix}
+		"site":     siteIdentifier,
+		"sitepath": sitePath}
 
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
 	//todo: handle error, template compiling much better.
 	if content == nil {
-		data["error"] = "Content not found" //todo: use error code so can we customize it in template
+		variables["error"] = "Content not found" //todo: use error code so can we customize it in template
 	} else {
 		if !util.ContainsInt(content.GetLocation().Path(), siteSettings.RootContent.GetLocation().ID) {
-			data["error"] = "Content not found in this site"
+			variables["error"] = "Content not found in this site"
 		}
 	}
-	data["content"] = content
+	variables["content"] = content
 
 	//todo: use anoymouse user id and check permission
-	err = Output(w, siteIdentifier, data, ctx)
+	err = Output(w, variables, ctx)
 	return err
 }
 
 type TemplateContext struct {
 	RequestContext context.Context
 	Site           string
+	SitePath       string
 }
 
 //Output using template
-func Output(w io.Writer, siteIdentifier string, variables map[string]interface{}, ctx context.Context) error {
+func Output(w io.Writer, variables map[string]interface{}, ctx context.Context) error {
 	// siteSettings := GetSiteSettings(siteIdentifier)
 
 	// pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
@@ -177,9 +201,7 @@ func Output(w io.Writer, siteIdentifier string, variables map[string]interface{}
 	gopath := os.Getenv("GOPATH")
 	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/github.com/digimakergo/digimaker/sitekit/templates/main.html")) //todo: use configuration
 
-	variables["site"] = siteIdentifier
-
-	tCtx := TemplateContext{RequestContext: ctx, Site: siteIdentifier}
+	tCtx := TemplateContext{RequestContext: ctx, Site: variables["site"].(string), SitePath: variables["sitepath"].(string)}
 
 	for name, newFunctions := range allFunctions {
 		functions := newFunctions()

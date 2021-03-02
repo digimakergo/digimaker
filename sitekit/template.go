@@ -46,6 +46,8 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 			if util.FileExists(templateFolder + "/" + pathWithTemplateFolder) {
 				result = pathWithTemplateFolder
 				break
+			} else {
+				log.Warning("Matched file not found: "+path, "template", ctx)
 			}
 		}
 	}
