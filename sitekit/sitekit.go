@@ -80,7 +80,10 @@ func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 	}
 
 	host := siteConfig["host"].(string)
-	path := siteConfig["path"].(string)
+	path := ""
+	if _, ok := siteConfig["path"]; ok {
+		path = siteConfig["path"].(string)
+	}
 	siteSettings := SiteSettings{
 		TemplateBase:    templateFolder[0],
 		TemplateFolders: templateFolder,
