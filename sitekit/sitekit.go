@@ -47,7 +47,7 @@ func SetSiteSettings(identifier string, settings SiteSettings) {
 }
 
 //Initialize sites setting to memory
-func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
+func LoadSite(siteConfig map[string]interface{}) error {
 	siteIdentifier := siteConfig["identifier"].(string)
 
 	if _, ok := siteConfig["template_folder"]; !ok {
@@ -92,7 +92,7 @@ func InitSite(r *mux.Router, siteConfig map[string]interface{}) error {
 		Host:            host,
 		Path:            path}
 	SetSiteSettings(siteIdentifier, siteSettings)
-	log.Info("Site loaded: " + siteIdentifier)
+	log.Info("Site settings loaded: " + siteIdentifier)
 	return nil
 }
 
@@ -251,4 +251,18 @@ func Output(w io.Writer, variables map[string]interface{}, ctx context.Context) 
 
 	err := tpl.ExecuteWriter(pongo2.Context(variables), w)
 	return err
+}
+
+func init() {
+	//Route sites
+	sitesConfig := util.GetConfigSectionAll("sites", "dm")
+	if sitesConfig != nil {
+		for i, item := range sitesConfig.([]interface{}) {
+			siteConfig := util.ConvertToMap(item)
+			err := LoadSite(siteConfig)
+			if err != nil {
+				log.Error("Error when loading site "+strconv.Itoa(i)+". Detail: "+err.Error(), "")
+			}
+		}
+	}
 }
