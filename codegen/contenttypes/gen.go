@@ -16,13 +16,6 @@ import (
 
 //Generate content types
 func main() {
-	homePath := ""
-	if len(os.Args) >= 2 && os.Args[1] != "" {
-		homePath = os.Args[1]
-		util.InitHomePath(homePath)
-	}
-
-	contenttype.LoadDefinition()
 
 	fmt.Println("Generating content entities for " + util.AbsHomePath())
 	err := Generate("entity")

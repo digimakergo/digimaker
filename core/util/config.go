@@ -21,7 +21,7 @@ func AppFolder() string {
 		//Init App config
 		appPath := os.Getenv("dmapp")
 		if appPath == "" {
-			log.Fatal("Please set DMApp environment variable to run the application.")
+			log.Fatal("Please set dmapp environment variable to run the application.")
 		}
 
 		if _, err := os.Stat(appPath); os.IsNotExist(err) {
