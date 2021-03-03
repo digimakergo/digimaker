@@ -19,7 +19,7 @@ var configFolder = "configs"
 func AppFolder() string {
 	if appFolder == "" {
 		//Init App config
-		appPath := os.Getenv("DMApp")
+		appPath := os.Getenv("dmapp")
 		if appPath == "" {
 			log.Fatal("Please set DMApp environment variable to run the application.")
 		}
@@ -34,6 +34,15 @@ func AppFolder() string {
 		appFolder = appPath
 	}
 	return appFolder
+}
+
+//running mode: eg. dev, prod
+func RunningMode() string {
+	mode := "prod"
+	if env := os.Getenv("env"); env != "" {
+		mode = env
+	}
+	return mode
 }
 
 func HomePath() string {

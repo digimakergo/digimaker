@@ -170,7 +170,10 @@ func getCallerInfo(pc uintptr, file string, line int, ok bool) string {
 }
 
 func init() {
-	environment := "prod"   //todo: read from env/flat/config
+	environment := "prod"
+	if envValue := os.Getenv("env"); envValue != "" {
+		environment = envValue
+	}
 	DebugIDs = []string{""} //todo: read from somewhere else
 
 	logrus.SetLevel(logrus.DebugLevel)

@@ -2,7 +2,6 @@ package sitekit
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -13,6 +12,7 @@ import (
 
 const templateViewContent = "content_view"
 
+//TemplateFolder() returns folder of templates. eg. under "templates" or "web/templates"
 func TemplateFolder() string {
 	path := util.AbsHomePath() + "/" + util.GetConfig("general", "template_folder")
 	return path
@@ -56,7 +56,6 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 
 //MatchTemplate returns overrided template based on override rule in template_override.yaml
 func MatchTemplate(source string, matchData map[string]interface{}) (string, []string) {
-	fmt.Println(source)
 	rules := util.GetConfigSectionAll(source, "template_override").([]interface{})
 	result := ""
 	matchLog := []string{}
