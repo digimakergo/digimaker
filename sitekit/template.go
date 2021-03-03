@@ -11,6 +11,7 @@ import (
 )
 
 const templateViewContent = "content_view"
+const overrideFile = "template_override"
 
 //TemplateFolder() returns folder of templates. eg. under "templates" or "web/templates"
 func TemplateFolder() string {
@@ -24,6 +25,7 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 
 	matchData := map[string]interface{}{}
 	matchData["viewmode"] = viewmode
+	matchData["site"] = settings.Site
 	matchData["contenttype"] = content.ContentType()
 	location := content.GetLocation()
 	if location != nil {
@@ -33,7 +35,16 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 		matchData["section"] = location.Section
 	}
 
-	path, matchLog := MatchTemplate(templateViewContent, matchData)
+	siteOverride := overrideFile + "-" + settings.Site
+	path := ""
+	matchLog := []string{}
+	if util.FileExists(util.ConfigPath() + "/" + siteOverride) {
+		path, matchLog = MatchTemplate(templateViewContent, matchData, siteOverride)
+	}
+	if path == "" {
+		path, matchLog = MatchTemplate(templateViewContent, matchData, overrideFile)
+	}
+
 	log.Debug("Matching on "+content.GetName()+", got: "+path, "template-match", ctx)
 	log.Debug(strings.Join(matchLog, "\n"), "template-match", ctx)
 
@@ -55,8 +66,8 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 }
 
 //MatchTemplate returns overrided template based on override rule in template_override.yaml
-func MatchTemplate(source string, matchData map[string]interface{}) (string, []string) {
-	rules := util.GetConfigSectionAll(source, "template_override").([]interface{})
+func MatchTemplate(source string, matchData map[string]interface{}, overrideFile string) (string, []string) {
+	rules := util.GetConfigSectionAll(source, overrideFile).([]interface{})
 	result := ""
 	matchLog := []string{}
 	for i, item := range rules {
@@ -72,7 +83,7 @@ func MatchTemplate(source string, matchData map[string]interface{}) (string, []s
 		}
 
 		matched, currentMatchLog := util.MatchCondition(conditions, matchData)
-		matchLog = append(matchLog, "matching on rule"+strconv.Itoa(i))
+		matchLog = append(matchLog, "matching on rule"+strconv.Itoa(i)+" on file "+overrideFile)
 		matchLog = append(matchLog, currentMatchLog...)
 		if matched {
 			result = to

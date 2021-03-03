@@ -25,6 +25,7 @@ var siteIdentifiers = []string{}
 
 //a basic setting to run a site.
 type SiteSettings struct {
+	Site            string
 	TemplateBase    string
 	TemplateFolders []string
 	RootContent     contenttype.ContentTyper
@@ -85,6 +86,7 @@ func LoadSite(siteConfig map[string]interface{}) error {
 		path = siteConfig["path"].(string)
 	}
 	siteSettings := SiteSettings{
+		Site:            siteIdentifier,
 		TemplateBase:    templateFolder[0],
 		TemplateFolders: templateFolder,
 		RootContent:     rootContent,
