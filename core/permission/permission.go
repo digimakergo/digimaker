@@ -127,7 +127,7 @@ func GetRolePolicies(roleIDs []int) []Policy {
 		for _, policyIdentifier := range rolePolicyMap[roleIdentifier] {
 			//todo: different roles may have different context(eg. target) under which the policies shouldn't merge
 			if util.Contains(policyIdentifiers, policyIdentifier) {
-				log.Debug("Policelist "+policyIdentifier+" is duplicated on roles. Ignored", "")
+				log.Warning("Policelist "+policyIdentifier+" is duplicated on roles. Ignored", "")
 				continue
 			}
 			policyIdentifiers = append(policyIdentifiers, policyIdentifier)
@@ -165,4 +165,11 @@ func RemoveAssignment(userID int, roleID int) error {
 		return err
 	}
 	return nil
+}
+
+func init() {
+	err := LoadPolicies()
+	if err != nil {
+		log.Fatal("Loading policies error: " + err.Error())
+	}
 }

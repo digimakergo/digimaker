@@ -363,3 +363,10 @@ func ContentToMap(content ContentTyper) (map[string]interface{}, error) {
 	}
 	return result, nil
 }
+
+func init() {
+	err := LoadDefinition()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
