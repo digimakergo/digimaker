@@ -35,14 +35,19 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 		matchData["section"] = location.Section
 	}
 
-	siteOverride := overrideFile + "-" + settings.Site
 	path := ""
 	matchLog := []string{}
-	if util.FileExists(util.ConfigPath() + "/" + siteOverride) {
-		path, matchLog = MatchTemplate(templateViewContent, matchData, siteOverride)
+
+	siteOverride := overrideFile + "-" + settings.Site
+	if util.FileExists(util.ConfigPath() + "/" + siteOverride + ".yaml") { //todo: use viper way so json/tomal can be supported also
+		currentPath, currentMatchLog := MatchTemplate(templateViewContent, matchData, siteOverride)
+		path = currentPath
+		matchLog = append(matchLog, currentMatchLog...)
 	}
 	if path == "" {
-		path, matchLog = MatchTemplate(templateViewContent, matchData, overrideFile)
+		currentPath, currentMatchLog := MatchTemplate(templateViewContent, matchData, overrideFile)
+		path = currentPath
+		matchLog = append(matchLog, currentMatchLog...)
 	}
 
 	log.Debug("Matching on "+content.GetName()+", got: "+path, "template-match", ctx)
