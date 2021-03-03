@@ -164,6 +164,7 @@ func GetSiteRouters(r *mux.Router) (SiteRouters, SiteRouters) {
 			defaultRouters[identifier] = defaultRouter
 		} else {
 			subRouter = r.Host(host).Subrouter()
+			defaultRouters[identifier] = subRouter
 		}
 		subRouters[identifier] = subRouter
 	}
