@@ -13,7 +13,6 @@ import (
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit"
-	"github.com/digimakergo/digimaker/sitekit/niceurl"
 	"golang.org/x/text/message"
 
 	"github.com/flosch/pongo2"
@@ -48,12 +47,6 @@ func dmShow(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error
 		result = "error: not marshalable"
 	}
 	return pongo2.AsValue(result), nil
-}
-
-func dmNiceurl(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	content := in.Interface().(contenttype.ContentTyper)
-	niceurl := niceurl.GenerateUrl(content)
-	return pongo2.AsValue(niceurl), nil
 }
 
 func dmAbsolutePath(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
@@ -150,7 +143,6 @@ func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_parent", dmParent)
 	pongo2.RegisterFilter("dm_show", dmShow)
-	pongo2.RegisterFilter("dm_niceurl", dmNiceurl)
 	pongo2.RegisterFilter("dm_abs_path", dmAbsolutePath)
 	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
 	pongo2.RegisterFilter("dm_format_number", dmFormatNumber)
