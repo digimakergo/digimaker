@@ -22,5 +22,3 @@
         {%include template%}
     {%endwith%}
 {% endmacro %}
-
-{% macro niceurl( content ) export%}{%if prefix!=""%}/{{prefix}}{%endif%}/{{content|dm_niceurl}}{% endmacro %}
