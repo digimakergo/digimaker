@@ -205,13 +205,16 @@ func OutputContent(w io.Writer, id int, siteIdentifier string, sitePath string, 
 	siteSettings := GetSiteSettings(siteIdentifier)
 	variables := map[string]interface{}{
 		"root":     siteSettings.RootContent,
+		"default":  siteSettings.DefaultContent,
 		"viewmode": "full",
 		"site":     siteIdentifier,
 		"sitepath": sitePath}
 
 	querier := handler.Querier()
 	content, err := querier.FetchByID(id)
-	//todo: handle error, template compiling much better.
+	if err != nil {
+		return errors.Wrap(err, "Error of outputing content while fetching content")
+	}
 	if content == nil {
 		variables["error"] = "Content not found" //todo: use error code so can we customize it in template
 	} else {
@@ -264,7 +267,7 @@ func init() {
 			siteConfig := util.ConvertToMap(item)
 			err := LoadSite(siteConfig)
 			if err != nil {
-				log.Error("Error when loading site "+strconv.Itoa(i)+". Detail: "+err.Error(), "")
+				log.Fatal("Error when loading site " + strconv.Itoa(i) + ". Detail: " + err.Error())
 			}
 		}
 	}
