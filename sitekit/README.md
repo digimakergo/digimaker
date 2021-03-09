@@ -1,20 +1,44 @@
 DM Sitekit
 ==========
-Sitekit is a toolkit which provides apis to build sites based on dm content framework.
+Sitekit is a toolkit which is used to build sites in a 'template way'.
 
 ### Core features
 
+- easy templating
 - multi sites support
 - load multi sites from yaml config file or api, or both.
 - powerful template override based on content conditions
-- nice url(from niceurl package)
-- route which can be integrate with other route by using sub route
-- template override can be used for custom module/controller
+- nice url(from niceurl package) and extendable
+- extend site router with templating
+- customize template functions, filters, macro
 
 ### Template engine
-For now the primary template engine is pongo2.
+The template engine used is pongo2 https://github.com/flosch/pongo2.
 
-There is idea to support different template engines for different purpose(eg. pre-compiled template engine for performance sensitive case).
-
-### How to use
+### Demosite
 See [Demosite](../demosite) for example use.
+
+### Template Functions
+Examples:
+
+Fetch content by id:
+
+    {%set content = dm.fetch_byid(8)%}
+
+Fetch children:
+
+    {%set children = dm.children( content, "article" )%}
+
+
+#### Filters
+
+Output variable:
+
+    {{var|dmshow}}
+
+Format time to local:
+
+    {{timestamp|dm_format_time}}
+
+
+### Template Override
