@@ -5,6 +5,7 @@ import (
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
 )
@@ -46,7 +47,8 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 
 		"children": func(parent contenttype.ContentTyper, contenttype string) []contenttype.ContentTyper {
 			querier := handler.Querier()
-			children, _, err := querier.Children(parent, contenttype, 1, db.EmptyCond(), nil, []string{"priority desc", "id asc"}, false, dm.context.RequestContext)
+			userID := util.CurrentUserID(dm.context.RequestContext)
+			children, _, err := querier.Children(parent, contenttype, userID, db.EmptyCond(), nil, []string{"priority desc", "id asc"}, false, dm.context.RequestContext)
 			if err != nil {
 				log.Debug("Error when fetch ", "tempalte", dm.context.RequestContext)
 			}

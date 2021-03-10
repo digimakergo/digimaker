@@ -142,7 +142,7 @@ func dmSplit(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Erro
 func init() {
 	pongo2.RegisterFilter("dm_children", dmChildren)
 	pongo2.RegisterFilter("dm_parent", dmParent)
-	pongo2.RegisterFilter("dm_show", dmShow)
+	pongo2.RegisterFilter("dmshow", dmShow)
 	pongo2.RegisterFilter("dm_abs_path", dmAbsolutePath)
 	pongo2.RegisterFilter("dm_format_time", dmFormatTime)
 	pongo2.RegisterFilter("dm_format_number", dmFormatNumber)
