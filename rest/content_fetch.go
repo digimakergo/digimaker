@@ -14,13 +14,19 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/gorilla/mux"
 )
+
+//Result item in the list
+type ResultItem map[string]interface{}
+
+//Result list
+type ResultList []ResultItem
 
 func GetContent(w http.ResponseWriter, r *http.Request) {
 	userID := CheckUserID(r.Context(), w)
@@ -29,7 +35,6 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	querier := handler.Querier()
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
 		HandleError(errors.New("Invalid id"), w)
@@ -38,15 +43,15 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 	var content contenttype.ContentTyper
 	contentType := params["contenttype"]
 	if contentType != "" {
-		content, err = querier.FetchByContentID(contentType, id)
+		content, err = query.FetchByCID(r.Context(), contentType, id)
 	} else {
-		content, err = querier.FetchByID(id)
+		content, err = query.FetchByID(r.Context(), id)
 	}
 	if err != nil {
 		HandleError(err, w)
 		return
 	} else {
-		if !permission.CanRead(userID, content, r.Context()) {
+		if !permission.CanRead(r.Context(), userID, content) {
 			HandleError(errors.New("Doesn't have permission."), w, 403)
 			return
 		}
@@ -65,13 +70,11 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	querier := handler.Querier()
 	id, _ := strconv.Atoi(params["id"])
 
 	versionNo, _ := strconv.Atoi(params["version"])
 
-	querier = handler.Querier()
-	content, err := querier.FetchByID(id)
+	content, err := query.FetchByID(r.Context(), id)
 	if err != nil {
 		HandleError(errors.New("Can not find content. error: "+err.Error()), w)
 		return
@@ -82,7 +85,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !permission.CanRead(userID, content, r.Context()) {
+	if !permission.CanRead(r.Context(), userID, content) {
 		HandleError(errors.New("No permisison to the content."), w)
 		return
 	}
@@ -96,7 +99,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 
 	dbHandler := db.DBHanlder()
 	version := contenttype.Version{}
-	dbHandler.GetEntity(version.TableName(),
+	dbHandler.GetEntity(r.Context(), version.TableName(),
 		db.Cond("content_id", content.GetCID()).Cond("content_type", content.ContentType()).Cond("version", versionNo),
 		[]string{},
 		nil,
@@ -224,8 +227,6 @@ func List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	querier := handler.Querier()
-
 	ctx := r.Context()
 	userID := CheckUserID(ctx, w)
 	if userID == 0 {
@@ -249,7 +250,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 			HandleError(errors.New("Invalid parent"), w)
 			return
 		}
-		rootContent, err = querier.FetchByID(rootID)
+		rootContent, err = query.FetchByID(r.Context(), rootID)
 		if err != nil {
 			log.Error(err.Error(), "", r.Context())
 			HandleError(errors.New("Can't get parent"), w, 410)
@@ -267,13 +268,13 @@ func List(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		list, count, err = querier.SubList(rootContent, ctype, level, userID, condition, limit, sortby, true, ctx)
+		list, count, err = query.SubList(ctx, rootContent, ctype, level, userID, condition, limit, sortby, true)
 		if err != nil {
 			HandleError(err, w)
 			return
 		}
 	} else {
-		list, count, err = querier.ListForUser(ctx, userID, ctype, condition, limit, sortby, true)
+		list, count, err = query.ListWithUser(ctx, userID, ctype, condition, limit, sortby, true)
 		if err != nil {
 			HandleError(err, w)
 			return
@@ -301,14 +302,13 @@ func RelationOptionList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cxt := r.Context()
-	userid := CheckUserID(cxt, w)
+	ctx := r.Context()
+	userid := CheckUserID(ctx, w)
 	if userid == 0 {
 		return
 	}
 
-	querier := handler.Querier()
-	list, count, err := querier.RelationOptions(contenttype, fieldIdentifier, nil, nil, false)
+	list, count, err := query.RelationOptions(ctx, contenttype, fieldIdentifier, nil, nil, false)
 	if err != nil {
 		HandleError(err, w)
 		return
@@ -349,8 +349,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	querier := handler.Querier()
-	rootContent, err := querier.FetchByID(id)
+	rootContent, err := query.FetchByID(r.Context(), id)
 
 	if err != nil {
 		HandleError(err, w)
@@ -362,19 +361,19 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !permission.CanRead(userID, rootContent, r.Context()) {
+	if !permission.CanRead(r.Context(), userID, rootContent) {
 		HandleError(errors.New("No permission"), w)
 		return
 	}
 
-	tree, err := querier.SubTree(rootContent, 5, strings.Join(typeList, ","), userID, []string{"priority desc", "id"}, r.Context())
+	tree, err := query.SubTree(r.Context(), rootContent, 5, strings.Join(typeList, ","), userID, []string{"priority desc", "id"})
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
 
 	//todo: make this configurable
-	tree.Iterate(func(node *handler.TreeNode) {
+	tree.Iterate(func(node *query.TreeNode) {
 		if node.ContentType == "folder" {
 			node.Fields = map[string]interface{}{"subtype": node.Content.Value("folder_type")}
 		}
