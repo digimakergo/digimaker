@@ -24,12 +24,6 @@ type DatamapList []Datamap
 type MysqlHandler struct {
 }
 
-//Query by ID
-func (rmdb *MysqlHandler) GetByID(contentType string, tableName string, id int, content interface{}) error {
-	_, err := rmdb.GetByFields(context.Background(), contentType, tableName, Cond("location.id", id), []int{}, []string{}, content, false)
-	return err
-}
-
 //Query to fill in contentTyper. Use reference in content parameter.
 //It fill in with nil if nothing found(no error returned in this case)
 //  var content contenttype.Article
