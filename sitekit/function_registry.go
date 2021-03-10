@@ -4,7 +4,7 @@ package sitekit
 //To register a new set of function, first implement this interface and then invoke RegisterFunctions in init()
 type TemplateFunctions interface {
 	GetMap() map[string]interface{}
-	SetContext(ctx TemplateContext)
+	SetInfo(ctx RequestInfo)
 }
 
 var allFunctions map[string]NewFunctions

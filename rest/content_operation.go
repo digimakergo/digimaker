@@ -19,6 +19,7 @@ import (
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/gorilla/mux"
@@ -119,7 +120,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 
 	version := contenttype.Version{}
 	dbHandler := db.DBHanlder()
-	dbHandler.GetEntity(version.TableName(),
+	dbHandler.GetEntity(r.Context(), version.TableName(),
 		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
 		[]string{}, nil, &version)
 	if version.ID == 0 {
@@ -145,7 +146,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 
 	//refetch to make sure it's saved
 	newVersion := contenttype.Version{}
-	dbHandler.GetEntity(version.TableName(),
+	dbHandler.GetEntity(r.Context(), version.TableName(),
 		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
 		[]string{}, nil, &newVersion)
 	if newVersion.ID == 0 || newVersion.ID > 0 && newVersion.Created != createdTime {
@@ -233,8 +234,7 @@ func SetPriority(w http.ResponseWriter, r *http.Request) {
 			HandleError(errors.New("Invalid params format on priority"), w)
 			return
 		}
-		querier := handler.Querier()
-		content, err := querier.FetchByID(id)
+		content, err := query.FetchByID(r.Context(), id)
 		if err != nil {
 			log.Error(err.Error(), "")
 			HandleError(errors.New("Can't find content"), w)

@@ -8,19 +8,18 @@ import (
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
 //CanLogin check if the username/email and password matches
-func CanLogin(usernameEmail string, password string) (error, contenttype.ContentTyper) {
-	querier := Querier()
-
+func CanLogin(ctx context.Context, usernameEmail string, password string) (error, contenttype.ContentTyper) {
 	//todo: use username instead of 'login'
 	cond := db.Cond("login=", usernameEmail)
 	if strings.Contains(usernameEmail, "@") {
 		cond = db.Cond("email=", usernameEmail)
 	}
-	user, err := querier.Fetch("user", cond)
+	user, err := query.Fetch(ctx, "user", cond)
 	if err != nil {
 		// return false, err
 		//todo: log it

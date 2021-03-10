@@ -10,9 +10,9 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/gorilla/mux"
 )
 
@@ -22,8 +22,7 @@ func CurrentUserEditField(w http.ResponseWriter, r *http.Request) {
 	if userID == 0 {
 		return
 	}
-	querier := handler.Querier()
-	content, _ := querier.GetUser(userID)
+	content, _ := query.GetUser(userID)
 
 	fields, err := permission.GetUpdateFields(r.Context(), content, userID)
 	if err != nil {
@@ -41,7 +40,7 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !permission.HasAccessTo(userID, "access/assigned-users", permission.MatchData{}, r.Context()) {
+	if !permission.HasAccessTo(r.Context(), userID, "access/assigned-users", permission.MatchData{}) {
 		HandleError(errors.New("No access"), w)
 		return
 	}
@@ -52,8 +51,7 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	querier := handler.Querier()
-	role, _ := querier.FetchByID(parentID)
+	role, _ := query.FetchByID(r.Context(), parentID)
 	if role == nil {
 		HandleError(errors.New("Roles doesn't exist"), w)
 		return
@@ -66,13 +64,13 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 
 	//todo: use one query with join
 	//todo: support order, pagnation params
-	dbHandler.GetEntity("dm_user_role", db.Cond("role_id", roleID), nil, nil, &userRoles)
+	dbHandler.GetEntity(r.Context(), "dm_user_role", db.Cond("role_id", roleID), nil, nil, &userRoles)
 	userIDs := []int{}
 	for _, userRole := range userRoles {
 		userIDs = append(userIDs, userRole.UserID)
 	}
 
-	list, count, _ := querier.List("user", db.Cond("c.id", userIDs), nil, nil, true)
+	list, count, _ := query.List(r.Context(), "user", db.Cond("c.id", userIDs), nil, nil, true)
 
 	resultList := []interface{}{}
 	for _, item := range list {
@@ -95,13 +93,12 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 	roleID, _ := strconv.Atoi(params["role"])
 	assignedUserID, _ := strconv.Atoi(params["user"])
 
-	if !permission.HasAccessTo(userID, "access/assign-user", permission.MatchData{}, r.Context()) {
+	if !permission.HasAccessTo(r.Context(), userID, "access/assign-user", permission.MatchData{}) {
 		HandleError(errors.New("No access"), w)
 		return
 	}
 
-	querier := handler.Querier()
-	role, _ := querier.FetchByID(roleID)
+	role, _ := query.FetchByID(r.Context(), roleID)
 	if role == nil {
 		HandleError(errors.New("Role not found"), w, 400)
 		return
@@ -125,7 +122,7 @@ func UnassignUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//todo: move all this to handler
-	if !permission.HasAccessTo(loginUserID, "access/unassign-user", permission.MatchData{}, r.Context()) {
+	if !permission.HasAccessTo(r.Context(), loginUserID, "access/unassign-user", permission.MatchData{}) {
 		HandleError(errors.New("No access"), w)
 		return
 	}

@@ -3,9 +3,12 @@
 package handler
 
 import (
-	"github.com/digimakergo/digimaker/core/contenttype"
+	"context"
 	"encoding/json"
 	"strconv"
+
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/query"
 
 	"github.com/pkg/errors"
 )
@@ -13,7 +16,7 @@ import (
 type ExportHandler struct{}
 
 //Export to json
-func (eh *ExportHandler) Export(content contenttype.ContentTyper, parent contenttype.ContentTyper) (string, error) {
+func (eh *ExportHandler) Export(ctx context.Context, content contenttype.ContentTyper, parent contenttype.ContentTyper) (string, error) {
 	data, err := json.Marshal(content)
 	contentMap := map[string]interface{}{}
 	json.Unmarshal(data, &contentMap)
@@ -37,13 +40,13 @@ func (eh *ExportHandler) Export(content contenttype.ContentTyper, parent content
 				fromContentUID  string
 			)
 			if fromLocationID := relation.FromLocation; fromLocationID != 0 {
-				fromContent, err := Querier().FetchByID(fromLocationID)
+				fromContent, err := query.FetchByID(ctx, fromLocationID)
 				if err != nil {
 					return "", errors.Wrap(err, "From location not found in content relation. from_location_id: "+strconv.Itoa(relation.FromLocation))
 				}
 				fromLocationUID = fromContent.GetLocation().UID
 			} else if fromContentID := relation.FromContentID; fromContentID != 0 {
-				fromContent, err := Querier().FetchByContentID(relation.FromType, fromContentID)
+				fromContent, err := query.FetchByContentID(ctx, relation.FromType, fromContentID)
 				if err != nil {
 					return "", errors.Wrap(err, "From content not found in content relation. from_content_id: "+strconv.Itoa(relation.FromContentID))
 				}

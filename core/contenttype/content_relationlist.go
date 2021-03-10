@@ -4,6 +4,7 @@
 package contenttype
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"sort"
@@ -60,7 +61,7 @@ func (rl *RelationList) LoadFromInput(input interface{}, params fieldtype.FieldP
 		if len(relationDataFields) > 0 {
 			//get content
 			contents := db.DatamapList{}
-			dbHandler.GetEntity(def.TableName, db.Cond("id", fromCid), nil, nil, &contents)
+			dbHandler.GetEntity(context.Background(), def.TableName, db.Cond("id", fromCid), nil, nil, &contents)
 			if len(contents) == 0 {
 				return errors.New("No content found on " + strconv.Itoa(fromCid))
 			}

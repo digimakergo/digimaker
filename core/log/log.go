@@ -80,7 +80,7 @@ func Debug(message interface{}, category string, ctx ...context.Context) {
 	caller := getCallerInfo(runtime.Caller(1))
 	if len(ctx) == 1 {
 		info := GetContextInfo(ctx[0])
-		if info.CanDebug() {
+		if info != nil && info.CanDebug() {
 			fields := GetContextFields(ctx[0])
 			fields["caller"] = caller
 			fields["category"] = category
@@ -104,11 +104,13 @@ func getFields(category string) logrus.Fields {
 func GetContextFields(ctx context.Context) logrus.Fields {
 	info := GetContextInfo(ctx)
 	fields := logrus.Fields{}
-	fields["ip"] = info.IP
-	fields["request_id"] = info.RequestID
-	fields["user_id"] = info.UserID
-	fields["debug_id"] = info.DebugID
-	fields["uri"] = info.URI
+	if info != nil {
+		fields["ip"] = info.IP
+		fields["request_id"] = info.RequestID
+		fields["user_id"] = info.UserID
+		fields["debug_id"] = info.DebugID
+		fields["uri"] = info.URI
+	}
 	return fields
 }
 
@@ -121,7 +123,12 @@ func InitContext(ctx context.Context, info *ContextInfo) context.Context {
 }
 
 func GetContextInfo(ctx context.Context) *ContextInfo {
-	return ctx.Value(logKey{}).(*ContextInfo)
+	info := ctx.Value(logKey{})
+	if info != nil {
+		return info.(*ContextInfo)
+	} else {
+		return nil
+	}
 }
 
 //start timing

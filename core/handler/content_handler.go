@@ -18,6 +18,7 @@ import (
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 
 	. "github.com/digimakergo/digimaker/core/db"
@@ -130,7 +131,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 
 // Create creates a content(same behavior as Draft&Publish but store published version directly)
 func (ch *ContentHandler) Create(contentType string, inputs InputMap, userId int, parentID int) (contenttype.ContentTyper, ValidationResult, error) {
-	parent, _ := querier.FetchByID(parentID)
+	parent, _ := query.FetchByID(ch.Context, parentID)
 	if parent == nil {
 		return nil, ValidationResult{}, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
 	}
@@ -145,7 +146,7 @@ func (ch *ContentHandler) Create(contentType string, inputs InputMap, userId int
 		realData["under"] = parent.GetLocation().Path()
 	}
 
-	if !permission.HasAccessTo(userId, "content/create", realData, ch.Context) {
+	if !permission.HasAccessTo(ch.Context, userId, "content/create", realData) {
 		return nil, ValidationResult{}, errors.New("User doesn't have access to create")
 	}
 
@@ -323,7 +324,7 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 }
 
 func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, inputs InputMap, userId int) (bool, ValidationResult, error) {
-	content, err := Querier().FetchByContentID(contentType, contentID)
+	content, err := query.FetchByContentID(ch.Context, contentType, contentID)
 	if err != nil {
 		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via content id.")
 	}
@@ -335,7 +336,7 @@ func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, in
 }
 
 func (ch ContentHandler) UpdateByID(id int, inputs InputMap, userId int) (bool, ValidationResult, error) {
-	content, err := Querier().FetchByID(id)
+	content, err := query.FetchByID(ch.Context, id)
 	if err != nil {
 		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via id.")
 	}
@@ -496,8 +497,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs InputMa
 //Check delete&create permission.
 //note: it dosn't check if target can create sub-children(only check if it can create direct children)
 func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId int, userId int) error {
-	querier := Querier()
-	target, err := querier.FetchByID(targetId)
+	target, err := query.FetchByID(ctx, targetId)
 	targetLocation := target.GetLocation()
 	if err != nil {
 		log.Error(err.Error(), "")
@@ -506,7 +506,7 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 
 	contents := []contenttype.ContentTyper{}
 	for _, id := range contentIds {
-		content, err := querier.FetchByID(id)
+		content, err := query.FetchByID(ctx, id)
 		if err != nil {
 			log.Error(err.Error(), "")
 			return errors.New("Content id " + strconv.Itoa(id) + " is not found for this user.")
@@ -549,9 +549,9 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 		//update location
 		subLocations := []contenttype.Location{}
 		dbhandler := db.DBHanlder()
-		dbhandler.GetEntity("dm_location", db.Cond("hierarchy like", oldHiearachy+"/%"), nil, nil, &subLocations)
+		dbhandler.GetEntity(ctx, "dm_location", db.Cond("hierarchy like", oldHiearachy+"/%"), nil, nil, &subLocations)
 		for _, subLocation := range subLocations {
-			subContent, _ := querier.FetchByID(subLocation.ID)
+			subContent, _ := query.FetchByID(ctx, subLocation.ID)
 			if !permission.CanDelete(ctx, subContent, userId) {
 				tx.Rollback()
 				log.Warning("No permission to delete "+strconv.Itoa(location.ID), "")
@@ -570,7 +570,7 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 
 //Delete content by content id
 func (ch ContentHandler) DeleteByCID(cid int, contenttype string, userId int) error {
-	content, err := Querier().FetchByContentID(contenttype, cid)
+	content, err := query.FetchByContentID(ch.Context, contenttype, cid)
 	if err != nil {
 		return errors.New("[handler.delete]Content doesn't exist with cid: " + strconv.Itoa(cid))
 	}
@@ -580,7 +580,7 @@ func (ch ContentHandler) DeleteByCID(cid int, contenttype string, userId int) er
 
 //Delete content by location id
 func (ch ContentHandler) DeleteByID(id int, userId int, toTrash bool) error {
-	content, err := Querier().FetchByID(id)
+	content, err := query.FetchByID(ch.Context, id)
 	//todo: check how many. if more than 1, delete current only(and set main_id if needed)
 	if err != nil {
 		return errors.New("[handler.delete]Content doesn't exist with id: " + strconv.Itoa(id))

@@ -9,8 +9,8 @@ import (
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
-	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
 
@@ -60,7 +60,7 @@ func LoadSite(siteConfig map[string]interface{}) error {
 		return errors.New("Need root setting.")
 	}
 	root := siteConfig["root"].(int)
-	rootContent, err := handler.Querier().FetchByID(root)
+	rootContent, err := query.FetchByID(context.Background(), root)
 	if err != nil {
 		return errors.Wrap(err, "Root doesn't exist.")
 	}
@@ -74,7 +74,7 @@ func LoadSite(siteConfig map[string]interface{}) error {
 	if defaultInt == root {
 		defaultContent = rootContent
 	} else {
-		defaultContent, err = handler.Querier().FetchByID(defaultInt)
+		defaultContent, err = query.FetchByID(context.Background(), defaultInt)
 		if err != nil {
 			return errors.Wrap(err, "Default doesn't exist.")
 		}
@@ -210,8 +210,8 @@ func OutputContent(w io.Writer, id int, siteIdentifier string, sitePath string, 
 		"site":     siteIdentifier,
 		"sitepath": sitePath}
 
-	querier := handler.Querier()
-	content, err := querier.FetchByID(id)
+	content, err := query.FetchByID(ctx, id)
+
 	if err != nil {
 		return errors.Wrap(err, "Error of outputing content while fetching content")
 	}
@@ -229,10 +229,10 @@ func OutputContent(w io.Writer, id int, siteIdentifier string, sitePath string, 
 	return err
 }
 
-type TemplateContext struct {
-	RequestContext context.Context
-	Site           string
-	SitePath       string
+type RequestInfo struct {
+	Context  context.Context
+	Site     string
+	SitePath string
 }
 
 //Output using template
@@ -246,11 +246,11 @@ func Output(w io.Writer, variables map[string]interface{}, ctx context.Context) 
 	gopath := os.Getenv("GOPATH")
 	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/github.com/digimakergo/digimaker/sitekit/templates/main.html")) //todo: use configuration
 
-	tCtx := TemplateContext{RequestContext: ctx, Site: variables["site"].(string), SitePath: variables["sitepath"].(string)}
+	info := RequestInfo{Context: ctx, Site: variables["site"].(string), SitePath: variables["sitepath"].(string)}
 
 	for name, newFunctions := range allFunctions {
 		functions := newFunctions()
-		functions.SetContext(tCtx)
+		functions.SetInfo(info)
 		functionMap := functions.GetMap()
 		variables[name] = functionMap
 	}

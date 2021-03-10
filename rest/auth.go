@@ -14,6 +14,7 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -81,7 +82,7 @@ func newAccessToken(refreshToken string, r *http.Request) (string, error) {
 		return "", errors.New("Invalid refresh token")
 	}
 
-	user, err := handler.Querier().GetUser(userID)
+	user, err := query.GetUser(userID)
 	if user == nil || err != nil {
 		if err != nil {
 			log.Error(err.Error(), "")
@@ -116,7 +117,7 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 		HandleError(errors.New("Please input username or password"), w)
 		return
 	}
-	err, user := handler.CanLogin(username, password)
+	err, user := handler.CanLogin(r.Context(), username, password)
 	if err != nil {
 		log.Error("Error when verifying username and password of "+username+": "+err.Error(), "", r.Context())
 		HandleError(errors.New("Verifying failed"), w, 400)

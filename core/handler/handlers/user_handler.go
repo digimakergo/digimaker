@@ -5,12 +5,14 @@
 package handlers
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -22,15 +24,14 @@ func (uh UserHandler) ValidateCreate(inputs handler.InputMap, parentID int) (boo
 	email := fmt.Sprint(inputs["email"])
 
 	result := handler.ValidationResult{Fields: map[string]string{}}
-	querier := handler.Querier()
 
-	existing, _ := querier.Fetch("user", db.Cond("login", login))
+	existing, _ := query.Fetch(context.Background(), "user", db.Cond("login", login))
 	if existing != nil {
 		result.Fields["login"] = "Username is used already"
 	}
 
 	if util.GetConfigSectionI("user")["unique_email"].(bool) {
-		existing, _ = querier.Fetch("user", db.Cond("email", email))
+		existing, _ = query.Fetch(context.Background(), "user", db.Cond("email", email))
 		if existing != nil {
 			result.Fields["email"] = "Email is used already"
 		}
@@ -44,11 +45,10 @@ func (uh UserHandler) ValidateUpdate(inputs handler.InputMap, content contenttyp
 	email := fmt.Sprint(inputs["email"])
 
 	result := handler.ValidationResult{Fields: map[string]string{}}
-	querier := handler.Querier()
 
 	loginField := content.Value("login").(*fieldtype.Text)
 	if loginField.String.String != login {
-		existing, _ := querier.Fetch("user", db.Cond("login", login))
+		existing, _ := query.Fetch(context.Background(), "user", db.Cond("login", login))
 		if existing != nil && existing.GetCID() != content.GetCID() { //NB. uppcase change is allowed
 			result.Fields["login"] = "Username is used already"
 		}
@@ -57,7 +57,7 @@ func (uh UserHandler) ValidateUpdate(inputs handler.InputMap, content contenttyp
 	emailField := content.Value("email").(*fieldtype.Text)
 	if emailField.String.String != email {
 		if util.GetConfigSectionI("user")["unique_email"].(bool) {
-			existing, _ := querier.Fetch("user", db.Cond("email", email))
+			existing, _ := query.Fetch(context.Background(), "user", db.Cond("email", email))
 			if existing != nil && existing.GetCID() != content.GetCID() { //NB. uppcase change is allowed
 				result.Fields["email"] = "Email is used already"
 			}

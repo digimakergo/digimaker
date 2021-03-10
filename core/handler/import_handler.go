@@ -3,12 +3,15 @@
 package handler
 
 import (
-	"github.com/digimakergo/digimaker/core/contenttype"
-	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/util"
-	"github.com/digimakergo/digimaker/core/log"
+	"context"
 	"encoding/json"
 	"strconv"
+
+	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/query"
+	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/pkg/errors"
 )
@@ -22,8 +25,8 @@ type ImportHandler struct{}
 //- update main_id where location is not the main_id.
 //- update relations content/location id
 //
-func (mh *ImportHandler) ImportAContent(contentType string, cuid string, parentUID string, contentData []byte) error {
-	existing, _ := Querier().FetchByCUID(contentType, cuid)
+func (mh *ImportHandler) ImportAContent(ctx context.Context, contentType string, cuid string, parentUID string, contentData []byte) error {
+	existing, _ := query.FetchByCUID(ctx, contentType, cuid)
 	if existing != nil {
 		//todo: for existing, maybe just update - need an option.
 		return errors.New("It's there already. cuid: " + cuid)
@@ -46,7 +49,7 @@ func (mh *ImportHandler) ImportAContent(contentType string, cuid string, parentU
 	}
 	log.Debug("Content saved. cuid: "+content.Value("cuid").(string)+", id: "+strconv.Itoa(content.GetCID()), "contenthandler.import")
 
-	parent, err := Querier().FetchByUID(parentUID)
+	parent, err := query.FetchByUID(ctx, parentUID)
 	if parent == nil {
 		return errors.Wrap(err, "Can not find parent.")
 	}
@@ -85,7 +88,7 @@ func (mh *ImportHandler) ImportAContent(contentType string, cuid string, parentU
 }
 
 //Import one line
-func (mh *ImportHandler) ImportALine(data []byte) error {
+func (mh *ImportHandler) ImportALine(ctx context.Context, data []byte) error {
 	dataMap := map[string]interface{}{}
 	json.Unmarshal(data, &dataMap)
 	contentType := dataMap["content_type"].(string)
@@ -93,7 +96,7 @@ func (mh *ImportHandler) ImportALine(data []byte) error {
 	parentUID := dataMap["parent_uid"].(string)
 	contentData, _ := json.Marshal(dataMap["data"])
 
-	err := mh.ImportAContent(contentType, cuid, parentUID, contentData)
+	err := mh.ImportAContent(ctx, contentType, cuid, parentUID, contentData)
 	return err
 }
 

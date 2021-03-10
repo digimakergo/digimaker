@@ -15,6 +15,7 @@ import (
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/gorilla/mux"
@@ -26,11 +27,11 @@ func CurrentUser(w http.ResponseWriter, r *http.Request) {
 	site := params["site"]
 
 	ctx := r.Context()
-	userID := ctx.Value(CtxKeyUserID).(int)
+	userID := util.CurrentUserID(ctx)
 
-	user, _ := handler.Querier().GetUser(userID)
+	user, _ := query.GetUser(userID)
 	if user != nil {
-		hasAccess := permission.HasAccessTo(userID, "site/access", map[string]interface{}{"site": site}, ctx)
+		hasAccess := permission.HasAccessTo(ctx, userID, "site/access", map[string]interface{}{"site": site})
 		if hasAccess {
 			data, err := json.Marshal(user)
 			if err != nil {
@@ -62,8 +63,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	email := params["email"]
 	//todo: valid if it's a email
-	querier := handler.Querier()
-	user, _ := querier.Fetch("user", db.Cond("email", email))
+	user, _ := query.Fetch(r.Context(), "user", db.Cond("email", email))
 	if user == nil {
 		HandleError(errors.New("User not found."), w)
 		return
@@ -111,7 +111,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 	hash := params["hash"]
 	dbHanldler := db.DBHanlder()
 	activation := Activiation{}
-	dbHanldler.GetEntity("dm_activation", db.Cond("hash", hash).Cond("type", "resetpassword"), []string{}, nil, &activation)
+	dbHanldler.GetEntity(r.Context(), "dm_activation", db.Cond("hash", hash).Cond("type", "resetpassword"), []string{}, nil, &activation)
 	if activation.ID == 0 {
 		HandleError(errors.New("Wrong hash?"), w)
 		return
@@ -130,8 +130,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 		}
 		if password, ok := inputs["password"]; ok {
 			ref, _ := strconv.Atoi(activation.Ref)
-			querier := handler.Querier()
-			user, _ := querier.FetchByContentID("user", ref)
+			user, _ := query.FetchByContentID(r.Context(), "user", ref)
 			if user == nil {
 				HandleError(errors.New("No user found"), w)
 				return
@@ -173,7 +172,6 @@ func EnableUser(w http.ResponseWriter, r *http.Request) {
 	ids := strings.Split(r.FormValue("id"), ",")
 	enableType := params["type"]
 
-	querier := handler.Querier()
 	users := []contenttype.ContentTyper{}
 	var err error
 	for _, id := range ids {
@@ -182,7 +180,7 @@ func EnableUser(w http.ResponseWriter, r *http.Request) {
 			HandleError(conErr, w)
 			return
 		}
-		user, _ := querier.FetchByContentID("user", idInt)
+		user, _ := query.FetchByContentID(r.Context(), "user", idInt)
 		if user == nil {
 			err = errors.New("User not found: " + id)
 		} else {

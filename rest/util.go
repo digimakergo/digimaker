@@ -15,11 +15,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
-
-	_ "github.com/digimakergo/digimaker/sitekit/filters"
 
 	"github.com/gorilla/mux"
 	pongo2 "gopkg.in/flosch/pongo2.v2"
@@ -122,13 +120,12 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 		HandleError(errors.New("id not int"), w)
 		return
 	}
-	querier := handler.Querier()
-	content, err := querier.FetchByID(idInt)
+	content, err := query.FetchByID(r.Context(), idInt)
 	if err != nil {
 		HandleError(errors.New("Content not found"), w)
 		return
 	}
-	if !permission.CanRead(userID, content, r.Context()) {
+	if !permission.CanRead(r.Context(), userID, content) {
 		HandleError(errors.New("Need permission"), w)
 		return
 	}
@@ -138,7 +135,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	variables["language"] = language
 	variables["content"] = content
 	authorID := content.Value("author").(int)
-	author, _ := querier.FetchByContentID("user", authorID)
+	author, _ := query.FetchByContentID(r.Context(), "user", authorID)
 	variables["author"] = author
 
 	data, err2 := tpl.ExecuteBytes(pongo2.Context(variables))
@@ -195,7 +192,7 @@ func GetAllowedLimitations(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, limits, err := permission.GetUserAccess(userId, operation, r.Context())
+	_, limits, err := permission.GetUserAccess(r.Context(), userId, operation)
 	if err != nil {
 		HandleError(err, w)
 	} else {

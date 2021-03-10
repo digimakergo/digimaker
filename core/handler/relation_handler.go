@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -20,7 +21,7 @@ func (handler *RelationHandler) AddContentID(to contenttype.ContentTyper, conten
 }
 
 //Add a content to current content(toContent)
-func (handler *RelationHandler) AddContent(to contenttype.ContentTyper, from contenttype.ContentTyper, identifier string, priority int, description string) error {
+func (handler *RelationHandler) AddContent(ctx context.Context, to contenttype.ContentTyper, from contenttype.ContentTyper, identifier string, priority int, description string) error {
 	//todo: validate if the fromField exist. this maybe done in bootstrap/generating datatype config
 	data, err := handler.generateData(to, identifier, from)
 	if err != nil {
@@ -34,7 +35,7 @@ func (handler *RelationHandler) AddContent(to contenttype.ContentTyper, from con
 	//Check if it's added already.
 	dbHandler := db.DBHanlder()
 	currentRelation := contenttype.Relation{}
-	dbHandler.GetEntity("dm_relation", Cond("to_content_id", contentID).
+	dbHandler.GetEntity(ctx, "dm_relation", Cond("to_content_id", contentID).
 		Cond("from_location", fromLocationID).
 		Cond("identifier", identifier),
 		[]string{}, nil,

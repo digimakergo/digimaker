@@ -26,7 +26,7 @@ type MysqlHandler struct {
 
 //Query by ID
 func (rmdb *MysqlHandler) GetByID(contentType string, tableName string, id int, content interface{}) error {
-	_, err := rmdb.GetByFields(contentType, tableName, Cond("location.id", id), []int{}, []string{}, content, false)
+	_, err := rmdb.GetByFields(context.Background(), contentType, tableName, Cond("location.id", id), []int{}, []string{}, content, false)
 	return err
 }
 
@@ -36,7 +36,7 @@ func (rmdb *MysqlHandler) GetByID(contentType string, tableName string, id int, 
 //  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
 //todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
-func (r *MysqlHandler) GetByFields(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
+func (r *MysqlHandler) GetByFields(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
 		return -1, errors.Wrap(err, "[MysqlHandler.GetByFields]Error when connecting db.")
@@ -80,12 +80,12 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
                      GROUP BY location.id, author_name
 										 ` + sortbyStr + " " + limitStr
 
-	log.Debug(sqlStr+","+fmt.Sprintln(values), "db")
+	log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Debug(err.Error(), "GetByFields")
+			log.Debug(err.Error(), "GetByFields", ctx)
 		} else {
 			message := "[MysqlHandler.GetByFields]Error when query. sql - " + sqlStr
 			return -1, errors.Wrap(err, message)
@@ -117,7 +117,7 @@ func (r *MysqlHandler) GetByFields(contentType string, tableName string, conditi
 //todo: possible to have more joins between entities, or ingegrate with ORM
 //todo: support select multiple entity once.
 //todo: support query without involing location at all.
-func (r *MysqlHandler) GetEntityContent(contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
+func (r *MysqlHandler) GetEntityContent(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
 		return -1, errors.Wrap(err, "[MysqlHandler.GetByFields]Error when connecting db.")
@@ -153,7 +153,7 @@ func (r *MysqlHandler) GetEntityContent(contentType string, tableName string, co
                      GROUP BY c.id
 										 ` + sortbyStr + " " + limitStr
 
-	log.Debug(sqlStr+","+fmt.Sprintln(values), "db")
+	log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
 
 	if err != nil {
@@ -250,7 +250,7 @@ func (*MysqlHandler) Count(tablename string, condition Condition) (int, error) {
 }
 
 //todo: support limit.
-func (r *MysqlHandler) GetEntity(tablename string, condition Condition, sortby []string, limit []int, entity interface{}) error {
+func (r *MysqlHandler) GetEntity(ctx context.Context, tablename string, condition Condition, sortby []string, limit []int, entity interface{}) error {
 	conditions, values := BuildCondition(condition)
 	sortbyStr, err := r.getSortBy(sortby)
 	if err != nil {
@@ -262,7 +262,7 @@ func (r *MysqlHandler) GetEntity(tablename string, condition Condition, sortby [
 		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
 	}
 	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions + " " + sortbyStr + limitStr
-	log.Debug(sqlStr, "db")
+	log.Debug(sqlStr, "db", ctx)
 	db, err := DB()
 	if err != nil {
 		return errors.Wrap(err, "[MysqlHandler.GetEntity]Error when connecting db.")
@@ -421,6 +421,8 @@ func (*MysqlHandler) Delete(tableName string, condition Condition, transation ..
 	if error != nil {
 		return errors.Wrap(error, "[MysqlHandler.Delete]Error when deleting. sql - "+sqlStr)
 	}
+
+	//todo: return this because it's useful for error handling
 	resultRows, _ := result.RowsAffected()
 	log.Debug("Deleted rows:"+strconv.FormatInt(resultRows, 10), "db")
 	return nil
