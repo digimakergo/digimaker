@@ -1,8 +1,0 @@
-{
-   "datatypes":["<data type check. note: maybe content model import into other places/other way. this is a check only>"],
-   "contenttypes":{"article":["<embed contentype.json or just attribute check>"]},
-   "content":{
-            "article":[{ "uid": "xxx", "cuid": "xeeee", "title": "", "relations":""},{}],
-            "image":[{"cuid":"xxxx", "src":"./var/images/011/122/1fdsf3.jpg"}]
-   }
-}
