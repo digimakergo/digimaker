@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/digimakergo/digimaker/core/auth"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/rest"
 )
 
 const tableName = "dm_token_state"
@@ -43,5 +43,5 @@ type TokenState struct {
 }
 
 func init() {
-	rest.RegisterTokenManager(DBTokenManager{})
+	auth.RegisterTokenManager(DBTokenManager{})
 }

@@ -7,13 +7,12 @@ import (
 
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/log/httplog"
+	"github.com/digimakergo/digimaker/core/util"
+
 	"github.com/gorilla/mux"
 )
 
 type key int
-
-//CtxKeyUserID defines context key for user id
-const CtxKeyUserID = key(1)
 
 var routeMap map[string]func(http.ResponseWriter, *http.Request) = map[string]func(http.ResponseWriter, *http.Request){}
 
@@ -39,7 +38,7 @@ func InitRequest(next http.Handler) http.Handler {
 		//set user_id to context
 		userID := 0
 		if r.Header.Get("Authorization") != "" {
-			err, claims := VerifyToken(r)
+			err, claims := VerifyAccessToken(r)
 
 			if err != nil {
 				if err == TokenErrorExpired {
@@ -52,7 +51,7 @@ func InitRequest(next http.Handler) http.Handler {
 			}
 
 			userID = claims.UserID
-			ctx = context.WithValue(ctx, CtxKeyUserID, claims.UserID)
+			ctx = context.WithValue(ctx, util.CtxKeyUserID, userID)
 		}
 
 		//start http log
