@@ -24,10 +24,15 @@ import (
 )
 
 func UploadFile(w http.ResponseWriter, r *http.Request) {
-	userId := CheckUserID(r.Context(), w)
-	if userId == 0 {
-		return
+	section := util.GetConfigSectionI("rest")
+	needAuth := section["upload_file_auth"].(bool)
+	if needAuth {
+		userId := CheckUserID(r.Context(), w)
+		if userId == 0 {
+			return
+		}
 	}
+
 	filename, err := HandleUploadFile(r, "*")
 	result := ""
 	if err != nil {
