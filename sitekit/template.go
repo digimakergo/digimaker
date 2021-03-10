@@ -50,8 +50,7 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 		matchLog = append(matchLog, currentMatchLog...)
 	}
 
-	log.Debug("Matching on "+content.GetName()+", got: "+path, "template-match", ctx)
-	log.Debug(strings.Join(matchLog, "\n"), "template-match", ctx)
+	log.Debug("Matching on "+content.GetName()+", got: "+path+"\n "+strings.Join(matchLog, "\n"), "template-match", ctx)
 
 	templateFolders := settings.TemplateFolders
 	result := ""

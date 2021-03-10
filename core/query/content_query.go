@@ -268,7 +268,7 @@ func Fill(ctx context.Context, contentType string, condition db.Condition, limit
 	var countResult int
 	var err error
 	if def.HasLocation {
-		countResult, err = dbhandler.GetByFields(ctx, contentType, tableName, condition, limit, sortby, content, hasCount)
+		countResult, err = dbhandler.GetContent(ctx, contentType, tableName, condition, limit, sortby, content, hasCount)
 	} else {
 		countResult, err = dbhandler.GetEntityContent(ctx, contentType, tableName, condition, limit, sortby, content, hasCount)
 	}

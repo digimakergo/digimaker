@@ -27,13 +27,13 @@ type MysqlHandler struct {
 //Query to fill in contentTyper. Use reference in content parameter.
 //It fill in with nil if nothing found(no error returned in this case)
 //  var content contenttype.Article
-//  rmdb.GetByFields("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
+//  GetContent("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
 //todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
-func (r *MysqlHandler) GetByFields(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
+func (r *MysqlHandler) GetContent(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
-		return -1, errors.Wrap(err, "[MysqlHandler.GetByFields]Error when connecting db.")
+		return -1, errors.Wrap(err, "[MysqlHandler.GetContent]Error when connecting db.")
 	}
 
 	columns := util.GetInternalSettings("location_columns")
@@ -79,9 +79,9 @@ func (r *MysqlHandler) GetByFields(ctx context.Context, contentType string, tabl
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			log.Debug(err.Error(), "GetByFields", ctx)
+			log.Debug(err.Error(), "GetContent", ctx)
 		} else {
-			message := "[MysqlHandler.GetByFields]Error when query. sql - " + sqlStr
+			message := "[MysqlHandler.GetContent]Error when query. sql - " + sqlStr
 			return -1, errors.Wrap(err, message)
 		}
 	}
@@ -114,7 +114,7 @@ func (r *MysqlHandler) GetByFields(ctx context.Context, contentType string, tabl
 func (r *MysqlHandler) GetEntityContent(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
-		return -1, errors.Wrap(err, "[MysqlHandler.GetByFields]Error when connecting db.")
+		return -1, errors.Wrap(err, "[MysqlHandler.GetEntityContent]Error when connecting db.")
 	}
 	//get condition string for fields
 	conditionStr, values := BuildCondition(condition)
@@ -154,7 +154,7 @@ func (r *MysqlHandler) GetEntityContent(ctx context.Context, contentType string,
 		if err == sql.ErrNoRows {
 			// log.Warning(err.Error(), "GetByFields")
 		} else {
-			message := "[MysqlHandler.GetByFields]Error when query. sql - " + sqlStr
+			message := "[MysqlHandler.GetEntityContent]Error when query. sql - " + sqlStr
 			return -1, errors.Wrap(err, message)
 		}
 	}
@@ -166,7 +166,7 @@ func (r *MysqlHandler) GetEntityContent(ctx context.Context, contentType string,
 
 		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
 		if err != nil {
-			message := "[MysqlHandler.GetByFields]Error when query count. sql - " + countSqlStr
+			message := "[MysqlHandler.GetEntityContent]Error when query count. sql - " + countSqlStr
 			return -1, errors.Wrap(err, message)
 		}
 		rows.Next()

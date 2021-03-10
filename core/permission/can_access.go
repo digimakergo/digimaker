@@ -150,7 +150,6 @@ func GetUpdateFields(ctx context.Context, content contenttype.ContentTyper, user
 		result = append(result, "*")
 	} else if accessType == AccessWithLimit {
 		matchData := GetMatchData(content, userID)
-		fmt.Println(matchData)
 		if content.ContentType() == "user" && content.GetCID() == userID { //todo: make "user" configurable
 			matchData["cid"] = "self"
 		}
