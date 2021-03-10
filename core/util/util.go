@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/digimakergo/digimaker/core/log"
+	"github.com/google/uuid"
 
 	"github.com/rs/xid"
 	"golang.org/x/crypto/bcrypt"

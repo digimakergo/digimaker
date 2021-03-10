@@ -15,4 +15,8 @@ func (c *ContentEntity) GetCID() int {
 	return c.ID
 }
 
+func (c *ContentEntity) GetID() int {
+	return c.ID
+}
+
 //TODO: add more common methods related to content here.

@@ -56,6 +56,10 @@ func (c *Location) ToDBValues() map[string]interface{} {
 	return result
 }
 
+func (c *Location) GetID() int {
+	return c.ID
+}
+
 func (c *Location) TableName() string {
 	return "dm_location"
 }
