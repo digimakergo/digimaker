@@ -99,22 +99,6 @@ func Fetch(ctx context.Context, contentType string, condition db.Condition) (con
 	return content, err
 }
 
-// List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
-//
-func List(ctx context.Context, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
-	contentList := contenttype.NewList(contentType)
-	count := -1
-	if withCount {
-		count = 0
-	}
-	err := Fill(ctx, contentType, condition, limit, sortby, contentList, &count)
-	if err != nil {
-		return nil, count, err
-	}
-	result := contenttype.ToList(contentType, contentList)
-	return result, count, err
-}
-
 func LocationList(condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.Location, int, error) {
 	locations := []contenttype.Location{}
 	dbHandler := db.DBHanlder()
@@ -295,6 +279,22 @@ func Fill(ctx context.Context, contentType string, condition db.Condition, limit
 	}
 	*count = countResult
 	return nil
+}
+
+// List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
+//
+func List(ctx context.Context, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
+	contentList := contenttype.NewList(contentType)
+	count := -1
+	if withCount {
+		count = 0
+	}
+	err := Fill(ctx, contentType, condition, limit, sortby, contentList, &count)
+	if err != nil {
+		return nil, count, err
+	}
+	result := contenttype.ToList(contentType, contentList)
+	return result, count, err
 }
 
 //Get version where version number is 0
