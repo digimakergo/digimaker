@@ -244,11 +244,11 @@ func SubList(ctx context.Context, rootContent contenttype.ContentTyper, contentT
 	}
 
 	//fetch
-	list, count, err := ListForUser(ctx, userID, contentType, condition, limit, sortby, withCount)
+	list, count, err := ListWithUser(ctx, userID, contentType, condition, limit, sortby, withCount)
 	return list, count, err
 }
 
-func ListForUser(ctx context.Context, userID int, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func ListWithUser(ctx context.Context, userID int, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	//permission condition
 	permissionCondition := accessCondition(userID, contentType, ctx)
 	condition = condition.And(permissionCondition)
