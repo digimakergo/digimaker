@@ -46,7 +46,7 @@ func (eh *ExportHandler) Export(ctx context.Context, content contenttype.Content
 				}
 				fromLocationUID = fromContent.GetLocation().UID
 			} else if fromContentID := relation.FromContentID; fromContentID != 0 {
-				fromContent, err := query.FetchByContentID(ctx, relation.FromType, fromContentID)
+				fromContent, err := query.FetchByCID(ctx, relation.FromType, fromContentID)
 				if err != nil {
 					return "", errors.Wrap(err, "From content not found in content relation. from_content_id: "+strconv.Itoa(relation.FromContentID))
 				}

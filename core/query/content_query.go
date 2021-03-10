@@ -50,7 +50,7 @@ func FetchByID(ctx context.Context, locationID int) (contenttype.ContentTyper, e
 	//fetch by content id.
 	contentID := location.ContentID
 	contentType := location.ContentType
-	result, err := FetchByContentID(ctx, contentType, contentID)
+	result, err := FetchByCID(ctx, contentType, contentID)
 	return result, err
 }
 
@@ -70,12 +70,12 @@ func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, erro
 	//fetch by content id.
 	contentID := location.ContentID
 	contentType := location.ContentType
-	result, err := FetchByContentID(ctx, contentType, contentID)
+	result, err := FetchByCID(ctx, contentType, contentID)
 	return result, err
 }
 
-// FetchByContentID fetches a content by content id.
-func FetchByContentID(ctx context.Context, contentType string, contentID int) (contenttype.ContentTyper, error) {
+// FetchByCID fetches a content by content id.
+func FetchByCID(ctx context.Context, contentType string, contentID int) (contenttype.ContentTyper, error) {
 	return Fetch(ctx, contentType, db.Cond("c.id", contentID))
 }
 
@@ -333,7 +333,7 @@ func Version(ctx context.Context, contentType string, condition db.Condition) (c
 }
 
 func GetUser(id int) (contenttype.ContentTyper, error) {
-	user, err := FetchByContentID(context.Background(), "user", id)
+	user, err := FetchByCID(context.Background(), "user", id)
 	return user, err
 }
 

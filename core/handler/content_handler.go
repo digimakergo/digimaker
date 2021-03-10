@@ -324,7 +324,7 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 }
 
 func (ch ContentHandler) UpdateByContentID(contentType string, contentID int, inputs InputMap, userId int) (bool, ValidationResult, error) {
-	content, err := query.FetchByContentID(ch.Context, contentType, contentID)
+	content, err := query.FetchByCID(ch.Context, contentType, contentID)
 	if err != nil {
 		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via content id.")
 	}
@@ -570,7 +570,7 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 
 //Delete content by content id
 func (ch ContentHandler) DeleteByCID(cid int, contenttype string, userId int) error {
-	content, err := query.FetchByContentID(ch.Context, contenttype, cid)
+	content, err := query.FetchByCID(ch.Context, contenttype, cid)
 	if err != nil {
 		return errors.New("[handler.delete]Content doesn't exist with cid: " + strconv.Itoa(cid))
 	}

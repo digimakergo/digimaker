@@ -135,7 +135,7 @@ func ExportPDF(w http.ResponseWriter, r *http.Request) {
 	variables["language"] = language
 	variables["content"] = content
 	authorID := content.Value("author").(int)
-	author, _ := query.FetchByContentID(r.Context(), "user", authorID)
+	author, _ := query.FetchByCID(r.Context(), "user", authorID)
 	variables["author"] = author
 
 	data, err2 := tpl.ExecuteBytes(pongo2.Context(variables))

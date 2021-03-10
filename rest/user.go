@@ -130,7 +130,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 		}
 		if password, ok := inputs["password"]; ok {
 			ref, _ := strconv.Atoi(activation.Ref)
-			user, _ := query.FetchByContentID(r.Context(), "user", ref)
+			user, _ := query.FetchByCID(r.Context(), "user", ref)
 			if user == nil {
 				HandleError(errors.New("No user found"), w)
 				return
@@ -180,7 +180,7 @@ func EnableUser(w http.ResponseWriter, r *http.Request) {
 			HandleError(conErr, w)
 			return
 		}
-		user, _ := query.FetchByContentID(r.Context(), "user", idInt)
+		user, _ := query.FetchByCID(r.Context(), "user", idInt)
 		if user == nil {
 			err = errors.New("User not found: " + id)
 		} else {
