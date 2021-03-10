@@ -5,6 +5,7 @@
 package permission
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 
@@ -69,12 +70,12 @@ type UserRole struct {
 }
 
 //todo: cache in context?
-func GetUserPolicies(userID int) ([]Policy, error) {
+func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 	dbHandler := db.DBHanlder()
 
 	//get roles of user
 	userRoleList := []UserRole{}
-	err := dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID), nil, nil, &userRoleList)
+	err := dbHandler.GetEntity(context.Background(), "dm_user_role", db.Cond("user_id", userID), nil, nil, &userRoleList)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
 	}
@@ -85,7 +86,7 @@ func GetUserPolicies(userID int) ([]Policy, error) {
 		roleIDs = append(roleIDs, userRole.RoleID)
 	}
 
-	currentPolicyList := GetRolePolicies(roleIDs)
+	currentPolicyList := GetRolePolicies(ctx, roleIDs)
 	for _, policy := range currentPolicyList {
 		policyList = append(policyList, policy)
 	}
@@ -107,12 +108,12 @@ func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]int
 	return result
 }
 
-func GetRolePolicies(roleIDs []int) []Policy {
+func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
 	roles := contenttype.NewList("role")
 	dbHandler := db.DBHanlder()
-	dbHandler.GetByFields("role", "dm_role", db.Cond("c.id", roleIDs), nil, nil, roles, false)
+	dbHandler.GetByFields(context.Background(), "role", "dm_role", db.Cond("c.id", roleIDs), nil, nil, roles, false)
 	if roles == nil {
-		log.Warning("Role doesn't exist on ID(s)"+fmt.Sprint(roleIDs), "")
+		log.Warning("Role doesn't exist on ID(s)"+fmt.Sprint(roleIDs), "permission", ctx)
 		return PolicyList{}
 	}
 
@@ -127,7 +128,7 @@ func GetRolePolicies(roleIDs []int) []Policy {
 		for _, policyIdentifier := range rolePolicyMap[roleIdentifier] {
 			//todo: different roles may have different context(eg. target) under which the policies shouldn't merge
 			if util.Contains(policyIdentifiers, policyIdentifier) {
-				log.Warning("Policelist "+policyIdentifier+" is duplicated on roles. Ignored", "")
+				log.Warning("Policelist "+policyIdentifier+" is duplicated on roles. Ignored", "permission", ctx)
 				continue
 			}
 			policyIdentifiers = append(policyIdentifiers, policyIdentifier)
@@ -137,7 +138,7 @@ func GetRolePolicies(roleIDs []int) []Policy {
 		}
 	}
 
-	log.Debug("Got policylist: "+fmt.Sprintln(policyIdentifiers), "permission")
+	log.Debug("Got policy identifiers: "+fmt.Sprintln(policyIdentifiers), "permission", ctx)
 	return policies
 }
 
@@ -146,7 +147,7 @@ func AssignToUser(roleID int, userID int) error {
 	//todo: check if user exist.
 	useRole := UserRole{}
 	dbHandler := db.DBHanlder()
-	dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID), nil, nil, &useRole)
+	dbHandler.GetEntity(context.Background(), "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID), nil, nil, &useRole)
 	if useRole.ID > 0 {
 		return errors.New("Already assigned.")
 	}

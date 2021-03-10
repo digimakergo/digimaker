@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/pkg/errors"
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/pkg/errors"
 )
 
 type AccessType int
@@ -27,26 +27,25 @@ const (
 //empty result means no access - not no limit, while a empty limit(empty map) in the slice means no limit(can do anything)
 // return access list, access type, error
 // if accessType is AccessWithLimit, there must be valid values in the access list
-func GetUserAccess(userID int, operation string, context context.Context) (AccessType, []map[string]interface{}, error) {
-	policyList, err := GetUserPolicies(userID)
-	log.Debug("Got policy list: "+fmt.Sprint(policyList), "permission")
+func GetUserAccess(ctx context.Context, userID int, operation string) (AccessType, []map[string]interface{}, error) {
+	policyList, err := GetUserPolicies(ctx, userID)
+	log.Debug("Got policy list: "+fmt.Sprint(policyList), "permission", ctx)
 	if err != nil {
 		return AccessNo, nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
 	}
 	//todo: cache limits to user, and cache anoymous globally.
 	limitList := GetLimitsFromPolicy(policyList, operation)
-	log.Debug("Got access list of "+operation+": "+fmt.Sprint(limitList), "permission")
+	log.Debug("Got access list of "+operation+": "+fmt.Sprint(limitList), "permission", ctx)
 
 	//empty access list
 	if limitList == nil {
-		log.Debug("No access.", "permission")
-		fmt.Println(userID)
+		log.Debug("No access.", "permission", ctx)
 		return AccessNo, limitList, nil
 	}
 	//check if there is an access with no limit.
 	for i, limit := range limitList {
 		if limit == nil {
-			log.Debug("Full access on "+strconv.Itoa(i+1), "permission")
+			log.Debug("Full access on "+strconv.Itoa(i+1), "permission", ctx)
 			return AccessFull, limitList, nil
 		}
 	}
@@ -54,9 +53,9 @@ func GetUserAccess(userID int, operation string, context context.Context) (Acces
 }
 
 //If the user has acccess given matchedData(realData here)
-func HasAccessTo(userID int, operation string, realData MatchData, context context.Context) bool {
+func HasAccessTo(ctx context.Context, userID int, operation string, realData MatchData) bool {
 	//get permission limits
-	accessType, limits, err := GetUserAccess(userID, operation, context)
+	accessType, limits, err := GetUserAccess(ctx, userID, operation)
 
 	if err != nil {
 		log.Error(err.Error(), "permission")
@@ -71,18 +70,18 @@ func HasAccessTo(userID int, operation string, realData MatchData, context conte
 		return false
 	}
 
-	log.Debug("Access limits: "+fmt.Sprintln(limits), "permission", context)
+	log.Debug("Access limits: "+fmt.Sprintln(limits), "permission", ctx)
 
 	//match limits
 	for i, limit := range limits {
-		log.Debug("Matching limit "+strconv.Itoa(i+1)+"/"+strconv.Itoa(len(limits)), "permission", context)
+		log.Debug("Matching limit "+strconv.Itoa(i+1)+"/"+strconv.Itoa(len(limits)), "permission", ctx)
 		policyResult, matchLog := util.MatchCondition(limit, realData)
 		for _, item := range matchLog {
-			log.Debug(item, "permission", context)
+			log.Debug(item, "permission", ctx)
 		}
 
 		if policyResult {
-			log.Debug("Policy matched.", "permission", context)
+			log.Debug("Policy matched.", "permission", ctx)
 			return true
 		}
 	}
@@ -91,7 +90,7 @@ func HasAccessTo(userID int, operation string, realData MatchData, context conte
 
 //todo: support more
 //If the use can read the content
-func CanRead(userID int, content contenttype.ContentTyper, context context.Context) bool {
+func CanRead(ctx context.Context, userID int, content contenttype.ContentTyper) bool {
 	location := content.GetLocation()
 	data := map[string]interface{}{"contenttype": content.ContentType()}
 	if location != nil {
@@ -103,23 +102,23 @@ func CanRead(userID int, content contenttype.ContentTyper, context context.Conte
 	if author != nil && (userID == author.(int)) {
 		data["author"] = "self"
 	}
-	result := HasAccessTo(userID, "content/read", data, context)
+	result := HasAccessTo(ctx, userID, "content/read", data)
 	return result
 }
 
 func CanDelete(ctx context.Context, content contenttype.ContentTyper, userId int) bool {
-	return HasAccessTo(userId, "content/delete", GetMatchData(content, userId), ctx)
+	return HasAccessTo(ctx, userId, "content/delete", GetMatchData(content, userId))
 }
 
 func CanCreate(ctx context.Context, parent contenttype.ContentTyper, contenttype string, userId int) bool {
 	data := GetMatchData(parent, userId)
 	data["contenttype"] = contenttype
-	return HasAccessTo(userId, "content/create", data, ctx)
+	return HasAccessTo(ctx, userId, "content/create", data)
 }
 
 func CanUpdate(ctx context.Context, content contenttype.ContentTyper, userId int) bool {
 	data := GetMatchData(content, userId)
-	return HasAccessTo(userId, "content/update", data, ctx)
+	return HasAccessTo(ctx, userId, "content/update", data)
 }
 
 func GetMatchData(content contenttype.ContentTyper, userId int) MatchData {
@@ -141,8 +140,8 @@ func GetMatchData(content contenttype.ContentTyper, userId int) MatchData {
 //Get update fields for this user. If content is a user content, it supports "cid":"self"
 //return fields list, if all matches, return ["*"]
 //Note: fields can not be set in different rules, meaning first matches will get the fields
-func GetUpdateFields(context context.Context, content contenttype.ContentTyper, userID int) ([]string, error) {
-	accessType, accessMap, err := GetUserAccess(userID, "content/update_fields", context)
+func GetUpdateFields(ctx context.Context, content contenttype.ContentTyper, userID int) ([]string, error) {
+	accessType, accessMap, err := GetUserAccess(ctx, userID, "content/update_fields")
 	if err != nil {
 		return nil, err
 	}

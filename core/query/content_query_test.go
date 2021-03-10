@@ -1,7 +1,7 @@
 //Author xc, Created on 2019-04-28 18:11
 //{COPYRIGHTS}
 
-package handler
+package query
 
 import (
 	"fmt"

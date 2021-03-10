@@ -10,7 +10,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit"
 	"golang.org/x/text/message"
@@ -19,9 +19,8 @@ import (
 )
 
 func dmChildren(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	querier := handler.Querier()
 	parent := in.Interface().(contenttype.ContentTyper)
-	children, _, _ := querier.Children(parent, param.String(), 1, db.EmptyCond(), []int{}, []string{}, false, context.Background())
+	children, _, _ := query.Children(context.Background(), parent, param.String(), 1, db.EmptyCond(), []int{}, []string{}, false)
 	return pongo2.AsValue(children), nil
 }
 
@@ -33,10 +32,9 @@ func dmWashNumber(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2
 }
 
 func dmParent(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	querier := handler.Querier()
 	content := in.Interface().(contenttype.ContentTyper)
 	parentID := content.Value("parent_id").(int)
-	parent, _ := querier.FetchByID(parentID)
+	parent, _ := query.FetchByID(context.Background(), parentID)
 	return pongo2.AsValue(parent), nil
 }
 
