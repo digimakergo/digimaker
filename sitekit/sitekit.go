@@ -10,6 +10,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
@@ -215,16 +216,21 @@ func OutputContent(w io.Writer, id int, siteIdentifier string, sitePath string, 
 	if err != nil {
 		return errors.Wrap(err, "Error of outputing content while fetching content")
 	}
+
 	if content == nil {
-		variables["error"] = "Content not found" //todo: use error code so can we customize it in template
+		variables["error"] = "Content not found" //todo: use error code and set variables(from template) so can we customize it in template
 	} else {
 		if !util.ContainsInt(content.GetLocation().Path(), siteSettings.RootContent.GetLocation().ID) {
 			variables["error"] = "Content not found in this site"
 		}
+
+		userID := util.CurrentUserID(ctx)
+		if !permission.CanRead(ctx, userID, content) {
+			variables["error"] = "No permission to this content"
+		}
 	}
 	variables["content"] = content
 
-	//todo: use anoymouse user id and check permission
 	err = Output(w, variables, ctx)
 	return err
 }

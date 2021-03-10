@@ -19,7 +19,7 @@ func CurrentUserID(ctx context.Context) int {
 }
 
 func AnonymousUser() int {
-	return 1 //todo: get from config
+	return 2 //todo: get from config
 }
 
 func IsAnonymousUser(ctx context.Context) bool {
