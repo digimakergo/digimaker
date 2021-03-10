@@ -16,8 +16,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type ContentQuery struct{}
-
 //TreeNode is a query result when querying SubTree
 type TreeNode struct {
 	*contenttype.Location
@@ -37,7 +35,7 @@ func (tn *TreeNode) Iterate(operation func(node *TreeNode)) {
 
 // FetchByID fetches content by location id.
 //If no location found. it will return nil and error message.
-func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, error) {
+func FetchByID(locationID int) (contenttype.ContentTyper, error) {
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
@@ -52,12 +50,12 @@ func (cq ContentQuery) FetchByID(locationID int) (contenttype.ContentTyper, erro
 	//fetch by content id.
 	contentID := location.ContentID
 	contentType := location.ContentType
-	result, err := cq.FetchByContentID(contentType, contentID)
+	result, err := FetchByContentID(contentType, contentID)
 	return result, err
 }
 
 //FetchByUID fetches content by unique id
-func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) {
+func FetchByUID(uid string) (contenttype.ContentTyper, error) {
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
@@ -72,26 +70,26 @@ func (cq ContentQuery) FetchByUID(uid string) (contenttype.ContentTyper, error) 
 	//fetch by content id.
 	contentID := location.ContentID
 	contentType := location.ContentType
-	result, err := cq.FetchByContentID(contentType, contentID)
+	result, err := FetchByContentID(contentType, contentID)
 	return result, err
 }
 
 // FetchByContentID fetches a content by content id.
-func (cq ContentQuery) FetchByContentID(contentType string, contentID int) (contenttype.ContentTyper, error) {
-	return cq.Fetch(contentType, db.Cond("c.id", contentID))
+func FetchByContentID(contentType string, contentID int) (contenttype.ContentTyper, error) {
+	return Fetch(contentType, db.Cond("c.id", contentID))
 }
 
 // FetchByCUID fetches a content by content's uid(cuid)
-func (cq ContentQuery) FetchByCUID(contentType string, cuid string) (contenttype.ContentTyper, error) {
-	return cq.Fetch(contentType, db.Cond("c.cuid", cuid))
+func FetchByCUID(contentType string, cuid string) (contenttype.ContentTyper, error) {
+	return Fetch(contentType, db.Cond("c.cuid", cuid))
 }
 
 // Fetch fetches first content based on condition.
-func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (contenttype.ContentTyper, error) {
+func Fetch(contentType string, condition db.Condition) (contenttype.ContentTyper, error) {
 	//todo: use limit in this case so it doesn't fetch more into memory.
 	content := contenttype.NewInstance(contentType)
 	count := -1
-	err := cq.Fill(contentType, condition, []int{0, 1}, []string{}, content, &count)
+	err := Fill(contentType, condition, []int{0, 1}, []string{}, content, &count)
 	if err != nil {
 		return nil, err
 	}
@@ -103,13 +101,13 @@ func (cq ContentQuery) Fetch(contentType string, condition db.Condition) (conten
 
 // List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
 //
-func (cq ContentQuery) List(contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func List(contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
 	count := -1
 	if withCount {
 		count = 0
 	}
-	err := cq.Fill(contentType, condition, limit, sortby, contentList, &count)
+	err := Fill(contentType, condition, limit, sortby, contentList, &count)
 	if err != nil {
 		return nil, count, err
 	}
@@ -117,7 +115,7 @@ func (cq ContentQuery) List(contentType string, condition db.Condition, limit []
 	return result, count, err
 }
 
-func (cq ContentQuery) LocationList(condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.Location, int, error) {
+func LocationList(condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.Location, int, error) {
 	locations := []contenttype.Location{}
 	dbHandler := db.DBHanlder()
 	err := dbHandler.GetEntity("dm_location", condition, sortby, limit, &locations)
@@ -132,22 +130,22 @@ func (cq ContentQuery) LocationList(condition db.Condition, limit []int, sortby 
 }
 
 // Children fetches children content directly under the given parentContent
-func (cq ContentQuery) Children(parentContent contenttype.ContentTyper, contenttype string, userID int, cond db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
+func Children(parentContent contenttype.ContentTyper, contenttype string, userID int, cond db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
 	contentTypeList := parentContent.Definition().AllowedTypes
 	if !util.Contains(contentTypeList, contenttype) {
 		return nil, -1, errors.New("content type " + contenttype + "doesn't exist or not allowed.")
 	}
-	result, countResult, err := cq.SubList(parentContent, contenttype, 1, userID, cond, limit, sortby, withCount, context)
+	result, countResult, err := SubList(parentContent, contenttype, 1, userID, cond, limit, sortby, withCount, context)
 	return result, countResult, err
 }
 
 // SubTree fetches content and return a tree result under rootContent, permission considered.
 // See TreeNode for the tree structure
-func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, contentTypes string, userID int, sortby []string, context context.Context) (TreeNode, error) {
+func SubTree(rootContent contenttype.ContentTyper, depth int, contentTypes string, userID int, sortby []string, context context.Context) (TreeNode, error) {
 	contentTypeList := strings.Split(contentTypes, ",")
 	var list []contenttype.ContentTyper
 	for _, contentType := range contentTypeList {
-		currentList, _, err := cq.SubList(rootContent, contentType, depth, userID, db.EmptyCond(), []int{}, sortby, false, context)
+		currentList, _, err := SubList(rootContent, contentType, depth, userID, db.EmptyCond(), []int{}, sortby, false, context)
 		if err != nil {
 			return TreeNode{}, err
 		}
@@ -157,13 +155,13 @@ func (cq ContentQuery) SubTree(rootContent contenttype.ContentTyper, depth int, 
 	}
 
 	treenode := TreeNode{Content: rootContent, Location: rootContent.GetLocation()}
-	cq.buildTree(&treenode, list)
+	buildTree(&treenode, list)
 	return treenode, nil
 }
 
 //build tree from list. Internal use.
 //If there are items not in the tree(parent id is NOT equal to anyone in the list), they will not be attached to the tree.
-func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentTyper) {
+func buildTree(treenode *TreeNode, list []contenttype.ContentTyper) {
 	//Add current level contents
 	parentLocation := treenode.Content.GetLocation()
 	for _, item := range list {
@@ -175,7 +173,7 @@ func (cq ContentQuery) buildTree(treenode *TreeNode, list []contenttype.ContentT
 
 	//Add sub level. If it's leaf node it will not run the loop.
 	for i, _ := range treenode.Children {
-		cq.buildTree(&treenode.Children[i], list)
+		buildTree(&treenode.Children[i], list)
 	}
 }
 
@@ -242,7 +240,7 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 }
 
 // SubList fetches content list with permission considered(only return contents the user has access to).
-func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
+func SubList(rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool, context context.Context) ([]contenttype.ContentTyper, int, error) {
 	rootLocation := rootContent.GetLocation()
 	if depth == 1 {
 		//Direct children
@@ -262,22 +260,22 @@ func (cq ContentQuery) SubList(rootContent contenttype.ContentTyper, contentType
 	}
 
 	//fetch
-	list, count, err := cq.ListForUser(context, userID, contentType, condition, limit, sortby, withCount)
+	list, count, err := ListForUser(context, userID, contentType, condition, limit, sortby, withCount)
 	return list, count, err
 }
 
-func (cq ContentQuery) ListForUser(context context.Context, userID int, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func ListForUser(context context.Context, userID int, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	//permission condition
 	permissionCondition := accessCondition(userID, contentType, context)
 	condition = condition.And(permissionCondition)
 
 	//fetch
-	list, count, err := cq.List(contentType, condition, limit, sortby, withCount)
+	list, count, err := List(contentType, condition, limit, sortby, withCount)
 	return list, count, err
 }
 
 //Fill all data into content which is a pointer
-func (cq ContentQuery) Fill(contentType string, condition db.Condition, limit []int, sortby []string, content interface{}, count *int) error {
+func Fill(contentType string, condition db.Condition, limit []int, sortby []string, content interface{}, count *int) error {
 	dbhandler := db.DBHanlder()
 	def, _ := contenttype.GetDefinition(contentType)
 	tableName := def.TableName
@@ -300,12 +298,12 @@ func (cq ContentQuery) Fill(contentType string, condition db.Condition, limit []
 }
 
 //Get version where version number is 0
-func (cq ContentQuery) Draft(author int) {
+func Draft(author int) {
 
 }
 
 //return a version content
-func (cq ContentQuery) Version(contentType string, condition db.Condition) (contenttype.Version, contenttype.ContentTyper, error) {
+func Version(contentType string, condition db.Condition) (contenttype.Version, contenttype.ContentTyper, error) {
 	_, err := contenttype.GetDefinition(contentType)
 	if err != nil {
 		return contenttype.Version{}, nil, err
@@ -334,20 +332,20 @@ func (cq ContentQuery) Version(contentType string, condition db.Condition) (cont
 	return version, content, nil
 }
 
-func (cq ContentQuery) GetUser(id int) (contenttype.ContentTyper, error) {
+func GetUser(id int) (contenttype.ContentTyper, error) {
 	querier := Querier()
 	user, err := querier.FetchByContentID("user", id)
 	return user, err
 }
 
-func (cq ContentQuery) GetContentAuthor(content contenttype.ContentTyper) (contenttype.ContentTyper, error) {
+func GetContentAuthor(content contenttype.ContentTyper) (contenttype.ContentTyper, error) {
 	authorID := content.Value("author").(int)
-	user, err := cq.GetUser(authorID)
+	user, err := GetUser(authorID)
 	return user, err
 }
 
 //GetRelationOptions get content list based on relation parameters
-func (cq ContentQuery) RelationOptions(ctype string, identifier string, limit []int, sortby []string, hasCount bool) ([]contenttype.ContentTyper, int, error) {
+func RelationOptions(ctype string, identifier string, limit []int, sortby []string, hasCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentDef, err := contenttype.GetDefinition(ctype)
 	if err != nil {
 		return nil, 0, errors.New("Can not get content defintion of " + ctype)
@@ -367,12 +365,5 @@ func (cq ContentQuery) RelationOptions(ctype string, identifier string, limit []
 	for cKey, cValue := range params.Condition {
 		condition = condition.And(cKey, cValue)
 	}
-	return cq.List(params.Type, condition, limit, sortby, hasCount)
-}
-
-//todo: use method instead of global variable
-var querier ContentQuery = ContentQuery{}
-
-func Querier() ContentQuery {
-	return querier
+	return List(params.Type, condition, limit, sortby, hasCount)
 }
