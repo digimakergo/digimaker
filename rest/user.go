@@ -111,7 +111,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 	hash := params["hash"]
 	dbHanldler := db.DBHanlder()
 	activation := Activiation{}
-	dbHanldler.GetEntity(r.Context(), "dm_activation", db.Cond("hash", hash).Cond("type", "resetpassword"), []string{}, nil, &activation)
+	dbHanldler.GetEntity(r.Context(), "dm_activation", db.Cond("hash", hash).Cond("type", "resetpassword"), []string{}, nil, &activation, false)
 	if activation.ID == 0 {
 		HandleError(errors.New("Wrong hash?"), w)
 		return

@@ -26,8 +26,6 @@ type MysqlHandler struct {
 
 //Query to fill in contentTyper. Use reference in content parameter.
 //It fill in with nil if nothing found(no error returned in this case)
-//  var content contenttype.Article
-//  GetContent("article", map[string]interface{}{"id": 12}, {{"name","asc"}} content)
 //
 //todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
 func (r *MysqlHandler) GetContent(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
@@ -244,11 +242,11 @@ func (*MysqlHandler) Count(tablename string, condition Condition) (int, error) {
 }
 
 //todo: support limit.
-func (r *MysqlHandler) GetEntity(ctx context.Context, tablename string, condition Condition, sortby []string, limit []int, entity interface{}) error {
+func (r *MysqlHandler) GetEntity(ctx context.Context, tablename string, condition Condition, sortby []string, limit []int, entity interface{}, count bool) (int, error) {
 	conditions, values := BuildCondition(condition)
 	sortbyStr, err := r.getSortBy(sortby)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	limitStr := ""
@@ -259,9 +257,10 @@ func (r *MysqlHandler) GetEntity(ctx context.Context, tablename string, conditio
 	log.Debug(sqlStr, "db", ctx)
 	db, err := DB()
 	if err != nil {
-		return errors.Wrap(err, "[MysqlHandler.GetEntity]Error when connecting db.")
+		return 0, errors.Wrap(err, "[MysqlHandler.GetEntity]Error when connecting db.")
 	}
 
+	//Fill in with DatamapList or other entity
 	if entityList, ok := entity.(*DatamapList); ok {
 		rows, rowError := queries.Raw(sqlStr, values...).QueryContext(context.Background(), db)
 		cols, _ := rows.Columns()
@@ -278,7 +277,7 @@ func (r *MysqlHandler) GetEntity(ctx context.Context, tablename string, conditio
 			}
 
 			if err := rows.Scan(columnPointers...); err != nil {
-				return err
+				return 0, err
 			}
 
 			//set to datamap
@@ -303,9 +302,18 @@ func (r *MysqlHandler) GetEntity(ctx context.Context, tablename string, conditio
 	if err == sql.ErrNoRows {
 		// log.Warning(err.Error(), "GetEntity")
 	} else {
-		return errors.Wrap(err, "[MysqlHandler.GetEntity]Error when query.")
+		return 0, errors.Wrap(err, "[MysqlHandler.GetEntity]Error when query.")
 	}
-	return nil
+
+	//count
+	countResult := 0
+	if count {
+		countResult, err = r.Count(tablename, condition)
+		if err != nil {
+			return 0, err
+		}
+	}
+	return countResult, nil
 }
 
 func (MysqlHandler) Insert(tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {

@@ -39,7 +39,7 @@ func FetchByID(ctx context.Context, locationID int) (contenttype.ContentTyper, e
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEntity(ctx, "dm_location", db.Cond("id", locationID), []string{}, nil, &location)
+	_, err := dbhandler.GetEntity(ctx, "dm_location", db.Cond("id", locationID), []string{}, nil, &location, false)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
 	}
@@ -59,7 +59,7 @@ func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, erro
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	err := dbhandler.GetEntity(ctx, "dm_location", db.Cond("uid", uid), []string{}, nil, &location)
+	_, err := dbhandler.GetEntity(ctx, "dm_location", db.Cond("uid", uid), []string{}, nil, &location, false)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyuid]Can not fetch location by uid "+uid)
 	}
@@ -102,11 +102,7 @@ func Fetch(ctx context.Context, contentType string, condition db.Condition) (con
 func LocationList(condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.Location, int, error) {
 	locations := []contenttype.Location{}
 	dbHandler := db.DBHanlder()
-	err := dbHandler.GetEntity(context.Background(), "dm_location", condition, sortby, limit, &locations)
-	count := 0
-	if withCount {
-		count, _ = dbHandler.Count("dm_location", condition)
-	}
+	count, err := dbHandler.GetEntity(context.Background(), "dm_location", condition, sortby, limit, &locations, withCount)
 	if err != nil {
 		return locations, 0, err
 	}
@@ -307,7 +303,7 @@ func Version(ctx context.Context, contentType string, condition db.Condition) (c
 
 	version := contenttype.Version{}
 	dbHandler := db.DBHanlder()
-	err = dbHandler.GetEntity(ctx, "dm_version", condition.Cond("content_type", contentType), []string{}, nil, &version)
+	_, err = dbHandler.GetEntity(ctx, "dm_version", condition.Cond("content_type", contentType), []string{}, nil, &version, false)
 	if err != nil {
 		return contenttype.Version{}, nil, err
 	}

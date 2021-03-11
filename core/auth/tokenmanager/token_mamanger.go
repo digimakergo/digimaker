@@ -25,7 +25,7 @@ func (d DBTokenManager) Store(id string, expiry int64, claims map[string]interfa
 func (d DBTokenManager) Get(id string) interface{} {
 	dbHandler := db.DBHanlder()
 	entity := TokenState{}
-	err := dbHandler.GetEntity(context.Background(), tableName, db.Cond("guid", id).Cond("expiry>=", time.Now().Unix()), nil, nil, &entity)
+	_, err := dbHandler.GetEntity(context.Background(), tableName, db.Cond("guid", id).Cond("expiry>=", time.Now().Unix()), nil, nil, &entity, false)
 	if err != nil || entity.GUID == "" {
 		return nil
 	}

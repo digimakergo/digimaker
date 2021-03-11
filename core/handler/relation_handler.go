@@ -39,7 +39,8 @@ func (handler *RelationHandler) AddContent(ctx context.Context, to contenttype.C
 		Cond("from_location", fromLocationID).
 		Cond("identifier", identifier),
 		[]string{}, nil,
-		&currentRelation)
+		&currentRelation,
+		false)
 
 	if currentRelation.ID != 0 {
 		return errors.New("[relationhandler.Add]Relation existing already to " +

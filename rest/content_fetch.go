@@ -103,7 +103,8 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 		db.Cond("content_id", content.GetCID()).Cond("content_type", content.ContentType()).Cond("version", versionNo),
 		[]string{},
 		nil,
-		&version)
+		&version,
+		false)
 	if version.ID == 0 {
 		HandleError(errors.New("version doesn't exist."), w)
 		return
