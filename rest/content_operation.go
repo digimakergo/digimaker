@@ -51,8 +51,8 @@ func New(w http.ResponseWriter, r *http.Request) {
 	}
 	//todo: add value based on definition
 
-	handler := handler.ContentHandler{Context: r.Context()}
-	content, validationResult, err := handler.Create(contentType, inputs, userId, parentInt)
+	handler := handler.ContentHandler{}
+	content, validationResult, err := handler.Create(r.Context(), contentType, inputs, userId, parentInt)
 
 	w.Header().Set("content-type", "application/json")
 	if !validationResult.Passed() {
@@ -183,16 +183,16 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 	//todo: add value based on definition
 
-	updateHandler := handler.ContentHandler{Context: r.Context()}
+	updateHandler := handler.ContentHandler{}
 
 	contenttype := params["contenttype"]
 	var result bool
 	var validationResult handler.ValidationResult
 
 	if contenttype == "" {
-		result, validationResult, err = updateHandler.UpdateByID(idInt, inputs, userID)
+		result, validationResult, err = updateHandler.UpdateByID(r.Context(), idInt, inputs, userID)
 	} else {
-		result, validationResult, err = updateHandler.UpdateByContentID(contenttype, idInt, inputs, userID)
+		result, validationResult, err = updateHandler.UpdateByContentID(r.Context(), contenttype, idInt, inputs, userID)
 	}
 
 	if !result {
@@ -317,9 +317,8 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		for _, id := range idSlice {
 			idInt, _ := strconv.Atoi(id)
 			handler := handler.ContentHandler{}
-			handler.Context = r.Context()
 			//todo: use Delete by ids to support one transaction with roll back
-			err := handler.DeleteByID(idInt, userID, true)
+			err := handler.DeleteByID(r.Context(), idInt, userID, true)
 			if err != nil {
 				HandleError(err, w)
 				return
@@ -337,8 +336,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		for _, cid := range cids {
 			cidInt, _ := strconv.Atoi(cid)
 			handler := handler.ContentHandler{}
-			handler.Context = r.Context()
-			err := handler.DeleteByCID(cidInt, contenttype, userID)
+			err := handler.DeleteByCID(r.Context(), cidInt, contenttype, userID)
 			if err != nil {
 				HandleError(err, w)
 				return
