@@ -28,6 +28,7 @@ type MysqlHandler struct {
 //It fill in with nil if nothing found(no error returned in this case)
 //
 //todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
+//todo: merge GetContent with GetEntityContent, remove contentType, tablename parameters because they are in contentType interface
 func (r *MysqlHandler) GetContent(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
@@ -89,12 +90,12 @@ func (r *MysqlHandler) GetContent(ctx context.Context, contentType string, table
 	if count {
 		countSqlStr := `SELECT COUNT(*) AS count
 									 FROM ( ` + tableName + ` c
-										 INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=c.id )
+										 INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id )
 										 ` + where
 
 		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
 		if err != nil {
-			message := "[MysqlHandler.GetByFields]Error when query count. sql - " + countSqlStr
+			message := "[MysqlHandler.GetContent]Error when query count. sql - " + countSqlStr
 			return -1, errors.Wrap(err, message)
 		}
 		rows.Next()
@@ -430,6 +431,7 @@ func (*MysqlHandler) Delete(tableName string, condition Condition, transation ..
 	return nil
 }
 
+//todo: consider to remove DBHanlder()?
 var dbObject = MysqlHandler{}
 
 func DBHanlder() MysqlHandler {
