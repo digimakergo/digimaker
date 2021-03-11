@@ -193,7 +193,7 @@ func EnableUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, user := range users {
-		err = handler.Enable(user, enableType == "1", userID, r.Context())
+		err = handler.Enable(r.Context(), user, enableType == "1", userID)
 		if err != nil {
 			HandleError(err, w)
 			return
