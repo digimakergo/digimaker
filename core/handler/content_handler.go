@@ -159,7 +159,7 @@ func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs
 	contentTypeHandler := GetContentTypeHandler(contentType)
 	if validator, ok := contentTypeHandler.(ContentTypeHandlerValidate); ok {
 		log.Debug("Validating from content type handler", "contenthandler.validate", ctx)
-		valid, validationResult = validator.ValidateCreate(inputs, parentID)
+		valid, validationResult = validator.ValidateCreate(ctx, inputs, parentID)
 		if !valid {
 			return nil, validationResult, nil
 		}
@@ -230,7 +230,7 @@ func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs
 	//call content type handler
 	if creater, ok := contentTypeHandler.(ContentTypeHandlerCreate); ok {
 		log.Debug("Calling handler for "+contentType, "contenthandler.create", ctx)
-		err := creater.Create(content, inputs, parentID)
+		err := creater.Create(ctx, content, inputs, parentID)
 		if err != nil {
 			tx.Rollback()
 			log.Error("Error from callback: "+err.Error(), "contenthandler.create", ctx)
@@ -287,7 +287,7 @@ func (ch ContentHandler) InvokeCallback(ctx context.Context, event string, stopO
 	for i, operationHandler := range operationHandlerList {
 		log.Debug(strconv.Itoa(i+1)+"/"+strconv.Itoa(count)+
 			" Invoking operation "+operationHandler.Identifier+" on "+event, "contehandler.invoke_callback", ctx)
-		err := operationHandler.Execute(event, content, params...)
+		err := operationHandler.Execute(ctx, event, content, params...)
 		if err != nil && stopOnError {
 			log.Error("Error when invoking operation handler "+operationHandler.Identifier+":"+err.Error(), "contehandler.invoke_callback", ctx)
 			return err
@@ -382,7 +382,7 @@ func (ch ContentHandler) Update(ctx context.Context, content contenttype.Content
 	contentTypeHandler := GetContentTypeHandler(contentType)
 	if validator, ok := contentTypeHandler.(ContentTypeHandlerValidate); ok {
 		log.Debug("Validating from update handler", "contenthandler.validate", ctx)
-		valid, validationResult = validator.ValidateUpdate(inputs, content)
+		valid, validationResult = validator.ValidateUpdate(ctx, inputs, content)
 		if !valid {
 			return false, validationResult, nil
 		}
@@ -459,7 +459,7 @@ func (ch ContentHandler) Update(ctx context.Context, content contenttype.Content
 	//call content type handler
 	if updater, ok := contentTypeHandler.(ContentTypeHandlerUpdate); ok {
 		log.Debug("Calling handler for "+contentType, "contenthandler.update", ctx)
-		err := updater.Update(content, inputs)
+		err := updater.Update(ctx, content, inputs)
 		if err != nil {
 			tx.Rollback()
 			log.Error("Error from callback: "+err.Error(), "contenthandler.update", ctx)
@@ -654,7 +654,7 @@ func (ch ContentHandler) DeleteByContent(ctx context.Context, content contenttyp
 
 	contentTypeHandler := GetContentTypeHandler(content.ContentType())
 	if deleter, ok := contentTypeHandler.(ContentTypeHandlerDelete); ok {
-		err = deleter.Delete(content)
+		err = deleter.Delete(ctx, content)
 		if err != nil {
 			tx.Rollback()
 		}

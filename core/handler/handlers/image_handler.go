@@ -5,6 +5,8 @@
 package handlers
 
 import (
+	"context"
+
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/handler"
 )
@@ -13,7 +15,7 @@ type ImageHandler struct {
 }
 
 //When creating on server side, or import.
-func (ih ImageHandler) Create(content contenttype.ContentTyper, inputs handler.InputMap, parentID int) error {
+func (ih ImageHandler) Create(ctx context.Context, content contenttype.ContentTyper, inputs handler.InputMap, parentID int) error {
 	content.SetValue("parent_id", parentID)
 	return nil
 }

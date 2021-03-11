@@ -3,14 +3,16 @@
 package handlers
 
 import (
+	"context"
+	"fmt"
+
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/handler"
-	"fmt"
 )
 
 func init() {
 	oHandller := handler.OperationHandler{Identifier: "test_handler",
-		Execute: func(triggedEvent string, content contenttype.ContentTyper, params ...interface{}) error {
+		Execute: func(ctx context.Context, triggedEvent string, content contenttype.ContentTyper, params ...interface{}) error {
 			fmt.Println("test handler invoked. trigger: " + triggedEvent)
 			return nil
 		}}

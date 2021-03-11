@@ -19,7 +19,7 @@ import (
 type UserHandler struct {
 }
 
-func (uh UserHandler) ValidateCreate(inputs handler.InputMap, parentID int) (bool, handler.ValidationResult) {
+func (uh UserHandler) ValidateCreate(ctx context.Context, inputs handler.InputMap, parentID int) (bool, handler.ValidationResult) {
 	login := fmt.Sprint(inputs["login"])
 	email := fmt.Sprint(inputs["email"])
 
@@ -40,7 +40,7 @@ func (uh UserHandler) ValidateCreate(inputs handler.InputMap, parentID int) (boo
 	return result.Passed(), result
 }
 
-func (uh UserHandler) ValidateUpdate(inputs handler.InputMap, content contenttype.ContentTyper) (bool, handler.ValidationResult) {
+func (uh UserHandler) ValidateUpdate(ctx context.Context, inputs handler.InputMap, content contenttype.ContentTyper) (bool, handler.ValidationResult) {
 	login := fmt.Sprint(inputs["login"])
 	email := fmt.Sprint(inputs["email"])
 
