@@ -38,7 +38,7 @@ func (r *MysqlHandler) GetContent(ctx context.Context, contentType string, table
 
 	columns := util.GetInternalSettings("location_columns")
 	columnsWithPrefix := util.Iterate(columns, func(s string) string {
-		return `location.` + s + ` AS "location.` + s + `"`
+		return `l.` + s + ` AS "location.` + s + `"`
 	})
 	locationColumns := strings.Join(columnsWithPrefix, ",")
 
@@ -67,11 +67,11 @@ func (r *MysqlHandler) GetContent(ctx context.Context, contentType string, table
 	}
 
 	sqlStr := `SELECT c.*, c.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
-                   FROM (` + tableName + ` c INNER JOIN dm_location location ON location.content_type = '` + contentType + `' AND location.content_id=c.id)
+                   FROM (` + tableName + ` c INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id)
                      LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
 										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author
                     ` + where + `
-                     GROUP BY location.id, author_name
+                     GROUP BY l.id, author_name
 										 ` + sortbyStr + " " + limitStr
 
 	log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
@@ -200,7 +200,7 @@ func (r *MysqlHandler) getSortBy(sortby []string, locationColumns ...[]string) (
 			itemArr := util.Split(item, " ")
 			sortByField := itemArr[0]
 			if len(locationColumns) > 0 && util.Contains(locationColumns[0], sortByField) {
-				sortByField = "location." + sortByField
+				sortByField = "l." + sortByField
 			}
 			sortByOrder := "ASC"
 

@@ -136,7 +136,7 @@ func buildCondition(userid int, def contenttype.ContentType, query url.Values) (
 		if err != nil {
 			return db.EmptyCond(), errors.New("Wrong id format")
 		}
-		condition = condition.And("location.id", ids)
+		condition = condition.And("l.id", ids)
 	}
 
 	//cid
@@ -157,7 +157,7 @@ func buildCondition(userid int, def contenttype.ContentType, query url.Values) (
 			fmt.Printf("savan" + contains[1])
 			//todo: esc % to inside in condition
 			cValue := "%" + contains[1] + "%"
-			condition = condition.And("location.name like", cValue)
+			condition = condition.And("l.name like", cValue)
 		}
 	}
 	//filter

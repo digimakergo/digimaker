@@ -200,7 +200,7 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 		currentCond := db.EmptyCond()
 
 		if section, ok := limit["section"]; ok {
-			currentCond = currentCond.Cond("location.section", util.InterfaceToStringArray(section.([]interface{})))
+			currentCond = currentCond.Cond("l.section", util.InterfaceToStringArray(section.([]interface{})))
 		}
 
 		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
@@ -213,7 +213,7 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 		//todo: current self author will override the other policy. to be fixed.
 		if author, ok := limit["author"]; ok {
 			if author.(string) == "self" {
-				currentCond = currentCond.Cond("author", userID)
+				currentCond = currentCond.Cond("l.author", userID)
 			}
 		}
 
@@ -230,16 +230,16 @@ func SubList(ctx context.Context, rootContent contenttype.ContentTyper, contentT
 		//Direct children
 		def, _ := contenttype.GetDefinition(contentType)
 		if def.HasLocation {
-			condition = condition.Cond("location.parent_id", rootLocation.ID)
+			condition = condition.Cond("l.parent_id", rootLocation.ID)
 		} else {
 			condition = condition.Cond("location_id", rootLocation.ID)
 		}
 	} else {
 		rootHierarchy := rootLocation.Hierarchy
 		rootDepth := rootLocation.Depth
-		condition = condition.Cond("location.hierarchy like", rootHierarchy+"/%")
+		condition = condition.Cond("l.hierarchy like", rootHierarchy+"/%")
 		if depth > 0 {
-			condition = condition.Cond("location.depth <=", rootDepth+depth)
+			condition = condition.Cond("l.depth <=", rootDepth+depth)
 		}
 	}
 
@@ -282,7 +282,7 @@ func Fill(ctx context.Context, contentType string, condition db.Condition, limit
 }
 
 // List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
-//
+// Condition example: db.Cond("l.author", 1).Cond("c.modified >", "2020-03-13") where field should start with "c."
 func List(ctx context.Context, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
 	count := -1
@@ -295,11 +295,6 @@ func List(ctx context.Context, contentType string, condition db.Condition, limit
 	}
 	result := contenttype.ToList(contentType, contentList)
 	return result, count, err
-}
-
-//Get version where version number is 0
-func Draft(author int) {
-
 }
 
 //return a version content
