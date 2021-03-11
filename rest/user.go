@@ -89,7 +89,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	data, _ := json.Marshal(activation)
 	var dbMap map[string]interface{}
 	json.Unmarshal(data, &dbMap)
-	_, err := dbHandler.Insert("dm_activation", dbMap)
+	_, err := dbHandler.Insert(r.Context(), "dm_activation", dbMap)
 	if err == nil {
 		//send password
 		url := "http://xxxx.com/api/user/resetpassword-confirm/" + activation.Hash
@@ -153,7 +153,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			dbHanldler.Delete("dm_activation", db.Cond("id", activation.ID))
+			dbHanldler.Delete(r.Context(), "dm_activation", db.Cond("id", activation.ID))
 
 			w.Write([]byte("1"))
 		}

@@ -1,6 +1,7 @@
 package contenttype
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 
@@ -93,11 +94,11 @@ func (c *ContentCommon) GetRelations() *ContentRelationList {
 	return &c.Relations
 }
 
-func (c *ContentCommon) StoreRelations(thisContenttype string, transaction ...*sql.Tx) error {
+func (c *ContentCommon) StoreRelations(ctx context.Context, thisContenttype string, transaction ...*sql.Tx) error {
 	dbHandler := db.DBHanlder()
 
 	//delete
-	err := dbHandler.Delete("dm_relation", db.Cond("to_content_id", c.CID).Cond("to_type", thisContenttype), transaction...)
+	err := dbHandler.Delete(ctx, "dm_relation", db.Cond("to_content_id", c.CID).Cond("to_type", thisContenttype), transaction...)
 	if err != nil {
 		return err
 	}
@@ -112,7 +113,7 @@ func (c *ContentCommon) StoreRelations(thisContenttype string, transaction ...*s
 			dataMap["to_content_id"] = c.CID
 			dataMap["to_type"] = thisContenttype
 			dataMap["priority"] = relation.Priority
-			_, err := dbHandler.Insert("dm_relation", dataMap, transaction...)
+			_, err := dbHandler.Insert(ctx, "dm_relation", dataMap, transaction...)
 			if err != nil {
 				return err
 			}

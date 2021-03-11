@@ -104,7 +104,7 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := permission.AssignToUser(role.GetCID(), assignedUserID)
+	err := permission.AssignToUser(r.Context(), role.GetCID(), assignedUserID)
 
 	if err != nil {
 		log.Error("Error when assigning: "+err.Error(), "")
@@ -131,7 +131,7 @@ func UnassignUser(w http.ResponseWriter, r *http.Request) {
 	userID, _ := strconv.Atoi(params["user"])
 	roleID, _ := strconv.Atoi(params["role"])
 
-	err := permission.RemoveAssignment(userID, roleID)
+	err := permission.RemoveAssignment(r.Context(), userID, roleID)
 	if err != nil {
 		HandleError(err, w)
 		return

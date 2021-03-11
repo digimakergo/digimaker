@@ -15,10 +15,10 @@ const tableName = "dm_token_state"
 type DBTokenManager struct {
 }
 
-func (d DBTokenManager) Store(id string, expiry int64, claims map[string]interface{}) error {
+func (d DBTokenManager) Store(ctx context.Context, id string, expiry int64, claims map[string]interface{}) error {
 	dbHandler := db.DBHanlder()
 	tokenState := map[string]interface{}{"guid": id, "expiry": expiry}
-	_, err := dbHandler.Insert(tableName, tokenState)
+	_, err := dbHandler.Insert(ctx, tableName, tokenState)
 	return err
 }
 
@@ -32,9 +32,9 @@ func (d DBTokenManager) Get(id string) interface{} {
 	return entity
 }
 
-func (d DBTokenManager) Delete(id string) error {
+func (d DBTokenManager) Delete(ctx context.Context, id string) error {
 	dbHandler := db.DBHanlder()
-	return dbHandler.Delete(tableName, db.Cond("guid", id))
+	return dbHandler.Delete(ctx, tableName, db.Cond("guid", id))
 }
 
 type TokenState struct {

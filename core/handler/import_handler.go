@@ -42,7 +42,7 @@ func (mh *ImportHandler) ImportAContent(ctx context.Context, contentType string,
 
 	content.SetValue("cid", 0)
 	log.Debug("Saving content first.", "import")
-	err = content.Store(tx)
+	err = content.Store(ctx, tx)
 	if err != nil {
 		tx.Rollback()
 		return errors.Wrap(err, "Can not saved. Rolled back.")
@@ -59,7 +59,7 @@ func (mh *ImportHandler) ImportAContent(ctx context.Context, contentType string,
 		location.ID = 0
 		location.ParentID = parentID
 		location.ContentID = content.GetCID()
-		err = location.Store(tx)
+		err = location.Store(ctx, tx)
 		log.Debug("Saving location.", "contenthandler.import")
 		if err != nil {
 			tx.Rollback()

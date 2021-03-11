@@ -75,7 +75,7 @@ func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]cont
 
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
-func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, userId int, tx *sql.Tx, parentID int) error {
+func (ch *ContentHandler) storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, userId int, tx *sql.Tx, parentID int) error {
 	if content.GetCID() == 0 {
 		log.Debug("Content is new.", "contenthandler.StoreCreatedContent", ch.Context)
 	}
@@ -84,7 +84,7 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 	if !contentDefinition.HasLocation {
 		content.SetValue("location_id", parentID)
 	}
-	err := content.Store(tx)
+	err := content.Store(ctx, tx)
 	if err != nil {
 		return err
 	}
@@ -111,14 +111,14 @@ func (ch *ContentHandler) storeCreatedContent(content contenttype.ContentTyper, 
 		location.Section = parent.Section
 		location.Name = contentName
 
-		err = location.Store(tx)
+		err = location.Store(ch.Context, tx)
 
 		if err != nil {
 			return errors.Wrap(err, "Transaction failed in location when saving new location.")
 		}
 		location.Hierarchy = parent.Hierarchy + "/" + strconv.Itoa(location.ID)
 		location.MainID = location.ID
-		err = location.Store(tx)
+		err = location.Store(ch.Context, tx)
 		if err != nil {
 			return errors.Wrap(err, "Transaction failed in location when saving location for main_id and hierarchy.")
 		}
@@ -210,7 +210,7 @@ func (ch *ContentHandler) Create(contentType string, inputs InputMap, userId int
 		content.SetValue("version", versionIfNeeded)
 	}
 
-	err = ch.storeCreatedContent(content, userId, tx, parentID)
+	err = ch.storeCreatedContent(ch.Context, content, userId, tx, parentID)
 	if err != nil {
 		tx.Rollback()
 		log.Error(err.Error(), "contenthandler.Create", ch.Context)
@@ -314,7 +314,7 @@ func (ch ContentHandler) CreateVersion(content contenttype.ContentTyper, version
 	version.Version = versionNumber
 	version.Data = data
 	//version.Created = content.Value("created").(int)
-	err = version.Store(tx)
+	err = version.Store(ch.Context, tx)
 	if err != nil {
 		tx.Rollback()
 		return 0, errors.Wrap(err, "Can not save version on contetent id: "+strconv.Itoa(id))
@@ -434,7 +434,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs InputMa
 	//Save update content.
 	log.Debug("Saving content", "contenthandler.update", ch.Context)
 
-	err = content.Store(tx)
+	err = content.Store(ch.Context, tx)
 	if err != nil {
 		tx.Rollback()
 		log.Debug("Saving content failed: "+err.Error(), "contenthandler.update", ch.Context)
@@ -448,7 +448,7 @@ func (ch ContentHandler) Update(content contenttype.ContentTyper, inputs InputMa
 		location.Name = GenerateName(content)
 		//todo: location.IdentifierPath =
 		log.Debug("Updating location info", "contenthandler.update", ch.Context)
-		err := location.Store(tx)
+		err := location.Store(ch.Context, tx)
 		if err != nil {
 			tx.Rollback()
 			log.Debug("Updating location failed: "+err.Error(), "contenthandler.update", ch.Context)
@@ -544,7 +544,7 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 		location.IdentifierPath = newPath
 
 		location.Depth = len(strings.Split(newHiearachy, "/"))
-		location.Store(tx)
+		location.Store(ctx, tx)
 
 		//update location
 		subLocations := []contenttype.Location{}
@@ -561,7 +561,7 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 			subLocation.Hierarchy = newHiearachy + strings.TrimPrefix(subLocation.Hierarchy, oldHiearachy)
 			subLocation.IdentifierPath = newPath + strings.TrimPrefix(subLocation.IdentifierPath, oldPath)
 			subLocation.Depth = len(strings.Split(subLocation.Hierarchy, "/"))
-			subLocation.Store(tx)
+			subLocation.Store(ctx, tx)
 		}
 	}
 	tx.Commit()
@@ -609,7 +609,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 
 	def := content.Definition()
 	if !def.HasLocation {
-		err := content.Delete(tx)
+		err := content.Delete(ch.Context, tx)
 		if err != nil {
 			return err
 		}
@@ -623,7 +623,7 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 			relations := content.GetRelations()
 			if len(relations.Map) > 0 {
 				dbHandler := db.DBHanlder()
-				err = dbHandler.Delete("dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
+				err = dbHandler.Delete(ch.Context, "dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
 				if err != nil {
 					tx.Rollback()
 					message := "[handler.deleteByContent]Can not delete relation."
@@ -633,19 +633,19 @@ func (ch ContentHandler) DeleteByContent(content contenttype.ContentTyper, userI
 			}
 
 			//Delete location
-			err = content.GetLocation().Delete(tx)
+			err = content.GetLocation().Delete(ch.Context, tx)
 			if err != nil {
 				tx.Rollback()
 			} else {
 				//delete versions
 				if content.Definition().HasVersion {
 					dbHanlder := db.DBHanlder()
-					dbHanlder.Delete("dm_version", db.Cond("content_type", content.ContentType()).
+					dbHanlder.Delete(ch.Context, "dm_version", db.Cond("content_type", content.ContentType()).
 						Cond("content_id", content.GetCID()), tx)
 				}
 
 				//Delete content
-				err = content.Delete(tx)
+				err = content.Delete(ch.Context, tx)
 				if err != nil {
 					tx.Rollback()
 				}

@@ -142,7 +142,7 @@ func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
 	return policies
 }
 
-func AssignToUser(roleID int, userID int) error {
+func AssignToUser(ctx context.Context, roleID int, userID int) error {
 	//todo: check if role exisit. maybe need role entity?
 	//todo: check if user exist.
 	useRole := UserRole{}
@@ -151,7 +151,7 @@ func AssignToUser(roleID int, userID int) error {
 	if useRole.ID > 0 {
 		return errors.New("Already assigned.")
 	}
-	_, err := dbHandler.Insert("dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
+	_, err := dbHandler.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
 	if err != nil {
 		return err
 	}
@@ -159,9 +159,9 @@ func AssignToUser(roleID int, userID int) error {
 }
 
 //Remove a user from role assignment
-func RemoveAssignment(userID int, roleID int) error {
+func RemoveAssignment(ctx context.Context, userID int, roleID int) error {
 	dbHandler := db.DBHanlder()
-	err := dbHandler.Delete("dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
+	err := dbHandler.Delete(ctx, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
 	if err != nil {
 		return err
 	}

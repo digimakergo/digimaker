@@ -137,7 +137,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w)
 		return
 	}
-	err = version.Store(tx)
+	err = version.Store(r.Context(), tx)
 	tx.Commit()
 	if err != nil {
 		HandleError(err, w)
@@ -251,7 +251,7 @@ func SetPriority(w http.ResponseWriter, r *http.Request) {
 		//update priority
 		location := content.GetLocation()
 		location.Priority = priority
-		err = location.Store(tx)
+		err = location.Store(r.Context(), tx)
 		if err != nil {
 			tx.Rollback()
 			log.Error(err.Error(), "")

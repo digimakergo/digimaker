@@ -36,7 +36,7 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 
 	//Generate refresh token and access token
 	userID := user.GetCID()
-	refreshToken, err := auth.NewRefreshToken(userID)
+	refreshToken, err := auth.NewRefreshToken(r.Context(), userID)
 	if err != nil {
 		log.Error("Error in generating token on "+strconv.Itoa(userID)+": "+err.Error(), "")
 		HandleError(errors.New("Error when generating refresh token"), w)
@@ -70,7 +70,7 @@ func AuthRevokeRefreshToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	guid := claims.GUID
-	err = auth.GetTokenManager().Delete(guid)
+	err = auth.GetTokenManager().Delete(r.Context(), guid)
 	if err != nil {
 		log.Error("Deleting token error: "+err.Error(), "", r.Context())
 		return
@@ -176,12 +176,12 @@ func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 	//generate new refresh token.
 	userID := refreshClaims.UserID
 	guid := refreshClaims.GUID
-	newToken, err := auth.NewRefreshToken(userID)
+	newToken, err := auth.NewRefreshToken(r.Context(), userID)
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
-	err = auth.GetTokenManager().Delete(guid)
+	err = auth.GetTokenManager().Delete(r.Context(), guid)
 	if err != nil {
 		log.Error("Error when deleting token: "+err.Error(), "", r.Context())
 		HandleError(err, w)

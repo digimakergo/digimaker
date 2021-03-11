@@ -56,7 +56,7 @@ func (handler *RelationHandler) AddContent(ctx context.Context, to contenttype.C
 		Identifier:   identifier,
 		Description:  description,
 		Data:         data}
-	err = relation.Store()
+	err = relation.Store(ctx)
 	if err != nil {
 		errors.Wrap(err, "[relationhandler.AddTo]Saving relation error.")
 	}

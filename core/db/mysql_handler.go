@@ -317,7 +317,7 @@ func (r *MysqlHandler) GetEntity(ctx context.Context, tablename string, conditio
 	return countResult, nil
 }
 
-func (MysqlHandler) Insert(tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
+func (MysqlHandler) Insert(ctx context.Context, tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
 	sqlStr := "INSERT INTO " + tablename + " ("
 	valuesString := "VALUES("
 	var valueParameters []interface{}
@@ -335,7 +335,7 @@ func (MysqlHandler) Insert(tablename string, values map[string]interface{}, tran
 	sqlStr += ")"
 	valuesString += ")"
 	sqlStr = sqlStr + " " + valuesString
-	log.Debug(sqlStr, "db")
+	log.Debug(sqlStr, "db", ctx)
 
 	var result sql.Result
 	var error error
@@ -360,13 +360,13 @@ func (MysqlHandler) Insert(tablename string, values map[string]interface{}, tran
 		return 0, errors.Wrap(err, "MysqlHandler.Insert]Error when inserting. sql - "+sqlStr)
 	}
 
-	log.Debug("Insert results in id: "+strconv.FormatInt(id, 10), "db")
+	log.Debug("Insert results in id: "+strconv.FormatInt(id, 10), "db", ctx)
 
 	return int(id), nil
 }
 
 //Generic update an entity
-func (MysqlHandler) Update(tablename string, values map[string]interface{}, condition Condition, transation ...*sql.Tx) error {
+func (MysqlHandler) Update(ctx context.Context, tablename string, values map[string]interface{}, condition Condition, transation ...*sql.Tx) error {
 	sqlStr := "UPDATE " + tablename + " SET "
 	var valueParameters []interface{}
 	for name, value := range values {
@@ -381,7 +381,7 @@ func (MysqlHandler) Update(tablename string, values map[string]interface{}, cond
 	valueParameters = append(valueParameters, conditionValues...)
 	sqlStr += " WHERE " + conditionString
 
-	log.Debug(sqlStr, "db")
+	log.Debug(sqlStr, "db", ctx)
 
 	var result sql.Result
 	var error error
@@ -398,16 +398,16 @@ func (MysqlHandler) Update(tablename string, values map[string]interface{}, cond
 		return errors.Wrap(error, "[MysqlHandler.Update]Error when updating. sql - "+sqlStr)
 	}
 	resultRows, _ := result.RowsAffected()
-	log.Debug("Updated rows:"+strconv.FormatInt(resultRows, 10), "db")
+	log.Debug("Updated rows:"+strconv.FormatInt(resultRows, 10), "db", ctx)
 	return nil
 }
 
 //Delete based on condition
-func (*MysqlHandler) Delete(tableName string, condition Condition, transation ...*sql.Tx) error {
+func (*MysqlHandler) Delete(ctx context.Context, tableName string, condition Condition, transation ...*sql.Tx) error {
 	conditionString, conditionValues := BuildCondition(condition)
 	sqlStr := "DELETE FROM " + tableName + " WHERE " + conditionString
 
-	log.Debug(sqlStr, "db")
+	log.Debug(sqlStr, "db", ctx)
 
 	var result sql.Result
 	var error error
@@ -427,7 +427,7 @@ func (*MysqlHandler) Delete(tableName string, condition Condition, transation ..
 
 	//todo: return this because it's useful for error handling
 	resultRows, _ := result.RowsAffected()
-	log.Debug("Deleted rows:"+strconv.FormatInt(resultRows, 10), "db")
+	log.Debug("Deleted rows:"+strconv.FormatInt(resultRows, 10), "db", ctx)
 	return nil
 }
 

@@ -3,7 +3,10 @@
 
 package contenttype
 
-import "database/sql"
+import (
+	"context"
+	"database/sql"
+)
 
 //All the content type(eg. article, folder) will implement this interface.
 type ContentTyper interface {
@@ -15,9 +18,9 @@ type ContentTyper interface {
 
 	SetValue(identifier string, value interface{}) error
 
-	Store(...*sql.Tx) error
+	Store(ctx context.Context, transaction ...*sql.Tx) error
 
-	Delete(transaction ...*sql.Tx) error
+	Delete(ctx context.Context, transaction ...*sql.Tx) error
 
 	Value(identifier string) interface{}
 

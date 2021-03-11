@@ -3,6 +3,7 @@
 package auth
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -16,9 +17,9 @@ import (
 )
 
 type RefreshTokenManager interface {
-	Store(id string, Expiry int64, claims map[string]interface{}) error
+	Store(ctx context.Context, id string, Expiry int64, claims map[string]interface{}) error
 	Get(id string) interface{}
-	Delete(id string) error
+	Delete(ctx context.Context, id string) error
 }
 
 var tokenManager RefreshTokenManager
@@ -35,7 +36,7 @@ type UserClaims struct {
 	Name   string `json:"user_name"`
 }
 
-func NewRefreshToken(userID int) (string, error) {
+func NewRefreshToken(ctx context.Context, userID int) (string, error) {
 	guid := util.GenerateGUID()
 	refreshExpiry := util.GetConfigSectionI("auth")["refresh_token_expiry"].(int)
 	expiry := time.Now().Add(time.Minute * time.Duration(refreshExpiry)).Unix()
@@ -52,7 +53,7 @@ func NewRefreshToken(userID int) (string, error) {
 	}
 
 	//store guid in db
-	err = tokenManager.Store(guid, expiry, refreshClaims)
+	err = tokenManager.Store(ctx, guid, expiry, refreshClaims)
 	if err != nil {
 		log.Error(err.Error(), "")
 		return "", errors.New("Error when storing refresh token info.")

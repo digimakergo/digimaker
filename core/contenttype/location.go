@@ -115,16 +115,16 @@ func (c *Location) Path() []int {
 	return c.path
 }
 
-func (c *Location) Store(transaction ...*sql.Tx) error {
+func (c *Location) Store(ctx context.Context, transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
 	if c.ID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
+		id, err := handler.Insert(ctx, c.TableName(), c.ToDBValues(), transaction...)
 		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
+		err := handler.Update(ctx, c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil
@@ -147,9 +147,9 @@ func (l *Location) IsMainLocation() bool {
 }
 
 //Delete location only
-func (l *Location) Delete(transaction ...*sql.Tx) error {
+func (l *Location) Delete(ctx context.Context, transaction ...*sql.Tx) error {
 	handler := db.DBHanlder()
-	contentError := handler.Delete(l.TableName(), Cond("id", l.ID), transaction...)
+	contentError := handler.Delete(ctx, l.TableName(), Cond("id", l.ID), transaction...)
 	return contentError
 }
 
