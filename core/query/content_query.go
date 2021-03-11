@@ -213,7 +213,7 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 		//todo: current self author will override the other policy. to be fixed.
 		if author, ok := limit["author"]; ok {
 			if author.(string) == "self" {
-				currentCond = currentCond.Cond("l.author", userID)
+				currentCond = currentCond.Cond("author", userID)
 			}
 		}
 
@@ -282,7 +282,8 @@ func Fill(ctx context.Context, contentType string, condition db.Condition, limit
 }
 
 // List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
-// Condition example: db.Cond("l.author", 1).Cond("c.modified >", "2020-03-13") where field should start with "c."
+// Condition example: db.Cond("l.parent_id", 4).Cond("author", 1).Cond("modified >", "2020-03-13")
+// where content field can be used directly or with c. as prefix(eg. "c.author"), but location field need a l. prefix(eg. l.parent_id)
 func List(ctx context.Context, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
 	count := -1
