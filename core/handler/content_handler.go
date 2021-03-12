@@ -138,14 +138,7 @@ func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs
 	contentDefinition, _ := contenttype.GetDefinition(contentType)
 	fieldsDefinition := contentDefinition.FieldMap
 
-	realData := map[string]interface{}{
-		"contenttype": contentType,
-	} //todo: support more conditions
-	if contentDefinition.HasLocation {
-		realData["under"] = parent.GetLocation().Path()
-	}
-
-	if !permission.HasAccessTo(ctx, userId, "content/create", realData) {
+	if !permission.CanCreate(ctx, parent, contentType, userId) {
 		return nil, ValidationResult{}, errors.New("User doesn't have access to create")
 	}
 
