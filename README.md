@@ -1,32 +1,31 @@
-Digimaker Content Management Framework
+Digimaker CMF
 ----------------
-A dev-friendly CMF which balances simplicity & flexibility with high performance. Written in Golang.
+A Content Management Framework which balances simplicity & flexibility with high performance. Written in Golang.
 
+***<em>Note: this project is still under development. Check https://digimaker.org for update</em>***
 
 ### Highlights
-- Content model with ORM entities
-- Manipulate content with simple go api
-- Operating normal data table like operating content
-- Event mechanism for developing content business logic(eg. update article content)
-- Flexible permission system
-- Website development via templating
+- Powerful templating for building website
 - Query&Manipulate content via rest api.
+- Content model with ORM entities
+- Ingegrate contents with data table
+- Manipulate content with simple go api
+- Event callback for exending content business logic(eg. update article content)
+- Flexible permission system
 
-### Editorial user interface
-EUI is the administrative console for managing content.
-See https://github.com/digimakergo/eui (Also see screenshots in the link)
 
-### Client UI library
-A client UI library(written in React) provides components for developing client project. It provides components like displaying/editing content/authentication.
+### Documentation
+See https://digimaker.org/doc for documentation and references.
+
+### Sample project for installation & demo
+See https://github.com/digimakergo/dmdemo
+
+### Editorial UI (Admin)
+See https://github.com/digimakergo/eui 
+
+### Client UI library(based on React) project
 See https://github.com/digimakergo/ui
 
-Progress
---------
-Currently it's still under alpha version.
-
-Documentation
---------
-Still in progress.
 
 License
 --------
