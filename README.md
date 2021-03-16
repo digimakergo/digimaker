@@ -1,5 +1,7 @@
 Digimaker CMF
 ----------------
+[![Go Reference](https://pkg.go.dev/badge/github.com/digimakergo/digimaker.svg)](https://pkg.go.dev/github.com/digimakergo/digimaker)
+
 A Content Management Framework which balances simplicity & flexibility with high performance. Written in Golang.
 
 ***<em>Note: this project is still under development. Check https://digimaker.org for update</em>***
