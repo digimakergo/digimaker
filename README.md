@@ -5,9 +5,9 @@ A Content Management Framework which balances simplicity & flexibility with high
 ***<em>Note: this project is still under development. Check https://digimaker.org for update</em>***
 
 ### Highlights
-- Powerful templating for building website
+- Powerful templating for building website using Pongo2
 - Query&Manipulate content via rest api.
-- Content model with ORM entities
+- Content model with ORM entities with SQLBoiler
 - Ingegrate contents with data table
 - Manipulate content with simple go api
 - Event callback for exending content business logic(eg. update article content)
