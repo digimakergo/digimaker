@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/DATA-DOG/go-sqlmock v1.5.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
 	github.com/friendsofgo/errors v0.9.2 // indirect
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-sql-driver/mysql v1.5.0
