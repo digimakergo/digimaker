@@ -1,18 +1,18 @@
 Digimaker CMF
 ----------------
+[![Go Reference](https://pkg.go.dev/badge/github.com/digimakergo/digimaker.svg)](https://pkg.go.dev/github.com/digimakergo/digimaker)
+
 A Content Management Framework which balances simplicity & flexibility with high performance. Written in Golang.
 
 ***<em>Note: this project is still under development. Check https://digimaker.org for update</em>***
 
 ### Highlights
-- Powerful templating for building website
-- Query&Manipulate content via rest api.
-- Content model with ORM entities
-- Ingegrate contents with data table
-- Manipulate content with simple go api
+- Templating for building website/html output using Pongo2
+- Query&Manipulate content via rest&go api.
+- Content model with ORM entities using SQLBoiler
 - Event callback for exending content business logic(eg. update article content)
-- Flexible permission system
-
+- Permission configuration
+- Online debug tool
 
 ### Documentation
 See https://digimaker.org/doc for documentation and references.
