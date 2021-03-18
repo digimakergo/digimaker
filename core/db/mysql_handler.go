@@ -12,6 +12,8 @@ import (
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 
+	"github.com/digimakergo/digimaker/core/definition"
+
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/queries"
@@ -29,7 +31,18 @@ type MysqlHandler struct {
 //
 //todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
 //todo: merge GetContent with GetEntityContent, remove contentType, tablename parameters because they are in contentType interface
-func (r *MysqlHandler) GetContent(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
+func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, contentType string, condition Condition, limit []int, sortby []string, count bool) (int, error) {
+	def, err := definition.GetDefinition(contentType)
+	if err != nil {
+		return -1, err
+	}
+
+	tableName := def.TableName
+
+	if !def.HasLocation {
+		return r.getEntityContent(ctx, content, contentType, tableName, condition, limit, sortby, count)
+	}
+
 	db, err := DB()
 	if err != nil {
 		return -1, errors.Wrap(err, "[MysqlHandler.GetContent]Error when connecting db.")
@@ -110,7 +123,7 @@ func (r *MysqlHandler) GetContent(ctx context.Context, contentType string, table
 //todo: possible to have more joins between entities, or ingegrate with ORM
 //todo: support select multiple entity once.
 //todo: support query without involing location at all.
-func (r *MysqlHandler) GetEntityContent(ctx context.Context, contentType string, tableName string, condition Condition, limit []int, sortby []string, content interface{}, count bool) (int, error) {
+func (r *MysqlHandler) getEntityContent(ctx context.Context, content interface{}, contentType string, tableName string, condition Condition, limit []int, sortby []string, count bool) (int, error) {
 	db, err := DB()
 	if err != nil {
 		return -1, errors.Wrap(err, "[MysqlHandler.GetEntityContent]Error when connecting db.")

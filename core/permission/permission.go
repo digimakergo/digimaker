@@ -111,7 +111,7 @@ func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]int
 func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
 	roles := contenttype.NewList("role")
 	dbHandler := db.DBHanlder()
-	dbHandler.GetContent(context.Background(), "role", "dm_role", db.Cond("c.id", roleIDs), nil, nil, roles, false)
+	dbHandler.GetContent(context.Background(), roles, "role", db.Cond("c.id", roleIDs), nil, nil, false)
 	if roles == nil {
 		log.Warning("Role doesn't exist on ID(s)"+fmt.Sprint(roleIDs), "permission", ctx)
 		return PolicyList{}

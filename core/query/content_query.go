@@ -258,17 +258,11 @@ func ListWithUser(ctx context.Context, userID int, contentType string, condition
 //Fill all data into content which is a pointer
 func Fill(ctx context.Context, contentType string, condition db.Condition, limit []int, sortby []string, content interface{}, count *int) error {
 	dbhandler := db.DBHanlder()
-	def, _ := definition.GetDefinition(contentType)
-	tableName := def.TableName
 	hasCount := *count != -1
 
 	var countResult int
 	var err error
-	if def.HasLocation {
-		countResult, err = dbhandler.GetContent(ctx, contentType, tableName, condition, limit, sortby, content, hasCount)
-	} else {
-		countResult, err = dbhandler.GetEntityContent(ctx, contentType, tableName, condition, limit, sortby, content, hasCount)
-	}
+	countResult, err = dbhandler.GetContent(ctx, content, contentType, condition, limit, sortby, hasCount)
 	if err != nil {
 		message := "[List]Content Query error"
 		log.Error(message+err.Error(), "")
