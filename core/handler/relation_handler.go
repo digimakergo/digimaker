@@ -37,11 +37,12 @@ func (handler *RelationHandler) AddContent(ctx context.Context, to contenttype.C
 	//Check if it's added already.
 	dbHandler := db.DBHanlder()
 	currentRelation := contenttype.Relation{}
-	dbHandler.GetEntity(ctx, "dm_relation", Cond("to_content_id", contentID).
-		Cond("from_location", fromLocationID).
-		Cond("identifier", identifier),
-		[]string{}, nil,
-		&currentRelation,
+	dbHandler.GetEntity(ctx, &currentRelation,
+		"dm_relation", Cond("to_content_id", contentID).
+			Cond("from_location", fromLocationID).
+			Cond("identifier", identifier),
+		[]string{},
+		nil,
 		false)
 
 	if currentRelation.ID != 0 {

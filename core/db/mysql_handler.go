@@ -256,7 +256,7 @@ func (*MysqlHandler) Count(tablename string, condition Condition) (int, error) {
 }
 
 //todo: support limit.
-func (r *MysqlHandler) GetEntity(ctx context.Context, tablename string, condition Condition, sortby []string, limit []int, entity interface{}, count bool) (int, error) {
+func (r *MysqlHandler) GetEntity(ctx context.Context, entity interface{}, tablename string, condition Condition, sortby []string, limit []int, count bool) (int, error) {
 	conditions, values := BuildCondition(condition)
 	sortbyStr, err := r.getSortBy(sortby)
 	if err != nil {

@@ -64,7 +64,7 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 
 	//todo: use one query with join
 	//todo: support order, pagnation params
-	dbHandler.GetEntity(r.Context(), "dm_user_role", db.Cond("role_id", roleID), nil, nil, &userRoles, false)
+	dbHandler.GetEntity(r.Context(), &userRoles, "dm_user_role", db.Cond("role_id", roleID), nil, nil, false)
 	userIDs := []int{}
 	for _, userRole := range userRoles {
 		userIDs = append(userIDs, userRole.UserID)

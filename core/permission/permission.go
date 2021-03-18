@@ -75,7 +75,7 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 
 	//get roles of user
 	userRoleList := []UserRole{}
-	_, err := dbHandler.GetEntity(context.Background(), "dm_user_role", db.Cond("user_id", userID), nil, nil, &userRoleList, false)
+	_, err := dbHandler.GetEntity(context.Background(), &userRoleList, "dm_user_role", db.Cond("user_id", userID), nil, nil, false)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
 	}
@@ -147,7 +147,7 @@ func AssignToUser(ctx context.Context, roleID int, userID int) error {
 	//todo: check if user exist.
 	useRole := UserRole{}
 	dbHandler := db.DBHanlder()
-	dbHandler.GetEntity(context.Background(), "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID), nil, nil, &useRole, false)
+	dbHandler.GetEntity(context.Background(), &useRole, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID), nil, nil, false)
 	if useRole.ID > 0 {
 		return errors.New("Already assigned.")
 	}
