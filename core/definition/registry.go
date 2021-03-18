@@ -1,7 +1,7 @@
 //Author xc, Created on 2019-03-25 20:00
 //{COPYRIGHTS}
 
-package fieldtype
+package definition
 
 import (
 	"fmt"
