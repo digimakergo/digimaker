@@ -1,7 +1,7 @@
 //Author xc, Created on 2019-03-25 20:00
 //{COPYRIGHTS}
 
-package definition
+package fieldtype
 
 import (
 	"fmt"
@@ -10,13 +10,7 @@ import (
 	"github.com/digimakergo/digimaker/core/log"
 )
 
-type funcNewField = func() FieldTyper
-
-var handlerRegistry = map[string]interface{}{}
 var defMap = map[string]FieldtypeDef{}
-
-//ValidationRule defines rule for a field's validation. eg. max length
-type VaidationRule map[string]interface{}
 
 type FieldtypeDef struct {
 	Type             string            `json:"type"`
@@ -38,22 +32,6 @@ type RelationSetting struct {
 type RelationFieldHandler interface {
 	ToStorage(contents interface{}) interface{}
 	UpdateOne(toContent interface{}, identifier string, from interface{})
-}
-
-func NewField(fieldtype string) FieldTyper {
-	newtype := handlerRegistry[fieldtype]
-	field := newtype.(funcNewField)()
-	return field
-}
-
-func RegisterFieldType(def FieldtypeDef, newType funcNewField) {
-	fieldtype := def.Type
-	log.Info("Registering field type " + fieldtype)
-	if _, ok := defMap[fieldtype]; ok {
-		log.Warning("Field type "+fieldtype+" exists already. It will be replaced.", "")
-	}
-	handlerRegistry[fieldtype] = newType
-	defMap[fieldtype] = def
 }
 
 func GetDef(fieldtype string) FieldtypeDef {
@@ -85,4 +63,24 @@ func EmtpyToNull(input interface{}) interface{} {
 		return nil
 	}
 	return input
+}
+
+type funcNewField = func() FieldTyper
+
+var handlerRegistry = map[string]interface{}{}
+
+func NewField(fieldtype string) FieldTyper {
+	newtype := handlerRegistry[fieldtype]
+	field := newtype.(funcNewField)()
+	return field
+}
+
+func RegisterFieldType(def FieldtypeDef, newType funcNewField) {
+	fieldtype := def.Type
+	log.Info("Registering field type " + fieldtype)
+	if _, ok := defMap[fieldtype]; ok {
+		log.Warning("Field type "+fieldtype+" exists already. It will be replaced.", "")
+	}
+	handlerRegistry[fieldtype] = newType
+	defMap[fieldtype] = def
 }

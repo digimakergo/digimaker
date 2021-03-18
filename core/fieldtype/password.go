@@ -1,6 +1,9 @@
 package fieldtype
 
-import "github.com/digimakergo/digimaker/core/util"
+import (
+	"github.com/digimakergo/digimaker/core/definition"
+	"github.com/digimakergo/digimaker/core/util"
+)
 
 //Password struct represent password type
 type Password struct {
@@ -12,7 +15,7 @@ func (p Password) Type() string {
 }
 
 //LoadFromInput load data from input before validation
-func (p *Password) LoadFromInput(input interface{}, params FieldParameters) error {
+func (p *Password) LoadFromInput(input interface{}, params definition.FieldParameters) error {
 	if input != nil {
 		str := input.(string)
 		if str != "" {
@@ -28,7 +31,7 @@ func (p *Password) LoadFromInput(input interface{}, params FieldParameters) erro
 }
 
 //Validate the field, return false, error message when fails
-func (p *Password) Validate(rule VaidationRule) (bool, string) {
+func (p *Password) Validate(rule definition.VaidationRule) (bool, string) {
 	if p.existing == "" && p.String.String == "" {
 		return false, "Password is empty"
 	}

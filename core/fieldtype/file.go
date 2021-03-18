@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -17,7 +18,7 @@ func (f File) Type() string {
 	return "file"
 }
 
-func (f *File) LoadFromInput(input interface{}, params FieldParameters) error {
+func (f *File) LoadFromInput(input interface{}, params definition.FieldParameters) error {
 	err := f.String.LoadFromInput(input, params)
 	if err != nil {
 		return err

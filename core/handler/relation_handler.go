@@ -9,6 +9,8 @@ import (
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	. "github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
+	"github.com/digimakergo/digimaker/core/fieldtype"
 
 	"github.com/pkg/errors"
 )
@@ -66,13 +68,13 @@ func (handler *RelationHandler) AddContent(ctx context.Context, to contenttype.C
 
 //Generate relation data based on name pattern.
 func (handler *RelationHandler) generateData(to contenttype.ContentTyper, identifier string, from contenttype.ContentTyper) (string, error) {
-	def, _ := contenttype.GetDefinition(to.ContentType())
+	def, _ := definition.GetDefinition(to.ContentType())
 	fieldSetting, ok := def.FieldMap[identifier]
 	if !ok {
 		return "", errors.New("Target content doesn't have field " + identifier)
 	}
 
-	fieldDef := fieldSetting.GetDefinition()
+	fieldDef := fieldtype.GetDef(fieldSetting.Identifier)
 	if !fieldDef.IsRelation {
 		return "", errors.New("field" + identifier + "is not a relation type.")
 	}

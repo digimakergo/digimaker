@@ -1,5 +1,9 @@
 package fieldtype
 
+import (
+	"github.com/digimakergo/digimaker/core/definition"
+)
+
 // FieldTyper defines a field type data
 // There are 2 types of datas in a field: input data, output data. They can be the same, but sometime can be different.
 // eg. for a text field, they are all the same
@@ -20,13 +24,13 @@ type FieldTyper interface {
 	// driver.Valuer
 
 	//Init from input(http input or api input)
-	LoadFromInput(input interface{}, params FieldParameters) error
+	LoadFromInput(input interface{}, params definition.FieldParameters) error
 
 	//Get value when doing 'internal exchange'.same as Value() in driver.Valuer, but return a basic type(eg. string, int, datetime, or nil)
 	FieldValue() interface{}
 
 	//Validate the field, return false, error message when fails
-	Validate(rule VaidationRule) (bool, string)
+	Validate(rule definition.VaidationRule) (bool, string)
 
 	//If the field is empty. eg. in a selection, 0/-1 can mean empty(not selected)
 	IsEmpty() bool
@@ -43,5 +47,3 @@ type FieldTyper interface {
 type FieldTypeEvent interface {
 	BeforeSaving() error
 }
-
-type FieldParameters map[string]interface{}

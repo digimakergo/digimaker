@@ -16,6 +16,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
@@ -80,7 +81,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	ctype := params["type"]
-	_, err := contenttype.GetDefinition(ctype)
+	_, err := definition.GetDefinition(ctype)
 	if err != nil {
 		HandleError(errors.New("type doesn't exist."), w)
 		return

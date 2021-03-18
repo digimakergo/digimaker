@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 )
 
@@ -22,12 +23,12 @@ type String struct {
 }
 
 //Validate validates input.
-func (s String) Validate(rule VaidationRule) (bool, string) {
+func (s String) Validate(rule definition.VaidationRule) (bool, string) {
 	return true, ""
 }
 
 //LoadFromInput load data from input before validation
-func (s *String) LoadFromInput(input interface{}, params FieldParameters) error {
+func (s *String) LoadFromInput(input interface{}, params definition.FieldParameters) error {
 	if input == nil {
 		s.String = ""
 	} else {
@@ -91,7 +92,7 @@ type Int struct {
 }
 
 //LoadFromInput loads data from input before validation
-func (i *Int) LoadFromInput(input interface{}, params FieldParameters) error {
+func (i *Int) LoadFromInput(input interface{}, params definition.FieldParameters) error {
 	if input == "" {
 		input = nil
 	}
@@ -121,7 +122,7 @@ func (i Int) IsEmpty() bool {
 }
 
 //Validate validates input.
-func (i Int) Validate(rule VaidationRule) (bool, string) {
+func (i Int) Validate(rule definition.VaidationRule) (bool, string) {
 	return true, ""
 }
 
@@ -137,7 +138,7 @@ func (i *Int) UnmarshalJSON(data []byte) error {
 	str := ""
 	err := json.Unmarshal(data, &str)
 	if err == nil {
-		return i.LoadFromInput(str, FieldParameters{})
+		return i.LoadFromInput(str, definition.FieldParameters{})
 	} else {
 		return i.Scan(data)
 	}
@@ -150,7 +151,7 @@ type JSON struct {
 }
 
 //LoadFromInput loads data from input before validation
-func (j *JSON) LoadFromInput(input interface{}, params FieldParameters) error {
+func (j *JSON) LoadFromInput(input interface{}, params definition.FieldParameters) error {
 	//todo: validate if it's a json structure([],{})
 	existing := j.NullString
 	if str, ok := input.(string); ok {
@@ -188,7 +189,7 @@ func (j JSON) IsEmpty() bool {
 }
 
 //Validate validates input.
-func (j JSON) Validate(rule VaidationRule) (bool, string) {
+func (j JSON) Validate(rule definition.VaidationRule) (bool, string) {
 	return true, ""
 }
 

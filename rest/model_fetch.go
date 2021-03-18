@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/definition"
 
 	"github.com/gorilla/mux"
 )
@@ -22,7 +22,7 @@ func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	}
 
 	containers := strings.Split(typeStr, "/")
-	definition, _ := contenttype.GetDefinition(containers[0], language)
+	definition, _ := definition.GetDefinition(containers[0], language)
 
 	resultMap := filterDefinition(definition)
 	result, _ := json.Marshal(resultMap)
@@ -31,7 +31,7 @@ func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	w.Write(result)
 }
 
-func filterDefinition(definition contenttype.ContentType) map[string]interface{} {
+func filterDefinition(definition definition.ContentType) map[string]interface{} {
 	data, _ := json.Marshal(definition)
 	resultMap := map[string]interface{}{}
 	json.Unmarshal(data, &resultMap)
@@ -54,7 +54,7 @@ func GetAllDefinitions(w http.ResponseWriter, r *http.Request) {
 		language = "default"
 	}
 
-	definitionList := contenttype.GetDefinitionList()
+	definitionList := definition.GetDefinitionList()
 	list := definitionList[language]
 	result := map[string]interface{}{}
 	for contenttype, definition := range list {

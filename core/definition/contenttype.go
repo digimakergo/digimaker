@@ -17,6 +17,11 @@ import (
 
 type ContentTypeList map[string]map[string]ContentType
 
+//ValidationRule defines rule for a field's validation. eg. max length
+type VaidationRule map[string]interface{}
+
+type FieldParameters map[string]interface{}
+
 type ContentType struct {
 	Name         string            `json:"name"`
 	TableName    string            `json:"table_name"`
@@ -120,10 +125,6 @@ func getSubFields(cf *FieldDef, callback ...func(*FieldDef)) map[string]FieldDef
 		}
 		return result
 	}
-}
-
-func (f *FieldDef) GetDefinition() FieldtypeDef {
-	return GetDef(f.FieldType)
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json

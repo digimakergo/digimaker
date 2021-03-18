@@ -15,6 +15,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
@@ -36,7 +37,7 @@ var ErrorNoPermission = errors.New("The user doesn't have access to the action."
 // Validate validates and returns a validation result.
 // Validate is used in Create and Update, but can be also used separately
 //  eg. when you have several steps, you want to validate one step only(only the fields in that step).
-func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]contenttype.FieldDef, inputs InputMap, checkAllRequired bool) (bool, ValidationResult) {
+func (ch *ContentHandler) Validate(contentType string, fieldsDef map[string]definition.FieldDef, inputs InputMap, checkAllRequired bool) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
 	result := ValidationResult{Fields: map[string]string{}}
@@ -135,7 +136,7 @@ func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs
 		return nil, ValidationResult{}, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
 	}
 
-	contentDefinition, _ := contenttype.GetDefinition(contentType)
+	contentDefinition, _ := definition.GetDefinition(contentType)
 	fieldsDefinition := contentDefinition.FieldMap
 
 	if !permission.CanCreate(ctx, parent, contentType, userId) {
@@ -344,7 +345,7 @@ func (ch ContentHandler) UpdateByID(ctx context.Context, id int, inputs InputMap
 // it will check if it's required&empty
 func (ch ContentHandler) Update(ctx context.Context, content contenttype.ContentTyper, inputs InputMap, userId int) (bool, ValidationResult, error) {
 	contentType := content.ContentType()
-	contentDef, _ := contenttype.GetDefinition(contentType)
+	contentDef, _ := definition.GetDefinition(contentType)
 	fieldsDefinition := contentDef.FieldMap
 
 	//permission check

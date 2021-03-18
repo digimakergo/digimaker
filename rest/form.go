@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/handler"
 
 	"github.com/gorilla/mux"
@@ -35,7 +35,7 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fieldMap, err := contenttype.GetFields(contentType)
+	fieldMap, err := definition.GetFields(contentType)
 	if err != nil {
 		HandleError(err, w)
 		return

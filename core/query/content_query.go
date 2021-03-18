@@ -8,6 +8,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
@@ -224,7 +225,7 @@ func SubList(ctx context.Context, rootContent contenttype.ContentTyper, contentT
 	rootLocation := rootContent.GetLocation()
 	if depth == 1 {
 		//Direct children
-		def, _ := contenttype.GetDefinition(contentType)
+		def, _ := definition.GetDefinition(contentType)
 		if def.HasLocation {
 			condition = condition.Cond("l.parent_id", rootLocation.ID)
 		} else {
@@ -257,7 +258,7 @@ func ListWithUser(ctx context.Context, userID int, contentType string, condition
 //Fill all data into content which is a pointer
 func Fill(ctx context.Context, contentType string, condition db.Condition, limit []int, sortby []string, content interface{}, count *int) error {
 	dbhandler := db.DBHanlder()
-	def, _ := contenttype.GetDefinition(contentType)
+	def, _ := definition.GetDefinition(contentType)
 	tableName := def.TableName
 	hasCount := *count != -1
 
@@ -296,7 +297,7 @@ func List(ctx context.Context, contentType string, condition db.Condition, limit
 
 //return a version content
 func Version(ctx context.Context, contentType string, condition db.Condition) (contenttype.Version, contenttype.ContentTyper, error) {
-	_, err := contenttype.GetDefinition(contentType)
+	_, err := definition.GetDefinition(contentType)
 	if err != nil {
 		return contenttype.Version{}, nil, err
 	}
@@ -337,7 +338,7 @@ func GetContentAuthor(content contenttype.ContentTyper) (contenttype.ContentType
 
 //GetRelationOptions get content list based on relation parameters
 func RelationOptions(ctx context.Context, ctype string, identifier string, limit []int, sortby []string, hasCount bool) ([]contenttype.ContentTyper, int, error) {
-	contentDef, err := contenttype.GetDefinition(ctype)
+	contentDef, err := definition.GetDefinition(ctype)
 	if err != nil {
 		return nil, 0, errors.New("Can not get content defintion of " + ctype)
 	}

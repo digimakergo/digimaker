@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 )
 
 type RelationParameters struct {
@@ -33,7 +34,7 @@ func (r *Relation) Scan(src interface{}) error {
 	return nil
 }
 
-func (r *Relation) LoadFromInput(input interface{}, params FieldParameters) error {
+func (r *Relation) LoadFromInput(input interface{}, params definition.FieldParameters) error {
 	err := r.String.LoadFromInput(input, params)
 	if err != nil {
 		return err
@@ -78,7 +79,7 @@ func (r *Relation) LoadFromInput(input interface{}, params FieldParameters) erro
 }
 
 //Convert to parameters obj
-func ConvertRelationParams(params FieldParameters) (RelationParameters, error) {
+func ConvertRelationParams(params definition.FieldParameters) (RelationParameters, error) {
 	paramsData, _ := json.Marshal(params)
 	rParams := RelationParameters{}
 	err := json.Unmarshal(paramsData, &rParams)

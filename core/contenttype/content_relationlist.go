@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/pkg/errors"
@@ -21,7 +22,7 @@ import (
 type RelationList []Relation
 
 //LoadFromInput load data from input before validation
-func (rl *RelationList) LoadFromInput(input interface{}, params fieldtype.FieldParameters) error {
+func (rl *RelationList) LoadFromInput(input interface{}, params definition.FieldParameters) error {
 	s := fmt.Sprint(input)
 	if s == "" {
 		*rl = []Relation{}
@@ -46,7 +47,7 @@ func (rl *RelationList) LoadFromInput(input interface{}, params fieldtype.FieldP
 	for i, v := range arrInt {
 		fromType := arrType[i]
 		fromCid := v
-		def, err := GetDefinition(fromType)
+		def, err := definition.GetDefinition(fromType)
 		if err != nil {
 			return err
 		}
@@ -90,7 +91,7 @@ func (rl RelationList) FieldValue() interface{} {
 	return rl
 }
 
-func (rl RelationList) Validate(rule fieldtype.VaidationRule) (bool, string) {
+func (rl RelationList) Validate(rule definition.VaidationRule) (bool, string) {
 	//todo: check if the id exist or has permission
 	return true, ""
 }

@@ -9,7 +9,8 @@ import (
 
 	_ "github.com/digimakergo/digimaker/codegen/contenttypes/temp"
 
-	"github.com/digimakergo/digimaker/core/contenttype"
+	_ "github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/util"
 )
@@ -35,7 +36,7 @@ func Generate(subFolder string) error {
 
 	fieldtypeMap := fieldtype.GetAllDefinition()
 
-	contentTypeDef := contenttype.GetDefinitionList()["default"]
+	contentTypeDef := definition.GetDefinitionList()["default"]
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}
 		vars["def_fieldtype"] = fieldtype.GetAllDefinition()

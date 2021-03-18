@@ -6,6 +6,8 @@ package contenttype
 import (
 	"context"
 	"database/sql"
+
+	"github.com/digimakergo/digimaker/core/definition"
 )
 
 //All the content type(eg. article, folder) will implement this interface.
@@ -30,7 +32,7 @@ type ContentTyper interface {
 
 	GetLocation() *Location
 
-	Definition(language ...string) ContentType
+	Definition(language ...string) definition.ContentType
 
 	ToMap() map[string]interface{}
 

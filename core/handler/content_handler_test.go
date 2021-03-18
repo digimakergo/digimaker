@@ -7,6 +7,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/test"
 	"github.com/digimakergo/digimaker/test/entity"
@@ -25,7 +26,7 @@ func TestValidate(t *testing.T) {
 	// Test validation1
 	handler := ContentHandler{}
 	params := map[string]interface{}{"title": "ff", "body": "Hello"}
-	def, _ := contenttype.GetDefinition("article")
+	def, _ := definition.GetDefinition("article")
 	passed, result := handler.Validate("article", def.FieldMap, params, true)
 	assert.Equal(t, true, passed)
 
