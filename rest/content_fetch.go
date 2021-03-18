@@ -14,6 +14,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/query"
@@ -99,11 +100,12 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 
 	dbHandler := db.DBHanlder()
 	version := contenttype.Version{}
-	dbHandler.GetEntity(r.Context(), version.TableName(),
+	dbHandler.GetEntity(r.Context(),
+		&version,
+		version.TableName(),
 		db.Cond("content_id", content.GetCID()).Cond("content_type", content.ContentType()).Cond("version", versionNo),
 		[]string{},
 		nil,
-		&version,
 		false)
 	if version.ID == 0 {
 		HandleError(errors.New("version doesn't exist."), w)
@@ -115,7 +117,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(data))
 }
 
-func buildCondition(userid int, def contenttype.ContentType, query url.Values) (db.Condition, error) {
+func buildCondition(userid int, def definition.ContentType, query url.Values) (db.Condition, error) {
 	author := query.Get("author")
 	condition := db.EmptyCond()
 	if author != "" {
@@ -222,7 +224,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	sortby := BuildSortby(r)
 
 	ctype := params["contenttype"]
-	def, err := contenttype.GetDefinition(ctype)
+	def, err := definition.GetDefinition(ctype)
 	if err != nil {
 		HandleError(errors.New("Cann't get content type"), w)
 		return
@@ -342,7 +344,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	typeList := util.Split(types)
-	contenttypeList := contenttype.GetDefinitionList()["default"]
+	contenttypeList := definition.GetDefinitionList()["default"]
 	for _, ctype := range typeList {
 		if _, ok := contenttypeList[ctype]; !ok {
 			HandleError(errors.New("Invalid type"), w, StatusWrongParams)
