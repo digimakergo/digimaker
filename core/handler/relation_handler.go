@@ -41,8 +41,6 @@ func (handler *RelationHandler) AddContent(ctx context.Context, to contenttype.C
 		"dm_relation", Cond("to_content_id", contentID).
 			Cond("from_location", fromLocationID).
 			Cond("identifier", identifier),
-		[]string{},
-		nil,
 		false)
 
 	if currentRelation.ID != 0 {

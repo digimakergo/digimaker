@@ -44,7 +44,7 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 
 		"children": func(parent contenttype.ContentTyper, contenttype string) []contenttype.ContentTyper {
 			userID := util.CurrentUserID(dm.Context)
-			children, _, err := query.Children(dm.Context, parent, contenttype, userID, db.EmptyCond(), nil, []string{"priority desc", "id asc"}, false)
+			children, _, err := query.Children(dm.Context, parent, contenttype, userID, db.EmptyCond().Sort("priority desc", "id asc"), false)
 			if err != nil {
 				log.Debug("Error when fetch ", "tempalte", dm.Context)
 			}

@@ -31,11 +31,14 @@ type MysqlHandler struct {
 //
 //todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
 //todo: merge GetContent with GetEntityContent, remove contentType, tablename parameters because they are in contentType interface
-func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, contentType string, condition Condition, limit []int, sortby []string, count bool) (int, error) {
+func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, contentType string, condition Condition, count bool) (int, error) {
 	def, err := definition.GetDefinition(contentType)
 	if err != nil {
 		return -1, err
 	}
+
+	limit := condition.LimitArr
+	sortby := condition.Sortby
 
 	tableName := def.TableName
 
@@ -256,13 +259,15 @@ func (*MysqlHandler) Count(tablename string, condition Condition) (int, error) {
 }
 
 //todo: support limit.
-func (r *MysqlHandler) GetEntity(ctx context.Context, entity interface{}, tablename string, condition Condition, sortby []string, limit []int, count bool) (int, error) {
+func (r *MysqlHandler) GetEntity(ctx context.Context, entity interface{}, tablename string, condition Condition, count bool) (int, error) {
 	conditions, values := BuildCondition(condition)
+	sortby := condition.Sortby
 	sortbyStr, err := r.getSortBy(sortby)
 	if err != nil {
 		return 0, err
 	}
 
+	limit := condition.LimitArr
 	limitStr := ""
 	if limit != nil && len(limit) == 2 {
 		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])

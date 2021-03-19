@@ -75,7 +75,7 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 
 	//get roles of user
 	userRoleList := []UserRole{}
-	_, err := dbHandler.GetEntity(context.Background(), &userRoleList, "dm_user_role", db.Cond("user_id", userID), nil, nil, false)
+	_, err := dbHandler.GetEntity(context.Background(), &userRoleList, "dm_user_role", db.Cond("user_id", userID), false)
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
 	}
@@ -111,7 +111,7 @@ func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]int
 func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
 	roles := contenttype.NewList("role")
 	dbHandler := db.DBHanlder()
-	dbHandler.GetContent(context.Background(), roles, "role", db.Cond("c.id", roleIDs), nil, nil, false)
+	dbHandler.GetContent(context.Background(), roles, "role", db.Cond("c.id", roleIDs), false)
 	if roles == nil {
 		log.Warning("Role doesn't exist on ID(s)"+fmt.Sprint(roleIDs), "permission", ctx)
 		return PolicyList{}
@@ -147,7 +147,7 @@ func AssignToUser(ctx context.Context, roleID int, userID int) error {
 	//todo: check if user exist.
 	useRole := UserRole{}
 	dbHandler := db.DBHanlder()
-	dbHandler.GetEntity(context.Background(), &useRole, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID), nil, nil, false)
+	dbHandler.GetEntity(context.Background(), &useRole, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID), false)
 	if useRole.ID > 0 {
 		return errors.New("Already assigned.")
 	}

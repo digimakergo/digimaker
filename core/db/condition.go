@@ -24,6 +24,8 @@ type Expression struct {
 type Condition struct {
 	Logic    string
 	Children interface{} //can be []Condition or Expression(when it's the leaf) (eg. and( and( A, B ), C )
+	Sortby   []string
+	LimitArr []int
 }
 
 //Cond is same as And(<field>, <value>) or And( Cond( <field>, <value> ) )
@@ -65,6 +67,16 @@ func (c Condition) Or(input interface{}, more ...interface{}) Condition {
 		result = c.Or(Cond(input.(string), value)) //invoke myself with Condition type
 	}
 	return result
+}
+
+func (c Condition) Sort(sortby ...string) Condition {
+	c.Sortby = sortby
+	return c
+}
+
+func (c Condition) Limit(offset int, number int) Condition {
+	c.LimitArr = []int{offset, number}
+	return c
 }
 
 //combine condition like "and", "or", etc

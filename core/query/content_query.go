@@ -40,7 +40,7 @@ func FetchByID(ctx context.Context, locationID int) (contenttype.ContentTyper, e
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	_, err := dbhandler.GetEntity(ctx, &location, "dm_location", db.Cond("id", locationID), []string{}, nil, false)
+	_, err := dbhandler.GetEntity(ctx, &location, "dm_location", db.Cond("id", locationID), false)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
 	}
@@ -60,7 +60,7 @@ func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, erro
 	//get type first by location.
 	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	_, err := dbhandler.GetEntity(ctx, &location, "dm_location", db.Cond("uid", uid), []string{}, nil, false)
+	_, err := dbhandler.GetEntity(ctx, &location, "dm_location", db.Cond("uid", uid), false)
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyuid]Can not fetch location by uid "+uid)
 	}
@@ -90,7 +90,8 @@ func Fetch(ctx context.Context, contentType string, condition db.Condition) (con
 	//todo: use limit in this case so it doesn't fetch more into memory.
 	content := contenttype.NewInstance(contentType)
 	count := -1
-	err := Fill(ctx, contentType, condition, []int{0, 1}, []string{}, content, &count)
+	condition = condition.Limit(0, 1)
+	err := Fill(ctx, contentType, condition, content, &count)
 	if err != nil {
 		return nil, err
 	}
@@ -100,10 +101,10 @@ func Fetch(ctx context.Context, contentType string, condition db.Condition) (con
 	return content, err
 }
 
-func LocationList(condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.Location, int, error) {
+func LocationList(condition db.Condition, withCount bool) ([]contenttype.Location, int, error) {
 	locations := []contenttype.Location{}
 	dbHandler := db.DBHanlder()
-	count, err := dbHandler.GetEntity(context.Background(), &locations, "dm_location", condition, sortby, limit, withCount)
+	count, err := dbHandler.GetEntity(context.Background(), &locations, "dm_location", condition, withCount)
 	if err != nil {
 		return locations, 0, err
 	}
@@ -111,12 +112,12 @@ func LocationList(condition db.Condition, limit []int, sortby []string, withCoun
 }
 
 // Children fetches children content directly under the given parentContent
-func Children(ctx context.Context, parentContent contenttype.ContentTyper, contenttype string, userID int, cond db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func Children(ctx context.Context, parentContent contenttype.ContentTyper, contenttype string, userID int, cond db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentTypeList := parentContent.Definition().AllowedTypes
 	if !util.Contains(contentTypeList, contenttype) {
 		return nil, -1, errors.New("content type " + contenttype + "doesn't exist or not allowed.")
 	}
-	result, countResult, err := SubList(ctx, parentContent, contenttype, 1, userID, cond, limit, sortby, withCount)
+	result, countResult, err := SubList(ctx, parentContent, contenttype, 1, userID, cond, withCount)
 	return result, countResult, err
 }
 
@@ -126,7 +127,7 @@ func SubTree(ctx context.Context, rootContent contenttype.ContentTyper, depth in
 	contentTypeList := strings.Split(contentTypes, ",")
 	var list []contenttype.ContentTyper
 	for _, contentType := range contentTypeList {
-		currentList, _, err := SubList(ctx, rootContent, contentType, depth, userID, db.EmptyCond(), []int{}, sortby, false)
+		currentList, _, err := SubList(ctx, rootContent, contentType, depth, userID, db.EmptyCond().Sort(sortby...), false)
 		if err != nil {
 			return TreeNode{}, err
 		}
@@ -221,7 +222,7 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 }
 
 // SubList fetches content list with permission considered(only return contents the user has access to).
-func SubList(ctx context.Context, rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func SubList(ctx context.Context, rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	rootLocation := rootContent.GetLocation()
 	if depth == 1 {
 		//Direct children
@@ -241,28 +242,28 @@ func SubList(ctx context.Context, rootContent contenttype.ContentTyper, contentT
 	}
 
 	//fetch
-	list, count, err := ListWithUser(ctx, userID, contentType, condition, limit, sortby, withCount)
+	list, count, err := ListWithUser(ctx, userID, contentType, condition, withCount)
 	return list, count, err
 }
 
-func ListWithUser(ctx context.Context, userID int, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func ListWithUser(ctx context.Context, userID int, contentType string, condition db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	//permission condition
 	permissionCondition := accessCondition(userID, contentType, ctx)
 	condition = condition.And(permissionCondition)
 
 	//fetch
-	list, count, err := List(ctx, contentType, condition, limit, sortby, withCount)
+	list, count, err := List(ctx, contentType, condition, withCount)
 	return list, count, err
 }
 
 //Fill all data into content which is a pointer
-func Fill(ctx context.Context, contentType string, condition db.Condition, limit []int, sortby []string, content interface{}, count *int) error {
+func Fill(ctx context.Context, contentType string, condition db.Condition, content interface{}, count *int) error {
 	dbhandler := db.DBHanlder()
 	hasCount := *count != -1
 
 	var countResult int
 	var err error
-	countResult, err = dbhandler.GetContent(ctx, content, contentType, condition, limit, sortby, hasCount)
+	countResult, err = dbhandler.GetContent(ctx, content, contentType, condition, hasCount)
 	if err != nil {
 		message := "[List]Content Query error"
 		log.Error(message+err.Error(), "")
@@ -275,13 +276,13 @@ func Fill(ctx context.Context, contentType string, condition db.Condition, limit
 // List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
 // Condition example: db.Cond("l.parent_id", 4).Cond("author", 1).Cond("modified >", "2020-03-13")
 // where content field can be used directly or with c. as prefix(eg. "c.author"), but location field need a l. prefix(eg. l.parent_id)
-func List(ctx context.Context, contentType string, condition db.Condition, limit []int, sortby []string, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func List(ctx context.Context, contentType string, condition db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
 	count := -1
 	if withCount {
 		count = 0
 	}
-	err := Fill(ctx, contentType, condition, limit, sortby, contentList, &count)
+	err := Fill(ctx, contentType, condition, contentList, &count)
 	if err != nil {
 		return nil, count, err
 	}
@@ -298,7 +299,7 @@ func Version(ctx context.Context, contentType string, condition db.Condition) (c
 
 	version := contenttype.Version{}
 	dbHandler := db.DBHanlder()
-	_, err = dbHandler.GetEntity(ctx, &version, "dm_version", condition.Cond("content_type", contentType), []string{}, nil, false)
+	_, err = dbHandler.GetEntity(ctx, &version, "dm_version", condition.Cond("content_type", contentType), false)
 	if err != nil {
 		return contenttype.Version{}, nil, err
 	}
@@ -351,5 +352,5 @@ func RelationOptions(ctx context.Context, ctype string, identifier string, limit
 	for cKey, cValue := range params.Condition {
 		condition = condition.And(cKey, cValue)
 	}
-	return List(ctx, params.Type, condition, limit, sortby, hasCount)
+	return List(ctx, params.Type, condition, hasCount)
 }

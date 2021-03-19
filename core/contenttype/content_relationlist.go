@@ -62,7 +62,7 @@ func (rl *RelationList) LoadFromInput(input interface{}, params definition.Field
 		if len(relationDataFields) > 0 {
 			//get content
 			contents := db.DatamapList{}
-			dbHandler.GetEntity(context.Background(), &contents, def.TableName, db.Cond("id", fromCid), nil, nil, false)
+			dbHandler.GetEntity(context.Background(), &contents, def.TableName, db.Cond("id", fromCid), false)
 			if len(contents) == 0 {
 				return errors.New("No content found on " + strconv.Itoa(fromCid))
 			}
