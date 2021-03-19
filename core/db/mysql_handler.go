@@ -158,7 +158,6 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 		}
 
 		//count if there is
-		countResult := 0
 		if count {
 			countSqlStr := `SELECT COUNT(*) AS count FROM ` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id ` + where
 
