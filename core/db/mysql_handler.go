@@ -30,7 +30,6 @@ type MysqlHandler struct {
 //It fill in with nil if nothing found(no error returned in this case)
 //
 //todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
-//todo: merge GetContent with GetEntityContent, remove contentType, tablename parameters because they are in contentType interface
 func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, contentType string, condition Condition, count bool) (int, error) {
 	def, err := definition.GetDefinition(contentType)
 	if err != nil {
@@ -42,151 +41,142 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 
 	tableName := def.TableName
 
-	if !def.HasLocation {
-		return r.getEntityContent(ctx, content, contentType, tableName, condition, limit, sortby, count)
-	}
-
+	countResult := 0
 	db, err := DB()
 	if err != nil {
 		return -1, errors.Wrap(err, "[MysqlHandler.GetContent]Error when connecting db.")
 	}
 
-	columns := util.GetInternalSettings("location_columns")
-	columnsWithPrefix := util.Iterate(columns, func(s string) string {
-		return `l.` + s + ` AS "location.` + s + `"`
-	})
-	locationColumns := strings.Join(columnsWithPrefix, ",")
+	if def.HasLocation {
+		columns := util.GetInternalSettings("location_columns")
+		columnsWithPrefix := util.Iterate(columns, func(s string) string {
+			return `l.` + s + ` AS "location.` + s + `"`
+		})
+		locationColumns := strings.Join(columnsWithPrefix, ",")
 
-	//get condition string for fields
-	conditionStr, values := BuildCondition(condition, columns)
-	where := ""
-	if conditionStr != "" {
-		where = "WHERE " + conditionStr
-	}
-
-	relationQuery := r.getRelationQuery()
-
-	//limit
-	limitStr := ""
-	if len(limit) > 0 {
-		if len(limit) != 2 {
-			return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
+		//get condition string for fields
+		conditionStr, values := BuildCondition(condition, columns)
+		where := ""
+		if conditionStr != "" {
+			where = "WHERE " + conditionStr
 		}
-		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
-	}
 
-	//sort by
-	sortbyStr, err := r.getSortBy(sortby, columns)
-	if err != nil {
-		return -1, err
-	}
+		relationQuery := r.getRelationQuery()
 
-	sqlStr := `SELECT c.*, c.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
-                   FROM (` + tableName + ` c INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id)
-                     LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
-										 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author
-                    ` + where + `
-                     GROUP BY l.id, author_name
-										 ` + sortbyStr + " " + limitStr
-
-	log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
-	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			log.Debug(err.Error(), "GetContent", ctx)
-		} else {
-			message := "[MysqlHandler.GetContent]Error when query. sql - " + sqlStr
-			return -1, errors.Wrap(err, message)
+		//limit
+		limitStr := ""
+		if len(limit) > 0 {
+			if len(limit) != 2 {
+				return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
+			}
+			limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
 		}
-	}
 
-	//count if there is
-	countResult := 0
-	if count {
-		countSqlStr := `SELECT COUNT(*) AS count
-									 FROM ( ` + tableName + ` c
-										 INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id )
-										 ` + where
-
-		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
+		//sort by
+		sortbyStr, err := r.getSortBy(sortby, columns)
 		if err != nil {
-			message := "[MysqlHandler.GetContent]Error when query count. sql - " + countSqlStr
-			return -1, errors.Wrap(err, message)
+			return -1, err
 		}
-		rows.Next()
-		rows.Scan(&countResult)
-		rows.Close()
-	}
 
-	return countResult, nil
-}
+		sqlStr := `SELECT c.*, c.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
+	                   FROM (` + tableName + ` c INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id)
+	                     LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
+											 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author
+	                    ` + where + `
+	                     GROUP BY l.id, author_name
+											 ` + sortbyStr + " " + limitStr
 
-//Get non-location content
-//todo: possible to have more joins between entities, or ingegrate with ORM
-//todo: support select multiple entity once.
-//todo: support query without involing location at all.
-func (r *MysqlHandler) getEntityContent(ctx context.Context, content interface{}, contentType string, tableName string, condition Condition, limit []int, sortby []string, count bool) (int, error) {
-	db, err := DB()
-	if err != nil {
-		return -1, errors.Wrap(err, "[MysqlHandler.GetEntityContent]Error when connecting db.")
-	}
-	//get condition string for fields
-	conditionStr, values := BuildCondition(condition)
-	where := ""
-	if conditionStr != "" {
-		where = "WHERE " + conditionStr
-	}
+		log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
+		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
 
-	relationQuery := r.getRelationQuery()
-
-	//limit
-	limitStr := ""
-	if len(limit) > 0 {
-		if len(limit) != 2 {
-			return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
-		}
-		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
-	}
-
-	//sort by
-	sortbyStr, err := r.getSortBy(sortby)
-	if err != nil {
-		return -1, err
-	}
-
-	sqlStr := `SELECT c.*, c.id as cid, '` + contentType + `' as content_type` + relationQuery + `
-                   FROM (` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id )
-                     LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
-                    ` + where + `
-                     GROUP BY c.id
-										 ` + sortbyStr + " " + limitStr
-
-	log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
-	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
-
-	if err != nil {
-		if err == sql.ErrNoRows {
-			// log.Warning(err.Error(), "GetByFields")
-		} else {
-			message := "[MysqlHandler.GetEntityContent]Error when query. sql - " + sqlStr
-			return -1, errors.Wrap(err, message)
-		}
-	}
-
-	//count if there is
-	countResult := 0
-	if count {
-		countSqlStr := `SELECT COUNT(*) AS count FROM ` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id ` + where
-
-		rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
 		if err != nil {
-			message := "[MysqlHandler.GetEntityContent]Error when query count. sql - " + countSqlStr
-			return -1, errors.Wrap(err, message)
+			if err == sql.ErrNoRows {
+				log.Debug(err.Error(), "GetContent", ctx)
+			} else {
+				message := "[MysqlHandler.GetContent]Error when query. sql - " + sqlStr
+				return -1, errors.Wrap(err, message)
+			}
 		}
-		rows.Next()
-		rows.Scan(&countResult)
-		rows.Close()
+
+		//count if there is
+		if count {
+			countSqlStr := `SELECT COUNT(*) AS count
+										 FROM ( ` + tableName + ` c
+											 INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id )
+											 ` + where
+
+			rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
+			if err != nil {
+				message := "[MysqlHandler.GetContent]Error when query count. sql - " + countSqlStr
+				return -1, errors.Wrap(err, message)
+			}
+			rows.Next()
+			rows.Scan(&countResult)
+			rows.Close()
+		}
+	} else {
+		//Get non-location content
+		//todo: possible to have more joins between entities, or ingegrate with ORM
+		//todo: support select multiple entity once.
+		//todo: support query without involing location at all.
+
+		//get condition string for fields
+		conditionStr, values := BuildCondition(condition)
+		where := ""
+		if conditionStr != "" {
+			where = "WHERE " + conditionStr
+		}
+
+		relationQuery := r.getRelationQuery()
+
+		//limit
+		limitStr := ""
+		if len(limit) > 0 {
+			if len(limit) != 2 {
+				return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
+			}
+			limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+		}
+
+		//sort by
+		sortbyStr, err := r.getSortBy(sortby)
+		if err != nil {
+			return -1, err
+		}
+
+		sqlStr := `SELECT c.*, c.id as cid, '` + contentType + `' as content_type` + relationQuery + `
+										 FROM (` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id )
+											 LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
+											` + where + `
+											 GROUP BY c.id
+											 ` + sortbyStr + " " + limitStr
+
+		log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
+		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
+
+		if err != nil {
+			if err == sql.ErrNoRows {
+				// log.Warning(err.Error(), "GetByFields")
+			} else {
+				message := "[MysqlHandler.GetEntityContent]Error when query. sql - " + sqlStr
+				return -1, errors.Wrap(err, message)
+			}
+		}
+
+		//count if there is
+		countResult := 0
+		if count {
+			countSqlStr := `SELECT COUNT(*) AS count FROM ` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id ` + where
+
+			rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
+			if err != nil {
+				message := "[MysqlHandler.GetEntityContent]Error when query count. sql - " + countSqlStr
+				return -1, errors.Wrap(err, message)
+			}
+			rows.Next()
+			rows.Scan(&countResult)
+			rows.Close()
+		}
 	}
 
 	return countResult, nil
