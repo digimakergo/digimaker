@@ -47,29 +47,44 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 		return -1, errors.Wrap(err, "[MysqlHandler.GetContent]Error when connecting db.")
 	}
 
+	//limit
+	limitStr := ""
+	if len(limit) > 0 {
+		if len(limit) != 2 {
+			return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
+		}
+		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+	}
+
+	relationQuery := ""
+	relationJoin := ""
+	groupby := ""
+
+	if def.HasRelationlist() {
+		relationQuery = r.getRelationQuery()
+		relationJoin = ` LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'`
+		if def.HasLocation {
+			groupby = ` GROUP BY l.id, author_name`
+		} else {
+			groupby = ` GROUP BY c.id`
+		}
+	}
+
+	authorSelect := ",location_user.name AS author_name"
+	authorJoin := "LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author"
+
 	if def.HasLocation {
 		columns := util.GetInternalSettings("location_columns")
 		columnsWithPrefix := util.Iterate(columns, func(s string) string {
 			return `l.` + s + ` AS "location.` + s + `"`
 		})
-		locationColumns := strings.Join(columnsWithPrefix, ",")
+		locationColumns := "," + strings.Join(columnsWithPrefix, ",")
 
 		//get condition string for fields
 		conditionStr, values := BuildCondition(condition, columns)
 		where := ""
 		if conditionStr != "" {
-			where = "WHERE " + conditionStr
-		}
-
-		relationQuery := r.getRelationQuery()
-
-		//limit
-		limitStr := ""
-		if len(limit) > 0 {
-			if len(limit) != 2 {
-				return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
-			}
-			limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+			where = " WHERE " + conditionStr
 		}
 
 		//sort by
@@ -78,13 +93,9 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 			return -1, err
 		}
 
-		sqlStr := `SELECT c.*, c.id AS cid, location_user.name AS author_name, ` + locationColumns + relationQuery + `
+		sqlStr := `SELECT c.*, c.id AS cid` + authorSelect + locationColumns + relationQuery + `
 	                   FROM (` + tableName + ` c INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id)
-	                     LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
-											 LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author
-	                    ` + where + `
-	                     GROUP BY l.id, author_name
-											 ` + sortbyStr + " " + limitStr
+	                     ` + relationJoin + authorJoin + where + groupby + sortbyStr + limitStr
 
 		log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
 		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
@@ -116,26 +127,12 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 		}
 	} else {
 		//Get non-location content
-		//todo: possible to have more joins between entities, or ingegrate with ORM
-		//todo: support select multiple entity once.
-		//todo: support query without involing location at all.
 
 		//get condition string for fields
 		conditionStr, values := BuildCondition(condition)
 		where := ""
 		if conditionStr != "" {
-			where = "WHERE " + conditionStr
-		}
-
-		relationQuery := r.getRelationQuery()
-
-		//limit
-		limitStr := ""
-		if len(limit) > 0 {
-			if len(limit) != 2 {
-				return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
-			}
-			limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+			where = " WHERE " + conditionStr
 		}
 
 		//sort by
@@ -144,12 +141,9 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 			return -1, err
 		}
 
-		sqlStr := `SELECT c.*, c.id as cid, '` + contentType + `' as content_type` + relationQuery + `
+		sqlStr := `SELECT c.*, c.id as cid, '` + contentType + `' as content_type` + authorSelect + relationQuery + `
 										 FROM (` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id )
-											 LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'
-											` + where + `
-											 GROUP BY c.id
-											 ` + sortbyStr + " " + limitStr
+										 ` + relationJoin + authorJoin + where + groupby + sortbyStr + limitStr
 
 		log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
 		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
@@ -183,7 +177,7 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 }
 
 func (r *MysqlHandler) getRelationQuery() string {
-	relationQuery := `,JSON_ARRAYAGG( JSON_OBJECT( 'identifier', relation.identifier,
+	relationQuery := `, JSON_ARRAYAGG( JSON_OBJECT( 'identifier', relation.identifier,
                                       'to_content_id', relation.to_content_id,
                                       'to_type', relation.to_type,
                                       'from_content_id', relation.from_content_id,

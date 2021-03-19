@@ -34,6 +34,8 @@ type ContentType struct {
 	DataFields   []DataField       `json:"data_fields"`
 	//All fields where identifier is the key.
 	FieldMap map[string]FieldDef `json:"-"`
+
+	hasRelationlist int //cache of hasRelationlist, 1(yes), -1(no), 0(not set)
 }
 
 func (c *ContentType) HasDataField(identifier string) bool {
@@ -45,6 +47,29 @@ func (c *ContentType) HasDataField(identifier string) bool {
 		}
 	}
 	return result
+}
+
+func (c ContentType) HasRelationlist() bool {
+	if c.hasRelationlist == 0 {
+		hasRelationList := false
+		for _, field := range c.FieldMap {
+			if field.FieldType == "relationlist" {
+				hasRelationList = true
+				break
+			}
+		}
+		if hasRelationList {
+			c.hasRelationlist = 1
+		} else {
+			c.hasRelationlist = -1
+		}
+	}
+
+	if c.hasRelationlist == 1 {
+		return true
+	} else {
+		return false
+	}
 }
 
 func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) {
