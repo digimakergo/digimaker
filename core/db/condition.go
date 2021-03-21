@@ -8,7 +8,8 @@ import (
 	"github.com/digimakergo/digimaker/core/util"
 )
 
-var Operators = []string{">", ">=", "<", "<=", "!=", "=", "in", "like"} //todo: make it extendable in loading
+var Operators = []string{">", ">=", "<", "==", "<=", "!=", "=", "in", "like"} //todo: make it extendable in loading
+//Note: == is for join
 
 const logicAnd = "and"
 const logicOr = "or"
@@ -163,6 +164,14 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 	}
 	if logic == "" { //if it's a expression
 		expression := cond.Children.(Expression)
+
+		//handle join condition
+		//todo: fix possible sql injection issue, with more validation on field
+		if expression.Operator == "==" {
+			result := expression.Field + "=" + expression.Value.(string)
+			return result, nil
+		}
+
 		value := []interface{}{}
 		operatorStr := ""
 		switch expression.Value.(type) {

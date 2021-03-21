@@ -30,8 +30,12 @@ type MysqlHandler struct {
 //It fill in with nil if nothing found(no error returned in this case)
 //
 //todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
-func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, contentType string, condition Condition, count bool) (int, error) {
-	def, err := definition.GetDefinition(contentType)
+//todo: condition should be query, which include select(fields), targets(for join)
+func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, contentTypes string, condition Condition, count bool) (int, error) {
+	contenttypeArr := strings.Split(contentTypes, ",")
+	contentType := contenttypeArr[0]
+
+	def, err := definition.GetDefinition(contenttypeArr[0])
 	if err != nil {
 		return -1, err
 	}
@@ -56,9 +60,33 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
 	}
 
+	//relation related
 	relationQuery := ""
 	relationJoin := ""
 	groupby := ""
+
+	//join select
+	extraFields := []string{}
+	extraTables := []string{}
+	for i := 1; i < len(contenttypeArr); i++ {
+		joinContentType := contenttypeArr[i]
+		joinDef, err := definition.GetDefinition(joinContentType)
+		if err != nil {
+			return -1, err
+		}
+		for field, _ := range joinDef.FieldMap {
+			extraFields = append(extraFields, joinContentType+"."+field+` AS "`+joinContentType+`.`+field+`"`)
+		}
+
+		extraTables = append(extraTables, joinDef.TableName+" "+joinContentType)
+	}
+
+	extraFieldStr := ""
+	extraTableStr := ""
+	if len(extraTables) > 0 {
+		extraFieldStr = "," + strings.Join(extraFields, ",")
+		extraTableStr = "," + strings.Join(extraTables, ",") + " "
+	}
 
 	if def.HasRelationlist() {
 		relationQuery = r.getRelationQuery()
@@ -93,8 +121,8 @@ func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, cont
 			return -1, err
 		}
 
-		sqlStr := `SELECT c.*, c.id AS cid` + authorSelect + locationColumns + relationQuery + `
-	                   FROM (` + tableName + ` c INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id)
+		sqlStr := `SELECT c.*, c.id AS cid` + authorSelect + locationColumns + relationQuery + extraFieldStr + `
+	                   FROM (` + tableName + ` c INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id` + extraTableStr + ` )
 	                     ` + relationJoin + authorJoin + where + groupby + sortbyStr + limitStr
 
 		log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)

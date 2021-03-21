@@ -291,7 +291,7 @@ func GetDefinition(contentType string, language ...string) (ContentType, error) 
 	if ok {
 		return result, nil
 	} else {
-		return ContentType{}, errors.New("doesn't exist.")
+		return ContentType{}, errors.New("Content type doesn't exist: " + contentType)
 	}
 }
 
