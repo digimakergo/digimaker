@@ -75,14 +75,14 @@ func (c Condition) Or(input interface{}, more ...interface{}) Condition {
 	return result
 }
 
-func (c *Condition) Sort(sortby ...string) Condition {
+func (c Condition) Sort(sortby ...string) Condition {
 	c.Option.Sortby = sortby
-	return *c
+	return c
 }
 
-func (c *Condition) Limit(offset int, number int) Condition {
+func (c Condition) Limit(offset int, number int) Condition {
 	c.Option.LimitArr = []int{offset, number}
-	return *c
+	return c
 }
 
 func (c *Condition) Count() Condition {

@@ -119,7 +119,7 @@ func CreateQuery(targets string, condition Condition) (string, Query) {
 //Bind content with a simple syntax, support innner join
 func BindContent(ctx context.Context, entity interface{}, targets string, condition Condition) (int, error) {
 	contentType, query := CreateQuery(targets, condition)
-	count, err := BindContentWithQuery(ctx, entity, contentType, query, ContentOption{})
+	count, err := BindContentWithQuery(ctx, entity, contentType, query, ContentOption{WithAuthor: true})
 	return count, err
 }
 
@@ -130,14 +130,14 @@ func BindContentWithQuery(ctx context.Context, entity interface{}, contentType s
 		return -1, err
 	}
 
-	count, err := BindWithQuery(ctx, entity, query)
+	count, err := BindEntity(ctx, entity, query)
 	return count, err
 }
 
 //Bind entity with Query
 //If limit is x,0(even 0,0) it will ignore entity, and only count
 //If limit is 10(>0),y it will ignore count unless AlwaysCount is true
-func BindWithQuery(ctx context.Context, entity interface{}, query Query) (int, error) {
+func BindEntity(ctx context.Context, entity interface{}, query Query) (int, error) {
 	sqlStr, values, err := handler.BuildQuery(query)
 	if err != nil {
 		return -1, err
@@ -173,7 +173,7 @@ func BindWithQuery(ctx context.Context, entity interface{}, query Query) (int, e
 	}
 
 	if count {
-		countResult, err = CountWithQuery(ctx, query)
+		countResult, err = Count(ctx, query)
 		if err != nil {
 			return -1, err
 		}
@@ -183,7 +183,7 @@ func BindWithQuery(ctx context.Context, entity interface{}, query Query) (int, e
 }
 
 //Count only
-func CountWithQuery(ctx context.Context, query Query) (int, error) {
+func Count(ctx context.Context, query Query) (int, error) {
 	sqlStr, values, err := handler.BuildQuery(query)
 	if err != nil {
 		return -1, err

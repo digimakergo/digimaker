@@ -7,3 +7,9 @@ type DBHandler interface {
 
 	GetColumns(table string) []string
 }
+
+var handler DBHandler
+
+func RegisterHandler(dbBuilder DBHandler) {
+	handler = dbBuilder
+}

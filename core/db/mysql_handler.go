@@ -9,216 +9,165 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 
-	"github.com/digimakergo/digimaker/core/definition"
-
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
 	"github.com/pkg/errors"
-	"github.com/volatiletech/sqlboiler/queries"
 )
 
 type Datamap map[string]interface{}
 type DatamapList []Datamap
 
+//cache all columns which is fetched from database.
+var tableColumns = map[string][]string{}
+
 // Implement DBEntitier
 type MysqlHandler struct {
 }
 
-//Query to fill in contentTyper. Use reference in content parameter.
-//It fill in with nil if nothing found(no error returned in this case)
-//
-//todo: possible to have more joins between content/entities(relations or others), or ingegrate with ORM
-//todo: condition should be query, which include select(fields), targets(for join)
-func (r *MysqlHandler) GetContent(ctx context.Context, content interface{}, contentTypes string, condition Condition, count bool) (int, error) {
-	contenttypeArr := strings.Split(contentTypes, ",")
-	contentType := contenttypeArr[0]
+//get table columns with Cache
+func (handler MysqlHandler) GetColumns(table string) []string {
+	return tableColumns[table]
+}
 
-	def, err := definition.GetDefinition(contenttypeArr[0])
+//
+func (handler MysqlHandler) WithContent(query Query, contentType string, option ContentOption) (Query, error) {
+	def, err := definition.GetDefinition(contentType)
 	if err != nil {
-		return -1, err
+		return query, err
 	}
 
-	limit := condition.LimitArr
-	sortby := condition.Sortby
+	contentQuery := query.Queries[0]
+	hasAlias := contentQuery.Alias == "" //without alias
 
-	tableName := def.TableName
+	contentFields := contentQuery.Select
 
-	countResult := 0
-	db, err := DB()
+	contentAlias := "c"
+	if !hasAlias {
+		contentAlias = contentQuery.Alias
+	}
+	contentPrefix := contentAlias + "."
+
+	//add prefix to content fields
+	fieldPrefix := ""
+	if !hasAlias {
+		fieldPrefix = contentQuery.Alias + "."
+	}
+
+	if len(contentFields) == 0 {
+		fields := handler.GetColumns(def.TableName)
+
+		fieldsWithPrefix := []string{}
+		for _, field := range fields {
+			fieldStr := contentPrefix + field + " AS '" + fieldPrefix + field + "'"
+			fieldsWithPrefix = append(fieldsWithPrefix, fieldStr)
+		}
+		contentFields = fieldsWithPrefix
+	}
+
+	//add cid to content fields
+	contentFields = append(contentFields, contentPrefix+"id AS '"+fieldPrefix+"cid'")
+	contentQuery.Select = contentFields
+
+	//add location join if needed
+	if def.HasLocation {
+		//add location onequery
+		locationAlias := "l"
+		if !hasAlias {
+			locationAlias = contentQuery.Alias + "_" + locationAlias
+		}
+
+		//fields
+		columns := handler.GetColumns("dm_location")
+		renamedColumns := []string{}
+		for _, column := range columns {
+			renamedColumns = append(renamedColumns, locationAlias+"."+column+" AS '"+fieldPrefix+"location."+column+"'")
+		}
+
+		locationQuery := SingleQuery{
+			Table:    "dm_location",
+			Alias:    locationAlias,
+			Select:   renamedColumns,
+			Relation: Cond(locationAlias+".content_type ==", "'"+contentType+"'").Cond(locationAlias+".content_id ==", contentAlias+".id"),
+		}
+		query.Add(locationQuery)
+	}
+
+	//add author join if needed
+	if option.WithAuthor {
+		authorAlias := contentAlias + "_l_author"
+		authorQuery := SingleQuery{
+			Table:    "dm_location",
+			Alias:    authorAlias,
+			Select:   []string{authorAlias + ".name AS " + "'" + fieldPrefix + "author_name'"},
+			Relation: Cond(contentAlias+".author ==", authorAlias+".content_id").Cond(authorAlias+".content_type ==", "'user'"),
+		}
+		query.Add(authorQuery)
+	}
+
+	//use c for one content alias for conditions&tables
+	if hasAlias {
+		contentQuery.Alias = "c"
+	}
+	//change content query
+	query.Queries[0] = contentQuery
+	return query, nil
+}
+
+//Implement BuildQuery
+func (handler MysqlHandler) BuildQuery(query Query) (string, []interface{}, error) {
+	tables := []string{}
+	fields := []string{}
+
+	condition := EmptyCond()
+	for _, item := range query.Queries {
+		table := item.Table
+		tables = append(tables, table+" "+item.Alias)
+
+		fields = append(fields, item.Select...)
+		condition = condition.And(item.Condition).And(item.Relation) //todo: deal relations using on
+		//todo: add alias if alias is not empty
+	}
+
+	//select
+	fieldStr := strings.Join(fields, ",")
+
+	//tables
+	tableStr := strings.Join(tables, ",")
+
+	//condition
+	conditionStr, values := BuildCondition(condition) //todo: return error error
+
+	//group by
+	groupbyStr := ""
+	groupby := query.Groupby
+	if len(groupby) > 0 {
+		groupbyStr = " GROUP BY " + strings.Join(groupby, ",")
+	}
+
+	//sort by
+	sortby, err := handler.getSortBy(query.SortArr)
 	if err != nil {
-		return -1, errors.Wrap(err, "[MysqlHandler.GetContent]Error when connecting db.")
+		return "", nil, err
 	}
 
 	//limit
-	limitStr := ""
-	if len(limit) > 0 {
-		if len(limit) != 2 {
-			return -1, errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
-		}
-		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+	limit, err := handler.getLimit(query.LimitArr)
+	if err != nil {
+		return "", nil, err
 	}
 
-	//relation related
-	relationQuery := ""
-	relationJoin := ""
-	groupby := ""
+	sqlStr := `SELECT ` + fieldStr + ` FROM ` + tableStr + " WHERE " + conditionStr + groupbyStr + sortby + limit
 
-	//join select
-	extraFields := []string{}
-	extraTables := []string{}
-	for i := 1; i < len(contenttypeArr); i++ {
-		joinContentType := contenttypeArr[i]
-		joinDef, err := definition.GetDefinition(joinContentType)
-		if err != nil {
-			return -1, err
-		}
-		for field, _ := range joinDef.FieldMap {
-			extraFields = append(extraFields, joinContentType+"."+field+` AS "`+joinContentType+`.`+field+`"`)
-		}
+	fmt.Println(sqlStr)
 
-		extraTables = append(extraTables, joinDef.TableName+" "+joinContentType)
-	}
-
-	extraFieldStr := ""
-	extraTableStr := ""
-	if len(extraTables) > 0 {
-		extraFieldStr = "," + strings.Join(extraFields, ",")
-		extraTableStr = "," + strings.Join(extraTables, ",") + " "
-	}
-
-	if def.HasRelationlist() {
-		relationQuery = r.getRelationQuery()
-		relationJoin = ` LEFT JOIN dm_relation relation ON c.id=relation.to_content_id AND relation.to_type='` + contentType + `'`
-		if def.HasLocation {
-			groupby = ` GROUP BY l.id, author_name`
-		} else {
-			groupby = ` GROUP BY c.id`
-		}
-	}
-
-	authorSelect := ",location_user.name AS author_name"
-	authorJoin := "LEFT JOIN dm_location location_user ON location_user.content_type='user' AND location_user.content_id=c.author"
-
-	if def.HasLocation {
-		columns := util.GetInternalSettings("location_columns")
-		columnsWithPrefix := util.Iterate(columns, func(s string) string {
-			return `l.` + s + ` AS "location.` + s + `"`
-		})
-		locationColumns := "," + strings.Join(columnsWithPrefix, ",")
-
-		//get condition string for fields
-		conditionStr, values := BuildCondition(condition, columns)
-		where := ""
-		if conditionStr != "" {
-			where = " WHERE " + conditionStr
-		}
-
-		//sort by
-		sortbyStr, err := r.getSortBy(sortby, columns)
-		if err != nil {
-			return -1, err
-		}
-
-		sqlStr := `SELECT c.*, c.id AS cid` + authorSelect + locationColumns + relationQuery + extraFieldStr + `
-	                   FROM (` + tableName + ` c INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id` + extraTableStr + ` )
-	                     ` + relationJoin + authorJoin + where + groupby + sortbyStr + limitStr
-
-		log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
-		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
-
-		if err != nil {
-			if err == sql.ErrNoRows {
-				log.Debug(err.Error(), "GetContent", ctx)
-			} else {
-				message := "[MysqlHandler.GetContent]Error when query. sql - " + sqlStr
-				return -1, errors.Wrap(err, message)
-			}
-		}
-
-		//count if there is
-		if count {
-			countSqlStr := `SELECT COUNT(*) AS count
-										 FROM ( ` + tableName + ` c
-											 INNER JOIN dm_location l ON l.content_type = '` + contentType + `' AND l.content_id=c.id )
-											 ` + where
-
-			rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
-			if err != nil {
-				message := "[MysqlHandler.GetContent]Error when query count. sql - " + countSqlStr
-				return -1, errors.Wrap(err, message)
-			}
-			rows.Next()
-			rows.Scan(&countResult)
-			rows.Close()
-		}
-	} else {
-		//Get non-location content
-
-		//get condition string for fields
-		conditionStr, values := BuildCondition(condition)
-		where := ""
-		if conditionStr != "" {
-			where = " WHERE " + conditionStr
-		}
-
-		//sort by
-		sortbyStr, err := r.getSortBy(sortby)
-		if err != nil {
-			return -1, err
-		}
-
-		sqlStr := `SELECT c.*, c.id as cid, '` + contentType + `' as content_type` + authorSelect + relationQuery + `
-										 FROM (` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id )
-										 ` + relationJoin + authorJoin + where + groupby + sortbyStr + limitStr
-
-		log.Debug(sqlStr+","+fmt.Sprintln(values), "db", ctx)
-		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, content)
-
-		if err != nil {
-			if err == sql.ErrNoRows {
-				// log.Warning(err.Error(), "GetByFields")
-			} else {
-				message := "[MysqlHandler.GetEntityContent]Error when query. sql - " + sqlStr
-				return -1, errors.Wrap(err, message)
-			}
-		}
-
-		//count if there is
-		if count {
-			countSqlStr := `SELECT COUNT(*) AS count FROM ` + tableName + ` c INNER JOIN dm_location location ON c.location_id = location.id ` + where
-
-			rows, err := queries.Raw(countSqlStr, values...).QueryContext(context.Background(), db)
-			if err != nil {
-				message := "[MysqlHandler.GetEntityContent]Error when query count. sql - " + countSqlStr
-				return -1, errors.Wrap(err, message)
-			}
-			rows.Next()
-			rows.Scan(&countResult)
-			rows.Close()
-		}
-	}
-
-	return countResult, nil
-}
-
-func (r *MysqlHandler) getRelationQuery() string {
-	relationQuery := `, JSON_ARRAYAGG( JSON_OBJECT( 'identifier', relation.identifier,
-                                      'to_content_id', relation.to_content_id,
-                                      'to_type', relation.to_type,
-                                      'from_content_id', relation.from_content_id,
-                                      'from_type', relation.from_type,
-                                      'from_location', relation.from_location,
-                                      'priority', relation.priority,
-                                      'uid', relation.uid,
-                                      'description',relation.description,
-                                      'data' ,relation.data ) ) AS relations`
-	return relationQuery
+	return sqlStr, values, nil
 }
 
 //Get sort by sql based on sortby pattern(eg.[]string{"name asc", "id desc"})
-func (r *MysqlHandler) getSortBy(sortby []string, locationColumns ...[]string) (string, error) {
+func (r MysqlHandler) getSortBy(sortby []string, locationColumns ...[]string) (string, error) {
 	//sort by
 	sortbyArr := []string{}
 	for _, item := range sortby {
@@ -243,107 +192,22 @@ func (r *MysqlHandler) getSortBy(sortby []string, locationColumns ...[]string) (
 
 	sortbyStr := ""
 	if len(sortbyArr) > 0 {
-		sortbyStr = "ORDER BY " + strings.Join(sortbyArr, ",")
+		sortbyStr = " ORDER BY " + strings.Join(sortbyArr, ",")
 		sortbyStr = util.StripSQLPhrase(sortbyStr)
 	}
 	return sortbyStr, nil
 }
 
-// Count based on condition
-func (*MysqlHandler) Count(tablename string, condition Condition) (int, error) {
-	conditions, values := BuildCondition(condition)
-	sqlStr := "SELECT COUNT(*) AS count FROM " + tablename + " WHERE " + conditions
-	log.Debug(sqlStr, "db")
-	db, err := DB()
-	if err != nil {
-		return 0, errors.Wrap(err, "[MysqlHandler.Count]Error when connecting db.")
-	}
-	rows, err := queries.Raw(sqlStr, values...).QueryContext(context.Background(), db)
-	if err != nil {
-		return 0, errors.Wrap(err, "[MysqlHandler.Count]Error when querying.")
-	}
-	rows.Next()
-	var count int
-	rows.Scan(&count)
-	rows.Close()
-	return count, nil
-}
-
-//todo: support limit.
-func (r *MysqlHandler) GetEntity(ctx context.Context, entity interface{}, tablename string, condition Condition, count bool) (int, error) {
-	conditions, values := BuildCondition(condition)
-	sortby := condition.Sortby
-	sortbyStr, err := r.getSortBy(sortby)
-	if err != nil {
-		return 0, err
-	}
-
-	limit := condition.LimitArr
+func (r MysqlHandler) getLimit(limit []int) (string, error) {
+	//limit
 	limitStr := ""
-	if limit != nil && len(limit) == 2 {
+	if len(limit) > 0 {
+		if len(limit) != 2 {
+			return "", errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
+		}
 		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
 	}
-	sqlStr := "SELECT * FROM " + tablename + " WHERE " + conditions + " " + sortbyStr + limitStr
-	log.Debug(sqlStr, "db", ctx)
-	db, err := DB()
-	if err != nil {
-		return 0, errors.Wrap(err, "[MysqlHandler.GetEntity]Error when connecting db.")
-	}
-
-	//Fill in with DatamapList or other entity
-	if entityList, ok := entity.(*DatamapList); ok {
-		rows, rowError := queries.Raw(sqlStr, values...).QueryContext(context.Background(), db)
-		cols, _ := rows.Columns()
-		err = rowError
-		defer rows.Close()
-		list := DatamapList{}
-
-		for rows.Next() {
-			//scan to columnpointers
-			columns := make([]interface{}, len(cols))
-			columnPointers := make([]interface{}, len(cols))
-			for i, _ := range columns {
-				columnPointers[i] = &columns[i]
-			}
-
-			if err := rows.Scan(columnPointers...); err != nil {
-				return 0, err
-			}
-
-			//set to datamap
-			datamap := Datamap{}
-			for i, colName := range cols {
-				val := columnPointers[i].(*interface{})
-				v := *val
-				switch v.(type) {
-				case []byte:
-					datamap[colName] = string(v.([]byte))
-				default:
-					datamap[colName] = v
-				}
-			}
-			list = append(list, datamap)
-		}
-
-		*entityList = list
-	} else {
-		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
-	}
-	if err == sql.ErrNoRows {
-		// log.Warning(err.Error(), "GetEntity")
-	} else {
-		return 0, errors.Wrap(err, "[MysqlHandler.GetEntity]Error when query.")
-	}
-
-	//count
-	countResult := 0
-	if count {
-		countResult, err = r.Count(tablename, condition)
-		if err != nil {
-			return 0, err
-		}
-	}
-	return countResult, nil
+	return limitStr, nil
 }
 
 func (MysqlHandler) Insert(ctx context.Context, tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
@@ -460,9 +324,6 @@ func (*MysqlHandler) Delete(ctx context.Context, tableName string, condition Con
 	return nil
 }
 
-//todo: consider to remove DBHanlder()?
-var dbObject = MysqlHandler{}
-
-func DBHanlder() MysqlHandler {
-	return dbObject
+func init() {
+	RegisterHandler(MysqlHandler{})
 }
