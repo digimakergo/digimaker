@@ -21,11 +21,10 @@ type SingleQuery struct {
 	Relation  Condition
 }
 
-type ContentFetchOption struct {
+type ContentOption struct {
 	WithAuthor       bool
 	WithRelation     []string //relation field
 	WithRelationlist []string //relationlist field
-	AlwaysCount      bool
 }
 
 type Query struct {
@@ -81,7 +80,7 @@ func getTableAlias(target string) (string, string, string) {
 	tableName := ""
 	def, err := definition.GetDefinition(targetName)
 	if err == nil {
-		targetName = def.TableName
+		tableName = def.TableName
 	} else {
 		tableName = targetName
 	}
@@ -98,8 +97,9 @@ func CreateQuery(targets string, condition Condition) (string, Query) {
 	for i, target := range targetArr {
 		table, alias, target := getTableAlias(target)
 		sQuery := SingleQuery{
-			Table: table,
-			Alias: alias,
+			Table:     table,
+			Alias:     alias,
+			Condition: condition,
 		}
 		if i == 0 {
 			firstTarget = target
@@ -119,12 +119,12 @@ func CreateQuery(targets string, condition Condition) (string, Query) {
 //Bind content with a simple syntax, support innner join
 func BindContent(ctx context.Context, entity interface{}, targets string, condition Condition) (int, error) {
 	contentType, query := CreateQuery(targets, condition)
-	count, err := BindContentWithQuery(ctx, entity, contentType, query, ContentFetchOption{})
+	count, err := BindContentWithQuery(ctx, entity, contentType, query, ContentOption{})
 	return count, err
 }
 
 //Bind content with query
-func BindContentWithQuery(ctx context.Context, entity interface{}, contentType string, query Query, option ContentFetchOption) (int, error) {
+func BindContentWithQuery(ctx context.Context, entity interface{}, contentType string, query Query, option ContentOption) (int, error) {
 	query, err := handler.WithContent(query, contentType, option)
 	if err != nil {
 		return -1, err

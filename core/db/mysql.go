@@ -19,15 +19,11 @@ type Handler struct {
 
 //get table columns with Cache
 func (handler Handler) GetColumns(table string) []string {
-	if table == "dm_location" {
-		return []string{"name", "content_type", "content_id"}
-	} else {
-		return []string{"author", "title", "modified"}
-	}
+	return tableColumns[table]
 }
 
 //
-func (handler Handler) WithContent(query Query, contentType string, option ContentFetchOption) (Query, error) {
+func (handler Handler) WithContent(query Query, contentType string, option ContentOption) (Query, error) {
 	def, err := definition.GetDefinition(contentType)
 	if err != nil {
 		return query, err
@@ -38,6 +34,12 @@ func (handler Handler) WithContent(query Query, contentType string, option Conte
 
 	contentFields := contentQuery.Select
 
+	contentAlias := "c"
+	if !hasAlias {
+		contentAlias = contentQuery.Alias
+	}
+	contentPrefix := contentAlias + "."
+
 	//add prefix to content fields
 	fieldPrefix := ""
 	if !hasAlias {
@@ -46,28 +48,18 @@ func (handler Handler) WithContent(query Query, contentType string, option Conte
 
 	if len(contentFields) == 0 {
 		fields := handler.GetColumns(def.TableName)
-		if contentQuery.Alias == "" {
-			contentFields = fields
-		} else {
-			fieldsWithPrefix := []string{}
-			for _, field := range fields {
-				fieldStr := fieldPrefix + field + " AS '" + fieldPrefix + field + "'"
-				fieldsWithPrefix = append(fieldsWithPrefix, fieldStr)
-			}
-			contentFields = fieldsWithPrefix
+
+		fieldsWithPrefix := []string{}
+		for _, field := range fields {
+			fieldStr := contentPrefix + field + " AS '" + fieldPrefix + field + "'"
+			fieldsWithPrefix = append(fieldsWithPrefix, fieldStr)
 		}
+		contentFields = fieldsWithPrefix
 	}
 
 	//add cid to content fields
-	contentFields = append(contentFields, fieldPrefix+"id AS '"+fieldPrefix+"cid'")
+	contentFields = append(contentFields, contentPrefix+"id AS '"+fieldPrefix+"cid'")
 	contentQuery.Select = contentFields
-
-	contentPrefix := ""
-	contentAlias := "c"
-	if !hasAlias {
-		contentAlias = contentQuery.Alias
-		contentPrefix = contentQuery.Alias + "."
-	}
 
 	//add location join if needed
 	if def.HasLocation {
@@ -81,7 +73,7 @@ func (handler Handler) WithContent(query Query, contentType string, option Conte
 		columns := handler.GetColumns("dm_location")
 		renamedColumns := []string{}
 		for _, column := range columns {
-			renamedColumns = append(renamedColumns, locationAlias+"."+column+" AS '"+contentPrefix+"l-"+column+"'")
+			renamedColumns = append(renamedColumns, locationAlias+"."+column+" AS '"+fieldPrefix+"location."+column+"'")
 		}
 
 		locationQuery := SingleQuery{
@@ -206,4 +198,8 @@ func (r Handler) getLimit(limit []int) (string, error) {
 		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
 	}
 	return limitStr, nil
+}
+
+func init() {
+	RegisterHandler(Handler{})
 }
