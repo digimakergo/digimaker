@@ -6,7 +6,6 @@ package rest
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -98,15 +97,11 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dbHandler := db.DBHanlder()
 	version := contenttype.Version{}
-	dbHandler.GetEntity(r.Context(),
+	db.BindEntity(r.Context(),
 		&version,
 		version.TableName(),
-		db.Cond("content_id", content.GetCID()).Cond("content_type", content.ContentType()).Cond("version", versionNo),
-		[]string{},
-		nil,
-		false)
+		db.Cond("content_id", content.GetCID()).Cond("content_type", content.ContentType()).Cond("version", versionNo))
 	if version.ID == 0 {
 		HandleError(errors.New("version doesn't exist."), w)
 		return
@@ -151,13 +146,12 @@ func buildCondition(userid int, def definition.ContentType, query url.Values) (d
 		}
 		condition = condition.And("c.id", cids)
 	}
-	//contain savan
+	//contain
 	nameStr := query.Get("name")
 
 	if nameStr != "" {
 		contains := util.Split(nameStr, ":")
 		if len(contains) > 0 && contains[0] == "contain" {
-			fmt.Printf("savan" + contains[1])
 			//todo: esc % to inside in condition
 			cValue := "%" + contains[1] + "%"
 			condition = condition.And("l.name like", cValue)
@@ -243,6 +237,11 @@ func List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	condition = condition.Sort(sortby...)
+	if len(limit) == 2 {
+		condition = condition.Limit(limit[0], limit[1])
+	}
+
 	rootStr := getParams.Get("parent")
 	var list []contenttype.ContentTyper
 	var count int
@@ -271,13 +270,13 @@ func List(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		list, count, err = query.SubList(ctx, rootContent, ctype, level, userID, condition, limit, sortby, true)
+		list, count, err = query.SubList(ctx, rootContent, ctype, level, userID, condition, true)
 		if err != nil {
 			HandleError(err, w)
 			return
 		}
 	} else {
-		list, count, err = query.ListWithUser(ctx, userID, ctype, condition, limit, sortby, true)
+		list, count, err = query.ListWithUser(ctx, userID, ctype, condition, true)
 		if err != nil {
 			HandleError(err, w)
 			return
