@@ -8,8 +8,7 @@ import (
 	"github.com/digimakergo/digimaker/core/util"
 )
 
-var Operators = []string{">", ">=", "<", "==", "<=", "!=", "=", "in", "like"} //todo: make it extendable in loading
-//Note: == is for join
+var Operators = []string{">", ">=", "<", "==", "<=", "!=", "=", "in", "like"} // Note: == is for join. todo: make it extendable in loading
 
 const logicAnd = "and"
 const logicOr = "or"

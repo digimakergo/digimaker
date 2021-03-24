@@ -30,6 +30,19 @@ func TestCond(t *testing.T) {
 	fmt.Println(BuildCondition(falseCond))
 }
 
+func ExampleCond() {
+	//cond
+	cond := Cond("id>", 10)
+
+	//and
+	cond2 := Cond(" modified  > ", 22222222)
+	cond3 := Cond("published >", 3333333)
+	andCond := cond.And(cond2, cond3)
+
+	//or then and
+	cond4 := cond.Or(cond2, cond3).And(cond2, cond3)
+}
+
 func ExampleEmptyCond() {
 	cond := EmptyCond().Cond("author", "1")
 	built, _ := BuildCondition(cond)

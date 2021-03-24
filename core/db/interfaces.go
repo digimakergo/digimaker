@@ -23,14 +23,17 @@ func RegisterHandler(dbBuilder DBHandler) {
 	handler = dbBuilder
 }
 
+//Insert record, return id created(if it has). It only invokes "handler.Insert"
 func Insert(ctx context.Context, tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
 	return handler.Insert(ctx, tablename, values, transation...)
 }
 
+//Update record. It only invokes "handler.Update"
 func Update(ctx context.Context, tablename string, values map[string]interface{}, condition Condition, transation ...*sql.Tx) error {
 	return handler.Update(ctx, tablename, values, condition, transation...)
 }
 
+//Delete record. It only invokes "handler.Delete"
 func Delete(ctx context.Context, tablename string, condition Condition, transation ...*sql.Tx) error {
 	return handler.Delete(ctx, tablename, condition, transation...)
 }

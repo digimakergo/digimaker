@@ -69,6 +69,7 @@ func (q *Query) Limit(offset int, limit int) Query {
 }
 
 //get table, alias, contenttype, if content type doens't exist, use tablename
+//eg. "dm_folder folder" or "dm_folder folder, dm_order order"
 func getTableAlias(target string) (string, string, string) {
 	nameArr := util.Split(target, " ")
 	targetName := nameArr[0]
@@ -130,23 +131,24 @@ func CountContent(ctx context.Context, targets string, condition Condition) (int
 	return count, err
 }
 
-//Bind enity
+//Bind entity
 func BindEntity(ctx context.Context, entity interface{}, targets string, condition Condition) (int, error) {
 	_, query := CreateQuery(targets, condition)
 	count, err := BindEntityWithQuery(ctx, entity, query)
 	return count, err
 }
 
-//Count entity
+//Count entities
 func Count(targets string, condition Condition, ctx ...context.Context) (int, error) {
-	_, query := CreateQuery(targets, condition)
+	condition = condition.Limit(0, 0)
 	var currentCtx context.Context
 	if len(ctx) > 0 {
 		currentCtx = ctx[0]
 	} else {
 		currentCtx = context.Background()
 	}
-	return CountWithQuery(currentCtx, query)
+	count, err := BindEntity(currentCtx, nil, targets, condition)
+	return count, err
 }
 
 //Bind content with query
@@ -160,7 +162,8 @@ func BindContentWithQuery(ctx context.Context, entity interface{}, contentType s
 	return count, err
 }
 
-//Bind entity with Query
+//Bind entity with Query. The simpest is to use BindContent/BindEntity which is using condition directly.
+//Condition is syntax(use function to create) easier than query(struct creating)
 //If limit is x,0(even 0,0) it will ignore entity, and only count
 //If limit is 10(>0),y it will ignore count unless AlwaysCount is true
 func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (int, error) {
@@ -238,7 +241,7 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 	}
 
 	if count {
-		countResult, err = CountWithQuery(ctx, query)
+		countResult, err = countWithQuery(ctx, query)
 		if err != nil {
 			return -1, err
 		}
@@ -248,7 +251,7 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 }
 
 //Count only
-func CountWithQuery(ctx context.Context, query Query) (int, error) {
+func countWithQuery(ctx context.Context, query Query) (int, error) {
 	sqlStr, values, err := handler.BuildQuery(query)
 	if err != nil {
 		return -1, err
