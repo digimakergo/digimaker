@@ -145,25 +145,6 @@ func GetAll(config string) map[string]interface{} {
 	return allSettings
 }
 
-var internalViper *viper.Viper
-
-// GetInternalSettings return setting for internal use.
-func GetInternalSettings(setting string) []string {
-	result := internalViper.GetStringSlice(setting)
-	if result == nil {
-		log.Error("Didn't find setting "+setting+" in dm_internal.yaml", "system")
-	}
-	return result
-}
-
-func GetInternalSetting(setting string) string {
-	return internalViper.GetString(setting)
-}
-
-func GetInternalSettingInt(setting string) int {
-	return internalViper.GetInt(setting)
-}
-
 //convert viper map interface{} configuration into array map.
 func ConvertToMap(config interface{}) map[string]interface{} {
 	configMap := config.(map[interface{}]interface{})
@@ -172,16 +153,4 @@ func ConvertToMap(config interface{}) map[string]interface{} {
 		result[identifier.(string)] = value
 	}
 	return result
-}
-
-func init() {
-	//Init internal
-	v := viper.New()
-	v.SetConfigName("dm_internal")
-	v.AddConfigPath(DMPath() + "/core") //todo: use better way for this.
-	err := v.ReadInConfig()
-	if err != nil {
-		log.Error("Fatal error in dm_internal.yaml config file: "+err.Error(), "system")
-	}
-	internalViper = v
 }

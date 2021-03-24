@@ -15,6 +15,27 @@ import (
 	"github.com/spf13/viper"
 )
 
+var LocationColumns []string = []string{
+	"id",
+	"parent_id",
+	"main_id",
+	"hierarchy",
+	"depth",
+	"identifier_path",
+	"content_type",
+	"content_id",
+	"language",
+	"identifier_path",
+	"author",
+	"name",
+	"is_hidden",
+	"is_invisible",
+	"priority",
+	"uid",
+	"section",
+	"p",
+}
+
 type ContentTypeList map[string]map[string]ContentType
 
 //ValidationRule defines rule for a field's validation. eg. max length

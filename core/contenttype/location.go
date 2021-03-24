@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/db"
-	. "github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -65,7 +65,7 @@ func (c *Location) TableName() string {
 }
 
 func (c *Location) IdentifierList() []string {
-	return util.GetInternalSettings("location_columns")
+	return definition.LocationColumns
 }
 
 func (c *Location) Field(name string) interface{} {
@@ -123,7 +123,7 @@ func (c *Location) Store(ctx context.Context, transaction ...*sql.Tx) error {
 			return err
 		}
 	} else {
-		err := db.Update(ctx, c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
+		err := db.Update(ctx, c.TableName(), c.ToDBValues(), db.Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil
@@ -132,7 +132,7 @@ func (c *Location) Store(ctx context.Context, transaction ...*sql.Tx) error {
 //Count how many locations for the same content
 //Note: the count is instant so not cached.
 func (l *Location) CountLocations() int {
-	count, err := db.Count("dm_location", Cond("content_type", l.ContentType).Cond("content_id", l.ContentID))
+	count, err := db.Count("dm_location", db.Cond("content_type", l.ContentType).Cond("content_id", l.ContentID))
 	if err != nil {
 		//todo: panic to top
 	}
@@ -146,7 +146,7 @@ func (l *Location) IsMainLocation() bool {
 
 //Delete location only
 func (l *Location) Delete(ctx context.Context, transaction ...*sql.Tx) error {
-	contentError := db.Delete(ctx, l.TableName(), Cond("id", l.ID), transaction...)
+	contentError := db.Delete(ctx, l.TableName(), db.Cond("id", l.ID), transaction...)
 	return contentError
 }
 
@@ -157,7 +157,7 @@ func (l *Location) GetParentLocation() (*Location, error) {
 
 func GetLocations(contenttype string, cid int) (*[]Location, error) {
 	locations := &[]Location{}
-	_, err := db.BindEntity(context.Background(), locations, "dm_location", Cond("content_type", contenttype).And("content_id", cid))
+	_, err := db.BindEntity(context.Background(), locations, "dm_location", db.Cond("content_type", contenttype).And("content_id", cid))
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +166,7 @@ func GetLocations(contenttype string, cid int) (*[]Location, error) {
 
 func GetLocationByID(locationID int) (*Location, error) {
 	location := &Location{}
-	_, err := db.BindEntity(context.Background(), location, "dm_location", Cond("id", locationID))
+	_, err := db.BindEntity(context.Background(), location, "dm_location", db.Cond("id", locationID))
 	if err != nil {
 		return nil, err
 	}
