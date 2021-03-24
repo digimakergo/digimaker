@@ -60,17 +60,16 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 	roleID := role.GetCID()
 
 	userRoles := []permission.UserRole{}
-	dbHandler := db.DBHanlder()
 
 	//todo: use one query with join
 	//todo: support order, pagnation params
-	dbHandler.GetEntity(r.Context(), &userRoles, "dm_user_role", db.Cond("role_id", roleID), false)
+	db.BindEntity(r.Context(), &userRoles, "dm_user_role", db.Cond("role_id", roleID))
 	userIDs := []int{}
 	for _, userRole := range userRoles {
 		userIDs = append(userIDs, userRole.UserID)
 	}
 
-	list, count, _ := query.List(r.Context(), "user", db.Cond("c.id", userIDs), true)
+	list, count, _ := query.List(r.Context(), "user", db.Cond("c.id", userIDs))
 
 	resultList := []interface{}{}
 	for _, item := range list {

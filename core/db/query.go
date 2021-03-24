@@ -123,6 +123,32 @@ func BindContent(ctx context.Context, entity interface{}, targets string, condit
 	return count, err
 }
 
+//Count content
+func CountContent(ctx context.Context, targets string, condition Condition) (int, error) {
+	condition = condition.Limit(0, 0)
+	count, err := BindContent(ctx, nil, targets, condition)
+	return count, err
+}
+
+//Bind enity
+func BindEntity(ctx context.Context, entity interface{}, targets string, condition Condition) (int, error) {
+	_, query := CreateQuery(targets, condition)
+	count, err := BindEntityWithQuery(ctx, entity, query)
+	return count, err
+}
+
+//Count entity
+func Count(targets string, condition Condition, ctx ...context.Context) (int, error) {
+	_, query := CreateQuery(targets, condition)
+	var currentCtx context.Context
+	if len(ctx) > 0 {
+		currentCtx = ctx[0]
+	} else {
+		currentCtx = context.Background()
+	}
+	return CountWithQuery(currentCtx, query)
+}
+
 //Bind content with query
 func BindContentWithQuery(ctx context.Context, entity interface{}, contentType string, query Query, option ContentOption) (int, error) {
 	query, err := handler.WithContent(query, contentType, option)
@@ -130,14 +156,14 @@ func BindContentWithQuery(ctx context.Context, entity interface{}, contentType s
 		return -1, err
 	}
 
-	count, err := BindEntity(ctx, entity, query)
+	count, err := BindEntityWithQuery(ctx, entity, query)
 	return count, err
 }
 
 //Bind entity with Query
 //If limit is x,0(even 0,0) it will ignore entity, and only count
 //If limit is 10(>0),y it will ignore count unless AlwaysCount is true
-func BindEntity(ctx context.Context, entity interface{}, query Query) (int, error) {
+func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (int, error) {
 	sqlStr, values, err := handler.BuildQuery(query)
 	if err != nil {
 		return -1, err
@@ -166,14 +192,53 @@ func BindEntity(ctx context.Context, entity interface{}, query Query) (int, erro
 		if err != nil {
 			return -1, errors.Wrap(err, "Error when connecting db.")
 		}
-		err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
-		if err != nil {
-			return -1, errors.Wrap(err, "Error when binding entity."+err.Error())
+
+		//Fill in with DatamapList or other entity
+		if entityList, ok := entity.(*DatamapList); ok {
+			rows, rowError := queries.Raw(sqlStr, values...).QueryContext(context.Background(), db)
+			cols, _ := rows.Columns()
+			err = rowError
+			defer rows.Close()
+			list := DatamapList{}
+
+			for rows.Next() {
+				//scan to columnpointers
+				columns := make([]interface{}, len(cols))
+				columnPointers := make([]interface{}, len(cols))
+				for i, _ := range columns {
+					columnPointers[i] = &columns[i]
+				}
+
+				if err := rows.Scan(columnPointers...); err != nil {
+					return 0, err
+				}
+
+				//set to datamap
+				datamap := Datamap{}
+				for i, colName := range cols {
+					val := columnPointers[i].(*interface{})
+					v := *val
+					switch v.(type) {
+					case []byte:
+						datamap[colName] = string(v.([]byte))
+					default:
+						datamap[colName] = v
+					}
+				}
+				list = append(list, datamap)
+			}
+
+			*entityList = list
+		} else {
+			err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
+			if err != nil {
+				return -1, errors.Wrap(err, "Error when binding entity."+err.Error())
+			}
 		}
 	}
 
 	if count {
-		countResult, err = Count(ctx, query)
+		countResult, err = CountWithQuery(ctx, query)
 		if err != nil {
 			return -1, err
 		}
@@ -183,7 +248,7 @@ func BindEntity(ctx context.Context, entity interface{}, query Query) (int, erro
 }
 
 //Count only
-func Count(ctx context.Context, query Query) (int, error) {
+func CountWithQuery(ctx context.Context, query Query) (int, error) {
 	sqlStr, values, err := handler.BuildQuery(query)
 	if err != nil {
 		return -1, err

@@ -226,6 +226,7 @@ func matchItem(conditionValue interface{}, realValue interface{}) (bool, string)
 //Split with triming space. "," is the default separator if no seperator is provided.
 func Split(str string, seperator ...string) []string {
 	sep := ""
+	str = strings.TrimSpace(str)
 	if len(seperator) == 0 {
 		sep = ","
 	} else {

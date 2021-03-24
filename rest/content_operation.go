@@ -120,12 +120,10 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 	}
 
 	version := contenttype.Version{}
-	dbHandler := db.DBHanlder()
-	dbHandler.GetEntity(r.Context(),
+	db.BindEntity(r.Context(),
 		&version,
 		version.TableName(),
-		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
-		false)
+		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype))
 	if version.ID == 0 {
 		version.ContentType = ctype
 		version.ContentID = id
@@ -149,11 +147,11 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 
 	//refetch to make sure it's saved
 	newVersion := contenttype.Version{}
-	dbHandler.GetEntity(r.Context(),
+	db.BindEntity(r.Context(),
 		&newVersion,
 		version.TableName(),
 		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
-		false)
+	)
 	if newVersion.ID == 0 || newVersion.ID > 0 && newVersion.Created != createdTime {
 		message := "Not saved. new id:" + strconv.Itoa(newVersion.ID) + " .new saved time:" +
 			strconv.Itoa(newVersion.Created) + ", should saved time:" + strconv.Itoa(createdTime)

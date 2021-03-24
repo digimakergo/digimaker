@@ -71,11 +71,10 @@ type UserRole struct {
 
 //todo: cache in context?
 func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
-	dbHandler := db.DBHanlder()
 
 	//get roles of user
 	userRoleList := []UserRole{}
-	_, err := dbHandler.GetEntity(context.Background(), &userRoleList, "dm_user_role", db.Cond("user_id", userID), false)
+	_, err := db.BindEntity(context.Background(), &userRoleList, "dm_user_role", db.Cond("user_id", userID))
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
 	}
@@ -110,8 +109,7 @@ func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]int
 
 func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
 	roles := contenttype.NewList("role")
-	dbHandler := db.DBHanlder()
-	dbHandler.GetContent(context.Background(), roles, "role", db.Cond("c.id", roleIDs), false)
+	db.BindContent(context.Background(), roles, "role", db.Cond("c.id", roleIDs))
 	if roles == nil {
 		log.Warning("Role doesn't exist on ID(s)"+fmt.Sprint(roleIDs), "permission", ctx)
 		return PolicyList{}
@@ -146,12 +144,11 @@ func AssignToUser(ctx context.Context, roleID int, userID int) error {
 	//todo: check if role exisit. maybe need role entity?
 	//todo: check if user exist.
 	useRole := UserRole{}
-	dbHandler := db.DBHanlder()
-	dbHandler.GetEntity(context.Background(), &useRole, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID), false)
+	db.BindEntity(context.Background(), &useRole, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
 	if useRole.ID > 0 {
 		return errors.New("Already assigned.")
 	}
-	_, err := dbHandler.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
+	_, err := db.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
 	if err != nil {
 		return err
 	}
@@ -160,8 +157,7 @@ func AssignToUser(ctx context.Context, roleID int, userID int) error {
 
 //Remove a user from role assignment
 func RemoveAssignment(ctx context.Context, userID int, roleID int) error {
-	dbHandler := db.DBHanlder()
-	err := dbHandler.Delete(ctx, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
+	err := db.Delete(ctx, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
 	if err != nil {
 		return err
 	}

@@ -5,13 +5,13 @@ package db
 import (
 	"context"
 	"database/sql"
-	"fmt"
 	"strconv"
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/volatiletech/sqlboiler/queries"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
 	"github.com/pkg/errors"
@@ -29,6 +29,27 @@ type MysqlHandler struct {
 
 //get table columns with Cache
 func (handler MysqlHandler) GetColumns(table string) []string {
+	if _, ok := tableColumns[table]; !ok {
+		sql := "SELECT COLUMN_NAME AS 'column' FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='" + config_database + "' AND TABLE_NAME=?"
+		db, err := DB()
+
+		if err != nil {
+			log.Error("No connection when fetching meta columns", "")
+		}
+		columns := []struct {
+			Column string `boil:"column"`
+		}{}
+		err = queries.Raw(sql, table).Bind(context.Background(), db, &columns)
+		if err != nil {
+			log.Error(err.Error(), "")
+		}
+		result := []string{}
+		for _, column := range columns {
+			result = append(result, column.Column)
+		}
+		tableColumns[table] = result
+	}
+
 	return tableColumns[table]
 }
 
@@ -132,7 +153,12 @@ func (handler MysqlHandler) BuildQuery(query Query) (string, []interface{}, erro
 	}
 
 	//select
-	fieldStr := strings.Join(fields, ",")
+	fieldStr := ""
+	if len(fields) > 0 {
+		fieldStr = strings.Join(fields, ",")
+	} else {
+		fieldStr = "*"
+	}
 
 	//tables
 	tableStr := strings.Join(tables, ",")
@@ -160,8 +186,6 @@ func (handler MysqlHandler) BuildQuery(query Query) (string, []interface{}, erro
 	}
 
 	sqlStr := `SELECT ` + fieldStr + ` FROM ` + tableStr + " WHERE " + conditionStr + groupbyStr + sortby + limit
-
-	fmt.Println(sqlStr)
 
 	return sqlStr, values, nil
 }
@@ -296,7 +320,7 @@ func (MysqlHandler) Update(ctx context.Context, tablename string, values map[str
 }
 
 //Delete based on condition
-func (*MysqlHandler) Delete(ctx context.Context, tableName string, condition Condition, transation ...*sql.Tx) error {
+func (MysqlHandler) Delete(ctx context.Context, tableName string, condition Condition, transation ...*sql.Tx) error {
 	conditionString, conditionValues := BuildCondition(condition)
 	sqlStr := "DELETE FROM " + tableName + " WHERE " + conditionString
 

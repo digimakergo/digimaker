@@ -541,8 +541,7 @@ func (ch ContentHandler) Move(ctx context.Context, contentIds []int, targetId in
 
 		//update location
 		subLocations := []contenttype.Location{}
-		dbhandler := db.DBHanlder()
-		dbhandler.GetEntity(ctx, &subLocations, "dm_location", db.Cond("hierarchy like", oldHiearachy+"/%"), false)
+		db.BindEntity(ctx, &subLocations, "dm_location", db.Cond("hierarchy like", oldHiearachy+"/%"))
 		for _, subLocation := range subLocations {
 			subContent, _ := query.FetchByID(ctx, subLocation.ID)
 			if !permission.CanDelete(ctx, subContent, userId) {
@@ -615,8 +614,7 @@ func (ch ContentHandler) DeleteByContent(ctx context.Context, content contenttyp
 			//Delete relation first.
 			relations := content.GetRelations()
 			if len(relations.Map) > 0 {
-				dbHandler := db.DBHanlder()
-				err = dbHandler.Delete(ctx, "dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
+				err = db.Delete(ctx, "dm_relation", Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
 				if err != nil {
 					tx.Rollback()
 					message := "[handler.deleteByContent]Can not delete relation."
@@ -632,8 +630,7 @@ func (ch ContentHandler) DeleteByContent(ctx context.Context, content contenttyp
 			} else {
 				//delete versions
 				if content.Definition().HasVersion {
-					dbHanlder := db.DBHanlder()
-					dbHanlder.Delete(ctx, "dm_version", db.Cond("content_type", content.ContentType()).
+					db.Delete(ctx, "dm_version", db.Cond("content_type", content.ContentType()).
 						Cond("content_id", content.GetCID()), tx)
 				}
 

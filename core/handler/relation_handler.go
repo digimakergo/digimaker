@@ -8,7 +8,6 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	. "github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 
@@ -35,13 +34,11 @@ func (handler *RelationHandler) AddContent(ctx context.Context, to contenttype.C
 	fromLocationID := from.Value("id").(int)
 
 	//Check if it's added already.
-	dbHandler := db.DBHanlder()
 	currentRelation := contenttype.Relation{}
-	dbHandler.GetEntity(ctx, &currentRelation,
-		"dm_relation", Cond("to_content_id", contentID).
+	db.BindEntity(ctx, &currentRelation,
+		"dm_relation", db.Cond("to_content_id", contentID).
 			Cond("from_location", fromLocationID).
-			Cond("identifier", identifier),
-		false)
+			Cond("identifier", identifier))
 
 	if currentRelation.ID != 0 {
 		return errors.New("[relationhandler.Add]Relation existing already to " +

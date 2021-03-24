@@ -116,15 +116,14 @@ func (c *Location) Path() []int {
 }
 
 func (c *Location) Store(ctx context.Context, transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
 	if c.ID == 0 {
-		id, err := handler.Insert(ctx, c.TableName(), c.ToDBValues(), transaction...)
+		id, err := db.Insert(ctx, c.TableName(), c.ToDBValues(), transaction...)
 		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(ctx, c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
+		err := db.Update(ctx, c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil
@@ -133,8 +132,7 @@ func (c *Location) Store(ctx context.Context, transaction ...*sql.Tx) error {
 //Count how many locations for the same content
 //Note: the count is instant so not cached.
 func (l *Location) CountLocations() int {
-	handler := db.DBHanlder()
-	count, err := handler.Count("dm_location", Cond("content_type", l.ContentType).Cond("content_id", l.ContentID))
+	count, err := db.Count("dm_location", Cond("content_type", l.ContentType).Cond("content_id", l.ContentID))
 	if err != nil {
 		//todo: panic to top
 	}
@@ -148,8 +146,7 @@ func (l *Location) IsMainLocation() bool {
 
 //Delete location only
 func (l *Location) Delete(ctx context.Context, transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
-	contentError := handler.Delete(ctx, l.TableName(), Cond("id", l.ID), transaction...)
+	contentError := db.Delete(ctx, l.TableName(), Cond("id", l.ID), transaction...)
 	return contentError
 }
 
@@ -159,9 +156,8 @@ func (l *Location) GetParentLocation() (*Location, error) {
 }
 
 func GetLocations(contenttype string, cid int) (*[]Location, error) {
-	handler := db.DBHanlder()
 	locations := &[]Location{}
-	_, err := handler.GetEntity(context.Background(), locations, "dm_location", Cond("content_type", contenttype).And("content_id", cid), false)
+	_, err := db.BindEntity(context.Background(), locations, "dm_location", Cond("content_type", contenttype).And("content_id", cid))
 	if err != nil {
 		return nil, err
 	}
@@ -169,9 +165,8 @@ func GetLocations(contenttype string, cid int) (*[]Location, error) {
 }
 
 func GetLocationByID(locationID int) (*Location, error) {
-	handler := db.DBHanlder()
 	location := &Location{}
-	_, err := handler.GetEntity(context.Background(), location, "dm_location", Cond("id", locationID), false)
+	_, err := db.BindEntity(context.Background(), location, "dm_location", Cond("id", locationID))
 	if err != nil {
 		return nil, err
 	}

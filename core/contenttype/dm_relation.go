@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"github.com/digimakergo/digimaker/core/db"
-	. "github.com/digimakergo/digimaker/core/db"
 
 	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
@@ -93,15 +92,14 @@ func (c *Relation) Field(name string) interface{} {
 }
 
 func (c Relation) Store(ctx context.Context, transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
 	if c.ID == 0 {
-		id, err := handler.Insert(ctx, c.TableName(), c.ToMap(), transaction...)
+		id, err := db.Insert(ctx, c.TableName(), c.ToMap(), transaction...)
 		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(ctx, c.TableName(), c.ToMap(), Cond("id", c.ID), transaction...)
+		err := db.Update(ctx, c.TableName(), c.ToMap(), db.Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil

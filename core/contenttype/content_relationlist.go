@@ -42,7 +42,6 @@ func (rl *RelationList) LoadFromInput(input interface{}, params definition.Field
 		return errors.New("id and type are not same length")
 	}
 
-	dbHandler := db.DBHanlder()
 	relationlist := []Relation{}
 	for i, v := range arrInt {
 		fromType := arrType[i]
@@ -62,7 +61,7 @@ func (rl *RelationList) LoadFromInput(input interface{}, params definition.Field
 		if len(relationDataFields) > 0 {
 			//get content
 			contents := db.DatamapList{}
-			dbHandler.GetEntity(context.Background(), &contents, def.TableName, db.Cond("id", fromCid), false)
+			db.BindEntity(context.Background(), &contents, def.TableName, db.Cond("id", fromCid))
 			if len(contents) == 0 {
 				return errors.New("No content found on " + strconv.Itoa(fromCid))
 			}

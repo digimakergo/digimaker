@@ -16,16 +16,14 @@ type DBTokenManager struct {
 }
 
 func (d DBTokenManager) Store(ctx context.Context, id string, expiry int64, claims map[string]interface{}) error {
-	dbHandler := db.DBHanlder()
 	tokenState := map[string]interface{}{"guid": id, "expiry": expiry}
-	_, err := dbHandler.Insert(ctx, tableName, tokenState)
+	_, err := db.Insert(ctx, tableName, tokenState)
 	return err
 }
 
 func (d DBTokenManager) Get(id string) interface{} {
-	dbHandler := db.DBHanlder()
 	entity := TokenState{}
-	_, err := dbHandler.GetEntity(context.Background(), &entity, tableName, db.Cond("guid", id).Cond("expiry>=", time.Now().Unix()), false)
+	_, err := db.BindEntity(context.Background(), &entity, tableName, db.Cond("guid", id).Cond("expiry>=", time.Now().Unix()))
 	if err != nil || entity.GUID == "" {
 		return nil
 	}
@@ -33,8 +31,7 @@ func (d DBTokenManager) Get(id string) interface{} {
 }
 
 func (d DBTokenManager) Delete(ctx context.Context, id string) error {
-	dbHandler := db.DBHanlder()
-	return dbHandler.Delete(ctx, tableName, db.Cond("guid", id))
+	return db.Delete(ctx, tableName, db.Cond("guid", id))
 }
 
 type TokenState struct {

@@ -85,11 +85,10 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	activation.Ref = strconv.Itoa(user.GetCID())
 	activation.Created = int(time.Now().Unix())
 	activation.Type = "resetpassword"
-	dbHandler := db.DBHanlder()
 	data, _ := json.Marshal(activation)
 	var dbMap map[string]interface{}
 	json.Unmarshal(data, &dbMap)
-	_, err := dbHandler.Insert(r.Context(), "dm_activation", dbMap)
+	_, err := db.Insert(r.Context(), "dm_activation", dbMap)
 	if err == nil {
 		//send password
 		url := "http://xxxx.com/api/user/resetpassword-confirm/" + activation.Hash
@@ -109,9 +108,8 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 	// hours := 24
 	params := mux.Vars(r)
 	hash := params["hash"]
-	dbHanldler := db.DBHanlder()
 	activation := Activiation{}
-	dbHanldler.GetEntity(r.Context(), &activation, "dm_activation", db.Cond("hash", hash).Cond("type", "resetpassword"), false)
+	db.BindEntity(r.Context(), &activation, "dm_activation", db.Cond("hash", hash).Cond("type", "resetpassword"))
 	if activation.ID == 0 {
 		HandleError(errors.New("Wrong hash?"), w)
 		return
@@ -152,7 +150,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			dbHanldler.Delete(r.Context(), "dm_activation", db.Cond("id", activation.ID))
+			db.Delete(r.Context(), "dm_activation", db.Cond("id", activation.ID))
 
 			w.Write([]byte("1"))
 		}

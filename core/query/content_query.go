@@ -10,7 +10,6 @@ import (
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
-	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/util"
 
@@ -38,9 +37,8 @@ func (tn *TreeNode) Iterate(operation func(node *TreeNode)) {
 //If no location found. it will return nil and error message.
 func FetchByID(ctx context.Context, locationID int) (contenttype.ContentTyper, error) {
 	//get type first by location.
-	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	_, err := dbhandler.GetEntity(ctx, &location, "dm_location", db.Cond("id", locationID), false)
+	_, err := db.BindEntity(ctx, &location, "dm_location", db.Cond("id", locationID))
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyid]Can not fetch location by locationID "+strconv.Itoa(locationID))
 	}
@@ -58,9 +56,8 @@ func FetchByID(ctx context.Context, locationID int) (contenttype.ContentTyper, e
 //FetchByUID fetches content by unique id
 func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, error) {
 	//get type first by location.
-	dbhandler := db.DBHanlder()
 	location := contenttype.Location{}
-	_, err := dbhandler.GetEntity(ctx, &location, "dm_location", db.Cond("uid", uid), false)
+	_, err := db.BindEntity(ctx, &location, "dm_location", db.Cond("uid", uid))
 	if err != nil {
 		return nil, errors.Wrap(err, "[contentquery.fetchbyuid]Can not fetch location by uid "+uid)
 	}
@@ -89,9 +86,7 @@ func FetchByCUID(ctx context.Context, contentType string, cuid string) (contentt
 func Fetch(ctx context.Context, contentType string, condition db.Condition) (contenttype.ContentTyper, error) {
 	//todo: use limit in this case so it doesn't fetch more into memory.
 	content := contenttype.NewInstance(contentType)
-	count := -1
-	condition = condition.Limit(0, 1)
-	err := Fill(ctx, contentType, condition, content, &count)
+	_, err := db.BindContent(ctx, content, contentType, condition)
 	if err != nil {
 		return nil, err
 	}
@@ -101,10 +96,9 @@ func Fetch(ctx context.Context, contentType string, condition db.Condition) (con
 	return content, err
 }
 
-func LocationList(condition db.Condition, withCount bool) ([]contenttype.Location, int, error) {
+func LocationList(condition db.Condition) ([]contenttype.Location, int, error) {
 	locations := []contenttype.Location{}
-	dbHandler := db.DBHanlder()
-	count, err := dbHandler.GetEntity(context.Background(), &locations, "dm_location", condition, withCount)
+	count, err := db.BindEntity(context.Background(), &locations, "dm_location", condition)
 	if err != nil {
 		return locations, 0, err
 	}
@@ -252,40 +246,23 @@ func ListWithUser(ctx context.Context, userID int, contentType string, condition
 	condition = condition.And(permissionCondition)
 
 	//fetch
-	list, count, err := List(ctx, contentType, condition, withCount)
+	list, count, err := List(ctx, contentType, condition)
 	return list, count, err
-}
-
-//Fill all data into content which is a pointer
-func Fill(ctx context.Context, contentType string, condition db.Condition, content interface{}, count *int) error {
-	dbhandler := db.DBHanlder()
-	hasCount := *count != -1
-
-	var countResult int
-	var err error
-	countResult, err = dbhandler.GetContent(ctx, content, contentType, condition, hasCount)
-	if err != nil {
-		message := "[List]Content Query error"
-		log.Error(message+err.Error(), "")
-		return errors.Wrap(err, message)
-	}
-	*count = countResult
-	return nil
 }
 
 // List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
 // Condition example: db.Cond("l.parent_id", 4).Cond("author", 1).Cond("modified >", "2020-03-13")
 // where content field can be used directly or with c. as prefix(eg. "c.author"), but location field need a l. prefix(eg. l.parent_id)
-func List(ctx context.Context, contentType string, condition db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func List(ctx context.Context, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
-	count := -1
-	if withCount {
-		count = 0
-	}
-	err := Fill(ctx, contentType, condition, contentList, &count)
+	count, err := db.BindContent(ctx, contentList, contentType, condition)
 	if err != nil {
 		return nil, count, err
 	}
+	// if len(condition.Option.LimitArr) == 0 {
+	// 	count = len(contentList)
+	// }
+
 	result := contenttype.ToList(contentType, contentList)
 	return result, count, err
 }
@@ -298,8 +275,7 @@ func Version(ctx context.Context, contentType string, condition db.Condition) (c
 	}
 
 	version := contenttype.Version{}
-	dbHandler := db.DBHanlder()
-	_, err = dbHandler.GetEntity(ctx, &version, "dm_version", condition.Cond("content_type", contentType), false)
+	_, err = db.BindEntity(ctx, &version, "dm_version", condition.Cond("content_type", contentType))
 	if err != nil {
 		return contenttype.Version{}, nil, err
 	}
@@ -352,5 +328,5 @@ func RelationOptions(ctx context.Context, ctype string, identifier string, limit
 	for cKey, cValue := range params.Condition {
 		condition = condition.And(cKey, cValue)
 	}
-	return List(ctx, params.Type, condition, hasCount)
+	return List(ctx, params.Type, condition)
 }

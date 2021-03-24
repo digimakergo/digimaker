@@ -15,11 +15,14 @@ import (
 
 var db *sql.DB
 
+var config_database string
+
 //Get DB connection cached globally
 //Note: when using it, the related driver should be imported already
 func DB() (*sql.DB, error) {
 	if db == nil {
 		dbConfig := util.GetConfigSection("database")
+		config_database = dbConfig["database"]
 		connString := dbConfig["username"] + ":" + dbConfig["password"] +
 			"@" + dbConfig["protocal"] +
 			"(" + dbConfig["host"] + ")/" +

@@ -59,7 +59,6 @@ func (r *Relation) LoadFromInput(input interface{}, params definition.FieldParam
 		valueColumn = rParams.Value
 	}
 
-	dbHandler := db.DBHanlder()
 	condition := db.Cond(valueColumn, value)
 	for cKey, cValue := range rParams.Condition {
 		condition = condition.And(cKey, cValue)
@@ -67,7 +66,7 @@ func (r *Relation) LoadFromInput(input interface{}, params definition.FieldParam
 
 	//todo: support Type to be a content type, not table name - also for query.
 	// to do so, we need to invoke content def from field - infiniate package look issue
-	count, err := dbHandler.Count(rParams.Type, condition)
+	count, err := db.Count(rParams.Type, condition)
 	if err != nil {
 		return err
 	}
