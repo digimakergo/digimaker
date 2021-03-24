@@ -2,6 +2,7 @@ package rest
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -13,6 +14,15 @@ const StatusWrongParams = 400
 const StatusExpired = 440
 const StatusNotFound = 404
 
+type errorBody struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
+
+type responseError struct {
+	Error errorBody `json:"error"`
+}
+
 func HandleError(err error, w http.ResponseWriter, httpCode ...int) {
 	//todo: output debug info if needed.
 	if len(httpCode) == 0 {
@@ -21,7 +31,9 @@ func HandleError(err error, w http.ResponseWriter, httpCode ...int) {
 		w.WriteHeader(httpCode[0])
 	}
 
-	errStr := err.Error() //todo: use error code here
+	resError := responseError{}
+	resError.Error = errorBody{Code: "10001", Message: err.Error()} //todo: use error code here
+	errStr, _ := json.Marshal(resError)
 	w.Write([]byte(errStr))
 }
 

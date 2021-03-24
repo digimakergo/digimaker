@@ -123,7 +123,7 @@ func BindContent(ctx context.Context, entity interface{}, targets string, condit
 	return count, err
 }
 
-//Count content
+//Count content separately
 func CountContent(ctx context.Context, targets string, condition Condition) (int, error) {
 	condition = condition.Limit(0, 0)
 	count, err := BindContent(ctx, nil, targets, condition)
