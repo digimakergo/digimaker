@@ -12,6 +12,7 @@ import (
 )
 
 //todo: potencially can support left join
+//todo: create error types for database issue(eg. connection) or sync error or other type
 
 type SingleQuery struct {
 	Table     string

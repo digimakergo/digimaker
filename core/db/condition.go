@@ -45,11 +45,13 @@ func (c Condition) And(input interface{}, more ...interface{}) Condition {
 	var result Condition
 	switch input.(type) {
 	case Condition:
+		inputCond := input.(Condition)
 		var arr []Condition
 		for _, item := range more {
 			arr = append(arr, item.(Condition))
 		}
-		result = combineExpression(logicAnd, c, input.(Condition), arr...)
+		result = combineExpression(logicAnd, c, inputCond, arr...)
+		result.Option = c.Option //put Option into result
 	case string:
 		value := more[0]
 		result = c.And(Cond(input.(string), value)) //invoke myself with Condition type
@@ -67,6 +69,7 @@ func (c Condition) Or(input interface{}, more ...interface{}) Condition {
 			arr = append(arr, item.(Condition))
 		}
 		result = combineExpression(logicOr, c, input.(Condition), arr...)
+		result.Option = c.Option
 	case string:
 		value := more[0]
 		result = c.Or(Cond(input.(string), value)) //invoke myself with Condition type
@@ -74,7 +77,7 @@ func (c Condition) Or(input interface{}, more ...interface{}) Condition {
 	return result
 }
 
-func (c Condition) Sort(sortby ...string) Condition {
+func (c Condition) Sortby(sortby ...string) Condition {
 	c.Option.Sortby = sortby
 	return c
 }

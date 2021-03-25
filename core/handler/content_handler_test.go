@@ -6,11 +6,9 @@ import (
 	"time"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
-	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/test"
-	"github.com/digimakergo/digimaker/test/entity"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -115,12 +113,4 @@ func TestDelete(t *testing.T) {
 	id := content.GetLocation().ID
 	err := handler.DeleteByID(id, 1, false)
 	assert.Equal(t, nil, err)
-}
-
-func TestQueryImage(t *testing.T) {
-	images := &[]entity.Image{}
-	handler := db.DBHanlder()
-	err := handler.GetEntity("dm_image", db.Cond("1", 1), []string{}, nil, images)
-	assert.Nil(t, err)
-	assert.NotNil(t, images)
 }

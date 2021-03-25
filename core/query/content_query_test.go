@@ -15,7 +15,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func ExampleFetch() {
+	//Fetch folder whose name is "Content", only first will be returned
+	content, err := Fetch(context.Background(), "folder", db.Cond("l.name", "Content"))
+	if err == nil && content != nil {
+		fmt.Println(content.(*entity.Folder).ID)
+	}
+	//output: 1
+}
+
 func ExampleFetchByCID() {
+	//Fetch folder which is content id(cid) 1
 	content, err := FetchByCID(context.Background(), "folder", 1)
 	if err == nil && content != nil {
 		fmt.Println(content.(*entity.Folder).ContentID)
@@ -24,6 +34,7 @@ func ExampleFetchByCID() {
 }
 
 func ExampleFetchByID() {
+	//Fetch folder which has location id 1
 	content, err := FetchByID(context.Background(), 1)
 	if err == nil && content != nil {
 		fmt.Println(content.(*entity.Folder).ContentID)
@@ -33,28 +44,66 @@ func ExampleFetchByID() {
 
 func ExampleSubList() {
 	rootContent, _ := FetchByID(context.Background(), 1)
-	list, _, _ := SubList(context.Background(), 1, rootContent, "article", 3, db.EmptyCond(), false)
+	//Fetch articles(level in 3) under root
+	list, _, _ := SubList(context.Background(), 1, rootContent, "article", 3, db.EmptyCond())
 
 	fmt.Println(len(list) > 0)
 	//output: true
 }
 
-func TestSubTree(t *testing.T) {
+func ExampleSubList_withSortLimit() {
 	rootContent, _ := FetchByID(context.Background(), 1)
-	treenode, _ := SubTree(context.Background(), rootContent, 3, "folder,article", 7, []string{})
+	//Fetch articles(level in 3) under root
 
-	fmt.Println(treenode.Content.GetName())
-	children := treenode.Children
-	for _, child := range children {
-		fmt.Println(child.Content.GetName())
-		for _, child2 := range child.Children {
-			fmt.Println("- " + child2.Content.GetName())
-			for _, child3 := range child2.Children {
-				fmt.Println("-- " + child3.Content.GetName())
-			}
-		}
-	}
+	list, _, _ := SubList(context.Background(), 1, rootContent, "article", 3, db.EmptyCond().Sortby("c.modified desc").Limit(0, 3))
 
+	fmt.Println(len(list))
+	//output: 3
+}
+
+func ExampleList() {
+	//fetch list of folders where id larger than 2
+	list, _, _ := List(context.Background(), "folder", db.Cond("l.id>", 2))
+	fmt.Println(list[0].GetLocation().ID)
+	//output: 3
+}
+
+func ExampleList_sortLimit() {
+	//fetch list ordered by modified desc, limit 0,4
+	list, _, _ := List(context.Background(), "folder", db.EmptyCond().Sortby("modified desc").Limit(0, 4))
+
+	fmt.Println(len(list))
+	//output: 4
+}
+
+func ExampleListWithUser() {
+	//fetch list of folders where id larger than 2
+	list, _, _ := ListWithUser(context.Background(), 1, "folder", db.Cond("l.id>", 2))
+	fmt.Println(list[0].GetLocation().ID)
+	//output: 3
+}
+
+func ExampleSubTree() {
+	rootContent, _ := FetchByID(context.Background(), 1)
+	//fetch trees of root for 3 levels
+	treenode, _ := SubTree(context.Background(), 1, rootContent, 3, "folder,article", []string{})
+
+	level := 0
+	treenode.Iterate(func(node *TreeNode) {
+		level++
+	})
+	fmt.Println(level > 3)
+	//output: true
+}
+
+func ExampleChildren() {
+	rootContent, _ := FetchByID(context.Background(), 1)
+
+	//fetch all folders directly under root. Can filter if valid condition parameter is provided.
+	children, _, _ := Children(context.Background(), 1, rootContent, "folder", db.EmptyCond())
+
+	fmt.Println(len(children) > 0)
+	//output: true
 }
 
 func TestQuery(t *testing.T) {

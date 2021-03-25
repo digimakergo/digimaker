@@ -237,7 +237,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	condition = condition.Sort(sortby...)
+	condition = condition.Sortby(sortby...)
 	if len(limit) == 2 {
 		condition = condition.Limit(limit[0], limit[1])
 	}

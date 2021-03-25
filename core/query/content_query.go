@@ -106,22 +106,22 @@ func LocationList(condition db.Condition) ([]contenttype.Location, int, error) {
 }
 
 // Children fetches children content directly under the given parentContent
-func Children(ctx context.Context, parentContent contenttype.ContentTyper, contenttype string, userID int, cond db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func Children(ctx context.Context, userID int, parentContent contenttype.ContentTyper, contenttype string, cond db.Condition) ([]contenttype.ContentTyper, int, error) {
 	contentTypeList := parentContent.Definition().AllowedTypes
 	if !util.Contains(contentTypeList, contenttype) {
 		return nil, -1, errors.New("content type " + contenttype + "doesn't exist or not allowed.")
 	}
-	result, countResult, err := SubList(ctx, userID, parentContent, contenttype, 1, cond, withCount)
+	result, countResult, err := SubList(ctx, userID, parentContent, contenttype, 1, cond)
 	return result, countResult, err
 }
 
 // SubTree fetches content and return a tree result under rootContent, permission considered.
 // See TreeNode for the tree structure
-func SubTree(ctx context.Context, rootContent contenttype.ContentTyper, depth int, contentTypes string, userID int, sortby []string) (TreeNode, error) {
+func SubTree(ctx context.Context, userID int, rootContent contenttype.ContentTyper, depth int, contentTypes string, sortby []string) (TreeNode, error) {
 	contentTypeList := strings.Split(contentTypes, ",")
 	var list []contenttype.ContentTyper
 	for _, contentType := range contentTypeList {
-		currentList, _, err := SubList(ctx, userID, rootContent, contentType, depth, db.EmptyCond().Sort(sortby...), false)
+		currentList, _, err := SubList(ctx, userID, rootContent, contentType, depth, db.EmptyCond().Sortby(sortby...))
 		if err != nil {
 			return TreeNode{}, err
 		}
@@ -216,7 +216,7 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 }
 
 // SubList fetches content list with permission considered(only return contents the user has access to).
-func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyper, contentType string, depth int, condition db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyper, contentType string, depth int, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	rootLocation := rootContent.GetLocation()
 	if depth == 1 {
 		//Direct children
@@ -236,11 +236,12 @@ func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 	}
 
 	//fetch
-	list, count, err := ListWithUser(ctx, userID, contentType, condition, withCount)
+	list, count, err := ListWithUser(ctx, userID, contentType, condition)
 	return list, count, err
 }
 
-func ListWithUser(ctx context.Context, userID int, contentType string, condition db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
+// ListWithUser fetches a list of content which the user has read permission to.
+func ListWithUser(ctx context.Context, userID int, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	//permission condition
 	permissionCondition := accessCondition(userID, contentType, ctx)
 	condition = condition.And(permissionCondition)
@@ -250,8 +251,14 @@ func ListWithUser(ctx context.Context, userID int, contentType string, condition
 	return list, count, err
 }
 
-// List fetches a list of content based on conditions. This is a database level 'list' without permission check. For permission included, use SubList
-// Condition example: db.Cond("l.parent_id", 4).Cond("author", 1).Cond("modified >", "2020-03-13")
+// List fetches a list of content based on conditions. This is a database level 'list' WITHOUT permission check.
+//
+// For permission included, use query.ListWithUser
+// For list under a tree root, use query.SubList
+//
+// Condition example:
+//  db.Cond("l.parent_id", 4).Cond("author", 1).Cond("modified >", "2020-03-13")
+//
 // where content field can be used directly or with c. as prefix(eg. "c.author"), but location field need a l. prefix(eg. l.parent_id)
 func List(ctx context.Context, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	contentList := contenttype.NewList(contentType)
@@ -259,6 +266,7 @@ func List(ctx context.Context, contentType string, condition db.Condition) ([]co
 	if err != nil {
 		return nil, count, err
 	}
+	//todo: count here. need to use ContentList type in NewList
 	// if len(condition.Option.LimitArr) == 0 {
 	// 	count = len(contentList)
 	// }
