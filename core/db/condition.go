@@ -84,9 +84,9 @@ func (c Condition) Limit(offset int, number int) Condition {
 	return c
 }
 
-func (c *Condition) Count() Condition {
+func (c Condition) WithCount() Condition {
 	c.Option.AlwaysCount = true
-	return *c
+	return c
 }
 
 //combine condition like "and", "or", etc

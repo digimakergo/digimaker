@@ -1,45 +1,95 @@
 {
-  "read": {
-    "permissions": [{
-      "operation": ["content/read"],
-      "limited_to": {
-        "contenttype": ["folder", "article"],
-        "section": ["public"]
-      }
-    }],
-    "assign_type": ["subtree", "scope"]
-  },
-  "editor_visit":{
-    "permissions":[{
-      "operation":["site/access"],
-      "limited_to": {
-        "site": ["admin"]
-      }
-      }
-    ],
-    "assign_type":[]
-  },
-  "edit": {
-    "permissions": [{
-        "operation": ["content/read"],
+  "policies": {
+    "anonymous": [{
+          "operation": ["content/read"],
+          "limited_to": {
+            "under": [3, 9]
+          }
+        }
+      ],
+    "member": [{
+          "operation": ["content/update", "content/read"],
+          "limited_to": {
+            "contenttype": ["article"],
+            "author": "self"
+          }
+        },
+        {
+            "operation": ["content/create"],
+            "limited_to": {
+              "contenttype": ["image"],
+              "under": [461]
+            }
+        },
+        {
+          "operation": ["content/update"],
+          "limited_to": {
+            "contenttype": ["user"]
+          }
+        },
+        {
+          "operation": ["content/update_fields"],
+          "limited_to": {
+            "contenttype": "user",
+            "cid": "self",
+            "fields": ["login", "password","firstname", "lastname", "email"]
+          }
+        },
+        {
+          "operation": ["site/access"],
+          "limited_to": {
+            "site": ["dmdemo"]
+          }
+        }
+      ],
+    "edit": [
+      {
+          "operation": ["site/access"],
+          "limited_to": {
+            "site": ["admin"]
+          }
+        },
+       {
+          "operation": ["content/read"]
+        },
+        {
+          "operation": ["content/create", "content/delete", "content/update"],
+          "limited_to": {
+            "contenttype": ["article", "image"]
+          }
+        },
+        {
+          "operation": ["content/update_fields"]
+        },
+        {
+          "operation": ["access/assigned-users"]
+        }
+      ],
+    "admin": [
+      {
+          "operation": ["site/access"],
+          "limited_to": {
+            "site": ["admin"]
+          }
+      },
+      {
+        "operation": ["eui/all"],
         "limited_to": {
-          "contenttype": ["folder", "article", "role", "user", "usergroup"]
+          "view": []
         }
       },
       {
-        "operation": ["content/create", "content/delete", "content/update"],
-        "limited_to": {
-          "contenttype": ["article", "role", "usergroup", "folder", "user", "image"]
-        }
+        "operation":["content/read", "content/create", "content/delete", "content/update", "content/move", "content/delete_subtree", "content/copy", "access/assigned-users", "access/assign-user"]
+      },
+      {
+        "operation": ["content/update_fields"]
       }
-    ],
-    "assign_type": ["subtree", "scope"]
+    ]
   },
-  "organize": {
-    "permissions": [{
-      "operation": ["content/move", "content/delete_subtree", "content/copy"],
-      "limited_to": {}
-    }],
-    "assign_type": []
+  "roles": {
+    "anonymous":["anonymous"],
+    "member": ["member"],
+    "edit": ["edit"],
+    "admin": ["admin"]
   }
 }

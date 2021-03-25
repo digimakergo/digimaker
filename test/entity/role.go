@@ -27,6 +27,13 @@ type Role struct{
          
          
          
+            Identifier  fieldtype.Text `boil:"identifier" json:"identifier" toml:"identifier" yaml:"identifier"`
+         
+        
+    
+         
+         
+         
             Summary  fieldtype.RichText `boil:"summary" json:"summary" toml:"summary" yaml:"summary"`
          
         
@@ -83,6 +90,12 @@ func (c *Role) ToDBValues() map[string]interface{} {
     
         
         
+            result["identifier"]=c.Identifier
+        
+        
+    
+        
+        
             result["summary"]=c.Summary
         
         
@@ -101,7 +114,7 @@ func (c *Role) ToDBValues() map[string]interface{} {
 
 //Get identifier list of fields(NOT including data_fields )
 func (c *Role) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "summary","title",}...)
+	return append(c.ContentCommon.IdentifierList(),[]string{ "identifier","summary","title",}...)
 }
 
 func (c *Role) Definition(language ...string) definition.ContentType {
@@ -118,6 +131,13 @@ func (c *Role) Value(identifier string) interface{} {
     
     var result interface{}
 	switch identifier {
+    
+    
+    
+    case "identifier":
+        
+            result = &(c.Identifier)
+        
     
     
     
@@ -146,6 +166,14 @@ func (c *Role) Value(identifier string) interface{} {
 func (c *Role) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         
+        
+            
+            
+            
+            case "identifier":
+            c.Identifier = value.(fieldtype.Text)
+            
+            
         
             
             

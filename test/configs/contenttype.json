@@ -143,6 +143,12 @@
         "type": "richtext",
         "name": "Summary",
         "required": false
+      },
+      {
+        "identifier": "identifier",
+        "type": "text",
+        "name": "Identifier",
+        "required": false
       }
     ]
   },

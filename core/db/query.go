@@ -109,15 +109,17 @@ func CreateQuery(targets string, condition Condition) (string, Query) {
 	}
 
 	query := Query{
-		Queries:  queries,
-		SortArr:  condition.Option.Sortby,
-		LimitArr: condition.Option.LimitArr,
+		Queries:     queries,
+		SortArr:     condition.Option.Sortby,
+		LimitArr:    condition.Option.LimitArr,
+		AlwaysCount: condition.Option.AlwaysCount,
 	}
 
 	return firstTarget, query
 }
 
 //Bind content with a simple syntax, support innner join
+//todo: might be better in another package since it better involves content model?
 func BindContent(ctx context.Context, entity interface{}, targets string, condition Condition) (int, error) {
 	contentType, query := CreateQuery(targets, condition)
 	count, err := BindContentWithQuery(ctx, entity, contentType, query, ContentOption{WithAuthor: true})
@@ -164,8 +166,8 @@ func BindContentWithQuery(ctx context.Context, entity interface{}, contentType s
 
 //Bind entity with Query. The simpest is to use BindContent/BindEntity which is using condition directly.
 //Condition is syntax(use function to create) easier than query(struct creating)
-//If limit is x,0(even 0,0) it will ignore entity, and only count
-//If limit is 10(>0),y it will ignore count unless AlwaysCount is true
+//If limit is <number>,0 it will ignore entity, and only count
+//If limit is <number larger than 0>(eg. 5), <number> it will ignore count unless AlwaysCount is true
 func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (int, error) {
 	sqlStr, values, err := handler.BuildQuery(query)
 	if err != nil {
@@ -177,15 +179,19 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 	count := true
 	fetchEntity := true
 
-	if len(limitArr) > 0 {
-		//if limit x,0, no need to fetch entity, count only
-		if limitArr[1] == 0 {
-			fetchEntity = false
-		}
+	if !query.AlwaysCount {
+		if len(limitArr) == 0 {
+			count = false //if no limit set, then it can be counted from result instead of query count
+		} else {
+			//if limit x,0, no need to fetch entity, count only
+			if limitArr[1] == 0 {
+				fetchEntity = false
+			}
 
-		//if limit x,10, fetch entity only, not need to count, unless AlwaysCount is set
-		if limitArr[0] > 0 && !query.AlwaysCount {
-			count = false
+			//if limit x,10, fetch entity only, not need to count
+			if limitArr[0] > 0 {
+				count = false
+			}
 		}
 	}
 

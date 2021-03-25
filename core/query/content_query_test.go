@@ -6,7 +6,6 @@ package query
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"testing"
 
 	"github.com/digimakergo/digimaker/core/db"
@@ -32,16 +31,12 @@ func ExampleFetchByID() {
 	//output: 1
 }
 
-func TestSubList(t *testing.T) {
+func ExampleSubList() {
 	rootContent, _ := FetchByID(context.Background(), 1)
-	fmt.Println("=========")
-	list, _, _ := SubList(context.Background(), rootContent, "article", 2, 7, db.TrueCond(), false)
+	list, _, _ := SubList(context.Background(), 1, rootContent, "article", 3, db.EmptyCond(), false)
 
-	//
-	for _, item := range list {
-		article := item.(*entity.Article)
-		fmt.Println(strconv.Itoa(article.ID) + ":" + article.GetName())
-	}
+	fmt.Println(len(list) > 0)
+	//output: true
 }
 
 func TestSubTree(t *testing.T) {

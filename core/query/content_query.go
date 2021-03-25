@@ -84,8 +84,8 @@ func FetchByCUID(ctx context.Context, contentType string, cuid string) (contentt
 
 // Fetch fetches first content based on condition.
 func Fetch(ctx context.Context, contentType string, condition db.Condition) (contenttype.ContentTyper, error) {
-	//todo: use limit in this case so it doesn't fetch more into memory.
 	content := contenttype.NewInstance(contentType)
+	condition = condition.Limit(0, 1)
 	_, err := db.BindContent(ctx, content, contentType, condition)
 	if err != nil {
 		return nil, err
@@ -111,7 +111,7 @@ func Children(ctx context.Context, parentContent contenttype.ContentTyper, conte
 	if !util.Contains(contentTypeList, contenttype) {
 		return nil, -1, errors.New("content type " + contenttype + "doesn't exist or not allowed.")
 	}
-	result, countResult, err := SubList(ctx, parentContent, contenttype, 1, userID, cond, withCount)
+	result, countResult, err := SubList(ctx, userID, parentContent, contenttype, 1, cond, withCount)
 	return result, countResult, err
 }
 
@@ -121,7 +121,7 @@ func SubTree(ctx context.Context, rootContent contenttype.ContentTyper, depth in
 	contentTypeList := strings.Split(contentTypes, ",")
 	var list []contenttype.ContentTyper
 	for _, contentType := range contentTypeList {
-		currentList, _, err := SubList(ctx, rootContent, contentType, depth, userID, db.EmptyCond().Sort(sortby...), false)
+		currentList, _, err := SubList(ctx, userID, rootContent, contentType, depth, db.EmptyCond().Sort(sortby...), false)
 		if err != nil {
 			return TreeNode{}, err
 		}
@@ -216,7 +216,7 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 }
 
 // SubList fetches content list with permission considered(only return contents the user has access to).
-func SubList(ctx context.Context, rootContent contenttype.ContentTyper, contentType string, depth int, userID int, condition db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
+func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyper, contentType string, depth int, condition db.Condition, withCount bool) ([]contenttype.ContentTyper, int, error) {
 	rootLocation := rootContent.GetLocation()
 	if depth == 1 {
 		//Direct children
