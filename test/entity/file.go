@@ -4,8 +4,10 @@
 package entity
 
 import (
+    "context"
     "database/sql"
     "github.com/digimakergo/digimaker/core/db"
+    "github.com/digimakergo/digimaker/core/definition"
     "github.com/digimakergo/digimaker/core/contenttype"
 	  "github.com/digimakergo/digimaker/core/fieldtype"
     
@@ -16,7 +18,7 @@ import (
 
 
 type File struct{
-     contenttype.ContentCommon `boil:",bind"`
+     contenttype.ContentEntity `boil:",bind"`
 
      
     
@@ -41,7 +43,6 @@ type File struct{
          
         
     
-    
 }
 
 func (c *File ) TableName() string{
@@ -53,18 +54,11 @@ func (c *File ) ContentType() string{
 }
 
 func (c *File ) GetName() string{
-	 location := c.GetLocation()
-     if location != nil{
-         return location.Name
-     }else{
-         return ""
-     }
+	 return ""
 }
 
 func (c *File) GetLocation() *contenttype.Location{
-    
     return nil
-    
 }
 
 func (c *File) ToMap() map[string]interface{}{
@@ -100,19 +94,16 @@ func (c *File) ToDBValues() map[string]interface{} {
         
         
     
-	for key, value := range c.ContentCommon.ToDBValues() {
-		result[key] = value
-	}
 	return result
 }
 
 //Get identifier list of fields(NOT including data_fields )
 func (c *File) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "filetype","path","title",}...)
+	return []string{ "filetype","path","title",}
 }
 
-func (c *File) Definition(language ...string) contenttype.ContentType {
-	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+func (c *File) Definition(language ...string) definition.ContentType {
+	def, _ := definition.GetDefinition( c.ContentType(), language... )
     return def
 }
 
@@ -144,10 +135,8 @@ func (c *File) Value(identifier string) interface{} {
         
     
     
-	case "cid":
-		result = c.ContentCommon.CID
+
     default:
-    	result = c.ContentCommon.Value( identifier )
     }
 	return result
 }
@@ -182,46 +171,44 @@ func (c *File) SetValue(identifier string, value interface{}) error {
             
         
 	default:
-		err := c.ContentCommon.SetValue(identifier, value)
-        if err != nil{
-            return err
-        }
+
 	}
 	//todo: check if identifier exist
 	return nil
 }
 
 //Store content.
-//Note: it will set id to CID after success
-func (c *File) Store(transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
-	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
-		c.CID = id
+//Note: it will set id to ID after success
+func (c *File) Store(ctx context.Context, transaction ...*sql.Tx) error {
+	if c.ID == 0 {
+		id, err := db.Insert(ctx, c.TableName(), c.ToDBValues(), transaction...)
+		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
+		err := db.Update(ctx, c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil
 }
+
 
 func (c *File)StoreWithLocation(){
 
 }
 
 //Delete content only
-func (c *File) Delete(transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
-	contentError := handler.Delete(c.TableName(), Cond("id", c.CID), transaction...)
+func (c *File) Delete(ctx context.Context, transaction ...*sql.Tx) error {
+	contentError := db.Delete(ctx, c.TableName(), Cond("id", c.ID), transaction...)
 	return contentError
 }
 
 func init() {
 	new := func() contenttype.ContentTyper {
-		return &File{}
+    entity := &File{}
+    entity.ContentEntity.ContentType = "File"
+    return entity
 	}
 
 	newList := func() interface{} {

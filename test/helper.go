@@ -9,9 +9,6 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/sirupsen/logrus"
-	"github.com/digimakergo/digimaker/core"
-	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -19,20 +16,6 @@ var RootID = 3
 
 var started = false
 var ctx context.Context
-
-//Start bootstraps environment. Note it can be invoke multiple times because the tests can be in different package, but inside it will only init once.
-func Start() context.Context {
-	if !started {
-		fmt.Println("Starting testing...")
-		testFolder := util.DMPath() + "/test"
-		core.Bootstrap(testFolder)
-		// InitData()
-		ctx = context.Background()
-		ctx = context.WithValue(ctx, "user_id", 1)
-		ctx = log.WithLogger(ctx, logrus.Fields{"ip": "127.0.0.1", "request_id": "test-request-id"})
-	}
-	return ctx
-}
 
 func InitSchema() {
 	runSQL("schema.sql")

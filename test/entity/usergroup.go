@@ -4,8 +4,10 @@
 package entity
 
 import (
+    "context"
     "database/sql"
     "github.com/digimakergo/digimaker/core/db"
+    "github.com/digimakergo/digimaker/core/definition"
     "github.com/digimakergo/digimaker/core/contenttype"
 	  "github.com/digimakergo/digimaker/core/fieldtype"
     
@@ -102,8 +104,8 @@ func (c *Usergroup) IdentifierList() []string {
 	return append(c.ContentCommon.IdentifierList(),[]string{ "summary","title",}...)
 }
 
-func (c *Usergroup) Definition(language ...string) contenttype.ContentType {
-	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+func (c *Usergroup) Definition(language ...string) definition.ContentType {
+	def, _ := definition.GetDefinition( c.ContentType(), language... )
     return def
 }
 
@@ -173,18 +175,25 @@ func (c *Usergroup) SetValue(identifier string, value interface{}) error {
 
 //Store content.
 //Note: it will set id to CID after success
-func (c *Usergroup) Store(transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
+func (c *Usergroup) Store(ctx context.Context, transaction ...*sql.Tx) error {
 	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
+		id, err := db.Insert(ctx, c.TableName(), c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
+		err := db.Update(ctx, c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
+    if err != nil {
+			return err
+		}
+	}
+
+	err := c.StoreRelations(ctx, c.ContentType(), transaction...)
+	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -193,9 +202,8 @@ func (c *Usergroup)StoreWithLocation(){
 }
 
 //Delete content only
-func (c *Usergroup) Delete(transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
-	contentError := handler.Delete(c.TableName(), Cond("id", c.CID), transaction...)
+func (c *Usergroup) Delete(ctx context.Context, transaction ...*sql.Tx) error {
+	contentError := db.Delete(ctx, c.TableName(), Cond("id", c.CID), transaction...)
 	return contentError
 }
 

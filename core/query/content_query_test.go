@@ -4,33 +4,38 @@
 package query
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"testing"
 
 	"github.com/digimakergo/digimaker/core/db"
+	_ "github.com/digimakergo/digimaker/test"
 	"github.com/digimakergo/digimaker/test/entity"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFetchByContent(t *testing.T) {
+func ExampleFetchByCID() {
+	content, err := FetchByCID(context.Background(), "folder", 1)
+	if err == nil && content != nil {
+		fmt.Println(content.(*entity.Folder).ContentID)
+	}
+	//output: 1
+}
 
-	querier := Querier()
-	content, err := querier.FetchByContentID("folder", 1)
-	assert.Equal(t, nil, err)
-	fmt.Println(content.ToMap()["content_id"])
-	// assert.Equal(t, 2, content.ToMap()["content_id"].(int))
-
-	content, err = querier.FetchByID(1)
-	assert.Equal(t, 1, content.Value("id"))
+func ExampleFetchByID() {
+	content, err := FetchByID(context.Background(), 1)
+	if err == nil && content != nil {
+		fmt.Println(content.(*entity.Folder).ContentID)
+	}
+	//output: 1
 }
 
 func TestSubList(t *testing.T) {
-	querier := Querier()
-	rootContent, _ := querier.FetchByID(1)
+	rootContent, _ := FetchByID(context.Background(), 1)
 	fmt.Println("=========")
-	list, _, _ := querier.SubList(rootContent, "article", 2, 7, db.EmptyCond(), []int{}, []string{}, false, ctx)
+	list, _, _ := SubList(context.Background(), rootContent, "article", 2, 7, db.TrueCond(), false)
 
 	//
 	for _, item := range list {
@@ -40,10 +45,8 @@ func TestSubList(t *testing.T) {
 }
 
 func TestSubTree(t *testing.T) {
-	querier := Querier()
-	rootContent, _ := querier.FetchByID(1)
-	fmt.Println("TREEEEEEEEEEEEE")
-	treenode, _ := querier.SubTree(rootContent, 3, "folder,article", 7, []string{}, ctx)
+	rootContent, _ := FetchByID(context.Background(), 1)
+	treenode, _ := SubTree(context.Background(), rootContent, 3, "folder,article", 7, []string{})
 
 	fmt.Println(treenode.Content.GetName())
 	children := treenode.Children
@@ -60,14 +63,13 @@ func TestSubTree(t *testing.T) {
 }
 
 func TestQuery(t *testing.T) {
-
-	dbHandler := db.DBHanlder()
-	var article entity.Article
-	dbHandler.GetByID("article", "dm_article", 2, &article)
-
-	assert.NotNil(t, article)
-
-	folders, _, _ := Querier().List("folder", db.Cond("1", "1"), []int{}, []string{}, false)
-	fmt.Println("HELLO")
+	folders, _, _ := List(context.Background(), "folder", db.Cond("1", "1"))
 	fmt.Println(folders)
+}
+
+func TestQueryImage(t *testing.T) {
+	images := &[]entity.Image{}
+	_, err := db.BindContent(context.Background(), images, "dm_image", db.Cond("1", 1))
+	assert.Nil(t, err)
+	assert.NotNil(t, images)
 }

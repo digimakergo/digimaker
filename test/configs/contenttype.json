@@ -193,7 +193,7 @@
     "table_name": "dm_image",
     "has_version": false,
     "has_location": false,
-    "data_fields":[{"identifier":"parent_id", "type":"int"}, {"identifier":"imagetype", "type":"string"}],
+    "data_fields":[{"identifier":"parent_id", "fieldtype":"int"}, {"identifier":"imagetype", "fieldtype":"string"}],
     "fields": [
       {
         "identifier": "title",

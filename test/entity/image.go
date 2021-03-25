@@ -4,8 +4,10 @@
 package entity
 
 import (
+    "context"
     "database/sql"
     "github.com/digimakergo/digimaker/core/db"
+    "github.com/digimakergo/digimaker/core/definition"
     "github.com/digimakergo/digimaker/core/contenttype"
 	  "github.com/digimakergo/digimaker/core/fieldtype"
     
@@ -16,7 +18,7 @@ import (
 
 
 type Image struct{
-     contenttype.ContentCommon `boil:",bind"`
+     contenttype.ContentEntity `boil:",bind"`
 
      
           Imagetype  string `boil:"imagetype" json:"imagetype" toml:"imagetype" yaml:"imagetype"`
@@ -38,7 +40,6 @@ type Image struct{
          
         
     
-    
 }
 
 func (c *Image ) TableName() string{
@@ -50,18 +51,11 @@ func (c *Image ) ContentType() string{
 }
 
 func (c *Image ) GetName() string{
-	 location := c.GetLocation()
-     if location != nil{
-         return location.Name
-     }else{
-         return ""
-     }
+	 return ""
 }
 
 func (c *Image) GetLocation() *contenttype.Location{
-    
     return nil
-    
 }
 
 func (c *Image) ToMap() map[string]interface{}{
@@ -95,19 +89,16 @@ func (c *Image) ToDBValues() map[string]interface{} {
         
         
     
-	for key, value := range c.ContentCommon.ToDBValues() {
-		result[key] = value
-	}
 	return result
 }
 
 //Get identifier list of fields(NOT including data_fields )
 func (c *Image) IdentifierList() []string {
-	return append(c.ContentCommon.IdentifierList(),[]string{ "path","title",}...)
+	return []string{ "path","title",}
 }
 
-func (c *Image) Definition(language ...string) contenttype.ContentType {
-	def, _ := contenttype.GetDefinition( c.ContentType(), language... )
+func (c *Image) Definition(language ...string) definition.ContentType {
+	def, _ := definition.GetDefinition( c.ContentType(), language... )
     return def
 }
 
@@ -138,10 +129,8 @@ func (c *Image) Value(identifier string) interface{} {
         
     
     
-	case "cid":
-		result = c.ContentCommon.CID
+
     default:
-    	result = c.ContentCommon.Value( identifier )
     }
 	return result
 }
@@ -174,46 +163,44 @@ func (c *Image) SetValue(identifier string, value interface{}) error {
             
         
 	default:
-		err := c.ContentCommon.SetValue(identifier, value)
-        if err != nil{
-            return err
-        }
+
 	}
 	//todo: check if identifier exist
 	return nil
 }
 
 //Store content.
-//Note: it will set id to CID after success
-func (c *Image) Store(transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
-	if c.CID == 0 {
-		id, err := handler.Insert(c.TableName(), c.ToDBValues(), transaction...)
-		c.CID = id
+//Note: it will set id to ID after success
+func (c *Image) Store(ctx context.Context, transaction ...*sql.Tx) error {
+	if c.ID == 0 {
+		id, err := db.Insert(ctx, c.TableName(), c.ToDBValues(), transaction...)
+		c.ID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := handler.Update(c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
+		err := db.Update(ctx, c.TableName(), c.ToDBValues(), Cond("id", c.ID), transaction...)
 		return err
 	}
 	return nil
 }
+
 
 func (c *Image)StoreWithLocation(){
 
 }
 
 //Delete content only
-func (c *Image) Delete(transaction ...*sql.Tx) error {
-	handler := db.DBHanlder()
-	contentError := handler.Delete(c.TableName(), Cond("id", c.CID), transaction...)
+func (c *Image) Delete(ctx context.Context, transaction ...*sql.Tx) error {
+	contentError := db.Delete(ctx, c.TableName(), Cond("id", c.ID), transaction...)
 	return contentError
 }
 
 func init() {
 	new := func() contenttype.ContentTyper {
-		return &Image{}
+    entity := &Image{}
+    entity.ContentEntity.ContentType = "Image"
+    return entity
 	}
 
 	newList := func() interface{} {
