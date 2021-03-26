@@ -27,21 +27,26 @@ func ExampleBindEntity() {
 		ID   string `boil:"id"`
 		Name string `boil:"name"`
 	}{}
-	BindEntity(context.Background(), &orderlist, "order", Cond("author", 5).Limit(0, 10))
+	BindEntity(context.Background(), &orderlist, "demo_order", Cond("author", 5).Limit(0, 10))
 
 	//Fetch all orders to a map list
 	datalist := DatamapList{}
-	count, err := BindEntity(context.Background(), &datalist, "order", TrueCond())
+	BindEntity(context.Background(), &datalist, "demo_order", TrueCond())
+	fmt.Print(len(datalist) > 0)
 
-	//Fetch one order to a map
-	order := Datamap{}
-	_, err = BindEntity(context.Background(), &order, "order", Cond("id", 2))
+	//Fetch one order to a map list
+	order := DatamapList{}
+	BindEntity(context.Background(), &order, "demo_order", Cond("id>", 1))
+	fmt.Print(len(order) > 0)
+	//output: truetrue
 
 }
 
 func ExampleCount() {
 	//Count all orders
-	count, err := Count("order", TrueCond())
+	count, _ := Count("order", TrueCond())
+	fmt.Println(count > 0)
+	//output: true
 }
 
 func TestContent(t *testing.T) {

@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 
 	"github.com/digimakergo/digimaker/core/definition"
@@ -143,14 +144,15 @@ func BindEntity(ctx context.Context, entity interface{}, targets string, conditi
 
 //Count entities
 func Count(targets string, condition Condition, ctx ...context.Context) (int, error) {
-	condition = condition.Limit(0, 0)
+	condition = condition.Limit(0, 0) //set to prevent fetching entity
 	var currentCtx context.Context
 	if len(ctx) > 0 {
 		currentCtx = ctx[0]
 	} else {
 		currentCtx = context.Background()
 	}
-	count, err := BindEntity(currentCtx, nil, targets, condition)
+	result := struct{}{}
+	count, err := BindEntity(currentCtx, &result, targets, condition)
 	return count, err
 }
 
@@ -242,7 +244,9 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 		} else {
 			err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
 			if err != nil {
-				return -1, errors.Wrap(err, "Error when binding entity."+err.Error())
+				if err != sql.ErrNoRows {
+					return -1, errors.Wrap(err, "Error when binding entity."+err.Error())
+				}
 			}
 		}
 	}
@@ -272,9 +276,12 @@ func countWithQuery(ctx context.Context, query Query) (int, error) {
 	entity := struct {
 		Count int `boil:"count"`
 	}{}
+
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, &entity)
 	if err != nil {
-		return -1, errors.Wrap(err, "Count error when binding entity."+err.Error())
+		if err != sql.ErrNoRows {
+			return -1, errors.Wrap(err, "Count error when binding entity."+err.Error())
+		}
 	}
 
 	return entity.Count, nil

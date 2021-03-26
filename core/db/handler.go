@@ -19,21 +19,21 @@ type DBHandler interface {
 
 var handler DBHandler
 
-func RegisterHandler(dbBuilder DBHandler) {
-	handler = dbBuilder
+func RegisterHandler(dbHandler DBHandler) {
+	handler = dbHandler
 }
 
-//Insert record, return id created(if it has). It only invokes "handler.Insert"
+//Insert record, return id created(if it has). It only invokes "<DBHandler>.Insert"
 func Insert(ctx context.Context, tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
 	return handler.Insert(ctx, tablename, values, transation...)
 }
 
-//Update record. It only invokes "handler.Update"
+//Update record. It only invokes "<DBHandler>.Update"
 func Update(ctx context.Context, tablename string, values map[string]interface{}, condition Condition, transation ...*sql.Tx) error {
 	return handler.Update(ctx, tablename, values, condition, transation...)
 }
 
-//Delete record. It only invokes "handler.Delete"
+//Delete record. It only invokes "<DBHandler>.Delete"
 func Delete(ctx context.Context, tablename string, condition Condition, transation ...*sql.Tx) error {
 	return handler.Delete(ctx, tablename, condition, transation...)
 }
