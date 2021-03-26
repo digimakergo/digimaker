@@ -8,16 +8,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestHasAccessTo(t *testing.T) {
-	context := debug.Init(context.Background())
-	policyList, err := GetUserPolicies(2)
+func TestGetUserPolicies(t *testing.T) {
+	policyList, err := GetUserPolicies(context.Background(), 2)
 	assert.NotNil(t, policyList)
 	assert.Nil(t, err)
-	currentData := map[string]interface{}{"contenttype": "folder1"}
-	result := HasAccessTo(2, "content/read", currentData, context)
-	for _, item := range debug.GetDebugger(context).List {
-		fmt.Println(item)
-	}
-	assert.Nil(t, err)
-	assert.Equal(t, result, false)
+}
+
+func ExampleHasAccessTo() {
+	currentData := map[string]interface{}{"contenttype": "folder"}
+
+	//2 is a member
+	result := HasAccessTo(context.Background(), 2, "content/read", currentData)
+	fmt.Println(result)
+	//output: true
 }

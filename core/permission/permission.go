@@ -9,9 +9,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 
@@ -69,9 +67,31 @@ type UserRole struct {
 	RoleID int `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
 }
 
+//GetUserPolicies returns policies of a user.
 //todo: cache in context?
-func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 
+type key int
+
+const ctxKeyUserPolicies = key(1)
+
+//CacheUserPolicies cache the policies into provided context
+func CacheUserPolicies(ctx context.Context, userID int) (context.Context, error) {
+	policies, err := GetUserPolicies(ctx, userID)
+	if err != nil {
+		return ctx, err
+	}
+	//todo: user user id in the key
+	result := context.WithValue(ctx, ctxKeyUserPolicies, policies)
+	return result, nil
+}
+
+//GetUserPolicies returns policies of a user, if it's already cached in the context, return it.
+func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
+	//first get cache from context.
+	cachedPolicies := ctx.Value(ctxKeyUserPolicies)
+	if cachedPolicies != nil {
+		return cachedPolicies.([]Policy), nil
+	}
 	//get roles of user
 	userRoleList := []UserRole{}
 	_, err := db.BindEntity(context.Background(), &userRoleList, "dm_user_role", db.Cond("user_id", userID))
@@ -93,6 +113,7 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 	return policyList, nil
 }
 
+// GetLimitsFromPolicy gets all limits from a policies
 func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]interface{} {
 	var result []map[string]interface{}
 	for _, policy := range policyList {
@@ -107,20 +128,19 @@ func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]int
 	return result
 }
 
+// GetRolePolicies returns policies of role ids
 func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
-	roles := contenttype.NewList("role")
-	db.BindContent(context.Background(), roles, "role", db.Cond("c.id", roleIDs))
-	if roles == nil {
-		log.Warning("Role doesn't exist on ID(s)"+fmt.Sprint(roleIDs), "permission", ctx)
-		return PolicyList{}
+	roles := db.DatamapList{}
+	_, err := db.BindEntity(ctx, &roles, "dm_role", db.Cond("id", roleIDs))
+	if err != nil {
+		log.Error("Can not get role on role ids: "+fmt.Sprint(roleIDs), "", ctx)
+		return nil
 	}
 
-	roleList := contenttype.ToList("role", roles)
 	policyIdentifiers := []string{}
 	policies := []Policy{}
-	for _, role := range roleList {
-		roleIdentifierField := role.Value("identifier").(*fieldtype.Text)
-		roleIdentifier := roleIdentifierField.String.String
+	for _, role := range roles {
+		roleIdentifier := role["identifier"].(string)
 
 		//loop policies under the role
 		for _, policyIdentifier := range rolePolicyMap[roleIdentifier] {
@@ -140,22 +160,26 @@ func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
 	return policies
 }
 
+// AssignToUser assigns a role to a user
 func AssignToUser(ctx context.Context, roleID int, userID int) error {
 	//todo: check if role exisit. maybe need role entity?
 	//todo: check if user exist.
-	useRole := UserRole{}
-	db.BindEntity(context.Background(), &useRole, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
-	if useRole.ID > 0 {
+	count, err := db.Count("dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
+	if err != nil {
+		return err
+	}
+	if count > 0 {
 		return errors.New("Already assigned.")
 	}
-	_, err := db.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
+	//todo: put db.Insert/update/delete into entity of UserRole(better generate automatically)
+	_, err = db.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-//Remove a user from role assignment
+//RemoveAssignment removes a user from role assignment
 func RemoveAssignment(ctx context.Context, userID int, roleID int) error {
 	err := db.Delete(ctx, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
 	if err != nil {
