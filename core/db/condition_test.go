@@ -34,13 +34,69 @@ func ExampleCond() {
 	//cond
 	cond := Cond("id>", 10)
 
+	output, _ := BuildCondition(cond)
+	fmt.Println(output)
+	//output: id > ?
+}
+
+func ExampleCond_mulitiCond() {
+	cond := Cond("modified >", 22222)
+
+	//Here Cond() is the same as And()
+	andCond := cond.Cond("published >", 3333333)
+
+	output, _ := BuildCondition(andCond)
+	fmt.Println(output)
+	//output: (modified > ? AND published > ?)
+}
+
+func ExampleCond_andCondition() {
+	cond := Cond(" modified  > ", 22222222)
+	cond2 := Cond("published >", 3333333)
+
 	//and
-	cond2 := Cond(" modified  > ", 22222222)
-	cond3 := Cond("published >", 3333333)
-	andCond := cond.And(cond2, cond3)
+	andCond := cond.And(cond2)
+
+	output, _ := BuildCondition(andCond)
+	fmt.Println(output)
+	//output: (modified > ? AND published > ?)
+}
+
+func ExampleCond_andExpression() {
+	cond := Cond("modified >", 22222)
+
+	//and
+	andCond := cond.And("published >", 3333333) //Here is the same as cond.And( db.Cond( "published >", 3333333 ) )
+
+	output, _ := BuildCondition(andCond)
+	fmt.Println(output)
+	//output: (modified > ? AND published > ?)
+}
+
+func ExampleCond_or() {
+	cond := Cond(" modified  > ", 22222222)
+	cond2 := Cond("published >", 3333333)
+
+	//or
+	orCond := cond.Or(cond2)
+
+	output, _ := BuildCondition(orCond)
+	fmt.Println(output)
+
+	//output: (modified > ? OR published > ?)
+}
+
+func ExampleCond_orAnd() {
+	cond := Cond(" modified  > ", 22222222)
+	cond2 := Cond("published >", 3333333)
 
 	//or then and
-	cond4 := cond.Or(cond2, cond3).And(cond2, cond3)
+	orCond := cond.Or(cond2).And("id>", 1)
+
+	output, _ := BuildCondition(orCond)
+	fmt.Println(output)
+
+	//output: ((modified > ? OR published > ?) AND id > ?)
 }
 
 func ExampleEmptyCond() {
