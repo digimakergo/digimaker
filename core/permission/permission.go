@@ -67,9 +67,6 @@ type UserRole struct {
 	RoleID int `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
 }
 
-//GetUserPolicies returns policies of a user.
-//todo: cache in context?
-
 type key int
 
 func getCtxPolicyKey(userID int) key {
@@ -77,7 +74,7 @@ func getCtxPolicyKey(userID int) key {
 }
 
 //CacheUserPolicies cache the policies into provided context
-func CacheUserPolicies(ctx context.Context, userID int) (context.Context, error) {
+func InitPolicyContext(ctx context.Context, userID int) (context.Context, error) {
 	policies, err := GetUserPolicies(ctx, userID)
 	if err != nil {
 		return ctx, err
