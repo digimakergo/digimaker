@@ -73,7 +73,7 @@ func getCtxPolicyKey(userID int) key {
 	return key(userID)
 }
 
-//CacheUserPolicies cache the policies into provided context
+//InitPolicyContext cache the policies into provided context
 func InitPolicyContext(ctx context.Context, userID int) (context.Context, error) {
 	policies, err := GetUserPolicies(ctx, userID)
 	if err != nil {
@@ -86,6 +86,7 @@ func InitPolicyContext(ctx context.Context, userID int) (context.Context, error)
 }
 
 //GetUserPolicies returns policies of a user, if it's already cached in the context, return it.
+//todo: Will be a powerful to support variables in policies. eg:under:"{role.under}", contenttype: "role.contenttypes"
 func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 	//first get cache from context.
 	cachedPolicies := ctx.Value(getCtxPolicyKey(userID))
