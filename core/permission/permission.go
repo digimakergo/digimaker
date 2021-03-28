@@ -72,7 +72,9 @@ type UserRole struct {
 
 type key int
 
-const ctxKeyUserPolicies = key(1)
+func getCtxPolicyKey(userID int) key {
+	return key(userID)
+}
 
 //CacheUserPolicies cache the policies into provided context
 func CacheUserPolicies(ctx context.Context, userID int) (context.Context, error) {
@@ -80,15 +82,16 @@ func CacheUserPolicies(ctx context.Context, userID int) (context.Context, error)
 	if err != nil {
 		return ctx, err
 	}
-	//todo: user user id in the key
-	result := context.WithValue(ctx, ctxKeyUserPolicies, policies)
+
+	cacheKey := getCtxPolicyKey(userID)
+	result := context.WithValue(ctx, cacheKey, policies)
 	return result, nil
 }
 
 //GetUserPolicies returns policies of a user, if it's already cached in the context, return it.
 func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 	//first get cache from context.
-	cachedPolicies := ctx.Value(ctxKeyUserPolicies)
+	cachedPolicies := ctx.Value(getCtxPolicyKey(userID))
 	if cachedPolicies != nil {
 		return cachedPolicies.([]Policy), nil
 	}

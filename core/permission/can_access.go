@@ -52,8 +52,9 @@ func GetUserAccess(ctx context.Context, userID int, operation string) (AccessTyp
 	return AccessWithLimit, limitList, nil
 }
 
-//If the user has acccess given matchedData(realData here)
-func HasAccessTo(ctx context.Context, userID int, operation string, realData MatchData) bool {
+//If the user has acccess given data(targetData here)
+//If realData is empty, just check if the user has given operation(can be full access or partly access to that operation)
+func HasAccessTo(ctx context.Context, userID int, operation string, targetData ...MatchData) bool {
 	//get permission limits
 	accessType, limits, err := GetUserAccess(ctx, userID, operation)
 
@@ -66,6 +67,15 @@ func HasAccessTo(ctx context.Context, userID int, operation string, realData Mat
 		return true
 	}
 
+	//When match data is not provided, if there is partly access it will be success.
+	if len(targetData) == 0 {
+		if accessType == AccessWithLimit {
+			return true
+		} else {
+			return false
+		}
+	}
+
 	if accessType == AccessNo {
 		return false
 	}
@@ -75,7 +85,7 @@ func HasAccessTo(ctx context.Context, userID int, operation string, realData Mat
 	//match limits
 	for i, limit := range limits {
 		log.Debug("Matching limit "+strconv.Itoa(i+1)+"/"+strconv.Itoa(len(limits)), "permission", ctx)
-		policyResult, matchLog := util.MatchCondition(limit, realData)
+		policyResult, matchLog := util.MatchCondition(limit, targetData[0])
 		for _, item := range matchLog {
 			log.Debug(item, "permission", ctx)
 		}
@@ -90,6 +100,7 @@ func HasAccessTo(ctx context.Context, userID int, operation string, realData Mat
 
 //todo: support more
 //If the use can read the content
+//support keys: contenttype, id(locaton id), under, author(include "self")
 func CanRead(ctx context.Context, userID int, content contenttype.ContentTyper) bool {
 	location := content.GetLocation()
 	data := map[string]interface{}{"contenttype": content.ContentType()}
@@ -106,22 +117,26 @@ func CanRead(ctx context.Context, userID int, content contenttype.ContentTyper) 
 	return result
 }
 
+//support keys: contenttype, id(locaton id), under, author(include "self")
 func CanDelete(ctx context.Context, content contenttype.ContentTyper, userId int) bool {
-	return HasAccessTo(ctx, userId, "content/delete", GetMatchData(content, userId))
+	return HasAccessTo(ctx, userId, "content/delete", getMatchData(content, userId))
 }
 
+//support keys: contenttype, id(parent locaton id), under, parent author(include "self")
 func CanCreate(ctx context.Context, parent contenttype.ContentTyper, contenttype string, userId int) bool {
-	data := GetMatchData(parent, userId)
+	data := getMatchData(parent, userId)
 	data["contenttype"] = contenttype
 	return HasAccessTo(ctx, userId, "content/create", data)
 }
 
+//support keys: contenttype, id(locaton id), under, author(include "self")
 func CanUpdate(ctx context.Context, content contenttype.ContentTyper, userId int) bool {
-	data := GetMatchData(content, userId)
+	data := getMatchData(content, userId)
 	return HasAccessTo(ctx, userId, "content/update", data)
 }
 
-func GetMatchData(content contenttype.ContentTyper, userId int) MatchData {
+//todo: add more conditions(keys)
+func getMatchData(content contenttype.ContentTyper, userId int) MatchData {
 	def := content.Definition()
 	data := MatchData{}
 	data["contenttype"] = content.ContentType()
@@ -149,7 +164,7 @@ func GetUpdateFields(ctx context.Context, content contenttype.ContentTyper, user
 	if accessType == AccessFull {
 		result = append(result, "*")
 	} else if accessType == AccessWithLimit {
-		matchData := GetMatchData(content, userID)
+		matchData := getMatchData(content, userID)
 		if content.ContentType() == "user" && content.GetCID() == userID { //todo: make "user" configurable
 			matchData["cid"] = "self"
 		}
