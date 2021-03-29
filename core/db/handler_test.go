@@ -54,11 +54,11 @@ func ExampleUpdate() {
 }
 
 func ExampleDelete() {
-	//Update only name
 	values := map[string]interface{}{
 		"name": "Order"}
 	id, _ := Insert(context.Background(), "demo_order", values)
 
+	//Delete the inserted one
 	Delete(context.Background(), "demo_order", Cond("id", id))
 
 	count, _ := Count("demo_order", Cond("id", id))

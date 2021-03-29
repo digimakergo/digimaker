@@ -30,6 +30,7 @@ func NewList(contentType string) interface{} {
 }
 
 //Convert a *[]Article type(used for binding) to a slice of ContentTyper(use for more generic handling)
+//todo: merge NewList with ToList
 func ToList(contentType string, obj interface{}) []ContentTyper {
 	return contenttypeList[contentType].ToList(obj)
 }

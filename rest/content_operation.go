@@ -28,8 +28,8 @@ import (
 
 func New(w http.ResponseWriter, r *http.Request) {
 
-	userId := CheckUserID(r.Context(), w)
-	if userId == 0 {
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
 		return
 	}
 
@@ -53,7 +53,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 	//todo: add value based on definition
 
 	handler := handler.ContentHandler{}
-	content, validationResult, err := handler.Create(r.Context(), contentType, inputs, userId, parentInt)
+	content, validationResult, err := handler.Create(r.Context(), userID, contentType, inputs, parentInt)
 
 	w.Header().Set("content-type", "application/json")
 	if !validationResult.Passed() {

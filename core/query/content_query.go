@@ -24,7 +24,7 @@ type TreeNode struct {
 	Children []TreeNode               `json:"children"`
 }
 
-//iterate all nodes
+//Iterate loops all nodes in the tree
 func (tn *TreeNode) Iterate(operation func(node *TreeNode)) {
 	operation(tn)
 	for i, child := range tn.Children {

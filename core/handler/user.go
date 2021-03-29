@@ -46,6 +46,7 @@ func CanLogin(ctx context.Context, usernameEmail string, password string) (error
 }
 
 //enable or disable user(enable = false means disable)
+//todo: create a user interface
 func Enable(ctx context.Context, user contenttype.ContentTyper, enable bool, userId int) error {
 	disabledField := user.Value("disabled")
 	if disabledField == nil {

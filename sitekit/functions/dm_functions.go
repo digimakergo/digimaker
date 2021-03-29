@@ -1,6 +1,8 @@
 package functions
 
 import (
+	"strconv"
+
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/log"
@@ -44,9 +46,9 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 
 		"children": func(parent contenttype.ContentTyper, contenttype string) []contenttype.ContentTyper {
 			userID := util.CurrentUserID(dm.Context)
-			children, _, err := query.Children(dm.Context, parent, contenttype, userID, db.EmptyCond().Sortby("priority desc", "id asc"), false)
+			children, _, err := query.Children(dm.Context, userID, parent, contenttype, db.EmptyCond().Sortby("l.priority desc", "id asc"))
 			if err != nil {
-				log.Debug("Error when fetch ", "tempalte", dm.Context)
+				log.Debug("Error when fetch children on id "+strconv.Itoa(parent.GetID())+": "+err.Error(), "template", dm.Context)
 			}
 			return children
 		},

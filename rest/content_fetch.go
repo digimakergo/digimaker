@@ -270,13 +270,13 @@ func List(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		list, count, err = query.SubList(ctx, rootContent, ctype, level, userID, condition, true)
+		list, count, err = query.SubList(ctx, userID, rootContent, ctype, level, condition.WithCount())
 		if err != nil {
 			HandleError(err, w)
 			return
 		}
 	} else {
-		list, count, err = query.ListWithUser(ctx, userID, ctype, condition, true)
+		list, count, err = query.ListWithUser(ctx, userID, ctype, condition.WithCount())
 		if err != nil {
 			HandleError(err, w)
 			return
@@ -368,7 +368,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tree, err := query.SubTree(r.Context(), rootContent, 5, strings.Join(typeList, ","), userID, []string{"priority desc", "id"})
+	tree, err := query.SubTree(r.Context(), userID, rootContent, 5, strings.Join(typeList, ","), []string{"priority desc", "id"})
 	if err != nil {
 		HandleError(err, w)
 		return

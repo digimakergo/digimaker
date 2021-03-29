@@ -77,11 +77,13 @@ func (c Condition) Or(input interface{}, more ...interface{}) Condition {
 	return result
 }
 
+//Sortby sets sort rules where each string is a rule separated by space. eg. Sortby( "author asc", "modified desc" )
 func (c Condition) Sortby(sortby ...string) Condition {
 	c.Option.Sortby = sortby
 	return c
 }
 
+//Limit sets limit rule. Note: Limit(<x>, 0) has special meaning: count only.
 func (c Condition) Limit(offset int, number int) Condition {
 	c.Option.LimitArr = []int{offset, number}
 	return c

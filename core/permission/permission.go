@@ -87,6 +87,7 @@ func InitPolicyContext(ctx context.Context, userID int) (context.Context, error)
 
 //GetUserPolicies returns policies of a user, if it's already cached in the context, return it.
 //todo: Will be a powerful to support variables in policies. eg:under:"{role.under}", contenttype: "role.contenttypes"
+//todo: Support field condition, eg: {"contenttype": "article","field_category": "news"} - policy that a user can read article whose category is news.
 func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 	//first get cache from context.
 	cachedPolicies := ctx.Value(getCtxPolicyKey(userID))
