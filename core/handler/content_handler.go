@@ -130,7 +130,7 @@ func (ch *ContentHandler) storeCreatedContent(ctx context.Context, content conte
 }
 
 // Create creates a content(same behavior as Draft&Publish but store published version directly)
-func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs InputMap, userId int, parentID int) (contenttype.ContentTyper, ValidationResult, error) {
+func (ch *ContentHandler) Create(ctx context.Context, userID int, contentType string, inputs InputMap, parentID int) (contenttype.ContentTyper, ValidationResult, error) {
 	parent, _ := query.FetchByID(ctx, parentID)
 	if parent == nil {
 		return nil, ValidationResult{}, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
@@ -139,7 +139,7 @@ func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs
 	contentDefinition, _ := definition.GetDefinition(contentType)
 	fieldsDefinition := contentDefinition.FieldMap
 
-	if !permission.CanCreate(ctx, parent, contentType, userId) {
+	if !permission.CanCreate(ctx, parent, contentType, userID) {
 		return nil, ValidationResult{}, errors.New("User doesn't have access to create")
 	}
 
@@ -183,7 +183,7 @@ func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs
 		content.SetValue("modified", now)
 	}
 	if contentDefinition.HasLocation || contentDefinition.HasDataField("author") {
-		content.SetValue("author", userId)
+		content.SetValue("author", userID)
 	}
 	if contentDefinition.HasLocation || contentDefinition.HasDataField("cuid") {
 		content.SetValue("cuid", util.GenerateUID())
@@ -194,7 +194,7 @@ func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs
 	//Create transaction
 	tx, err := db.CreateTx()
 	if err != nil {
-		return nil, ValidationResult{}, errors.New("Can't get transaction.")
+		return nil, ValidationResult{}, errors.New("Can't get transaction")
 	}
 
 	//Save content and location if needed
@@ -203,7 +203,7 @@ func (ch *ContentHandler) Create(ctx context.Context, contentType string, inputs
 		content.SetValue("version", versionIfNeeded)
 	}
 
-	err = ch.storeCreatedContent(ctx, content, userId, tx, parentID)
+	err = ch.storeCreatedContent(ctx, content, userID, tx, parentID)
 	if err != nil {
 		tx.Rollback()
 		log.Error(err.Error(), "contenthandler.Create", ctx)
