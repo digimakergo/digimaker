@@ -52,7 +52,6 @@ func New(w http.ResponseWriter, r *http.Request) {
 	}
 	//todo: add value based on definition
 
-	handler := handler.ContentHandler{}
 	content, validationResult, err := handler.Create(r.Context(), userID, contentType, inputs, parentInt)
 
 	w.Header().Set("content-type", "application/json")
@@ -186,16 +185,14 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 	//todo: add value based on definition
 
-	updateHandler := handler.ContentHandler{}
-
 	contenttype := params["contenttype"]
 	var result bool
 	var validationResult handler.ValidationResult
 
 	if contenttype == "" {
-		result, validationResult, err = updateHandler.UpdateByID(r.Context(), idInt, inputs, userID)
+		result, validationResult, err = handler.UpdateByID(r.Context(), idInt, inputs, userID)
 	} else {
-		result, validationResult, err = updateHandler.UpdateByContentID(r.Context(), contenttype, idInt, inputs, userID)
+		result, validationResult, err = handler.UpdateByContentID(r.Context(), contenttype, idInt, inputs, userID)
 	}
 
 	if !result {
@@ -288,7 +285,6 @@ func Move(w http.ResponseWriter, r *http.Request) {
 	}
 	targetId, _ := strconv.Atoi(params["target"])
 
-	handler := handler.ContentHandler{}
 	err := handler.Move(ctx, contentIds, targetId, userID)
 	if err != nil {
 		HandleError(err, w, 410)
@@ -319,7 +315,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 		for _, id := range idSlice {
 			idInt, _ := strconv.Atoi(id)
-			handler := handler.ContentHandler{}
 			//todo: use Delete by ids to support one transaction with roll back
 			err := handler.DeleteByID(r.Context(), idInt, userID, true)
 			if err != nil {
@@ -338,7 +333,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		}
 		for _, cid := range cids {
 			cidInt, _ := strconv.Atoi(cid)
-			handler := handler.ContentHandler{}
 			err := handler.DeleteByCID(r.Context(), cidInt, contenttype, userID)
 			if err != nil {
 				HandleError(err, w)

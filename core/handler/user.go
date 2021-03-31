@@ -54,12 +54,11 @@ func Enable(ctx context.Context, user contenttype.ContentTyper, enable bool, use
 	}
 	disabled := disabledField.(*fieldtype.Checkbox).FieldValue().(int)
 	if disabled == 1 && enable || disabled == 0 && !enable {
-		handler := ContentHandler{}
 		disableInt := 1
 		if enable {
 			disableInt = 0
 		}
-		result, _, err := handler.Update(ctx, user, map[string]interface{}{"disabled": disableInt}, userId)
+		result, _, err := Update(ctx, user, map[string]interface{}{"disabled": disableInt}, userId)
 		if result {
 			return nil
 		} else if err != nil {
