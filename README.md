@@ -12,9 +12,9 @@ A Content Management Framework which balances simplicity & flexibility with high
 - Query&Manipulate content via rest&go api.
 - ORM entities using SQLBoiler
 - Event callback for exending content business logic(eg. update article content)
-- Permission configuration
+- Flexiable permission system
 - Online debug tool
-- Client components for query/manipulate contents
+- Client components for content related ui
 
 ### Documentation
 See https://digimaker.org/doc for documentation and references.
