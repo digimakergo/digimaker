@@ -7,24 +7,25 @@ A Content Management Framework which balances simplicity & flexibility with high
 ***<em>Note: this project is still under development. Check https://digimaker.org for update</em>***
 
 ### Highlights
+- Highly extendable content model
 - Templating for building website/html output using Pongo2
 - Query&Manipulate content via rest&go api.
-- Content model with ORM entities using SQLBoiler
+- ORM entities using SQLBoiler
 - Event callback for exending content business logic(eg. update article content)
 - Permission configuration
 - Online debug tool
+- Client components for query/manipulate contents
 
 ### Documentation
 See https://digimaker.org/doc for documentation and references.
 
-### Sample project for installation & demo
-See https://github.com/digimakergo/dmdemo
+For installation & demo, check https://github.com/digimakergo/dmdemo
 
-### Editorial UI (Admin)
-See https://github.com/digimakergo/eui 
 
-### Client UI library(based on React) project
-See https://github.com/digimakergo/ui
+### Related project
+Editorial UI (Admin) see https://github.com/digimakergo/eui 
+
+Client UI components: https://github.com/digimakergo/ui
 
 
 License
