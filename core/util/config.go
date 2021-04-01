@@ -65,7 +65,12 @@ func DMPath() string {
 }
 
 func VarFolder() string {
-	return GetConfig("general", "var_folder")
+	varFolder := GetConfig("general", "var_folder")
+	result := varFolder
+	if !filepath.IsAbs(varFolder) {
+		result, _ = filepath.Abs(AbsHomePath() + "/" + varFolder)
+	}
+	return result
 }
 
 //Get config based on section and identifer
