@@ -117,13 +117,13 @@ func buildCondition(userid int, def definition.ContentType, query url.Values) (d
 	condition := db.EmptyCond()
 	if author != "" {
 		if author == "self" {
-			condition = condition.Cond("author", userid)
+			condition = condition.Cond("c.author", userid)
 		} else {
 			authorInt, err := strconv.Atoi(author)
 			if err != nil {
 				return db.EmptyCond(), errors.New("wrong author format")
 			}
-			condition = condition.Cond("author", authorInt)
+			condition = condition.Cond("c.author", authorInt)
 		}
 	}
 
