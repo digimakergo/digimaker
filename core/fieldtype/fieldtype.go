@@ -10,31 +10,53 @@ import (
 //Definition includes a fieldtype basic information
 type Definition struct {
 	Name       string                            //eg. text
-	BaseType   string                            //eg. string or eg "fieldtype.CustomString"
+	DataType   string                            //eg. string or eg "fieldtype.CustomString"
 	Package    string                            //empty if there is no additional package, otherwise it's like 'mycompany.fieldtype'. Used for generating entity's import.
 	NewHandler func(definition.FieldDef) Handler //callback to create new handler for this fieldtype
 }
 
 //Fieldtyper is a implementation of a fieldtype, including main logic
 type Handler interface {
-	//Load from input, should return the value of BaseType, (eg. int)
-	ConvertInput(input interface{}) (interface{}, error)
+	//Load from input, should return the value of BaseType, (eg. int), return error or validation error or empty error
+	LoadInput(input interface{}, mode string) (interface{}, error)
 
-	//Check if the input is empty.
-	IsEmpty(input interface{}) bool
+	//output database field. todo: can support this to generate database field automatically
+	// DatabaseField(definition.FieldDef) string
+
 }
 
-//OutputCovnerter is implemented when fieldtype needs converting when outputting
-type OutputCovnerter interface {
-	ConvertOuput() interface{}
+type ValidationError struct {
+	Message string
+}
+
+//Validation error
+func (err ValidationError) Error() string {
+	return err.Message
+}
+
+func NewValidationError(message string) ValidationError {
+	return ValidationError{Message: message}
+}
+
+//Empty Error
+type EmptyError struct {
+}
+
+func (err EmptyError) Error() string {
+	return "Field is empty"
 }
 
 //BeforeSaving is implemented when fieldtype has event before saving
 type BeforeSaving interface {
-	BeforeSave()
+	BeforeSave(value interface{}, mode string)
 }
 
-var fieldtypeMap map[string]Definition
+//OutputCovnerter is implemented when fieldtype needs converting when outputting
+type Outputer interface {
+	Ouput() interface{}
+}
+
+var fieldtypeMap map[string]Definition = map[string]Definition{}
 
 //Register registers a fieldtype
 func Register(definition Definition) {
@@ -58,10 +80,6 @@ func GetFieldtype(fieldtype string) Definition {
 }
 
 //GetAllFieldtype get all fieldtype
-func GetAllFieldtype() []string {
-	result := []string{}
-	for fieldtype, _ := range fieldtypeMap {
-		result = append(result, fieldtype)
-	}
-	return result
+func GetAllFieldtype() map[string]Definition {
+	return fieldtypeMap
 }

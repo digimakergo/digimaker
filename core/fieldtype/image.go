@@ -1,30 +1,30 @@
-//Author xc, Created on 2020-05-10 10:00
-//{COPYRIGHTS}
-
 package fieldtype
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
-//Image stores only the orginal image path.
-//Thumbnail and image alias is generated in 'output' part(a kind of cache data).
-type Image struct {
-	String
+type ImageHandler struct {
+	definition.FieldDef
 }
 
-func (i Image) Type() string {
-	return "image"
+func (handler ImageHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+	//todo: check image format
+	str := fmt.Sprint(input)
+	return str, nil
 }
 
 //Image can be loaded from rest, or local api
-func (i *Image) BeforeSaving() error {
-	imagepath := i.String.String
-	if imagepath != "" && imagepath != i.existing { //means there is a valid image change
+func (i ImageHandler) BeforeSaving(value interface{}, existing interface{}, mode string) (interface{}, error) {
+	imagepath := value.(string)
+
+	if imagepath != "" && imagepath != existing.(string) { //means there is a valid image change
 		//todo: support other image services or remote image
 		oldAbsPath := util.VarFolder() + "/" + imagepath
 
@@ -32,7 +32,7 @@ func (i *Image) BeforeSaving() error {
 		temp := util.GetConfig("general", "upload_tempfolder")
 
 		if _, err := os.Stat(oldAbsPath); err != nil {
-			return errors.New("Can't find file on " + oldAbsPath)
+			return nil, errors.New("Can't find file on " + oldAbsPath)
 		}
 
 		arr := strings.Split(imagepath, "/")
@@ -49,7 +49,7 @@ func (i *Image) BeforeSaving() error {
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(newFolderAbs, 0775)
 			if err != nil {
-				return err
+				return nil, err
 			}
 		}
 
@@ -64,17 +64,19 @@ func (i *Image) BeforeSaving() error {
 		}
 		if err != nil {
 			errorMessage := "Can not copy/move image to target " + imagepath + ". error: " + err.Error()
-			return errors.New(errorMessage)
+			return nil, errors.New(errorMessage)
 		}
 
 		err = GenerateThumbnail(newPath)
 		if err != nil {
-			return err
+			return nil, err
 		}
-
-		i.String = String{String: newPath}
+		return newPath, nil
+	} else {
+		//todo: remove the existing thumbnails
+		return "", nil
 	}
-	return nil
+
 }
 
 func GenerateThumbnail(imagePath string) error {
@@ -85,7 +87,11 @@ func GenerateThumbnail(imagePath string) error {
 }
 
 func init() {
-	RegisterFieldType(
-		FieldtypeDef{Type: "image", Value: "fieldtype.Image"},
-		func() FieldTyper { return &Image{} })
+	Register(
+		Definition{
+			Name:     "text",
+			DataType: "string",
+			NewHandler: func(def definition.FieldDef) Handler {
+				return ImageHandler{FieldDef: def}
+			}})
 }
