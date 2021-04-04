@@ -44,15 +44,15 @@ type VaidationRule map[string]interface{}
 type FieldParameters map[string]interface{}
 
 type ContentType struct {
-	Name         string            `json:"name"`
-	TableName    string            `json:"table_name"`
-	RelationData []string          `json:"relation_data"`
-	NamePattern  string            `json:"name_pattern"`
-	HasVersion   bool              `json:"has_version"`
-	HasLocation  bool              `json:"has_location"`
-	AllowedTypes []string          `json:"allowed_types"`
-	Fields       ContentFieldArray `json:"fields"`
-	DataFields   []DataField       `json:"data_fields"`
+	Name         string      `json:"name"`
+	TableName    string      `json:"table_name"`
+	RelationData []string    `json:"relation_data"`
+	NamePattern  string      `json:"name_pattern"`
+	HasVersion   bool        `json:"has_version"`
+	HasLocation  bool        `json:"has_location"`
+	AllowedTypes []string    `json:"allowed_types"`
+	Fields       []FieldDef  `json:"fields"`
+	DataFields   []DataField `json:"data_fields"`
 	//All fields where identifier is the key.
 	FieldMap map[string]FieldDef `json:"-"`
 
@@ -127,15 +127,15 @@ func (cfArray ContentFieldArray) GetField(identifier string) (FieldDef, bool) {
 
 //Content field definition
 type FieldDef struct {
-	Identifier  string            `json:"identifier"`
-	Name        string            `json:"name"`
-	FieldType   string            `json:"type"`
-	Required    bool              `json:"required"`
-	Validation  VaidationRule     `json:"validation"`
-	Description string            `json:"description"`
-	IsOutput    bool              `json:"is_output"`
-	Parameters  FieldParameters   `json:"parameters"`
-	Children    ContentFieldArray `json:"children"`
+	Identifier   string            `json:"identifier"`
+	Name         string            `json:"name"`
+	FieldType    string            `json:"type"`
+	DefaultValue interface{}       `json:"default_value"` //eg. checkbox 1 means checked
+	Required     bool              `json:"required"`
+	Description  string            `json:"description"`
+	IsOutput     bool              `json:"is_output"`
+	Parameters   FieldParameters   `json:"parameters"`
+	Children     ContentFieldArray `json:"children"`
 }
 
 type DataField struct {

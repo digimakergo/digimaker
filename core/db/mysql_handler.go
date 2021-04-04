@@ -138,7 +138,7 @@ func (handler MysqlHandler) WithContent(query Query, contentType string, option 
 }
 
 //Implement BuildQuery
-func (handler MysqlHandler) BuildQuery(query Query) (string, []interface{}, error) {
+func (handler MysqlHandler) BuildQuery(query Query, count bool) (string, []interface{}, error) {
 	tables := []string{}
 	fields := []string{}
 
@@ -185,20 +185,26 @@ func (handler MysqlHandler) BuildQuery(query Query) (string, []interface{}, erro
 		return "", nil, err
 	}
 
-	sqlStr := `SELECT ` + fieldStr + ` FROM ` + tableStr + " WHERE " + conditionStr + groupbyStr + sortby + limit
+	sqlStr := ""
+	if !count {
+		sqlStr = `SELECT ` + fieldStr + ` FROM ` + tableStr + " WHERE " + conditionStr + groupbyStr + sortby + limit
+	} else {
+		sqlStr = `SELECT COUNT(*) AS count FROM ` + tableStr + " WHERE " + conditionStr + groupbyStr
+	}
 
 	return sqlStr, values, nil
 }
 
 //Get sort by sql based on sortby pattern(eg.[]string{"name asc", "id desc"})
-func (r MysqlHandler) getSortBy(sortby []string, locationColumns ...[]string) (string, error) {
+func (r MysqlHandler) getSortBy(sortby []string) (string, error) {
 	//sort by
 	sortbyArr := []string{}
 	for _, item := range sortby {
 		if strings.TrimSpace(item) != "" {
 			itemArr := util.Split(item, " ")
 			sortByField := itemArr[0]
-			if len(locationColumns) > 0 && util.Contains(locationColumns[0], sortByField) {
+			locationColumns := definition.LocationColumns
+			if len(locationColumns) > 0 && util.Contains(locationColumns, sortByField) {
 				sortByField = "l." + sortByField
 			}
 			sortByOrder := "ASC"

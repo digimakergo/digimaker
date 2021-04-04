@@ -8,7 +8,7 @@ import (
 type DBHandler interface {
 	WithContent(query Query, contentType string, option ContentOption) (Query, error)
 
-	BuildQuery(querier Query) (string, []interface{}, error)
+	BuildQuery(querier Query, count bool) (string, []interface{}, error)
 
 	GetColumns(table string) []string
 

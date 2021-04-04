@@ -172,7 +172,7 @@ func BindContentWithQuery(ctx context.Context, entity interface{}, contentType s
 //If limit is <number>,0 it will ignore entity, and only count
 //If limit is <number larger than 0>(eg. 5), <number> it will ignore count unless AlwaysCount is true
 func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (int, error) {
-	sqlStr, values, err := handler.BuildQuery(query)
+	sqlStr, values, err := handler.BuildQuery(query, false)
 	if err != nil {
 		return -1, err
 	}
@@ -263,7 +263,7 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 
 //Count only
 func countWithQuery(ctx context.Context, query Query) (int, error) {
-	sqlStr, values, err := handler.BuildQuery(query)
+	sqlStr, values, err := handler.BuildQuery(query, true)
 	if err != nil {
 		return -1, err
 	}

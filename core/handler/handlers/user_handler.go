@@ -10,7 +10,6 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
@@ -46,16 +45,16 @@ func (uh UserHandler) ValidateUpdate(ctx context.Context, inputs handler.InputMa
 
 	result := handler.ValidationResult{Fields: map[string]string{}}
 
-	loginField := content.Value("login").(*fieldtype.Text)
-	if loginField.String.String != login {
+	loginField := content.Value("login").(string)
+	if loginField != login {
 		existing, _ := query.Fetch(context.Background(), "user", db.Cond("login", login))
 		if existing != nil && existing.GetCID() != content.GetCID() { //NB. uppcase change is allowed
 			result.Fields["login"] = "Username is used already"
 		}
 	}
 
-	emailField := content.Value("email").(*fieldtype.Text)
-	if emailField.String.String != email {
+	emailField := content.Value("email").(string)
+	if emailField != email {
 		if util.GetConfigSectionI("user")["unique_email"].(bool) {
 			existing, _ := query.Fetch(context.Background(), "user", db.Cond("email", email))
 			if existing != nil && existing.GetCID() != content.GetCID() { //NB. uppcase change is allowed

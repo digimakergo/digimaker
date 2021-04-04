@@ -116,7 +116,7 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{if not $fieldtype.IsOutput}}
     case "{{$identifier}}":
         {{if not (eq $fieldtype.FieldType "relationlist")}}
-            result = &(c.{{$identifier|UpperName}})
+            result = (c.{{$identifier|UpperName}})
         {{else}}
             result = c.Relations.GetField("{{$identifier}}")
         {{end}}

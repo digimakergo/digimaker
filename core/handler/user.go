@@ -7,7 +7,6 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 )
@@ -31,13 +30,13 @@ func CanLogin(ctx context.Context, usernameEmail string, password string) (error
 
 	disabled := user.Value("disabled")
 	if disabled != nil {
-		if disabled.(*fieldtype.Checkbox).FieldValue().(int) == 1 {
+		if disabled.(int) == 1 {
 			return errors.New("User is disabled"), nil
 		}
 	}
 
-	passwordField := user.Value("password").(*fieldtype.Password)
-	result := util.MatchPassword(password, passwordField.FieldValue().(string))
+	passwordField := user.Value("password")
+	result := util.MatchPassword(password, passwordField.(string))
 	if result {
 		return nil, user
 	} else {
@@ -52,7 +51,7 @@ func Enable(ctx context.Context, user contenttype.ContentTyper, enable bool, use
 	if disabledField == nil {
 		return errors.New("No disabled feature")
 	}
-	disabled := disabledField.(*fieldtype.Checkbox).FieldValue().(int)
+	disabled := disabledField.(int)
 	if disabled == 1 && enable || disabled == 0 && !enable {
 		disableInt := 1
 		if enable {
