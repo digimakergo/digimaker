@@ -185,6 +185,11 @@ func init() {
 
 	logrus.SetLevel(logrus.DebugLevel)
 
+	dmapp := os.Getenv("dmapp")
+	if dmapp == "" {
+		dmapp = "."
+	}
+
 	if environment == "prod" {
 		logrus.SetOutput(ioutil.Discard)
 		//log server output
@@ -192,7 +197,7 @@ func init() {
 
 		//default output
 		//todo: create /var/log/digimaker/digimaker.log automatically. need to think about permission
-		file, err := os.OpenFile("digimaker.log",
+		file, err := os.OpenFile(dmapp+"/digimaker.log",
 			os.O_APPEND|os.O_CREATE|os.O_WRONLY,
 			0644)
 		if err != nil {

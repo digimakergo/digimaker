@@ -42,17 +42,19 @@ func Validate(contentType string, fieldsDef map[string]definition.FieldDef, inpu
 		input, fieldExists := inputs[identifier]
 		fieldResult := ""
 		//validat both required and others together.
-		isEmpty := fieldtype.IsEmptyInput(input)
 		if fieldExists {
+			isEmpty := fieldtype.IsEmptyInput(input)
 			if fieldDef.Required && isEmpty {
 				fieldResult = "1"
 			} else {
-				field := fieldtype.NewField(fieldDef.FieldType)
-				err := field.LoadFromInput(input, fieldDef.Parameters)
-				if err != nil {
-					fieldResult = err.Error()
-				} else {
-					if fieldDef.Required && field.IsEmpty() { //not empty input, but empty in this fieldtype. eg. {} or [] for json fieldtype
+				fieldtypeDef := fieldtype.GetFieldtype(fieldDef.FieldType)
+				handler := fieldtypeDef.NewHandler(fieldDef)
+				if handler != nil {
+					_, err := handler.LoadInput(input, "")
+					if _, ok := err.(fieldtype.ValidationError); ok {
+						fieldResult = err.Error()
+					}
+					if _, ok := err.(fieldtype.EmptyError); ok {
 						fieldResult = "1"
 					}
 				}
@@ -156,17 +158,22 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 
 	//Create empty content instance and set value
 	content := contenttype.NewInstance(contentType)
-	for identifier, input := range inputs {
-		if _, ok := fieldsDefinition[identifier]; ok {
-			field := content.Value(identifier).(fieldtype.FieldTyper)
-			field.LoadFromInput(input, fieldsDefinition[identifier].Parameters)
-			//invoke BeforeSaving
-			if fieldWithEvent, ok := field.(fieldtype.FieldTypeEvent); ok {
-				err := fieldWithEvent.BeforeSaving()
+	for identifier, fieldDef := range fieldsDefinition {
+		if input, ok := inputs[identifier]; ok {
+			handler := fieldtype.GethHandler(fieldDef)
+			//set value
+			value, _ := handler.LoadInput(input, "")
+
+			//Invoke BeforeStoring
+			var err error
+			if fieldtypeEvent, ok := handler.(fieldtype.Event); ok {
+				log.Debug("Invoking before storing on field: "+identifier, "handler", ctx)
+				value, err = fieldtypeEvent.BeforeStoring(value, nil, "create")
 				if err != nil {
 					return nil, ValidationResult{}, err
 				}
 			}
+			content.SetValue(identifier, value)
 		}
 	}
 
@@ -385,18 +392,20 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 
 	//todo: update relations
 	//Set content.
-	for identifier, _ := range fieldsDefinition {
+	for identifier, fieldDef := range fieldsDefinition {
 		if input, ok := inputs[identifier]; ok {
 			//get field from loaded content
-			field := content.Value(identifier).(fieldtype.FieldTyper)
-			field.LoadFromInput(input, fieldsDefinition[identifier].Parameters)
-			//invoke BeforeSaving
-			if fieldWithEvent, ok := field.(fieldtype.FieldTypeEvent); ok {
-				err = fieldWithEvent.BeforeSaving()
+			handler := fieldtype.GethHandler(fieldDef)
+			value, _ := handler.LoadInput(input, "")
+			existing := content.Value(identifier)
+			//Invoke BeforeSaving
+			if fieldWithEvent, ok := handler.(fieldtype.Event); ok {
+				value, err = fieldWithEvent.BeforeStoring(value, existing, "")
 				if err != nil {
 					return false, ValidationResult{}, err
 				}
 			}
+			content.SetValue(identifier, value)
 		}
 	}
 
@@ -686,10 +695,10 @@ func GenerateName(content contenttype.ContentTyper) string {
 		varName := vars[i]
 		field := content.Value(varName)
 		switch field.(type) {
-		//support Text for now. todo: support all fields.
+		//support string for now. todo: support all fields.
 		//todo: support created, modified time
-		case *fieldtype.Text:
-			values[varName] = field.(*fieldtype.Text).FieldValue().(string)
+		case string:
+			values[varName] = field.(string)
 		}
 	}
 
