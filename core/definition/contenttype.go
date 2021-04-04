@@ -54,7 +54,8 @@ type ContentType struct {
 	Fields       []FieldDef  `json:"fields"`
 	DataFields   []DataField `json:"data_fields"`
 	//All fields where identifier is the key.
-	FieldMap map[string]FieldDef `json:"-"`
+	FieldMap            map[string]FieldDef `json:"-"`
+	FieldIdentifierList []string            `json:"-"`
 
 	hasRelationlist int //cache of hasRelationlist, 1(yes), -1(no), 0(not set)
 }
@@ -96,6 +97,7 @@ func (c ContentType) HasRelationlist() bool {
 func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) {
 	//set all fields into FieldMap
 	fieldMap := map[string]FieldDef{}
+	identifierList := []string{}
 	for i, field := range c.Fields {
 		identifier := field.Identifier
 		if len(fieldCallback) > 0 {
@@ -103,39 +105,30 @@ func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) {
 		}
 
 		fieldMap[identifier] = field
+		identifierList = append(identifierList, identifier)
 		//get sub fields
 		subFields := field.GetSubFields(fieldCallback...)
 		c.Fields[i] = field
 		for subIdentifier, subField := range subFields {
 			fieldMap[subIdentifier] = subField
+			identifierList = append(identifierList, subIdentifier)
 		}
 	}
 	c.FieldMap = fieldMap
-}
-
-//Custom type for FieldDef Array, to have more functions from the list
-type ContentFieldArray []FieldDef
-
-func (cfArray ContentFieldArray) GetField(identifier string) (FieldDef, bool) {
-	for _, field := range cfArray {
-		if field.Identifier == identifier {
-			return field, true
-		}
-	}
-	return FieldDef{}, false
+	c.FieldIdentifierList = identifierList
 }
 
 //Content field definition
 type FieldDef struct {
-	Identifier   string            `json:"identifier"`
-	Name         string            `json:"name"`
-	FieldType    string            `json:"type"`
-	DefaultValue interface{}       `json:"default_value"` //eg. checkbox 1 means checked
-	Required     bool              `json:"required"`
-	Description  string            `json:"description"`
-	IsOutput     bool              `json:"is_output"`
-	Parameters   FieldParameters   `json:"parameters"`
-	Children     ContentFieldArray `json:"children"`
+	Identifier   string          `json:"identifier"`
+	Name         string          `json:"name"`
+	FieldType    string          `json:"type"`
+	DefaultValue interface{}     `json:"default_value"` //eg. checkbox 1 means checked
+	Required     bool            `json:"required"`
+	Description  string          `json:"description"`
+	IsOutput     bool            `json:"is_output"`
+	Parameters   FieldParameters `json:"parameters"`
+	Children     []FieldDef      `json:"children"`
 }
 
 type DataField struct {
@@ -343,11 +336,17 @@ func GetFields(typePath string) (map[string]FieldDef, error) {
 		//get end level field
 		for i := 2; i < len(arr); i++ {
 			name = arr[i]
-			field, ok := currentField.Children.GetField(name)
-			if !ok {
+			found := false
+			for _, field := range currentField.Children {
+				if field.Identifier == name {
+					currentField = field
+					found = true
+					break
+				}
+			}
+			if !found {
 				return nil, errors.New(name + " doesn't exist.")
 			}
-			currentField = field
 		}
 
 		if currentField.FieldType != "container" {

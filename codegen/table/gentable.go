@@ -34,7 +34,9 @@ func GenerateTable(ctype string) error {
 		return err
 	}
 	result := "CREATE TABLE " + def.TableName + " ( id INT AUTO_INCREMENT PRIMARY KEY, "
-	for identifier, fieldDef := range def.FieldMap {
+	identifierList := def.FieldIdentifierList
+	for _, identifier := range identifierList {
+		fieldDef := def.FieldMap[identifier]
 		handler := fieldtype.GethHandler(fieldDef)
 		if handler != nil {
 			dbType := handler.DBField()
