@@ -24,7 +24,7 @@ func (handler ImageHandler) LoadInput(input interface{}, mode string) (interface
 func (handler ImageHandler) BeforeStoring(value interface{}, existing interface{}, mode string) (interface{}, error) {
 	imagepath := value.(string)
 
-	if imagepath != "" && imagepath != existing.(string) { //means there is a valid image change
+	if imagepath != "" && (existing == nil || existing != nil && imagepath != existing.(string)) { //means there is a valid image change
 		//todo: support other image services or remote image
 		oldAbsPath := util.VarFolder() + "/" + imagepath
 
@@ -74,7 +74,7 @@ func (handler ImageHandler) BeforeStoring(value interface{}, existing interface{
 		return newPath, nil
 	} else {
 		//todo: remove the existing thumbnails
-		return "", nil
+		return existing, nil
 	}
 
 }
