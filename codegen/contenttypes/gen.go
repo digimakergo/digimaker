@@ -7,8 +7,6 @@ import (
 	"os"
 	"text/template"
 
-	_ "github.com/digimakergo/digimaker/codegen/contenttypes/temp"
-
 	_ "github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"

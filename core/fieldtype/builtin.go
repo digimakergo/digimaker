@@ -91,7 +91,7 @@ func (handler RichTextHandler) LoadInput(input interface{}, mode string) (interf
 }
 
 func (handler RichTextHandler) DBField() string {
-	return "text"
+	return "TEXT"
 }
 
 func (r RichTextHandler) ConvertOuput() interface{} {

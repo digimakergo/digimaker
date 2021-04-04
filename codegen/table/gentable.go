@@ -45,7 +45,7 @@ func GenerateTable(ctype string) error {
 			}
 		}
 	}
-	result += "author int, published int NOT NULL DEFAULT 0, modified int NOT NULL DEFAULT 0, cuid varchar(30) NOT NULL DEFAULT '')"
+	result += "author INT, published INT NOT NULL DEFAULT 0, modified INT NOT NULL DEFAULT 0, cuid VARCHAR(30) NOT NULL DEFAULT '')"
 	fmt.Println(result)
 	return nil
 }
