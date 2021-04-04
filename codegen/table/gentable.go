@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"sort"
+	"strings"
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
@@ -10,21 +12,25 @@ import (
 )
 
 func main() {
-	contenttypes := ""
+	contenttypes := []string{}
 	if len(os.Args) >= 2 && os.Args[1] != "" {
-		contenttypes = os.Args[1]
-	}
-	if contenttypes == "" {
-		fmt.Println("Please use like './gentable article', separated by ,")
-		return
+		util.Split(os.Args[1], ",")
+	} else {
+		contenttypeList := definition.GetDefinitionList()["default"]
+		for identifier, _ := range contenttypeList {
+			contenttypes = append(contenttypes, identifier)
+		}
+		sort.Strings(contenttypes)
 	}
 
-	fmt.Println("Generating table for " + contenttypes)
-	for _, contenttype := range util.Split(contenttypes, ",") {
+	fmt.Println("Generating table for " + strings.Join(contenttypes, ","))
+	fmt.Println("----------")
+	for _, contenttype := range contenttypes {
 		err := GenerateTable(contenttype)
 		if err != nil {
 			fmt.Println("Fail to generate: " + err.Error())
 		}
+		fmt.Println("")
 	}
 }
 
@@ -33,7 +39,7 @@ func GenerateTable(ctype string) error {
 	if err != nil {
 		return err
 	}
-	result := "CREATE TABLE " + def.TableName + " ( id INT AUTO_INCREMENT PRIMARY KEY, "
+	result := "CREATE TABLE " + def.TableName + " (id INT AUTO_INCREMENT PRIMARY KEY, "
 	identifierList := def.FieldIdentifierList
 	for _, identifier := range identifierList {
 		fieldDef := def.FieldMap[identifier]
