@@ -1,6 +1,11 @@
 package fieldtype
 
 import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
+
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 )
@@ -21,8 +26,7 @@ type Handler interface {
 	LoadInput(input interface{}, mode string) (interface{}, error)
 
 	//output database field. todo: can support this to generate database field automatically
-	// DatabaseField(definition.FieldDef) string
-
+	DBField() string
 }
 
 type ValidationError struct {
@@ -46,14 +50,15 @@ func (err EmptyError) Error() string {
 	return "Field is empty"
 }
 
-//BeforeSaving is implemented when fieldtype has event before saving
-type BeforeSaving interface {
-	BeforeSave(value interface{}, mode string)
+//BeforeSaving is implemented when fieldtype has event before saving and transaction starts.
+//todo: add a function to rollback if failed.
+type Event interface {
+	BeforeStoring(value interface{}, existing interface{}, mode string) (interface{}, error)
 }
 
-//OutputCovnerter is implemented when fieldtype needs converting when outputting
+//Ouput is implemented when fieldtype needs converting when outputting
 type Outputer interface {
-	Ouput() interface{}
+	Ouput(value interface{}, params map[string]interface{}) interface{}
 }
 
 var fieldtypeMap map[string]Definition = map[string]Definition{}
@@ -62,7 +67,7 @@ var fieldtypeMap map[string]Definition = map[string]Definition{}
 func Register(definition Definition) {
 	name := definition.Name
 	if _, ok := fieldtypeMap[name]; ok {
-		log.Error("Fieldtype has been previous registered: "+name+", skipped", "system")
+		log.Warning("Fieldtype has been previous registered: "+name, "system")
 	}
 	log.Info("Registering fieldtype: " + name)
 	fieldtypeMap[definition.Name] = definition
@@ -82,4 +87,42 @@ func GetFieldtype(fieldtype string) Definition {
 //GetAllFieldtype get all fieldtype
 func GetAllFieldtype() map[string]Definition {
 	return fieldtypeMap
+}
+
+func GethHandler(def definition.FieldDef) Handler {
+	fieldtypeStr := def.FieldType
+	fieldtypeDef := GetFieldtype(fieldtypeStr)
+	if fieldtypeDef.NewHandler == nil {
+		return nil
+	}
+	handler := fieldtypeDef.NewHandler(def)
+	return handler
+}
+
+// IsEmptyInput returns if it's an empty input.
+// The input can be not string(eg. int - definately not empty)
+func IsEmptyInput(input interface{}) bool {
+	if input == nil {
+		return true
+	}
+	s := fmt.Sprint(input)
+	s = strings.TrimSpace(s)
+	return s == ""
+}
+
+type RelationParameters struct {
+	Type      string                 `json:"type"`
+	Value     string                 `json:"value"`
+	Condition map[string]interface{} `json:"condition"`
+}
+
+//Convert to parameters obj
+func ConvertRelationParams(params definition.FieldParameters) (RelationParameters, error) {
+	paramsData, _ := json.Marshal(params)
+	rParams := RelationParameters{}
+	err := json.Unmarshal(paramsData, &rParams)
+	if err != nil {
+		return rParams, errors.New("Wrong definition of parameters:" + err.Error())
+	}
+	return rParams, nil
 }

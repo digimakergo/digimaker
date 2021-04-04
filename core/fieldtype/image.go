@@ -21,7 +21,7 @@ func (handler ImageHandler) LoadInput(input interface{}, mode string) (interface
 }
 
 //Image can be loaded from rest, or local api
-func (i ImageHandler) BeforeSaving(value interface{}, existing interface{}, mode string) (interface{}, error) {
+func (handler ImageHandler) BeforeStoring(value interface{}, existing interface{}, mode string) (interface{}, error) {
 	imagepath := value.(string)
 
 	if imagepath != "" && imagepath != existing.(string) { //means there is a valid image change
@@ -79,6 +79,10 @@ func (i ImageHandler) BeforeSaving(value interface{}, existing interface{}, mode
 
 }
 
+func (handler ImageHandler) DBField() string {
+	return "VARCHAR (500) NOT NULL DEFAULT ''"
+}
+
 func GenerateThumbnail(imagePath string) error {
 	varFolder := util.VarFolder()
 	size := util.GetConfig("general", "image_thumbnail_size")
@@ -89,7 +93,7 @@ func GenerateThumbnail(imagePath string) error {
 func init() {
 	Register(
 		Definition{
-			Name:     "text",
+			Name:     "image",
 			DataType: "string",
 			NewHandler: func(def definition.FieldDef) Handler {
 				return ImageHandler{FieldDef: def}

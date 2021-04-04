@@ -34,12 +34,12 @@ func Generate(subFolder string) error {
 		Funcs(funcMap()).
 		ParseFiles(util.DMPath() + "/codegen/contenttypes/contenttype_entity.tpl"))
 
-	fieldtypeMap := fieldtype.GetAllDefinition()
+	fieldtypeMap := fieldtype.GetAllFieldtype()
 
 	contentTypeDef := definition.GetDefinitionList()["default"]
 	for name, settings := range contentTypeDef {
 		vars := map[string]interface{}{}
-		vars["def_fieldtype"] = fieldtype.GetAllDefinition()
+		vars["def_fieldtype"] = fieldtypeMap
 		vars["name"] = name
 		imports := []string{}
 		for _, ftype := range settings.FieldMap {
@@ -48,9 +48,9 @@ func Generate(subFolder string) error {
 				return errors.New("field type " + typeStr + " doesn't exist.")
 			}
 
-			importName := fieldtype.GetDef(ftype.FieldType).Import
-			if importName != "" && !util.Contains(imports, importName) {
-				imports = append(imports, importName)
+			packagePath := fieldtype.GetFieldtype(ftype.FieldType).Package
+			if packagePath != "" && !util.Contains(imports, packagePath) {
+				imports = append(imports, packagePath)
 			}
 		}
 		vars["imports"] = imports

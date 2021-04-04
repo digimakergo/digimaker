@@ -14,7 +14,7 @@ import (
 
 /***** TextHandler ******/
 
-type TextValidationRule struct {
+type TextParameters struct {
 	MinLength     int    `mapstructure:"min_length"`
 	MaxLength     int    `mapstructure:"max_length"`
 	RegExp        string `mapstructure:"regexp"`
@@ -23,50 +23,64 @@ type TextValidationRule struct {
 
 type TextHandler struct {
 	definition.FieldDef
+	params TextParameters
+}
+
+func (handler *TextHandler) getParams() (TextParameters, error) {
+	//cache it
+	emptyParams := TextParameters{}
+	if handler.params == emptyParams {
+		if handler.Parameters != nil {
+			rule := TextParameters{}
+			err := mapstructure.Decode(handler.Parameters, &rule)
+			if err != nil {
+				returnError := errors.New("Validation rule error:" + err.Error())
+				return emptyParams, returnError
+			}
+			handler.params = rule
+		}
+	}
+	return handler.params, nil
 }
 
 func (handler TextHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
-	if handler.Validation != nil {
-		rule := TextValidationRule{}
-		err := mapstructure.Decode(handler.Validation, &rule)
+	params, err := handler.getParams()
+	if err != nil {
+		return params, err
+	}
+	strLength := len([]rune(str))
+
+	//min length
+	if params.MinLength > 0 && strLength < params.MinLength {
+		return nil, NewValidationError(fmt.Sprintf("Input needs at least %v characters", params.MinLength))
+	}
+
+	//max length
+	if params.MaxLength > 0 && strLength > params.MaxLength {
+		return nil, NewValidationError(fmt.Sprintf("Input can not have more than %v characters", params.MinLength))
+	}
+
+	//regular expression match
+	if params.RegExp != "" {
+		matched, err := regexp.MatchString(params.RegExp, str)
 		if err != nil {
-			returnError := errors.New("Validation rule error:" + err.Error())
-			return nil, returnError
+			return nil, fmt.Errorf("Matching error: %v", err.Error())
 		}
-
-		strLength := len([]rune(str))
-
-		//min length
-		if rule.MinLength > 0 && strLength < rule.MinLength {
-			return nil, NewValidationError(fmt.Sprintf("Input needs at least %v characters", rule.MinLength))
-		}
-
-		//max length
-		if rule.MaxLength > 0 && strLength > rule.MaxLength {
-			return nil, NewValidationError(fmt.Sprintf("Input can not have more than %v characters", rule.MinLength))
-		}
-
-		//regular expression match
-		if rule.RegExp != "" {
-			matched, err := regexp.MatchString(rule.RegExp, str)
-			if err != nil {
-				return nil, fmt.Errorf("Matching error: %v", err.Error())
-			}
-			if !matched {
-				return nil, NewValidationError(rule.RegExpMessage)
-			}
+		if !matched {
+			return nil, NewValidationError(params.RegExpMessage)
 		}
 	}
 	return str, nil
 }
 
-/***** RichText ******/
-type RichText struct {
-	String string
-	output string
+func (handler TextHandler) DBField() string {
+	rule, _ := handler.getParams()
+	maxLength := rule.MaxLength
+	return fmt.Sprintf("VARCHAR (%v) DEFAULT ''", maxLength)
 }
 
+/***** RichTextHandler ******/
 type RichTextHandler struct {
 	definition.FieldDef
 }
@@ -74,6 +88,10 @@ type RichTextHandler struct {
 func (handler RichTextHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	//replace html like <img src="var/f/fg/fge1ff.png" data-content="image;sdf319432424b432341" /> with real image path and size.
 	return input, nil
+}
+
+func (handler RichTextHandler) DBField() string {
+	return "text"
 }
 
 func (r RichTextHandler) ConvertOuput() interface{} {
@@ -96,12 +114,16 @@ func (handler CheckboxHandler) LoadInput(input interface{}, mode string) (interf
 	return valueInt, nil
 }
 
+func (handler CheckboxHandler) DBField() string {
+	return "TINYINT 1"
+}
+
 /** Radio handler ***/
 type RadioHandler struct {
 	definition.FieldDef
 }
 
-//max 20 length
+//max 30 length
 func (handler RadioHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
 	length := len(str)
@@ -109,6 +131,10 @@ func (handler RadioHandler) LoadInput(input interface{}, mode string) (interface
 		return nil, NewValidationError("Radio value can not be more than 30 characters")
 	}
 	return str, nil
+}
+
+func (handler RadioHandler) DBField() string {
+	return "VARCHAR (30) NOT NULL DEFAULT ''"
 }
 
 /** Datetime handler ***/
@@ -156,9 +182,9 @@ func (handler DatetimeHandler) LoadInput(input interface{}, mode string) (interf
 	}
 }
 
-/** Image handler ***/
-
-/** File handler ***/
+func (handler DatetimeHandler) DBField() string {
+	return "DATETIME"
+}
 
 func init() {
 	Register(
@@ -171,7 +197,7 @@ func init() {
 
 	Register(
 		Definition{Name: "richtext",
-			DataType: "fieldtype.RichText",
+			DataType: "string",
 			NewHandler: func(def definition.FieldDef) Handler {
 				return RichTextHandler{FieldDef: def}
 			}})

@@ -9,13 +9,12 @@ import (
     "github.com/digimakergo/digimaker/core/db"
     "github.com/digimakergo/digimaker/core/definition"
     "github.com/digimakergo/digimaker/core/contenttype"
-	  "github.com/digimakergo/digimaker/core/fieldtype"
     {{if .settings.HasLocation}}
     "github.com/digimakergo/digimaker/core/util"
     {{end}}
 	. "github.com/digimakergo/digimaker/core/db"
     {{range $i, $import := .imports }}
-    {{$import}}
+    "{{$import}}"
     {{end}}
 )
 
@@ -29,19 +28,15 @@ type {{$struct_name}} struct{
      {{end}}
     {{range $identifier, $fieldtype := .fields}}
          {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
-         {{if not $type_settings.IsRelation }}
+         {{if not (eq $fieldtype.FieldType "relationlist" ) }}
          {{if not $fieldtype.IsOutput}}
-            {{$identifier|UpperName}}  {{$type_settings.Value}} `boil:"{{$identifier}}" json:"{{if eq $fieldtype.FieldType "password"}}-{{else}}{{$identifier}}{{end}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+            {{$identifier|UpperName}}  {{$type_settings.DataType}} `boil:"{{$identifier}}" json:"{{if eq $fieldtype.FieldType "password"}}-{{else}}{{$identifier}}{{end}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
          {{end}}
         {{end}}
     {{end}}
     {{if .settings.HasLocation}}
      contenttype.Location `boil:"location,bind"`
     {{end}}
-}
-
-func (c *{{$struct_name}} ) TableName() string{
-	 return "{{.settings.TableName}}"
 }
 
 func (c *{{$struct_name}} ) ContentType() string{
@@ -82,7 +77,7 @@ func (c *{{$struct_name}}) ToDBValues() map[string]interface{} {
     {{end}}
 
     {{range $identifier, $fieldtype := .fields}}
-        {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
+        {{if not (eq $fieldtype.FieldType "relationlist")}}
         {{if not $fieldtype.IsOutput}}
             result["{{$identifier}}"]=c.{{$identifier|UpperName}}
         {{end}}
@@ -120,7 +115,7 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{range $identifier, $fieldtype := .fields}}
     {{if not $fieldtype.IsOutput}}
     case "{{$identifier}}":
-        {{if not (index $.def_fieldtype $fieldtype.FieldType).IsRelation}}
+        {{if not (eq $fieldtype.FieldType "relationlist")}}
             result = &(c.{{$identifier|UpperName}})
         {{else}}
             result = c.Relations.GetField("{{$identifier}}")
@@ -144,10 +139,10 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
         {{end}}
         {{range $identifier, $fieldtype := .fields}}
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
-            {{if not $type_settings.IsRelation}}
+            {{if not (eq $fieldtype.FieldType "relationlist")}}
             {{if not $fieldtype.IsOutput}}
             case "{{$identifier}}":
-            c.{{$identifier|UpperName}} = value.({{$type_settings.Value}})
+            c.{{$identifier|UpperName}} = value.({{$type_settings.DataType}})
             {{end}}
             {{end}}
         {{end}}
@@ -165,13 +160,13 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
 //Note: it will set id to CID after success
 func (c *{{$struct_name}}) Store(ctx context.Context, transaction ...*sql.Tx) error {
 	if c.CID == 0 {
-		id, err := db.Insert(ctx, c.TableName(), c.ToDBValues(), transaction...)
+		id, err := db.Insert(ctx, "{{.settings.TableName}}", c.ToDBValues(), transaction...)
 		c.CID = id
 		if err != nil {
 			return err
 		}
 	} else {
-		err := db.Update(ctx, c.TableName(), c.ToDBValues(), Cond("id", c.CID), transaction...)
+		err := db.Update(ctx, "{{.settings.TableName}}", c.ToDBValues(), Cond("id", c.CID), transaction...)
     if err != nil {
 			return err
 		}
@@ -191,7 +186,7 @@ func (c *{{$struct_name}})StoreWithLocation(){
 
 //Delete content only
 func (c *{{$struct_name}}) Delete(ctx context.Context, transaction ...*sql.Tx) error {
-	contentError := db.Delete(ctx, c.TableName(), Cond("id", c.CID), transaction...)
+	contentError := db.Delete(ctx, "{{.settings.TableName}}", Cond("id", c.CID), transaction...)
 	return contentError
 }
 
