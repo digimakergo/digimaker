@@ -90,6 +90,9 @@ func (handler MysqlHandler) WithContent(query Query, contentType string, option 
 
 	//add cid to content fields
 	contentFields = append(contentFields, contentPrefix+"id AS '"+fieldPrefix+"cid'")
+	if !def.HasLocation {
+		contentFields = append(contentFields, "'"+contentType+"'AS content_type")
+	}
 	contentQuery.Select = contentFields
 
 	//add location join if needed
