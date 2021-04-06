@@ -88,9 +88,9 @@ func (handler ImageHandler) AfterDelete(value interface{}) error {
 	}
 
 	thumbnail := ThumbnailFolder() + "/" + path
-	err := os.Remove(thumbnail)
-	if err != nil{
-		message := fmt.Sprintf("Deleting image thumnail(path: %v) of %v error: %v. Deleting continued.", path, handler.FieldDef.Identifier, err.Error()), "system" )
+	err = os.Remove(thumbnail)
+	if err != nil {
+		message := fmt.Sprintf("Deleting image thumnail(path: %v) of %v error: %v. Deleting continued.", path, handler.FieldDef.Identifier, err.Error(), "system")
 		log.Warning(message, "system")
 	}
 	return nil
