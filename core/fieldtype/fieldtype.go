@@ -51,9 +51,10 @@ func (err EmptyError) Error() string {
 }
 
 //BeforeSaving is implemented when fieldtype has event before saving and transaction starts.
-//todo: add a function to rollback if failed. add BeforeDeleting()
 type Event interface {
-	BeforeStoring(value interface{}, existing interface{}, mode string) (interface{}, error)
+	BeforeStore(value interface{}, existing interface{}, mode string) (interface{}, error)
+
+	AfterDelete(value interface{}) error
 }
 
 //Ouput is implemented when fieldtype needs converting when outputting

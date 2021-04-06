@@ -164,11 +164,11 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 			//set value
 			value, _ := handler.LoadInput(input, "")
 
-			//Invoke BeforeStoring
+			//Invoke BeforeStore
 			var err error
 			if fieldtypeEvent, ok := handler.(fieldtype.Event); ok {
 				log.Debug("Invoking before storing on field: "+identifier, "handler", ctx)
-				value, err = fieldtypeEvent.BeforeStoring(value, nil, "create")
+				value, err = fieldtypeEvent.BeforeStore(value, nil, "create")
 				if err != nil {
 					return nil, ValidationResult{}, err
 				}
@@ -400,7 +400,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 			existing := content.Value(identifier)
 			//Invoke BeforeSaving
 			if fieldWithEvent, ok := handler.(fieldtype.Event); ok {
-				value, err = fieldWithEvent.BeforeStoring(value, existing, "")
+				value, err = fieldWithEvent.BeforeStore(value, existing, "")
 				if err != nil {
 					return false, ValidationResult{}, err
 				}
@@ -672,6 +672,16 @@ func DeleteByContent(ctx context.Context, content contenttype.ContentTyper, user
 		message := "[handler.deleteByContent]Can not commit."
 		log.Error(message+err.Error(), "", ctx)
 		return errors.New(message)
+	}
+
+	// fieldtype callback for delete
+	for identifier, field := range def.FieldMap {
+		handler := fieldtype.GethHandler(field)
+		if handler != nil {
+			if event, ok := handler.(fieldtype.Event); ok {
+				event.AfterDelete(content.Value(identifier))
+			}
+		}
 	}
 
 	//invoke callback

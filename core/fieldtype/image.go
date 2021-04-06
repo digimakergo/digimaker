@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/definition"
+	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -21,7 +22,7 @@ func (handler ImageHandler) LoadInput(input interface{}, mode string) (interface
 }
 
 //Image can be loaded from rest, or local api
-func (handler ImageHandler) BeforeStoring(value interface{}, existing interface{}, mode string) (interface{}, error) {
+func (handler ImageHandler) BeforeStore(value interface{}, existing interface{}, mode string) (interface{}, error) {
 	imagepath := value.(string)
 
 	if imagepath != "" && (existing == nil || existing != nil && imagepath != existing.(string)) { //means there is a valid image change
@@ -60,7 +61,7 @@ func (handler ImageHandler) BeforeStoring(value interface{}, existing interface{
 		if underTemp {
 			err = os.Rename(oldAbsPath, newPathAbs)
 		} else {
-			err = os.Link(oldAbsPath, newPathAbs)
+			err = os.Link(oldAbsPath, newPathAbs) //todo: use better copy
 		}
 		if err != nil {
 			errorMessage := "Can not copy/move image to target " + imagepath + ". error: " + err.Error()
@@ -73,10 +74,26 @@ func (handler ImageHandler) BeforeStoring(value interface{}, existing interface{
 		}
 		return newPath, nil
 	} else {
-		//todo: remove the existing thumbnails
 		return existing, nil
 	}
+}
 
+//After delete content, delete image&thumbnail, skip error if there is any wrong(eg. image not existing).
+func (handler ImageHandler) AfterDelete(value interface{}) error {
+	path := util.VarFolder() + "/" + value.(string)
+	err := os.Remove(path)
+	if err != nil {
+		message := fmt.Sprintf("Deleting image(path: %v) of %v error: %v. Deleting continued.", path, handler.FieldDef.Identifier, err.Error())
+		log.Warning(message, "system")
+	}
+
+	thumbnail := ThumbnailFolder() + "/" + path
+	err := os.Remove(thumbnail)
+	if err != nil{
+		message := fmt.Sprintf("Deleting image thumnail(path: %v) of %v error: %v. Deleting continued.", path, handler.FieldDef.Identifier, err.Error()), "system" )
+		log.Warning(message, "system")
+	}
+	return nil
 }
 
 func (handler ImageHandler) DBField() string {
@@ -86,8 +103,13 @@ func (handler ImageHandler) DBField() string {
 func GenerateThumbnail(imagePath string) error {
 	varFolder := util.VarFolder()
 	size := util.GetConfig("general", "image_thumbnail_size")
-	thumbCacheFolder := varFolder + "/" + util.GetConfig("general", "image_thumbnail_folder")
+	thumbCacheFolder := ThumbnailFolder()
 	return util.ResizeImage(varFolder+"/"+imagePath, thumbCacheFolder+"/"+imagePath, size)
+}
+
+func ThumbnailFolder() string {
+	thumbFolder := util.VarFolder() + "/" + util.GetConfig("general", "image_thumbnail_folder")
+	return thumbFolder
 }
 
 func init() {
