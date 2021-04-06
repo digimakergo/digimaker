@@ -138,19 +138,19 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
              c.{{$identifier|UpperName}} = value.({{$fieldtype}})
         {{end}}
         {{range $identifier, $fieldtype := .fields}}
-            {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
-            {{if not (eq $fieldtype.FieldType "relationlist")}}
-            {{if not $fieldtype.IsOutput}}
-            case "{{$identifier}}":
-            c.{{$identifier|UpperName}} = value.({{$type_settings.DataType}})
-            {{end}}
+            {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}            
+            {{if not ( eq $fieldtype.FieldType "relationlist" ) }}
+                {{if not $fieldtype.IsOutput}}
+                case "{{$identifier}}":
+                c.{{$identifier|UpperName}} = value.({{$type_settings.DataType}})
+                {{end}}
+            {{else}}
+                case "{{$identifier}}":
+                return c.Relations.SetValue( "{{$identifier}}", value  ) 
             {{end}}
         {{end}}
 	default:
-		err := c.ContentCommon.SetValue(identifier, value)
-        if err != nil{
-            return err
-        }
+		return c.ContentCommon.SetValue(identifier, value)        
 	}
 	//todo: check if identifier exist
 	return nil

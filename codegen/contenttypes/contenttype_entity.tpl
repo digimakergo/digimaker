@@ -123,10 +123,13 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
         {{range $identifier, $fieldtype := .fields}}
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
             {{if not ( eq $fieldtype.FieldType "relationlist" ) }}
-            {{if not $fieldtype.IsOutput}}
-            case "{{$identifier}}":
-            c.{{$identifier|UpperName}} = value.({{$type_settings.DataType}})
-            {{end}}
+                {{if not $fieldtype.IsOutput}}
+                case "{{$identifier}}":
+                c.{{$identifier|UpperName}} = value.({{$type_settings.DataType}})
+                {{end}}
+            {{else}}
+                case "{{$identifier}}":
+                return c.Relations.SetValue( "{{$identifier}}", value  ) 
             {{end}}
         {{end}}
 	default:

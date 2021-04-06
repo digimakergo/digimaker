@@ -4,111 +4,32 @@
 package contenttype
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"sort"
-	"strconv"
-	"strings"
 
-	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
-	"github.com/digimakergo/digimaker/core/util"
 	"github.com/pkg/errors"
 )
-
-//RelationList is field type which is in relations in ContentCommon
-type RelationList []Relation
-
-//LoadFromInput load data from input before validation
-func (rl *RelationList) LoadFromInput(input interface{}, params definition.FieldParameters) error {
-	s := fmt.Sprint(input)
-	if s == "" {
-		*rl = []Relation{}
-		return nil
-	}
-	arr := strings.Split(s, ";")
-	if len(arr) != 2 {
-		return errors.New("wrong format.")
-	}
-	arrInt, err := util.ArrayStrToInt(strings.Split(arr[0], ","))
-
-	if err != nil {
-		return errors.New("Not int(s)")
-	}
-	arrType := strings.Split(arr[1], ",")
-	if len(arrType) != len(arrInt) {
-		return errors.New("id and type are not same length")
-	}
-
-	relationlist := []Relation{}
-	for i, v := range arrInt {
-		fromType := arrType[i]
-		fromCid := v
-		def, err := definition.GetDefinition(fromType)
-		if err != nil {
-			return err
-		}
-
-		r := Relation{}
-
-		r.FromContentID = fromCid
-		r.FromType = fromType
-		r.Priority = len(arrInt) - i
-
-		relationDataFields := def.RelationData
-		if len(relationDataFields) > 0 {
-			//get content
-			contents := db.DatamapList{}
-			db.BindEntity(context.Background(), &contents, def.TableName, db.Cond("id", fromCid))
-			if len(contents) == 0 {
-				return errors.New("No content found on " + strconv.Itoa(fromCid))
-			}
-
-			//If there is one field, use it on data, otherwise use json map as data
-			if len(relationDataFields) == 1 {
-				r.Data = fmt.Sprint(contents[0][relationDataFields[0]])
-			} else {
-				datamap := map[string]interface{}{}
-				for _, field := range relationDataFields {
-					datamap[field] = contents[0][field]
-				}
-				data, _ := json.Marshal(datamap)
-				r.Data = string(data)
-			}
-		}
-
-		relationlist = append(relationlist, r)
-	}
-	*rl = relationlist
-	return nil
-	//todo: update data after updating from_content
-}
-
-func (rl RelationList) FieldValue() interface{} {
-	return rl
-}
-
-func (rl RelationList) Validate(rule definition.VaidationRule) (bool, string) {
-	//todo: check if the id exist or has permission
-	return true, ""
-}
-
-func (rl RelationList) IsEmpty() bool {
-	return false
-}
-
-func (rl RelationList) Type() string {
-	return "relationlist"
-}
 
 //ContentRelations as a struct which is linked into a content.
 //The purpose is for binding & access.
 type ContentRelationList struct {
-	Map      map[string]*RelationList `json:"-"`
-	List     []Relation               `json:"-"`
-	Existing []Relation               `json:"-"`
+	Map      map[string]fieldtype.RelationList `json:"-"`
+	List     []fieldtype.Relation              `json:"-"`
+	Existing []fieldtype.Relation              `json:"-"`
+}
+
+func (cr *ContentRelationList) SetValue(identifier string, value interface{}) error {
+	if cr.Map == nil {
+		cr.Map = map[string]fieldtype.RelationList{}
+	}
+	if list, ok := value.(fieldtype.RelationList); ok {
+		cr.Map[identifier] = list
+	} else {
+		return fmt.Errorf("Only RelationList is supported on field %v", identifier)
+	}
+	return nil
 }
 
 func (relations *ContentRelationList) Scan(src interface{}) error {
@@ -122,7 +43,7 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 		return errors.New("Unknow scan value.")
 	}
 
-	var relationList []Relation
+	var relationList []fieldtype.Relation
 	err := json.Unmarshal([]byte(source), &relationList)
 	if err != nil {
 		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+source)
@@ -145,16 +66,16 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 //Convert list into Map when scaning
 func (relations *ContentRelationList) groupRelations() {
 	//todo: validate keys and make sure it's pre defined
-	groupedList := map[string]*RelationList{}
+	groupedList := map[string]fieldtype.RelationList{}
 	for _, relation := range relations.List {
 		if relation.Identifier != "" {
 			identifier := relation.Identifier
 			if _, ok := groupedList[identifier]; ok {
 				rl := groupedList[identifier]
-				*rl = append(*rl, relation)
+				rl = append(rl, relation)
 				groupedList[identifier] = rl
 			} else {
-				groupedList[identifier] = &RelationList{relation}
+				groupedList[identifier] = fieldtype.RelationList{relation}
 			}
 		}
 	}
@@ -168,20 +89,14 @@ func (relations ContentRelationList) MarshalJSON() ([]byte, error) {
 
 //Get relationlist field, create if it's not in map.
 //nb: does't checking if it's a relationlist type.
-func (relations *ContentRelationList) GetField(identifier string) *RelationList {
+func (relations ContentRelationList) GetField(identifier string) fieldtype.RelationList {
 	if relations.Map == nil {
-		relations.Map = map[string]*RelationList{}
-	}
-	if rl, ok := relations.Map[identifier]; ok {
-		return rl
+		return fieldtype.RelationList{}
 	} else {
-		relations.Map[identifier] = &RelationList{}
-		return relations.Map[identifier]
+		if rl, ok := relations.Map[identifier]; ok {
+			return rl
+		} else {
+			return fieldtype.RelationList{}
+		}
 	}
-}
-
-func init() {
-	fieldtype.RegisterFieldType(
-		fieldtype.FieldtypeDef{Type: "relationlist", Value: "contenttype.RelationList", IsRelation: true},
-		func() fieldtype.FieldTyper { return &RelationList{} })
 }

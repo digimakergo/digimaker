@@ -103,7 +103,7 @@ func (c *ContentCommon) StoreRelations(ctx context.Context, thisContenttype stri
 
 	//insert
 	for identifier, list := range c.Relations.Map {
-		for _, relation := range *list {
+		for _, relation := range list {
 			data, _ := json.Marshal(relation)
 			dataMap := map[string]interface{}{}
 			json.Unmarshal(data, &dataMap)
