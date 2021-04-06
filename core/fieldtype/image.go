@@ -11,6 +11,10 @@ import (
 	"github.com/digimakergo/digimaker/core/util"
 )
 
+type ImageParameter struct {
+	Format string `mapstructure:"format"` //eg. "jpg, png" low case
+}
+
 type ImageHandler struct {
 	definition.FieldDef
 }
@@ -23,11 +27,33 @@ func (handler ImageHandler) LoadInput(input interface{}, mode string) (interface
 
 //Image can be loaded from rest, or local api
 func (handler ImageHandler) BeforeStore(value interface{}, existing interface{}, mode string) (interface{}, error) {
-	imagepath := value.(string)
+	imagePath := value.(string)
 
-	if imagepath != "" && (existing == nil || existing != nil && imagepath != existing.(string)) { //means there is a valid image change
+	if imagePath != "" && (existing == nil || existing != nil && imagePath != existing.(string)) { //means there is a valid image change
 		//todo: support other image services or remote image
-		oldAbsPath := util.VarFolder() + "/" + imagepath
+
+		params := ImageParameter{}
+		err := ConvertParameters(handler.FieldDef.Parameters, &params)
+		if err != nil {
+			return existing, err
+		}
+
+		//check format
+		if params.Format != "" {
+			formats := util.Split(params.Format)
+			validFormat := false
+			for _, format := range formats {
+				lowImagePath := strings.ToLower(imagePath)
+				if strings.HasSuffix(lowImagePath, "."+format) {
+					validFormat = true
+				}
+			}
+			if !validFormat {
+				return existing, fmt.Errorf("Format not allowed. allowed are: %v", params.Format)
+			}
+		}
+
+		oldAbsPath := util.VarFolder() + "/" + imagePath
 
 		//image path should be under temp
 		temp := util.GetConfig("general", "upload_tempfolder")
@@ -36,7 +62,7 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 			return nil, errors.New("Can't find file on " + oldAbsPath)
 		}
 
-		arr := strings.Split(imagepath, "/")
+		arr := strings.Split(imagePath, "/")
 		filename := arr[len(arr)-1]
 
 		//create 2 level folder
@@ -46,7 +72,7 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 
 		newFolder := "images/" + firstLevel + "/" + secondLevel
 		newFolderAbs := util.VarFolder() + "/" + newFolder
-		_, err := os.Stat(newFolderAbs)
+		_, err = os.Stat(newFolderAbs)
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(newFolderAbs, 0775)
 			if err != nil {
@@ -57,14 +83,14 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 		newPath := newFolder + "/" + filename
 		newPathAbs := util.VarFolder() + "/" + newPath
 
-		underTemp := strings.HasPrefix(imagepath, temp)
+		underTemp := strings.HasPrefix(imagePath, temp)
 		if underTemp {
 			err = os.Rename(oldAbsPath, newPathAbs)
 		} else {
 			err = os.Link(oldAbsPath, newPathAbs) //todo: use better copy
 		}
 		if err != nil {
-			errorMessage := "Can not copy/move image to target " + imagepath + ". error: " + err.Error()
+			errorMessage := "Can not copy/move image to target " + imagePath + ". error: " + err.Error()
 			return nil, errors.New(errorMessage)
 		}
 

@@ -186,6 +186,18 @@ func (handler DatetimeHandler) DBField() string {
 	return "DATETIME"
 }
 
+//convert parameters(definition.FieldParameters - map[string]interface{}) to struct using mapstructure
+func ConvertParameters(params definition.FieldParameters, paramStruct interface{}) error {
+	if params != nil {
+		err := mapstructure.Decode(params, &paramStruct)
+		if err != nil {
+			returnError := errors.New("Parameters error:" + err.Error())
+			return returnError
+		}
+	}
+	return nil
+}
+
 func init() {
 	Register(
 		Definition{
