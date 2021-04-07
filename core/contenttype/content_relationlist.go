@@ -16,20 +16,20 @@ import (
 type ContentRelationList map[string]fieldtype.RelationList
 
 func (relations *ContentRelationList) Scan(src interface{}) error {
-	var source string
+	var source []byte
 	switch src.(type) {
 	case string:
-		source = src.(string)
+		source = []byte(src.(string))
 	case []byte:
-		source = string(src.([]byte))
+		source = src.([]byte)
 	default:
 		return errors.New("Unknow scan value.")
 	}
 
 	var relationList []fieldtype.Relation
-	err := json.Unmarshal([]byte(source), &relationList)
+	err := json.Unmarshal(source, &relationList)
 	if err != nil {
-		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+source)
+		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+string(source))
 	}
 
 	//Sort by priority (highest will be on top)
@@ -37,12 +37,9 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 		return relationList[i].Priority > relationList[j].Priority
 	})
 
-	//If not empty relation(only one record by everything is null/"")
-	// if !(len(relationList) == 1 && relationList[0].Identifier == "") {
 	groupedRelations := relations.groupRelations(relationList)
 	*relations = groupedRelations
 
-	// }
 	return nil
 }
 
