@@ -95,6 +95,23 @@ func (handler MysqlHandler) WithContent(query Query, contentType string, option 
 	}
 	contentQuery.Select = contentFields
 
+	//Add relation join if there is
+	if def.HasRelationlist() {
+		relationColumns := []string{"JSON_ARRAYAGG( JSON_OBJECT( 'id', relation.id, 'identifier', relation.identifier, 'to_content_id', relation.to_content_id,'to_type', relation.to_type,'from_content_id', relation.from_content_id,'from_type', relation.from_type,'from_location', relation.from_location,'priority', relation.priority, 'uid', relation.uid, 'description',relation.description, 'data' ,relation.data ) ) AS relations"}
+		relationQuery := SingleQuery{
+			Table:     "dm_relation",
+			Alias:     "relation",
+			Select:    relationColumns,
+			Condition: Cond("relation.to_content_id ==", "c.id").Cond("relation.to_type =", contentType),
+		}
+		/*todo: fix mysql ONLY_FULL_GROUP_BY issue,
+		currently it's setting  SET GLOBAL sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY',''));
+		*/
+		query.AddLeft(relationQuery)
+	}
+
+	query.Groupby = []string{"c.id"}
+
 	//add location join if needed
 	if def.HasLocation {
 		//add location onequery
@@ -155,6 +172,23 @@ func (handler MysqlHandler) BuildQuery(query Query, count bool) (string, []inter
 		//todo: add alias if alias is not empty
 	}
 
+	//tables
+	tableStr := strings.Join(tables, " INNER JOIN ")
+
+	//condition
+	conditionStr, values := BuildCondition(condition) //todo: return error error
+
+	//left joins
+	leftJoinStr := ""
+	if !count {
+		for _, item := range query.LeftQueries {
+			leftConditionStr, leftValues := BuildCondition(item.Condition)
+			fields = append(fields, item.Select...)
+			leftJoinStr = leftJoinStr + " LEFT JOIN " + item.Table + " " + item.Alias + " ON " + leftConditionStr
+			values = append(leftValues, values...) //put in front since left join in before where
+		}
+	}
+
 	//select
 	fieldStr := ""
 	if len(fields) > 0 {
@@ -162,12 +196,6 @@ func (handler MysqlHandler) BuildQuery(query Query, count bool) (string, []inter
 	} else {
 		fieldStr = "*"
 	}
-
-	//tables
-	tableStr := strings.Join(tables, ",")
-
-	//condition
-	conditionStr, values := BuildCondition(condition) //todo: return error error
 
 	//group by
 	groupbyStr := ""
@@ -190,7 +218,7 @@ func (handler MysqlHandler) BuildQuery(query Query, count bool) (string, []inter
 
 	sqlStr := ""
 	if !count {
-		sqlStr = `SELECT ` + fieldStr + ` FROM ` + tableStr + " WHERE " + conditionStr + groupbyStr + sortby + limit
+		sqlStr = `SELECT ` + fieldStr + ` FROM ` + tableStr + leftJoinStr + " WHERE " + conditionStr + groupbyStr + sortby + limit
 	} else {
 		sqlStr = `SELECT COUNT(*) AS count FROM ` + tableStr + " WHERE " + conditionStr + groupbyStr
 	}

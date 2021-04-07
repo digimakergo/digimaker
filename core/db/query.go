@@ -33,6 +33,7 @@ type Query struct {
 	Queries     []SingleQuery
 	Groupby     []string //group by
 	LimitArr    []int
+	LeftQueries []SingleQuery
 	SortArr     []string
 	AlwaysCount bool
 }
@@ -41,6 +42,11 @@ type Query struct {
 func (q *Query) Add(added SingleQuery) {
 	queries := append(q.Queries, added)
 	q.Queries = queries
+}
+
+func (q *Query) AddLeft(query SingleQuery) {
+	queries := append(q.LeftQueries, query)
+	q.LeftQueries = queries
 }
 
 //Join a content or table
