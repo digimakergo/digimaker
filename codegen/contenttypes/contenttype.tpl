@@ -146,7 +146,7 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
                 {{end}}
             {{else}}
                 case "{{$identifier}}":
-                return c.Relations.SetValue( "{{$identifier}}", value  ) 
+                return c.SetRelation( "{{$identifier}}", value  ) 
             {{end}}
         {{end}}
 	default:

@@ -133,6 +133,10 @@ func EmptyCond() Condition {
 	return Condition{}
 }
 
+func IsEmptyCond(cond Condition) bool {
+	return cond.Children == nil
+}
+
 func TrueCond() Condition {
 	return Condition{Logic: "", Children: Expression{Field: "", Operator: "", Value: "true"}}
 }

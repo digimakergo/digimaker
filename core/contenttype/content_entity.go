@@ -9,8 +9,8 @@ type ContentEntity struct {
 	Relations  ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
-func (c *ContentEntity) GetRelations() *ContentRelationList {
-	return &c.Relations
+func (c *ContentEntity) GetRelations() ContentRelationList {
+	return c.Relations
 }
 
 func (c *ContentEntity) GetCID() int {

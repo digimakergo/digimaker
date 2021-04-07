@@ -37,7 +37,7 @@ type RelationListHandler struct {
 //LoadFromInput load data from input before validation
 func (handler RelationListHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	s := fmt.Sprint(input)
-	result := []Relation{}
+	result := RelationList{}
 	if s != "" {
 		arr := strings.Split(s, ";")
 		if len(arr) != 2 {
@@ -66,6 +66,7 @@ func (handler RelationListHandler) LoadInput(input interface{}, mode string) (in
 			r.FromContentID = fromCid
 			r.FromType = fromType
 			r.Priority = len(arrInt) - i
+			r.Identifier = handler.Identifier
 
 			relationDataFields := fromDef.RelationData
 			if len(relationDataFields) > 0 {
