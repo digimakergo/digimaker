@@ -6,7 +6,9 @@ import (
 	"fmt"
 
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/friendsofgo/errors"
 )
 
 type ContentCommon struct {
@@ -18,7 +20,7 @@ type ContentCommon struct {
 	Status     int                 `boil:"status" json:"status" toml:"status" yaml:"status"`
 	Author     int                 `boil:"author" json:"author" toml:"author" yaml:"author"`
 	AuthorName string              `boil:"author_name" json:"author_name" toml:"author_name" yaml:"author_name"`
-	Relations  ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
+	Relations  ContentRelationList `boil:"relations" json:"-" toml:"relations" yaml:"relations"`
 }
 
 //IdentifierList return list of all field names
@@ -176,5 +178,25 @@ func (c *ContentCommon) StoreRelations(ctx context.Context, thisContenttype stri
 		}
 	}
 
+	return nil
+}
+
+//FinishBind sets related data after data binding. It will be better if SQLBoiler support interface for customized  binding for struct.
+func FinishBind(content ContentTyper) error {
+	contentType := content.ContentType()
+	def, _ := definition.GetDefinition(contentType)
+	if def.HasRelationlist() {
+		relationMap := content.GetRelations()
+		for identifier, fieldDef := range def.FieldMap {
+			if fieldDef.FieldType == "relationlist" {
+				if value, ok := relationMap[identifier]; ok {
+					err := content.SetValue(identifier, value)
+					if err != nil {
+						return errors.Wrap(err, "Error when binding relationlist "+identifier)
+					}
+				}
+			}
+		}
+	}
 	return nil
 }

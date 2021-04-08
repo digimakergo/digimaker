@@ -90,6 +90,10 @@ func Fetch(ctx context.Context, contentType string, condition db.Condition) (con
 	if err != nil {
 		return nil, err
 	}
+	err = contenttype.FinishBind(content)
+	if err != nil {
+		return nil, err
+	}
 	if content.GetCID() == 0 {
 		return nil, nil
 	}
@@ -272,6 +276,12 @@ func List(ctx context.Context, contentType string, condition db.Condition) ([]co
 	// }
 
 	result := contenttype.ToList(contentType, contentList)
+	for _, content := range result {
+		err := contenttype.FinishBind(content)
+		if err != nil {
+			return nil, -1, err
+		}
+	}
 	return result, count, err
 }
 

@@ -36,7 +36,7 @@ type ContentTyper interface {
 
 	ToMap() map[string]interface{}
 
-	GetRelations() *ContentRelationList
+	GetRelations() ContentRelationList
 }
 
 type ContentList []ContentTyper

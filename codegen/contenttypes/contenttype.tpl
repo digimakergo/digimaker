@@ -27,12 +27,10 @@ type {{$struct_name}} struct{
           {{$identifier|UpperName}}  {{$fieldtype}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
      {{end}}
     {{range $identifier, $fieldtype := .fields}}
-         {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
-         {{if not (eq $fieldtype.FieldType "relationlist" ) }}
+         {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}         
          {{if not $fieldtype.IsOutput}}
-            {{$identifier|UpperName}}  {{$type_settings.DataType}} `boil:"{{$identifier}}" json:"{{if eq $fieldtype.FieldType "password"}}-{{else}}{{$identifier}}{{end}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+            {{$identifier|UpperName}}  {{$type_settings.DataType}} `boil:"{{if not (eq $fieldtype.FieldType "relationlist" ) }}{{$identifier}}{{else}}-{{end}}" json:"{{if eq $fieldtype.FieldType "password"}}-{{else}}{{$identifier}}{{end}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
          {{end}}
-        {{end}}
     {{end}}
     {{if .settings.HasLocation}}
      contenttype.Location `boil:"location,bind"`
@@ -139,15 +137,10 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
         {{end}}
         {{range $identifier, $fieldtype := .fields}}
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}            
-            {{if not ( eq $fieldtype.FieldType "relationlist" ) }}
-                {{if not $fieldtype.IsOutput}}
-                case "{{$identifier}}":
-                c.{{$identifier|UpperName}} = value.({{$type_settings.DataType}})
-                {{end}}
-            {{else}}
-                case "{{$identifier}}":
-                return c.SetRelation( "{{$identifier}}", value  ) 
-            {{end}}
+            {{if not $fieldtype.IsOutput}}
+            case "{{$identifier}}":
+            c.{{$identifier|UpperName}} = value.({{$type_settings.DataType}})
+            {{end}}        
         {{end}}
 	default:
 		return c.ContentCommon.SetValue(identifier, value)        
