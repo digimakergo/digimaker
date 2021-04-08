@@ -102,6 +102,7 @@ func (handler RelationListHandler) DBField() string {
 	return ""
 }
 
+//todo: pass the current content and value
 func (handler RelationListHandler) Store(ctx context.Context, value interface{}, contentType string, cid int, transaction *sql.Tx) error {
 	relations, ok := value.(RelationList)
 	if !ok {
@@ -152,7 +153,6 @@ func (handler RelationListHandler) Store(ctx context.Context, value interface{},
 		}
 	}
 
-	fmt.Println(toBeUpdated)
 	//execute update
 	if len(toBeUpdated) > 0 {
 		for _, relation := range toBeUpdated {

@@ -100,7 +100,11 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 		}
 		return newPath, nil
 	} else {
-		return existing, nil
+		if existing != nil {
+			return existing, nil
+		} else {
+			return "", nil
+		}
 	}
 }
 

@@ -5,8 +5,6 @@ package contenttype
 
 import (
 	"encoding/json"
-
-	"github.com/digimakergo/digimaker/core/fieldtype"
 )
 
 //Content to json, used for internal content storing(eg. version data, draft data )
@@ -18,26 +16,9 @@ func ContentToJson(content ContentTyper) (string, error) {
 
 func MarchallToOutput(content ContentTyper) ([]byte, error) {
 	contentMap := content.ToMap()
-	for identifier, field := range contentMap {
-		switch field.(type) {
-		case fieldtype.FieldTyper:
-			value := field.(fieldtype.FieldTyper)
-			contentMap[identifier] = value.FieldValue()
-		}
-	}
 	//todo: use a new tag instead of json(eg. version: 'summary', version: '-' to ignore that.)
 	result, err := json.Marshal(contentMap)
 	return result, err
-}
-
-//If field has variables, replace variables with real value
-func OutputField(field fieldtype.FieldTyper) interface{} {
-	value := field.FieldValue()
-	def := fieldtype.GetDef(field.Type())
-	if def.HasVariable {
-		//todo: implement washing variable
-	}
-	return value
 }
 
 //Json to Content, used for internal content recoving. (eg. versioning, draft)

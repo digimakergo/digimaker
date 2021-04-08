@@ -6,15 +6,16 @@ import (
 )
 
 type ContentCommon struct {
-	CID        int                 `boil:"cid" json:"cid" toml:"cid" yaml:"cid"`
-	Version    int                 `boil:"version" json:"version" toml:"version" yaml:"version"`
-	Published  int                 `boil:"published" json:"published" toml:"published" yaml:"published"`
-	Modified   int                 `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
-	CUID       string              `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
-	Status     int                 `boil:"status" json:"status" toml:"status" yaml:"status"`
-	Author     int                 `boil:"author" json:"author" toml:"author" yaml:"author"`
-	AuthorName string              `boil:"author_name" json:"author_name" toml:"author_name" yaml:"author_name"`
-	Relations  ContentRelationList `boil:"relations" json:"-" toml:"relations" yaml:"relations"`
+	CID        int    `boil:"cid" json:"cid" toml:"cid" yaml:"cid"`
+	Version    int    `boil:"version" json:"version" toml:"version" yaml:"version"`
+	Published  int    `boil:"published" json:"published" toml:"published" yaml:"published"`
+	Modified   int    `boil:"modified" json:"modified" toml:"modified" yaml:"modified"`
+	CUID       string `boil:"cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	Status     int    `boil:"status" json:"status" toml:"status" yaml:"status"`
+	Author     int    `boil:"author" json:"author" toml:"author" yaml:"author"`
+	AuthorName string `boil:"author_name" json:"author_name" toml:"author_name" yaml:"author_name"`
+	//Relations is used for binding all relationlist. See FinishBind to assign to different relationlist
+	Relations ContentRelationList `boil:"relations" json:"-" toml:"relations" yaml:"relations"`
 }
 
 //IdentifierList return list of all field names

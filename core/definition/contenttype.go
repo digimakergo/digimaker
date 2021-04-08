@@ -26,7 +26,6 @@ var LocationColumns []string = []string{
 	"content_id",
 	"language",
 	"identifier_path",
-	"author",
 	"name",
 	"is_hidden",
 	"is_invisible",
@@ -134,7 +133,6 @@ type FieldDef struct {
 type DataField struct {
 	Identifier string `json:"identifier"`
 	FieldType  string `json:"fieldtype"`
-	Type       string `json:"type"`
 	Name       string `json:"name"`
 }
 
