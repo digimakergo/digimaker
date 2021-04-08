@@ -113,11 +113,7 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{range $identifier, $fieldtype := .fields}}
     {{if not $fieldtype.IsOutput}}
     case "{{$identifier}}":
-        {{if not (eq $fieldtype.FieldType "relationlist")}}
-            result = (c.{{$identifier|UpperName}})
-        {{else}}
-            result = c.Relations.GetField("{{$identifier}}")
-        {{end}}
+            result = (c.{{$identifier|UpperName}})        
     {{end}}
     {{end}}
 	case "cid":
@@ -163,11 +159,6 @@ func (c *{{$struct_name}}) Store(ctx context.Context, transaction ...*sql.Tx) er
     if err != nil {
 			return err
 		}
-	}
-
-	err := c.StoreRelations(ctx, c.ContentType(), transaction...)
-	if err != nil {
-		return err
 	}
 
 	return nil

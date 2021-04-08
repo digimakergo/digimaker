@@ -97,12 +97,8 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{end}}
     {{range $identifier, $fieldtype := .fields}}
     {{if not $fieldtype.IsOutput}}
-    case "{{$identifier}}":
-        {{if not ( eq $fieldtype.FieldType "relationlist" ) }}
-            result = (c.{{$identifier|UpperName}})
-        {{else}}
-            result = c.Relations.Map["{{$identifier}}"]
-        {{end}}
+    case "{{$identifier}}":        
+            result = (c.{{$identifier|UpperName}})        
     {{end}}
     {{end}}
 

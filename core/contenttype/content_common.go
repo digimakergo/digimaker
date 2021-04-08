@@ -1,13 +1,7 @@
 package contenttype
 
 import (
-	"context"
-	"database/sql"
-	"fmt"
-
-	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
-	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/friendsofgo/errors"
 )
 
@@ -95,90 +89,6 @@ func (c *ContentCommon) GetCID() int {
 
 func (c *ContentCommon) GetRelations() ContentRelationList {
 	return c.Relations
-}
-
-func (c *ContentCommon) SetRelation(identifier string, value interface{}) error {
-	if len(c.Relations) == 0 {
-		c.Relations = ContentRelationList{}
-	}
-	if list, ok := value.(fieldtype.RelationList); ok {
-		rTemp := c.Relations
-		rTemp[identifier] = list
-		c.Relations = rTemp
-	} else {
-		return fmt.Errorf("Only RelationList is supported on field %v", identifier)
-	}
-	return nil
-}
-
-func (c *ContentCommon) StoreRelations(ctx context.Context, thisContenttype string, transaction ...*sql.Tx) error {
-	existingList := []fieldtype.Relation{}
-	//get existing
-	if c.CID > 0 {
-		cond := db.Cond("to_type", thisContenttype).Cond("to_content_id", c.CID)
-		_, err := db.BindEntity(ctx, &existingList, "dm_relation", cond)
-		if err != nil {
-			return err
-		}
-	}
-
-	//get to be deleted
-	deleteCond := db.EmptyCond()
-	for _, existing := range existingList {
-		willDelete := true
-		for _, list := range c.Relations {
-			for _, relation := range list {
-				if existing.FromContentID == relation.FromContentID && existing.FromType == relation.FromType {
-					willDelete = false
-				}
-			}
-		}
-		if willDelete {
-			deleteCond = deleteCond.Or(db.Cond("from_content_id", existing.FromContentID).Cond("from_type", existing.FromType))
-		}
-	}
-
-	//get to be added
-	toBeAdded := []fieldtype.Relation{}
-	for _, list := range c.Relations {
-		for _, relation := range list {
-			exists := false
-			for _, existing := range existingList {
-				if existing.FromContentID == relation.FromContentID && existing.FromType == relation.FromType {
-					exists = true
-				}
-			}
-			if !exists {
-				toBeAdded = append(toBeAdded, relation)
-			}
-		}
-	}
-
-	//execute delete
-	if c.CID > 0 && !db.IsEmptyCond(deleteCond) {
-		err := db.Delete(ctx, "dm_relation", db.Cond("to_content_id", c.CID).Cond("to_type", thisContenttype).And(deleteCond), transaction...)
-		if err != nil {
-			return err
-		}
-	}
-
-	//execute insert
-	for _, relation := range toBeAdded {
-		dataMap := map[string]interface{}{}
-		dataMap["identifier"] = relation.Identifier
-		dataMap["to_content_id"] = c.CID
-		dataMap["to_type"] = thisContenttype
-		dataMap["from_content_id"] = relation.FromContentID
-		dataMap["from_type"] = relation.FromType
-		dataMap["data"] = relation.Data
-		dataMap["priority"] = relation.Priority
-		_, err := db.Insert(ctx, "dm_relation", dataMap, transaction...)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 //FinishBind sets related data after data binding. It will be better if SQLBoiler support interface for customized  binding for struct.

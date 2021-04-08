@@ -1,6 +1,8 @@
 package fieldtype
 
 import (
+	"context"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -55,6 +57,10 @@ type Event interface {
 	BeforeStore(value interface{}, existing interface{}, mode string) (interface{}, error)
 
 	AfterDelete(value interface{}) error
+}
+
+type StoreHandler interface {
+	Store(ctx context.Context, value interface{}, contentType string, cid int, transaction *sql.Tx) error
 }
 
 //Ouput is implemented when fieldtype needs converting when outputting

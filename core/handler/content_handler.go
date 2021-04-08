@@ -81,6 +81,17 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 	if !contentDefinition.HasLocation {
 		content.SetValue("location_id", parentID)
 	}
+
+	for identifier, fieldDef := range contentDefinition.FieldMap {
+		handler := fieldtype.GethHandler(fieldDef)
+		if storeHandler, ok := handler.(fieldtype.StoreHandler); ok {
+			err := storeHandler.Store(ctx, content.Value(identifier), content.ContentType(), content.GetCID(), tx)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
 	err := content.Store(ctx, tx)
 	if err != nil {
 		return err
@@ -161,6 +172,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	for identifier, fieldDef := range fieldsDefinition {
 		if input, ok := inputs[identifier]; ok {
 			handler := fieldtype.GethHandler(fieldDef)
+
 			//set value
 			value, _ := handler.LoadInput(input, "")
 
@@ -384,12 +396,6 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		}
 	}
 
-	//Save to new version
-	tx, err := db.CreateTx()
-	if err != nil {
-		return false, ValidationResult{}, errors.Wrap(err, "Create transaction error.")
-	}
-
 	//todo: update relations
 	//Set content.
 	for identifier, fieldDef := range fieldsDefinition {
@@ -407,6 +413,12 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 			}
 			content.SetValue(identifier, value)
 		}
+	}
+
+	//Save to new version
+	tx, err := db.CreateTx()
+	if err != nil {
+		return false, ValidationResult{}, errors.Wrap(err, "Create transaction error.")
 	}
 
 	//Save new version and set to content
@@ -430,6 +442,17 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 
 	//Save update content.
 	log.Debug("Saving content", "contenthandler.update", ctx)
+
+	for identifier, fieldDef := range contentDef.FieldMap {
+		handler := fieldtype.GethHandler(fieldDef)
+		if storeHandler, ok := handler.(fieldtype.StoreHandler); ok {
+			err := storeHandler.Store(ctx, content.Value(identifier), content.ContentType(), content.GetCID(), tx)
+			if err != nil {
+				tx.Rollback()
+				return false, ValidationResult{}, err
+			}
+		}
+	}
 
 	err = content.Store(ctx, tx)
 	if err != nil {
@@ -617,7 +640,7 @@ func DeleteByContent(ctx context.Context, content contenttype.ContentTyper, user
 		} else {
 			//Delete relation first.
 			relations := content.GetRelations()
-			if len(relations.Map) > 0 {
+			if len(relations) > 0 {
 				err = db.Delete(ctx, "dm_relation", db.Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
 				if err != nil {
 					tx.Rollback()

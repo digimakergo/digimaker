@@ -2,8 +2,8 @@ package fieldtype
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -11,6 +11,7 @@ import (
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/pkg/errors"
 )
 
 type Relation struct {
@@ -99,6 +100,97 @@ func (handler RelationListHandler) LoadInput(input interface{}, mode string) (in
 
 func (handler RelationListHandler) DBField() string {
 	return ""
+}
+
+func (handler RelationListHandler) Store(ctx context.Context, value interface{}, contentType string, cid int, transaction *sql.Tx) error {
+	relations, ok := value.(RelationList)
+	if !ok {
+		return errors.New("Not a relationlist type")
+	}
+	existingList := []Relation{}
+
+	currentCondition := db.Cond("to_type", contentType).Cond("to_content_id", cid).Cond("identifier", handler.Identifier)
+	// //get existing
+	if cid > 0 {
+		_, err := db.BindEntity(ctx, &existingList, "dm_relation", currentCondition)
+		if err != nil {
+			return err
+		}
+	}
+
+	//get to be deleted
+	deleteCond := db.EmptyCond()
+	for _, existing := range existingList {
+		willDelete := true
+		for _, relation := range relations {
+			if existing.FromContentID == relation.FromContentID && existing.FromType == relation.FromType {
+				willDelete = false
+			}
+		}
+		if willDelete {
+			deleteCond = deleteCond.Or(db.Cond("from_content_id", existing.FromContentID).Cond("from_type", existing.FromType))
+		}
+	}
+
+	//get to be added
+	toBeAdded := []Relation{}
+	toBeUpdated := []Relation{}
+	for _, relation := range relations {
+		exists := false
+		for _, existing := range existingList {
+			if existing.FromContentID == relation.FromContentID &&
+				existing.FromType == relation.FromType &&
+				existing.Identifier == relation.Identifier {
+				exists = true
+				if existing.Priority != relation.Priority {
+					toBeUpdated = append(toBeUpdated, relation)
+				}
+			}
+		}
+		if !exists {
+			toBeAdded = append(toBeAdded, relation)
+		}
+	}
+
+	fmt.Println(toBeUpdated)
+	//execute update
+	if len(toBeUpdated) > 0 {
+		for _, relation := range toBeUpdated {
+			updateMap := map[string]interface{}{}
+			updateMap["priority"] = relation.Priority
+			err := db.Update(ctx, "dm_relation", updateMap,
+				currentCondition.Cond("from_content_id", relation.FromContentID).Cond("from_type", relation.FromType),
+				transaction)
+			if err != nil {
+				return errors.Wrap(err, "Update relationlist error")
+			}
+		}
+	}
+
+	//execute delete
+	if !db.IsEmptyCond(deleteCond) {
+		err := db.Delete(ctx, "dm_relation", currentCondition.And(deleteCond), transaction)
+		if err != nil {
+			return err
+		}
+	}
+
+	//execute insert
+	for _, relation := range toBeAdded {
+		dataMap := map[string]interface{}{}
+		dataMap["identifier"] = relation.Identifier
+		dataMap["to_content_id"] = cid
+		dataMap["to_type"] = contentType
+		dataMap["from_content_id"] = relation.FromContentID
+		dataMap["from_type"] = relation.FromType
+		dataMap["data"] = relation.Data
+		dataMap["priority"] = relation.Priority
+		_, err := db.Insert(ctx, "dm_relation", dataMap, transaction)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func init() {
