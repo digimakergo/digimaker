@@ -5,11 +5,13 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
+	"gopkg.in/flosch/pongo2.v2"
 )
 
 //default dm functions
@@ -65,6 +67,12 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 				result = result + "/" + url
 			}
 			return result
+		},
+		"wash_field": func(input string) *pongo2.Value {
+			//wash content attribute
+			//todo: support more fieldtypes
+			result := handler.ConvertToHtml(dm.Context, input, true, "/var/") //todo: change to use configuration
+			return pongo2.AsSafeValue(result)
 		},
 	}
 
