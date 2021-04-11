@@ -223,20 +223,20 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyper, contentType string, depth int, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	rootLocation := rootContent.GetLocation()
 	def, _ := definition.GetDefinition(contentType)
-	if depth == 1 {
-		//Direct children
-		if def.HasLocation {
+	if def.HasLocation {
+		if depth == 1 {
+			//Direct children
 			condition = condition.Cond("l.parent_id", rootLocation.ID)
 		} else {
-			condition = condition.Cond("location_id", rootLocation.ID)
+			rootHierarchy := rootLocation.Hierarchy
+			rootDepth := rootLocation.Depth
+			condition = condition.Cond("l.hierarchy like", rootHierarchy+"/%")
+			if depth > 0 {
+				condition = condition.Cond("l.depth <=", rootDepth+depth)
+			}
 		}
 	} else {
-		rootHierarchy := rootLocation.Hierarchy
-		rootDepth := rootLocation.Depth
-		condition = condition.Cond("l.hierarchy like", rootHierarchy+"/%")
-		if def.HasLocation && depth > 0 {
-			condition = condition.Cond("l.depth <=", rootDepth+depth)
-		}
+		condition = condition.Cond("location_id", rootLocation.ID)
 	}
 
 	//fetch
