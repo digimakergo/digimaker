@@ -222,9 +222,9 @@ func accessCondition(userID int, contenttype string, context context.Context) db
 // SubList fetches content list with permission considered(only return contents the user has access to).
 func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyper, contentType string, depth int, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	rootLocation := rootContent.GetLocation()
+	def, _ := definition.GetDefinition(contentType)
 	if depth == 1 {
 		//Direct children
-		def, _ := definition.GetDefinition(contentType)
 		if def.HasLocation {
 			condition = condition.Cond("l.parent_id", rootLocation.ID)
 		} else {
@@ -234,7 +234,7 @@ func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 		rootHierarchy := rootLocation.Hierarchy
 		rootDepth := rootLocation.Depth
 		condition = condition.Cond("l.hierarchy like", rootHierarchy+"/%")
-		if depth > 0 {
+		if def.HasLocation && depth > 0 {
 			condition = condition.Cond("l.depth <=", rootDepth+depth)
 		}
 	}
