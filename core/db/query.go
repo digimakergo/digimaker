@@ -269,6 +269,7 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 
 //Count only
 func countWithQuery(ctx context.Context, query Query) (int, error) {
+	query.Groupby = []string{}
 	sqlStr, values, err := handler.BuildQuery(query, true)
 	if err != nil {
 		return -1, err
