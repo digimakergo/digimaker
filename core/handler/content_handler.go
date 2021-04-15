@@ -638,15 +638,16 @@ func DeleteByContent(ctx context.Context, content contenttype.ContentTyper, user
 		if location.CountLocations() > 1 {
 			return errors.New("There are more than 1 location. Remove location first.")
 		} else {
-			//Delete relation first.
-			relations := content.GetRelations()
-			if len(relations) > 0 {
-				err = db.Delete(ctx, "dm_relation", db.Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
-				if err != nil {
-					tx.Rollback()
-					message := "[handler.deleteByContent]Can not delete relation."
-					log.Error(message+err.Error(), "", ctx)
-					return errors.New(message)
+			//Delete relation first. //todo: use relationlist fieldtype
+			if relations, ok := content.(contenttype.GetRelations); ok {
+				if len(relations.GetRelations()) > 0 {
+					err = db.Delete(ctx, "dm_relation", db.Cond("to_content_id", content.Value("cid")).Cond("to_type", content.ContentType()), tx)
+					if err != nil {
+						tx.Rollback()
+						message := "[handler.deleteByContent]Can not delete relation."
+						log.Error(message+err.Error(), "", ctx)
+						return errors.New(message)
+					}
 				}
 			}
 

@@ -35,7 +35,9 @@ type ContentTyper interface {
 	Definition(language ...string) definition.ContentType
 
 	ToMap() map[string]interface{}
+}
 
+type GetRelations interface {
 	GetRelations() ContentRelationList
 }
 

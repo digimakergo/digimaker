@@ -1,4 +1,4 @@
-package fieldtype
+package fieldtypes
 
 import (
 	"errors"
@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/definition"
+	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 )
@@ -143,11 +144,11 @@ func ThumbnailFolder() string {
 }
 
 func init() {
-	Register(
-		Definition{
+	fieldtype.Register(
+		fieldtype.Definition{
 			Name:     "image",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) Handler {
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 				return ImageHandler{FieldDef: def}
 			}})
 }

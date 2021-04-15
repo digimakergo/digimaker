@@ -1,4 +1,4 @@
-package fieldtype
+package fieldtypes
 
 import (
 	"context"
@@ -8,28 +8,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
+	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/pkg/errors"
 )
-
-type Relation struct {
-	ID            int    `boil:"id" json:"-" toml:"id" yaml:"id"`
-	ToContentID   int    `boil:"to_content_id" json:"-" toml:"to_content_id" yaml:"to_content_id"`
-	ToType        string `boil:"to_type" json:"-" toml:"to_type" yaml:"to_type"`
-	FromContentID int    `boil:"from_content_id" json:"from_content_id" toml:"from_content_id" yaml:"from_content_id"`
-	FromType      string `boil:"from_type" json:"from_type" toml:"from_type" yaml:"from_type"`
-	FromLocation  int    `boil:"from_location" json:"-" toml:"from_location" yaml:"from_location"`
-	Priority      int    `boil:"priority" json:"priority" toml:"priority" yaml:"priority"`
-	Identifier    string `boil:"identifier" json:"identifier" toml:"identifier" yaml:"identifier"`
-	Description   string `boil:"description" json:"description" toml:"description" yaml:"description"`
-	Data          string `boil:"data" json:"data" toml:"data" yaml:"data"`
-	UID           string `boil:"uid" json:"-" toml:"uid" yaml:"uid"`
-}
-
-//A list of relation. Not used for bind so no Scan is not implemented
-type RelationList []Relation
 
 type RelationListHandler struct {
 	definition.FieldDef
@@ -38,7 +23,7 @@ type RelationListHandler struct {
 //LoadFromInput load data from input before validation
 func (handler RelationListHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	s := fmt.Sprint(input)
-	result := RelationList{}
+	result := contenttype.RelationList{}
 	if s != "" {
 		arr := strings.Split(s, ";")
 		if len(arr) != 2 {
@@ -62,7 +47,7 @@ func (handler RelationListHandler) LoadInput(input interface{}, mode string) (in
 				return result, err
 			}
 
-			r := Relation{}
+			r := contenttype.Relation{}
 
 			r.FromContentID = fromCid
 			r.FromType = fromType
@@ -104,11 +89,11 @@ func (handler RelationListHandler) DBField() string {
 
 //todo: pass the current content and value
 func (handler RelationListHandler) Store(ctx context.Context, value interface{}, contentType string, cid int, transaction *sql.Tx) error {
-	relations, ok := value.(RelationList)
+	relations, ok := value.(contenttype.RelationList)
 	if !ok {
 		return errors.New("Not a relationlist type")
 	}
-	existingList := []Relation{}
+	existingList := []contenttype.Relation{}
 
 	currentCondition := db.Cond("to_type", contentType).Cond("to_content_id", cid).Cond("identifier", handler.Identifier)
 	// //get existing
@@ -134,8 +119,8 @@ func (handler RelationListHandler) Store(ctx context.Context, value interface{},
 	}
 
 	//get to be added
-	toBeAdded := []Relation{}
-	toBeUpdated := []Relation{}
+	toBeAdded := []contenttype.Relation{}
+	toBeUpdated := []contenttype.Relation{}
 	for _, relation := range relations {
 		exists := false
 		for _, existing := range existingList {
@@ -194,12 +179,11 @@ func (handler RelationListHandler) Store(ctx context.Context, value interface{},
 }
 
 func init() {
-	Register(
-		Definition{
+	fieldtype.Register(
+		fieldtype.Definition{
 			Name:     "relationlist",
-			DataType: "fieldtype.RelationList",
-			Package:  "github.com/digimakergo/digimaker/core/fieldtype",
-			NewHandler: func(fieldDef definition.FieldDef) Handler {
+			DataType: "contenttype.RelationList",
+			NewHandler: func(fieldDef definition.FieldDef) fieldtype.Handler {
 				return RelationListHandler{FieldDef: fieldDef}
 			}})
 }

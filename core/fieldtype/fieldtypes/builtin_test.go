@@ -1,4 +1,4 @@
-package fieldtype
+package fieldtypes
 
 import (
 	"fmt"

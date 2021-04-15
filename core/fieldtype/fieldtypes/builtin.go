@@ -1,6 +1,7 @@
-package fieldtype
+package fieldtypes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"regexp"
@@ -8,7 +9,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
+	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/query/querier"
+	"github.com/digimakergo/digimaker/core/util"
 	"github.com/mitchellh/mapstructure"
 )
 
@@ -53,12 +59,12 @@ func (handler TextHandler) LoadInput(input interface{}, mode string) (interface{
 
 	//min length
 	if params.MinLength > 0 && strLength < params.MinLength {
-		return nil, NewValidationError(fmt.Sprintf("Input needs at least %v characters", params.MinLength))
+		return nil, fieldtype.NewValidationError(fmt.Sprintf("Input needs at least %v characters", params.MinLength))
 	}
 
 	//max length
 	if params.MaxLength > 0 && strLength > params.MaxLength {
-		return nil, NewValidationError(fmt.Sprintf("Input can not have more than %v characters", params.MinLength))
+		return nil, fieldtype.NewValidationError(fmt.Sprintf("Input can not have more than %v characters", params.MinLength))
 	}
 
 	//regular expression match
@@ -68,7 +74,7 @@ func (handler TextHandler) LoadInput(input interface{}, mode string) (interface{
 			return nil, fmt.Errorf("Matching error: %v", err.Error())
 		}
 		if !matched {
-			return nil, NewValidationError(params.RegExpMessage)
+			return nil, fieldtype.NewValidationError(params.RegExpMessage)
 		}
 	}
 	return str, nil
@@ -94,9 +100,55 @@ func (handler RichTextHandler) DBField() string {
 	return "TEXT"
 }
 
-func (r RichTextHandler) ConvertOuput() interface{} {
-	//replace html like <img src="var/f/fg/fge1ff.png" data-content="image;sdf319432424b432341" /> with real image path and size.
-	return ""
+func (r RichTextHandler) Ouput(ctx context.Context, querier querier.Querier, value interface{}) interface{} {
+	//convert image to updated image path
+	re := regexp.MustCompile(`<img[^>]+data-dm-content="[^"]+"[^>]+>`)
+
+	strValue := value.(string)
+
+	imagePrefix := util.GetConfig("general", "var_baseurl")
+	replaceFunc := func(currentStr string) string {
+		re2 := regexp.MustCompile(`([^ =]+)="([0-9a-zA-Z]|;)+"`)
+		attributes := re2.FindAllString(currentStr, -1)
+		attributeMap := map[string]string{}
+		for _, attStr := range attributes {
+			arr := strings.Split(attStr, "=")
+			name := arr[0]
+			value := strings.ReplaceAll(arr[1], `"`, "")
+			attributeMap[name] = value
+		}
+		contentInfo := strings.Split(attributeMap["data-dm-content"], ";")
+		if len(contentInfo) <= 1 {
+			log.Warning("data-dm-content has wrong format, should be <contenttype>;<cuid>, no replace done. - "+currentStr, "output", ctx)
+			return currentStr
+		}
+
+		condition := db.Cond("c.cuid", contentInfo[1])
+		content, _ := querier.Fetch(ctx, contentInfo[0], condition)
+		widthStr := ""
+		if width, ok := attributeMap["width"]; ok {
+			widthStr = `width="` + width + `"`
+		}
+
+		heightStr := ""
+		if height, ok := attributeMap["height"]; ok {
+			heightStr = `height="` + height + `"`
+		}
+
+		dataAttribute := `data-dm-content="` + attributeMap["data-dm-content"] + `"`
+
+		if content == nil {
+			//to do: check reason(might be missing access) and give log, and output different image
+			return fmt.Sprintf(`<img src="not-available.png" %v %v %v />`, widthStr, heightStr, dataAttribute) //todo: make it configurable
+		}
+
+		path := imagePrefix + content.Value("image").(string)
+
+		result := fmt.Sprintf(`<img src="%v" %v %v %v />`, path, widthStr, heightStr, dataAttribute)
+		return result
+	}
+	result := re.ReplaceAllStringFunc(strValue, replaceFunc)
+	return result
 }
 
 /** Checkbox handler ***/
@@ -109,7 +161,7 @@ func (handler CheckboxHandler) LoadInput(input interface{}, mode string) (interf
 	str := fmt.Sprint(input)
 	valueInt, err := strconv.Atoi(str)
 	if err != nil || (valueInt != 0 && valueInt != 1) {
-		return nil, NewValidationError("Only allow 1 or 0")
+		return nil, fieldtype.NewValidationError("Only allow 1 or 0")
 	}
 	return valueInt, nil
 }
@@ -128,7 +180,7 @@ func (handler RadioHandler) LoadInput(input interface{}, mode string) (interface
 	str := fmt.Sprint(input)
 	length := len(str)
 	if length > 30 {
-		return nil, NewValidationError("Radio value can not be more than 30 characters")
+		return nil, fieldtype.NewValidationError("Radio value can not be more than 30 characters")
 	}
 	return str, nil
 }
@@ -161,20 +213,20 @@ func (handler DatetimeHandler) LoadInput(input interface{}, mode string) (interf
 	if !strings.Contains(str, ":") {
 		value, err := time.Parse("2006-01-02", str)
 		if err != nil {
-			return nil, NewValidationError("Wrong format, only allow 2006-01-02")
+			return nil, fieldtype.NewValidationError("Wrong format, only allow 2006-01-02")
 		}
 		return value, nil
 	} else {
 		if strings.Contains(str, " ") {
 			value, err := time.Parse("2006-01-02 15:04:05", str)
 			if err != nil {
-				return nil, NewValidationError("Wrong format, only allow like 2006-01-02 15:04:05")
+				return nil, fieldtype.NewValidationError("Wrong format, only allow like 2006-01-02 15:04:05")
 			}
 			return value, nil
 		} else {
 			value, err := time.Parse(time.RFC3339, str)
 			if err != nil {
-				return nil, NewValidationError("Wrong format, only allow RFC3339 format")
+				return nil, fieldtype.NewValidationError("Wrong format, only allow RFC3339 format")
 			}
 			return value, nil
 		}
@@ -199,47 +251,47 @@ func ConvertParameters(params definition.FieldParameters, paramStruct interface{
 }
 
 func init() {
-	Register(
-		Definition{
+	fieldtype.Register(
+		fieldtype.Definition{
 			Name:     "text",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) Handler {
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 				return TextHandler{FieldDef: def}
 			}})
 
-	Register(
-		Definition{Name: "richtext",
+	fieldtype.Register(
+		fieldtype.Definition{Name: "richtext",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) Handler {
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 				return RichTextHandler{FieldDef: def}
 			}})
 
-	Register(
-		Definition{Name: "password",
+	fieldtype.Register(
+		fieldtype.Definition{Name: "password",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) Handler {
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 				return TextHandler{FieldDef: def}
 			}})
 
-	Register(
-		Definition{Name: "checkbox",
+	fieldtype.Register(
+		fieldtype.Definition{Name: "checkbox",
 			DataType: "int",
-			NewHandler: func(def definition.FieldDef) Handler {
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 				return CheckboxHandler{FieldDef: def}
 			}})
 
-	Register(
-		Definition{Name: "radio",
+	fieldtype.Register(
+		fieldtype.Definition{Name: "radio",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) Handler {
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 				return RadioHandler{FieldDef: def}
 			}})
 
-	Register(
-		Definition{Name: "datetime",
+	fieldtype.Register(
+		fieldtype.Definition{Name: "datetime",
 			DataType: "time.Time",
 			Package:  "time",
-			NewHandler: func(def definition.FieldDef) Handler {
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 				return DatetimeHandler{FieldDef: def}
 			}})
 

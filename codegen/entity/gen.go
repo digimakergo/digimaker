@@ -10,6 +10,7 @@ import (
 	_ "github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
+	_ "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -26,11 +27,11 @@ func main() {
 func Generate(subFolder string) error {
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).
-		ParseFiles(util.DMPath() + "/codegen/contenttypes/contenttype.tpl"))
+		ParseFiles(util.DMPath() + "/codegen/entity/contenttype.tpl"))
 
 	tplEntity := template.Must(template.New("contenttype_entity.tpl").
 		Funcs(funcMap()).
-		ParseFiles(util.DMPath() + "/codegen/contenttypes/contenttype_entity.tpl"))
+		ParseFiles(util.DMPath() + "/codegen/entity/contenttype_entity.tpl"))
 
 	fieldtypeMap := fieldtype.GetAllFieldtype()
 

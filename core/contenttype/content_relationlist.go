@@ -7,13 +7,12 @@ import (
 	"encoding/json"
 	"sort"
 
-	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/pkg/errors"
 )
 
 //ContentRelations as a struct which is linked into a content.
 //The purpose is for binding & access.
-type ContentRelationList map[string]fieldtype.RelationList
+type ContentRelationList map[string]RelationList
 
 func (relations *ContentRelationList) Scan(src interface{}) error {
 	var source []byte
@@ -26,7 +25,7 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 		return errors.New("Unknow scan value.")
 	}
 
-	var relationList []fieldtype.Relation
+	var relationList []Relation
 	err := json.Unmarshal(source, &relationList)
 	if err != nil {
 		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+string(source))
@@ -44,7 +43,7 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 }
 
 //Convert list into Map when scaning
-func (relations ContentRelationList) groupRelations(list []fieldtype.Relation) ContentRelationList {
+func (relations ContentRelationList) groupRelations(list []Relation) ContentRelationList {
 	//todo: validate keys and make sure it's pre defined
 	relationMap := ContentRelationList{}
 	for _, relation := range list {
@@ -55,24 +54,10 @@ func (relations ContentRelationList) groupRelations(list []fieldtype.Relation) C
 				rl = append(rl, relation)
 				relationMap[identifier] = rl
 			} else {
-				relationMap[identifier] = fieldtype.RelationList{relation}
+				relationMap[identifier] = RelationList{relation}
 			}
 		}
 	}
 
 	return relationMap
-}
-
-//Get relationlist field, create if it's not in map.
-//nb: does't checking if it's a relationlist type.
-func (relations ContentRelationList) GetField(identifier string) fieldtype.RelationList {
-	if len(relations) == 0 {
-		return nil
-	} else {
-		if rl, ok := relations[identifier]; ok {
-			return rl
-		} else {
-			return nil
-		}
-	}
 }

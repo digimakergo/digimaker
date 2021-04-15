@@ -1,10 +1,5 @@
 package contenttype
 
-import (
-	"github.com/digimakergo/digimaker/core/definition"
-	"github.com/friendsofgo/errors"
-)
-
 type ContentCommon struct {
 	CID        int    `boil:"cid" json:"cid" toml:"cid" yaml:"cid"`
 	Version    int    `boil:"version" json:"version" toml:"version" yaml:"version"`
@@ -90,24 +85,4 @@ func (c *ContentCommon) GetCID() int {
 
 func (c *ContentCommon) GetRelations() ContentRelationList {
 	return c.Relations
-}
-
-//FinishBind sets related data after data binding. It will be better if SQLBoiler support interface for customized  binding for struct.
-func FinishBind(content ContentTyper) error {
-	contentType := content.ContentType()
-	def, _ := definition.GetDefinition(contentType)
-	if def.HasRelationlist() {
-		relationMap := content.GetRelations()
-		for identifier, fieldDef := range def.FieldMap {
-			if fieldDef.FieldType == "relationlist" {
-				if value, ok := relationMap[identifier]; ok {
-					err := content.SetValue(identifier, value)
-					if err != nil {
-						return errors.Wrap(err, "Error when binding relationlist "+identifier)
-					}
-				}
-			}
-		}
-	}
-	return nil
 }

@@ -10,6 +10,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/query/querier"
 )
 
 //All the definition of fieldtypes
@@ -29,6 +30,10 @@ type Handler interface {
 
 	//output database field. todo: can support this to generate database field automatically
 	DBField() string
+}
+
+type Outputer interface {
+	Ouput(ctx context.Context, querier querier.Querier, value interface{}) interface{}
 }
 
 type ValidationError struct {
@@ -61,11 +66,6 @@ type Event interface {
 
 type StoreHandler interface {
 	Store(ctx context.Context, value interface{}, contentType string, cid int, transaction *sql.Tx) error
-}
-
-//Ouput is implemented when fieldtype needs converting when outputting
-type Outputer interface {
-	Ouput(value interface{}, params map[string]interface{}) interface{}
 }
 
 var fieldtypeMap map[string]Definition = map[string]Definition{}

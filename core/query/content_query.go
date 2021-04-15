@@ -84,20 +84,7 @@ func FetchByCUID(ctx context.Context, contentType string, cuid string) (contentt
 
 // Fetch fetches first content based on condition.
 func Fetch(ctx context.Context, contentType string, condition db.Condition) (contenttype.ContentTyper, error) {
-	content := contenttype.NewInstance(contentType)
-	condition = condition.Limit(0, 1)
-	_, err := db.BindContent(ctx, content, contentType, condition)
-	if err != nil {
-		return nil, err
-	}
-	err = contenttype.FinishBind(content)
-	if err != nil {
-		return nil, err
-	}
-	if content.GetCID() == 0 {
-		return nil, nil
-	}
-	return content, err
+	return DefaultQuerier.Fetch(ctx, contentType, condition)
 }
 
 func LocationList(condition db.Condition) ([]contenttype.Location, int, error) {
@@ -246,43 +233,11 @@ func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 
 // ListWithUser fetches a list of content which the user has read permission to.
 func ListWithUser(ctx context.Context, userID int, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
-	//permission condition
-	permissionCondition := accessCondition(userID, contentType, ctx)
-	condition = condition.And(permissionCondition)
-
-	//fetch
-	list, count, err := List(ctx, contentType, condition)
-	return list, count, err
+	return DefaultQuerier.ListWithUser(ctx, userID, contentType, condition)
 }
 
-// List fetches a list of content based on conditions. This is a database level 'list' WITHOUT permission check.
-//
-// For permission included, use query.ListWithUser
-// For list under a tree root, use query.SubList
-//
-// Condition example:
-//  db.Cond("l.parent_id", 4).Cond("author", 1).Cond("modified >", "2020-03-13")
-//
-// where content field can be used directly or with c. as prefix(eg. "c.author"), but location field need a l. prefix(eg. l.parent_id)
 func List(ctx context.Context, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
-	contentList := contenttype.NewList(contentType)
-	count, err := db.BindContent(ctx, contentList, contentType, condition)
-	if err != nil {
-		return nil, count, err
-	}
-	//todo: count here. need to use ContentList type in NewList
-	// if len(condition.Option.LimitArr) == 0 {
-	// 	count = len(contentList)
-	// }
-
-	result := contenttype.ToList(contentType, contentList)
-	for _, content := range result {
-		err := contenttype.FinishBind(content)
-		if err != nil {
-			return nil, -1, err
-		}
-	}
-	return result, count, err
+	return DefaultQuerier.List(ctx, contentType, condition)
 }
 
 //return a version content
