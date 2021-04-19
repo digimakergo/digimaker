@@ -35,23 +35,33 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	id, err := strconv.Atoi(params["id"])
-	if err != nil {
-		HandleError(errors.New("Invalid id"), w)
-		return
-	}
 	var content contenttype.ContentTyper
 	contentType := params["contenttype"]
+	var err error
 	if contentType != "" {
-		content, err = query.FetchByCID(r.Context(), contentType, id)
+		id, err := strconv.Atoi(params["id"])
+		if err != nil {
+			if len(params["id"]) != 20 {
+				HandleError(errors.New("Not valid cuid"), w)
+				return
+			}
+			content, err = query.FetchByCUID(r.Context(), contentType, params["id"])
+		} else {
+			content, err = query.FetchByCID(r.Context(), contentType, id)
+		}
 	} else {
+		id, err := strconv.Atoi(params["id"])
+		if err != nil {
+			HandleError(errors.New("Invalid id"), w)
+			return
+		}
 		content, err = query.FetchByID(r.Context(), id)
 	}
 	if err != nil {
 		HandleError(err, w)
 		return
 	} else {
-		if !permission.CanRead(r.Context(), userID, content) {
+		if content != nil && !permission.CanRead(r.Context(), userID, content) {
 			HandleError(errors.New("Doesn't have permission."), w, 403)
 			return
 		}
@@ -59,7 +69,6 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 		data, _ := contenttype.ContentToJson(content) //todo: use export for same serilization?
 		w.Write([]byte(data))
 	}
-
 }
 
 func GetVersion(w http.ResponseWriter, r *http.Request) {
@@ -387,7 +396,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	RegisterRoute("/content/get/{id:[0-9]+}", GetContent)
-	RegisterRoute("/content/get/{contenttype}/{id:[0-9]+}", GetContent)
+	RegisterRoute("/content/get/{contenttype}/{id}", GetContent)
 	RegisterRoute("/content/version/{id:[0-9]+}/{version:[0-9]+}", GetVersion)
 
 	RegisterRoute("/content/treemenu/{id:[0-9]+}", TreeMenu)
