@@ -26,7 +26,7 @@ func DB() (*sql.DB, error) {
 		connString := dbConfig["username"] + ":" + dbConfig["password"] +
 			"@" + dbConfig["protocal"] +
 			"(" + dbConfig["host"] + ")/" +
-			dbConfig["database"] //todo: fix what if there is @ or / in the password?
+			dbConfig["database"] + "?parseTime=true" //todo: fix what if there is @ or / in the password?
 
 		currentDB, err := sql.Open(dbConfig["type"], connString)
 		if err != nil {
