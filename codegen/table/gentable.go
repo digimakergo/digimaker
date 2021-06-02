@@ -8,13 +8,14 @@ import (
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
+	_ "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
 func main() {
 	contenttypes := []string{}
 	if len(os.Args) >= 2 && os.Args[1] != "" {
-		util.Split(os.Args[1], ",")
+		contenttypes = util.Split(os.Args[1], ",")
 	} else {
 		contenttypeList := definition.GetDefinitionList()["default"]
 		for identifier, _ := range contenttypeList {
