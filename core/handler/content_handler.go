@@ -262,7 +262,7 @@ func (ch *ContentHandler) Create(contentType string, inputs InputMap, userId int
 
 	log.Debug("Data committed.", "contenthandler.create", ch.Context)
 
-	log.TickTiming(ch.Context, "contenthandler_create.database")
+	//log.TickTiming(ch.Context, "contenthandler_create.database")
 	return content, ValidationResult{}, nil
 }
 

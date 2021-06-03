@@ -206,9 +206,27 @@ func EnableUser(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("1"))
 }
 
+func FetchUserRoles(w http.ResponseWriter, r *http.Request) {
+	currentUserID := CheckUserID(r.Context(), w)
+	if currentUserID == 0 {
+		return
+	}
+	//todo: check permission
+	params := mux.Vars(r)
+	userID, _ := strconv.Atoi(params["user"])
+	list, err := handler.FetchUserRoles(r.Context(), userID)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	data, _ := json.Marshal(list)
+	w.Write(data)
+}
+
 func init() {
 	RegisterRoute("/user/current/{site}", CurrentUser)
 	RegisterRoute("/user/resetpassword/{email}", ResetPassword)
 	RegisterRoute("/user/enable/{type}", EnableUser)
+	RegisterRoute("/user/roles/{user}", FetchUserRoles)
 	RegisterRoute("/user/resetpassword-confirm/{hash}", ResetPasswordDone)
 }

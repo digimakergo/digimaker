@@ -8,6 +8,7 @@ import (
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -68,4 +69,21 @@ func Enable(user contenttype.ContentTyper, enable bool, userId int, ctx context.
 		}
 	}
 	return nil
+}
+
+func FetchUserRoles(ctx context.Context, userID int) ([]contenttype.ContentTyper, error) {
+	userRoleList := []permission.UserRole{}
+
+	dbHandler := db.DBHanlder()
+	err := dbHandler.GetEntity("dm_user_role", db.Cond("user_id", userID), nil, nil, &userRoleList)
+	if err != nil {
+		return nil, err
+	}
+	roleIds := []int{}
+	for _, item := range userRoleList {
+		roleIds = append(roleIds, item.RoleID)
+	}
+	querier := Querier()
+	list, _, err := querier.List("role", db.Cond("c.id", roleIds), nil, nil, false)
+	return list, err
 }
