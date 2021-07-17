@@ -82,6 +82,23 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 	w.Write(data)
 }
 
+func UserRoles(w http.ResponseWriter, r *http.Request) {
+	currentUserID := CheckUserID(r.Context(), w)
+	if currentUserID == 0 {
+		return
+	}
+	//todo: check permission
+	params := mux.Vars(r)
+	userID, _ := strconv.Atoi(params["user"])
+	list, err := query.FetchUserRoles(r.Context(), userID)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	data, _ := json.Marshal(list)
+	w.Write(data)
+}
+
 func AssignUser(w http.ResponseWriter, r *http.Request) {
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
@@ -141,6 +158,7 @@ func UnassignUser(w http.ResponseWriter, r *http.Request) {
 func init() {
 	RegisterRoute("/access/update-fields/current-user", CurrentUserEditField)
 	RegisterRoute("/access/assigned-users", AssignedUsers)
+	RegisterRoute("/access/roles/{user}", UserRoles)
 	RegisterRoute("/access/assign/{role}/{user}", AssignUser)
 	RegisterRoute("/access/unassign/{user}/{role}", UnassignUser)
 }
