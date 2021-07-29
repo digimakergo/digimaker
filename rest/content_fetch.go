@@ -155,7 +155,8 @@ func buildCondition(userid int, def definition.ContentType, query url.Values) (d
 		}
 		condition = condition.And("c.id", cids)
 	}
-	//contain
+
+	//contain. todo: merge with filter below
 	nameStr := query.Get("name")
 
 	if nameStr != "" {
@@ -171,11 +172,22 @@ func buildCondition(userid int, def definition.ContentType, query url.Values) (d
 	for field := range def.FieldMap {
 		value := query.Get("field." + field)
 		if value != "" {
-			condition = condition.And("c."+field, value) //todo: support operator //todo: support more value type(eg. array)
+			operation, val := extraOperation(value)
+			condition = condition.And("c."+field+" "+operation, val)
 		}
 	}
 
 	return condition, nil
+}
+
+//extract operation and return operation+value
+func extraOperation(param string) (string, interface{}) {
+	//todo: support operator //todo: support more value type(eg. array)
+	if strings.HasPrefix(param, "contain:") {
+		value := strings.TrimPrefix(param, "contain:")
+		return "like", "%" + value + "%"
+	}
+	return "", param
 }
 
 func BuildSortby(r *http.Request) []string {
