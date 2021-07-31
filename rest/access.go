@@ -10,7 +10,6 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/gorilla/mux"
@@ -106,25 +105,26 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	roleID, _ := strconv.Atoi(params["role"])
+	role, _ := params["role"]
 	assignedUserID, _ := strconv.Atoi(params["user"])
+
+	assignParams := permission.AssignmentParameters{}
+	decorder := json.NewDecoder(r.Body)
+	err := decorder.Decode(&assignParams)
+	if err != nil {
+		HandleError(errors.New("Assignment parameters wrong format: "+err.Error()), w, 400)
+		return
+	}
 
 	if !permission.HasAccessTo(r.Context(), userID, "access/assign-user", permission.MatchData{}) {
 		HandleError(errors.New("No access"), w)
 		return
 	}
 
-	role, _ := query.FetchByID(r.Context(), roleID)
-	if role == nil {
-		HandleError(errors.New("Role not found"), w, 400)
-		return
-	}
-
-	err := permission.AssignToUser(r.Context(), role.GetCID(), assignedUserID)
+	err = permission.AssignToUser(r.Context(), role, assignedUserID, assignParams)
 
 	if err != nil {
-		log.Error("Error when assigning: "+err.Error(), "")
-		HandleError(errors.New("Error when assigning"), w, 400)
+		HandleError(errors.New("Error when assigning: "+err.Error()), w, 400)
 		return
 	}
 	w.Write([]byte("1"))
@@ -145,9 +145,9 @@ func UnassignUser(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	userID, _ := strconv.Atoi(params["user"])
-	roleID, _ := strconv.Atoi(params["role"])
+	role := params["role"]
 
-	err := permission.RemoveAssignment(r.Context(), userID, roleID)
+	err := permission.RemoveAssignment(r.Context(), userID, role)
 	if err != nil {
 		HandleError(err, w)
 		return

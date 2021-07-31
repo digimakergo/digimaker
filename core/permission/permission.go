@@ -6,6 +6,8 @@ package permission
 
 import (
 	"context"
+	"database/sql/driver"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -54,6 +56,14 @@ func LoadPolicies() error {
 	return nil
 }
 
+func GetRoles() []string {
+	roles := []string{}
+	for role, _ := range rolePolicyMap {
+		roles = append(roles, role)
+	}
+	return roles
+}
+
 func GetPolicyDefinition() map[string]PolicyList {
 	return policyDefinition
 }
@@ -61,10 +71,31 @@ func GetPolicyDefinition() map[string]PolicyList {
 /*************
 User role
 *************/
+type AssignmentParameters map[string]interface{}
+
+func (a AssignmentParameters) Value() (driver.Value, error) {
+	value, err := json.Marshal(a)
+	return value, err
+}
+
+func (a *AssignmentParameters) Scan(value interface{}) error {
+	obj := AssignmentParameters{}
+	if value != nil {
+		err := json.Unmarshal(value.([]byte), &obj)
+		if err != nil {
+			return err
+		}
+		*a = obj
+	}
+	return nil
+}
+
 type UserRole struct {
-	ID     int `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID int `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	RoleID int `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
+	ID         int                  `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID     int                  `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	RoleID     int                  `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
+	Role       string               `boil:"role" json:"role" toml:"role" yaml:"role"`
+	Parameters AssignmentParameters `boil:"parameters" json:"parameters" toml:"parameters" yaml:"parameters"`
 }
 
 type key int
@@ -101,18 +132,24 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
 	}
 	//get permissions
-	policyList := []Policy{}
-	roleIDs := []int{}
+	result := []Policy{}
 	for _, userRole := range userRoleList {
-		roleIDs = append(roleIDs, userRole.RoleID)
+		policyList := GetRolePolicies(ctx, userRole.Role)
+		//set variables to "{assigned}"
+		params := userRole.Parameters
+		for _, policy := range policyList {
+			for key, value := range policy.LimitedTo {
+				if v, ok := value.(string); ok && v == "{assigned}" {
+					if assignedValue, ok := params[key]; ok {
+						policy.LimitedTo[key] = assignedValue
+						log.Debug("Setting variable to "+key+" :"+fmt.Sprint(assignedValue), "permission", ctx)
+					}
+				}
+			}
+			result = append(result, policy)
+		}
 	}
-
-	currentPolicyList := GetRolePolicies(ctx, roleIDs)
-	for _, policy := range currentPolicyList {
-		policyList = append(policyList, policy)
-	}
-
-	return policyList, nil
+	return result, nil
 }
 
 // GetLimitsFromPolicy gets all limits from a policies
@@ -131,31 +168,21 @@ func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]int
 }
 
 // GetRolePolicies returns policies of role ids
-func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
-	roles := db.DatamapList{}
-	_, err := db.BindEntity(ctx, &roles, "dm_role", db.Cond("id", roleIDs))
-	if err != nil {
-		log.Error("Can not get role on role ids: "+fmt.Sprint(roleIDs), "", ctx)
-		return nil
-	}
+func GetRolePolicies(ctx context.Context, role string) []Policy {
 
 	policyIdentifiers := []string{}
 	policies := []Policy{}
-	for _, role := range roles {
-		roleIdentifier := role["identifier"].(string)
-
-		//loop policies under the role
-		for _, policyIdentifier := range rolePolicyMap[roleIdentifier] {
-			//todo: different roles may have different context(eg. target) under which the policies shouldn't merge
-			if util.Contains(policyIdentifiers, policyIdentifier) {
-				log.Warning("Policelist "+policyIdentifier+" is duplicated on roles. Ignored", "permission", ctx)
-				continue
-			}
-			policyIdentifiers = append(policyIdentifiers, policyIdentifier)
-
-			currentPolicies := policyDefinition[policyIdentifier]
-			policies = append(policies, currentPolicies...)
+	//loop policies under the role
+	for _, policyIdentifier := range rolePolicyMap[role] {
+		//todo: different roles may have different context(eg. target) under which the policies shouldn't merge
+		if util.Contains(policyIdentifiers, policyIdentifier) {
+			log.Warning("Policelist "+policyIdentifier+" is duplicated on roles. Ignored", "permission", ctx)
+			continue
 		}
+		policyIdentifiers = append(policyIdentifiers, policyIdentifier)
+
+		currentPolicies := policyDefinition[policyIdentifier]
+		policies = append(policies, currentPolicies...)
 	}
 
 	log.Debug("Got policy identifiers: "+fmt.Sprintln(policyIdentifiers), "permission", ctx)
@@ -163,27 +190,33 @@ func GetRolePolicies(ctx context.Context, roleIDs []int) []Policy {
 }
 
 // AssignToUser assigns a role to a user
-func AssignToUser(ctx context.Context, roleID int, userID int) error {
-	//todo: check if role exisit. maybe need role entity?
+func AssignToUser(ctx context.Context, role string, userID int, params AssignmentParameters) error {
+	roles := GetRoles()
+	if !util.Contains(roles, role) {
+		return errors.New("Role " + role + " doesn't exist.")
+	}
+
 	//todo: check if user exist.
-	count, err := db.Count("dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
+	count, err := db.Count("dm_user_role", db.Cond("user_id", userID).Cond("role", role))
 	if err != nil {
 		return err
 	}
 	if count > 0 {
-		return errors.New("Already assigned.")
+		return errors.New("Already assigned")
 	}
+
 	//todo: put db.Insert/update/delete into entity of UserRole(better generate automatically)
-	_, err = db.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
+	_, err = db.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role": role, "parameters": params})
 	if err != nil {
-		return err
+		log.Error("Assign to user: "+err.Error(), "")
+		return errors.New("Error when inserting access data")
 	}
 	return nil
 }
 
 //RemoveAssignment removes a user from role assignment
-func RemoveAssignment(ctx context.Context, userID int, roleID int) error {
-	err := db.Delete(ctx, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
+func RemoveAssignment(ctx context.Context, userID int, role string) error {
+	err := db.Delete(ctx, "dm_user_role", db.Cond("user_id", userID).Cond("role", role))
 	if err != nil {
 		return err
 	}
