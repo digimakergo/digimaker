@@ -151,6 +151,20 @@ func (r RichTextHandler) Ouput(ctx context.Context, querier querier.Querier, val
 	return result
 }
 
+/** Password handler **/
+type PasswordHandler struct {
+	definition.FieldDef
+}
+
+func (handler PasswordHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+	str := fmt.Sprint(input)
+	return util.HashPassword(str)
+}
+
+func (handler PasswordHandler) DBField() string {
+	return "BINARY(60)"
+}
+
 /** Checkbox handler ***/
 type CheckboxHandler struct {
 	definition.FieldDef
@@ -270,7 +284,7 @@ func init() {
 		fieldtype.Definition{Name: "password",
 			DataType: "string",
 			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
-				return TextHandler{FieldDef: def}
+				return PasswordHandler{FieldDef: def}
 			}})
 
 	fieldtype.Register(
