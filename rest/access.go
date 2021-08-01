@@ -10,6 +10,9 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
+	"github.com/digimakergo/digimaker/core/handler"
+	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/gorilla/mux"
@@ -105,14 +108,24 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	params := mux.Vars(r)
-	role, _ := params["role"]
 	assignedUserID, _ := strconv.Atoi(params["user"])
 
-	assignParams := permission.AssignmentParameters{}
+	assignParams := struct {
+		Parameters fieldtypes.Map `json:"parameters"`
+		RoleID     int            `json:"role_id"`
+		Role       string         `json:"role"`
+		Title      string         `json:"title"`
+	}{}
+
 	decorder := json.NewDecoder(r.Body)
 	err := decorder.Decode(&assignParams)
 	if err != nil {
 		HandleError(errors.New("Assignment parameters wrong format: "+err.Error()), w, 400)
+		return
+	}
+
+	if assignParams.RoleID == 0 && (assignParams.Role == "" || assignParams.Title == "") {
+		HandleError(errors.New("Please input role id or role & title"), w, 400)
 		return
 	}
 
@@ -121,7 +134,26 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = permission.AssignToUser(r.Context(), role, assignedUserID, assignParams)
+	if assignParams.RoleID != 0 {
+		err = permission.AssignToUser(r.Context(), assignParams.RoleID, assignedUserID)
+	} else {
+		input := handler.InputMap{}
+		input["title"] = assignParams.Title
+		input["identifier"] = assignParams.Role
+		input["parameters"] = assignParams.Parameters
+		role, result, createErr := handler.Create(r.Context(), userID, "role", input, 7) //todo: make parent id as optional
+		if !result.Passed() {
+			data, _ := json.Marshal(result)
+			w.Write(data)
+			return
+		}
+		if createErr != nil {
+			log.Error(createErr.Error(), "permission")
+			HandleError(errors.New("Error when creating role"), w)
+			return
+		}
+		err = permission.AssignToUser(r.Context(), role.GetCID(), assignedUserID)
+	}
 
 	if err != nil {
 		HandleError(errors.New("Error when assigning: "+err.Error()), w, 400)
@@ -159,6 +191,6 @@ func init() {
 	RegisterRoute("/access/update-fields/current-user", CurrentUserEditField)
 	RegisterRoute("/access/assigned-users", AssignedUsers)
 	RegisterRoute("/access/roles/{user}", UserRoles)
-	RegisterRoute("/access/assign/{role}/{user}", AssignUser)
+	RegisterRoute("/access/assign/{user}", AssignUser)
 	RegisterRoute("/access/unassign/{user}/{role}", UnassignUser)
 }

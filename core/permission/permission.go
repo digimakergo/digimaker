@@ -6,12 +6,11 @@ package permission
 
 import (
 	"context"
-	"database/sql/driver"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 
@@ -71,31 +70,17 @@ func GetPolicyDefinition() map[string]PolicyList {
 /*************
 User role
 *************/
-type AssignmentParameters map[string]interface{}
-
-func (a AssignmentParameters) Value() (driver.Value, error) {
-	value, err := json.Marshal(a)
-	return value, err
-}
-
-func (a *AssignmentParameters) Scan(value interface{}) error {
-	obj := AssignmentParameters{}
-	if value != nil {
-		err := json.Unmarshal(value.([]byte), &obj)
-		if err != nil {
-			return err
-		}
-		*a = obj
-	}
-	return nil
-}
 
 type UserRole struct {
-	ID         int                  `boil:"id" json:"id" toml:"id" yaml:"id"`
-	UserID     int                  `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
-	RoleID     int                  `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
-	Role       string               `boil:"role" json:"role" toml:"role" yaml:"role"`
-	Parameters AssignmentParameters `boil:"parameters" json:"parameters" toml:"parameters" yaml:"parameters"`
+	ID     int `boil:"id" json:"id" toml:"id" yaml:"id"`
+	UserID int `boil:"user_id" json:"user_id" toml:"user_id" yaml:"user_id"`
+	RoleID int `boil:"role_id" json:"role_id" toml:"role_id" yaml:"role_id"`
+}
+
+type Role struct {
+	ID         int            `boil:"id" json:"id" toml:"id" yaml:"id"`
+	Identifier string         `boil:"identifier" json:"identifier" toml:"identifier" yaml:"identifier"`
+	Parameters fieldtypes.Map `boil:"parameters" json:"parameters" toml:"parameters" yaml:"parameters"`
 }
 
 type key int
@@ -131,12 +116,16 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
 	}
+
 	//get permissions
 	result := []Policy{}
 	for _, userRole := range userRoleList {
-		policyList := GetRolePolicies(ctx, userRole.Role)
+		role := Role{}
+		db.BindEntity(ctx, &role, "dm_role", db.Cond("id", userRole.RoleID))
+
+		policyList := GetRolePolicies(ctx, role.Identifier)
 		//set variables to "{assigned}"
-		params := userRole.Parameters
+		params := role.Parameters
 		for _, policy := range policyList {
 			for key, value := range policy.LimitedTo {
 				if v, ok := value.(string); ok && v == "{assigned}" {
@@ -190,14 +179,10 @@ func GetRolePolicies(ctx context.Context, role string) []Policy {
 }
 
 // AssignToUser assigns a role to a user
-func AssignToUser(ctx context.Context, role string, userID int, params AssignmentParameters) error {
-	roles := GetRoles()
-	if !util.Contains(roles, role) {
-		return errors.New("Role " + role + " doesn't exist.")
-	}
+func AssignToUser(ctx context.Context, roleID int, userID int) error {
 
 	//todo: check if user exist.
-	count, err := db.Count("dm_user_role", db.Cond("user_id", userID).Cond("role", role))
+	count, err := db.Count("dm_user_role", db.Cond("user_id", userID).Cond("role_id", roleID))
 	if err != nil {
 		return err
 	}
@@ -206,7 +191,7 @@ func AssignToUser(ctx context.Context, role string, userID int, params Assignmen
 	}
 
 	//todo: put db.Insert/update/delete into entity of UserRole(better generate automatically)
-	_, err = db.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role": role, "parameters": params})
+	_, err = db.Insert(ctx, "dm_user_role", map[string]interface{}{"user_id": userID, "role_id": roleID})
 	if err != nil {
 		log.Error("Assign to user: "+err.Error(), "")
 		return errors.New("Error when inserting access data")
