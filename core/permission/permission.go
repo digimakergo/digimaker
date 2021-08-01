@@ -201,7 +201,7 @@ func AssignToUser(ctx context.Context, roleID int, userID int) error {
 
 //RemoveAssignment removes a user from role assignment
 func RemoveAssignment(ctx context.Context, userID int, role string) error {
-	err := db.Delete(ctx, "dm_user_role", db.Cond("user_id", userID).Cond("role", role))
+	err := db.Delete(ctx, "dm_user_role", db.Cond("user_id", userID).Cond("role_id", role))
 	if err != nil {
 		return err
 	}

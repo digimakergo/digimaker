@@ -18,6 +18,10 @@ func FetchUserRoles(ctx context.Context, userID int) ([]contenttype.ContentTyper
 	for _, item := range userRoleList {
 		roleIds = append(roleIds, item.RoleID)
 	}
-	list, _, err := List(ctx, "role", db.Cond("c.id", roleIds))
-	return list, err
+	if len(roleIds) > 0 {
+		list, _, err := List(ctx, "role", db.Cond("c.id", roleIds))
+		return list, err
+	}
+	return nil, nil
+
 }

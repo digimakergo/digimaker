@@ -23,6 +23,8 @@ func (a *Map) Scan(value interface{}) error {
 			return err
 		}
 		*a = obj
+	} else {
+		*a = nil
 	}
 	return nil
 }
