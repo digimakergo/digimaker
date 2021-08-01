@@ -32,7 +32,16 @@ func CurrentUser(w http.ResponseWriter, r *http.Request) {
 	if user != nil {
 		hasAccess := permission.HasAccessTo(ctx, userID, "site/access", map[string]interface{}{"site": site})
 		if hasAccess {
-			data, err := json.Marshal(user)
+			roles, _ := query.FetchUserRoles(ctx, userID)
+			roleResult := []string{}
+			for _, role := range roles {
+				roleResult = append(roleResult, role.Value("identifier").(string))
+			}
+
+			result, _ := contenttype.ContentToMap(user)
+			result["roles"] = roleResult
+
+			data, err := json.Marshal(result)
 			if err != nil {
 				log.Error(err.Error(), "")
 			}
