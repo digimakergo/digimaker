@@ -10,10 +10,10 @@ import (
 	"strconv"
 	"strings"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/digimakergo/digimaker/core/auth"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
+	"github.com/golang-jwt/jwt"
 
 	"github.com/digimakergo/digimaker/core/util"
 )
