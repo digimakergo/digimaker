@@ -78,7 +78,7 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 	}
 
 	contentDefinition := content.Definition()
-	if !contentDefinition.HasLocation {
+	if !contentDefinition.HasLocation && contentDefinition.HasDataField("location_id") {
 		content.SetValue("location_id", parentID)
 	}
 

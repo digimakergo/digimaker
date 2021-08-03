@@ -223,7 +223,9 @@ func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 			}
 		}
 	} else {
-		condition = condition.Cond("location_id", rootLocation.ID)
+		if def.HasDataField("location_id") {
+			condition = condition.Cond("location_id", rootLocation.ID)
+		}
 	}
 
 	//fetch
