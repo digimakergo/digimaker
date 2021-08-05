@@ -141,15 +141,10 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 		input["title"] = assignParams.Title
 		input["identifier"] = assignParams.Role
 		input["parameters"] = assignParams.Parameters
-		role, result, createErr := handler.Create(r.Context(), userID, "role", input, 7) //todo: make parent id as optional
-		if !result.Passed() {
-			data, _ := json.Marshal(result)
-			w.Write(data)
-			return
-		}
+		role, createErr := handler.Create(r.Context(), userID, "role", input, 7) //todo: make parent id as optional
 		if createErr != nil {
 			log.Error(createErr.Error(), "permission")
-			HandleError(errors.New("Error when creating role"), w)
+			HandleError(err, w)
 			return
 		}
 		err = permission.AssignToUser(r.Context(), role.GetCID(), assignedUserID)

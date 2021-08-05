@@ -138,23 +138,23 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 }
 
 // Create creates a content(same behavior as Draft&Publish but store published version directly)
-func Create(ctx context.Context, userID int, contentType string, inputs InputMap, parentID int) (contenttype.ContentTyper, ValidationResult, error) {
+func Create(ctx context.Context, userID int, contentType string, inputs InputMap, parentID int) (contenttype.ContentTyper, error) {
 	parent, _ := query.FetchByID(ctx, parentID)
 	if parent == nil {
-		return nil, ValidationResult{}, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
+		return nil, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
 	}
 
 	contentDefinition, _ := definition.GetDefinition(contentType)
 	fieldsDefinition := contentDefinition.FieldMap
 
 	if !permission.CanCreate(ctx, parent, contentType, userID) {
-		return nil, ValidationResult{}, errors.New("User doesn't have access to create")
+		return nil, errors.New("User doesn't have access to create")
 	}
 
 	//Validate
 	valid, validationResult := Validate(contentType, fieldsDefinition, inputs, true)
 	if !valid {
-		return nil, validationResult, nil
+		return nil, validationResult
 	}
 
 	//validate from contenttype handler
@@ -163,7 +163,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 		log.Debug("Validating from content type handler", "contenthandler.validate", ctx)
 		valid, validationResult = validator.ValidateCreate(ctx, inputs, parentID)
 		if !valid {
-			return nil, validationResult, nil
+			return nil, validationResult
 		}
 	}
 
@@ -182,7 +182,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 				log.Debug("Invoking before storing on field: "+identifier, "handler", ctx)
 				value, err = fieldtypeEvent.BeforeStore(value, nil, "create")
 				if err != nil {
-					return nil, ValidationResult{}, err
+					return nil, err
 				}
 			}
 			content.SetValue(identifier, value)
@@ -208,7 +208,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	//Create transaction
 	tx, err := db.CreateTx()
 	if err != nil {
-		return nil, ValidationResult{}, errors.New("Can't get transaction")
+		return nil, errors.New("Can't get transaction")
 	}
 
 	//Save content and location if needed
@@ -221,7 +221,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	if err != nil {
 		tx.Rollback()
 		log.Error(err.Error(), "contenthandler.Create", ctx)
-		return nil, ValidationResult{}, errors.Wrap(err, "Create content error")
+		return nil, errors.Wrap(err, "Create content error")
 	}
 
 	//Save version if needed
@@ -230,7 +230,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 		_, err = CreateVersion(ctx, content, versionIfNeeded, tx)
 		if err != nil {
 			log.Error(err.Error(), "contenthandler.Create", ctx)
-			return nil, ValidationResult{}, errors.Wrap(err, "Create version error.")
+			return nil, errors.Wrap(err, "Create version error.")
 		}
 		log.Debug("Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create", ctx)
 	}
@@ -242,7 +242,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 		if err != nil {
 			tx.Rollback()
 			log.Error("Error from callback: "+err.Error(), "contenthandler.create", ctx)
-			return nil, ValidationResult{}, err
+			return nil, err
 		}
 	}
 
@@ -257,7 +257,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	err = InvokeCallback(ctx, "create", true, matchData, content, tx, inputs)
 	if err != nil {
 		tx.Rollback()
-		return nil, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+		return nil, errors.Wrap(err, "Invoking callback error.")
 	}
 
 	//Commit all operations
@@ -265,13 +265,13 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	if err != nil {
 		tx.Rollback()
 		log.Error("Commit error: "+err.Error(), "contenthandler.create", ctx)
-		return nil, ValidationResult{}, errors.Wrap(err, "Commit error.")
+		return nil, errors.Wrap(err, "Commit error.")
 	}
 
 	log.Debug("Data committed.", "contenthandler.create", ctx)
 
 	log.EndTiming(ctx, "contenthandler_create.database")
-	return content, ValidationResult{}, nil
+	return content, nil
 }
 
 //InvokeCallback invokes callbacks based on condition match result
@@ -330,25 +330,25 @@ func CreateVersion(ctx context.Context, content contenttype.ContentTyper, versio
 	return version.ID, nil
 }
 
-func UpdateByContentID(ctx context.Context, contentType string, contentID int, inputs InputMap, userId int) (bool, ValidationResult, error) {
+func UpdateByContentID(ctx context.Context, contentType string, contentID int, inputs InputMap, userId int) (bool, error) {
 	content, err := query.FetchByCID(ctx, contentType, contentID)
 	if err != nil {
-		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via content id.")
+		return false, errors.Wrap(err, "Failed to get content via content id.")
 	}
 	if content.GetCID() == 0 {
-		return false, ValidationResult{}, errors.Wrap(err, "Got empty content.")
+		return false, errors.Wrap(err, "Got empty content.")
 	}
 
 	return Update(ctx, content, inputs, userId)
 }
 
-func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (bool, ValidationResult, error) {
+func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (bool, error) {
 	content, err := query.FetchByID(ctx, id)
 	if err != nil {
-		return false, ValidationResult{}, errors.Wrap(err, "Failed to get content via id.")
+		return false, errors.Wrap(err, "Failed to get content via id.")
 	}
 	if content.GetCID() == 0 {
-		return false, ValidationResult{}, errors.Wrap(err, "Got empty content.")
+		return false, errors.Wrap(err, "Got empty content.")
 	}
 
 	return Update(ctx, content, inputs, userId)
@@ -357,24 +357,24 @@ func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (bool,
 //Update content.
 //The inputs doesn't need to include all required fields. However if it's there,
 // it will check if it's required&empty
-func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputMap, userId int) (bool, ValidationResult, error) {
+func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputMap, userId int) (bool, error) {
 	contentType := content.ContentType()
 	contentDef, _ := definition.GetDefinition(contentType)
 	fieldsDefinition := contentDef.FieldMap
 
 	//permission check
 	if !permission.CanUpdate(ctx, content, userId) {
-		return false, ValidationResult{}, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
+		return false, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
 	}
 	//todo: think about merging 'content/update' and 'content/fields_update'
 	allowedFields, err := permission.GetUpdateFields(ctx, content, userId)
 	if err != nil {
-		return false, ValidationResult{}, err
+		return false, err
 	}
 	if len(allowedFields) > 0 && allowedFields[0] != "*" {
 		for field, _ := range inputs {
 			if _, ok := fieldsDefinition[field]; ok && !util.Contains(allowedFields, field) {
-				return false, ValidationResult{}, errors.New("User doesn't have permission to update field " + field + ".")
+				return false, errors.New("User doesn't have permission to update field " + field + ".")
 			}
 		}
 	}
@@ -383,7 +383,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	log.Debug("Validating", "contenthandler.update", ctx)
 	valid, validationResult := Validate(contentType, fieldsDefinition, inputs, false)
 	if !valid {
-		return false, validationResult, nil
+		return false, validationResult
 	}
 
 	//validate from contenttype handler
@@ -392,7 +392,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		log.Debug("Validating from update handler", "contenthandler.validate", ctx)
 		valid, validationResult = validator.ValidateUpdate(ctx, inputs, content)
 		if !valid {
-			return false, validationResult, nil
+			return false, validationResult
 		}
 	}
 
@@ -408,7 +408,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 			if fieldWithEvent, ok := handler.(fieldtype.Event); ok {
 				value, err = fieldWithEvent.BeforeStore(value, existing, "")
 				if err != nil {
-					return false, ValidationResult{}, err
+					return false, err
 				}
 			}
 			content.SetValue(identifier, value)
@@ -418,7 +418,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	//Save to new version
 	tx, err := db.CreateTx()
 	if err != nil {
-		return false, ValidationResult{}, errors.Wrap(err, "Create transaction error.")
+		return false, errors.Wrap(err, "Create transaction error.")
 	}
 
 	//Save new version and set to content
@@ -429,7 +429,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if err != nil {
 			//todo: rollback here not inside.
 			log.Debug("Create new version failed: "+err.Error(), "contenthandler.update", ctx)
-			return false, ValidationResult{}, errors.Wrap(err, "Can not save version.")
+			return false, errors.Wrap(err, "Can not save version.")
 		}
 		log.Debug("New version created", "contenthandler.update", ctx)
 		content.SetValue("version", version)
@@ -449,7 +449,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 			err := storeHandler.Store(ctx, content.Value(identifier), content.ContentType(), content.GetCID(), tx)
 			if err != nil {
 				tx.Rollback()
-				return false, ValidationResult{}, err
+				return false, err
 			}
 		}
 	}
@@ -458,7 +458,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	if err != nil {
 		tx.Rollback()
 		log.Debug("Saving content failed: "+err.Error(), "contenthandler.update", ctx)
-		return false, ValidationResult{}, errors.Wrap(err, "Saving content error. ")
+		return false, errors.Wrap(err, "Saving content error. ")
 	}
 
 	//Updated location related
@@ -472,7 +472,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if err != nil {
 			tx.Rollback()
 			log.Debug("Updating location failed: "+err.Error(), "contenthandler.update", ctx)
-			return false, ValidationResult{}, errors.Wrap(err, "Updating location info error.")
+			return false, errors.Wrap(err, "Updating location info error.")
 		}
 		log.Debug("Location updated", "contenthandler.update", ctx)
 	}
@@ -484,7 +484,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if err != nil {
 			tx.Rollback()
 			log.Error("Error from callback: "+err.Error(), "contenthandler.update", ctx)
-			return false, ValidationResult{}, err
+			return false, err
 		}
 	}
 
@@ -499,7 +499,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	err = InvokeCallback(ctx, "update", true, matchData, content, tx, inputs)
 	if err != nil {
 		tx.Rollback()
-		return false, ValidationResult{}, errors.Wrap(err, "Invoking callback error.")
+		return false, errors.Wrap(err, "Invoking callback error.")
 	}
 
 	log.Debug("All done. Commitinng.", "contenthandler.update", ctx)
@@ -507,10 +507,10 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	if err != nil {
 		tx.Rollback()
 		log.Error("Commit error: "+err.Error(), "contenthandler.update", ctx)
-		return false, ValidationResult{}, errors.Wrap(err, "Commit error.")
+		return false, errors.Wrap(err, "Commit error.")
 	}
 
-	return true, ValidationResult{}, nil
+	return true, nil
 }
 
 //Move moves contents to target

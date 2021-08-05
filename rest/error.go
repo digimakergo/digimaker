@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/util"
 )
 
@@ -13,10 +14,12 @@ const StatusUnauthed = 403
 const StatusWrongParams = 400
 const StatusExpired = 440
 const StatusNotFound = 404
+const StatusServer = 500
 
 type errorBody struct {
-	Code    string `json:"code"`
-	Message string `json:"message"`
+	Code    string      `json:"code"`
+	Message string      `json:"message"`
+	Detail  interface{} `json:"detail"`
 }
 
 type responseError struct {
@@ -25,15 +28,21 @@ type responseError struct {
 
 func HandleError(err error, w http.ResponseWriter, httpCode ...int) {
 	//todo: output debug info if needed.
-	if len(httpCode) == 0 {
-		w.WriteHeader(StatusWrongParams)
-	} else {
-		w.WriteHeader(httpCode[0])
-	}
+	var statusCode int = StatusServer
 
+	body := errorBody{Code: "10001", Message: err.Error(), Detail: ""} //todo: use error code here
+	var validation handler.ValidationResult
+	if errors.As(err, &validation) {
+		body.Detail = err
+		body.Code = "20001"
+		statusCode = StatusWrongParams
+	}
 	resError := responseError{}
-	resError.Error = errorBody{Code: "10001", Message: err.Error()} //todo: use error code here
+	resError.Error = body
 	errStr, _ := json.Marshal(resError)
+
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(statusCode)
 	w.Write([]byte(errStr))
 }
 

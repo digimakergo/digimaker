@@ -147,12 +147,8 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			success, validateResult, err := handler.Update(r.Context(), user, handler.InputMap{"password": password}, 1)
-			if !success {
-				if !validateResult.Passed() {
-					HandleError(errors.New(validateResult.Fields["password"]), w)
-					return
-				}
+			_, err := handler.Update(r.Context(), user, handler.InputMap{"password": password}, 1)
+			if err != nil {
 				HandleError(err, w)
 				return
 			}

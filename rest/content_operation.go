@@ -52,15 +52,7 @@ func New(w http.ResponseWriter, r *http.Request) {
 	}
 	//todo: add value based on definition
 
-	content, validationResult, err := handler.Create(r.Context(), userID, contentType, inputs, parentInt)
-
-	w.Header().Set("content-type", "application/json")
-	if !validationResult.Passed() {
-		data, _ := json.Marshal(validationResult)
-		w.WriteHeader(400)
-		w.Write(data)
-		return
-	}
+	content, err := handler.Create(r.Context(), userID, contentType, inputs, parentInt)
 
 	if err != nil {
 		HandleError(err, w)
@@ -186,23 +178,11 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	//todo: add value based on definition
 
 	contenttype := params["contenttype"]
-	var result bool
-	var validationResult handler.ValidationResult
 
 	if contenttype == "" {
-		result, validationResult, err = handler.UpdateByID(r.Context(), idInt, inputs, userID)
+		_, err = handler.UpdateByID(r.Context(), idInt, inputs, userID)
 	} else {
-		result, validationResult, err = handler.UpdateByContentID(r.Context(), contenttype, idInt, inputs, userID)
-	}
-
-	if !result {
-		w.Header().Set("content-type", "application/json")
-		if !validationResult.Passed() {
-			data, _ := json.Marshal(validationResult)
-			w.WriteHeader(400)
-			w.Write(data)
-			return
-		}
+		_, err = handler.UpdateByContentID(r.Context(), contenttype, idInt, inputs, userID)
 	}
 
 	if err != nil {
