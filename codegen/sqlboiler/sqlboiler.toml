@@ -25,7 +25,7 @@ whitelist = ['dm_relation','dm_version']
 third_party = ['"github.com/volatiletech/sqlboiler/boil"',
                 '"github.com/volatiletech/sqlboiler/queries/qmhelper"',
                 '"github.com/volatiletech/sqlboiler/strmangle"',
-                '"github.com/pkg/errors"',
+                '"errors"',
                '"github.com/volatiletech/sqlboiler/queries"',
                '. "github.com/digimakergo/digimaker/core/db"',
                '"github.com/digimakergo/digimaker/core/db"']

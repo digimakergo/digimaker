@@ -5,9 +5,10 @@ package contenttype
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 
-	"github.com/pkg/errors"
+	"errors"
 )
 
 //ContentRelations as a struct which is linked into a content.
@@ -28,7 +29,7 @@ func (relations *ContentRelationList) Scan(src interface{}) error {
 	var relationList []Relation
 	err := json.Unmarshal(source, &relationList)
 	if err != nil {
-		return errors.Wrap(err, "Can not convert to Relation. Relation data is not correct: "+string(source))
+		return fmt.Errorf("Can not convert to Relation. Relation data is not correct - %v: %w ", string(source), err)
 	}
 
 	//Sort by priority (highest will be on top)

@@ -7,14 +7,13 @@ package permission
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 
-	"github.com/pkg/errors"
+	"errors"
 )
 
 /*************
@@ -114,7 +113,7 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 	userRoleList := []UserRole{}
 	_, err := db.BindEntity(context.Background(), &userRoleList, "dm_user_role", db.Cond("user_id", userID))
 	if err != nil {
-		return nil, errors.Wrap(err, "Can not get user role by user id: "+strconv.Itoa(userID))
+		return nil, fmt.Errorf("Can not get user role by user id %v: %w", userID, err)
 	}
 
 	//get permissions

@@ -7,10 +7,9 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/digimakergo/digimaker/core/util"
-
-	"github.com/pkg/errors"
 )
 
 var db *sql.DB
@@ -31,7 +30,7 @@ func DB() (*sql.DB, error) {
 		currentDB, err := sql.Open(dbConfig["type"], connString)
 		if err != nil {
 			errorMessage := "[DB]Can not open. error: " + err.Error() + " Conneciton string: " + connString
-			return nil, errors.Wrap(err, errorMessage)
+			return nil, errors.New(errorMessage)
 		}
 		db = currentDB
 	}

@@ -9,6 +9,8 @@ This is a parent struct which consits of location and the content itself(eg. art
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -21,8 +23,6 @@ import (
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
-
-	"github.com/pkg/errors"
 )
 
 type InputMap map[string]interface{}
@@ -104,7 +104,7 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 	if contentDefinition.HasLocation {
 		parent, err := contenttype.GetLocationByID(parentID)
 		if err != nil {
-			return errors.Wrap(err, "Can not get parent location with "+strconv.Itoa(parentID))
+			return fmt.Errorf("Can not get parent location with %v: %w", parentID, err)
 		}
 
 		//Save location
@@ -122,13 +122,13 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 		err = location.Store(ctx, tx)
 
 		if err != nil {
-			return errors.Wrap(err, "Transaction failed in location when saving new location.")
+			return fmt.Errorf("Transaction failed in location when saving new location: %w", err)
 		}
 		location.Hierarchy = parent.Hierarchy + "/" + strconv.Itoa(location.ID)
 		location.MainID = location.ID
 		err = location.Store(ctx, tx)
 		if err != nil {
-			return errors.Wrap(err, "Transaction failed in location when saving location for main_id and hierarchy.")
+			return fmt.Errorf("Transaction failed in location when saving location for main_id and hierarchy: %w", err)
 		}
 
 		//todo: set location to the content
@@ -221,7 +221,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	if err != nil {
 		tx.Rollback()
 		log.Error(err.Error(), "contenthandler.Create", ctx)
-		return nil, errors.Wrap(err, "Create content error")
+		return nil, fmt.Errorf("Create content error: %w", err)
 	}
 
 	//Save version if needed
@@ -230,7 +230,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 		_, err = CreateVersion(ctx, content, versionIfNeeded, tx)
 		if err != nil {
 			log.Error(err.Error(), "contenthandler.Create", ctx)
-			return nil, errors.Wrap(err, "Create version error.")
+			return nil, fmt.Errorf("Create version error. %w", err)
 		}
 		log.Debug("Created version: "+strconv.Itoa(versionIfNeeded), "contenthandler.Create", ctx)
 	}
@@ -257,7 +257,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	err = InvokeCallback(ctx, "create", true, matchData, content, tx, inputs)
 	if err != nil {
 		tx.Rollback()
-		return nil, errors.Wrap(err, "Invoking callback error.")
+		return nil, fmt.Errorf("Invoking callback error: %w", err)
 	}
 
 	//Commit all operations
@@ -265,7 +265,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	if err != nil {
 		tx.Rollback()
 		log.Error("Commit error: "+err.Error(), "contenthandler.create", ctx)
-		return nil, errors.Wrap(err, "Commit error.")
+		return nil, fmt.Errorf("Commit error: %w", err)
 	}
 
 	log.Debug("Data committed.", "contenthandler.create", ctx)
@@ -312,7 +312,7 @@ func CreateVersion(ctx context.Context, content contenttype.ContentTyper, versio
 	id := content.GetCID()
 	data, err := contenttype.ContentToJson(content)
 	if err != nil {
-		return 0, errors.Wrap(err, "Can not create version data on content id: "+strconv.Itoa(id))
+		return 0, fmt.Errorf("Can not create version data on content id %v: %w", id, err)
 	}
 	version := contenttype.Version{}
 	version.ContentType = content.ContentType()
@@ -324,7 +324,7 @@ func CreateVersion(ctx context.Context, content contenttype.ContentTyper, versio
 	err = version.Store(ctx, tx)
 	if err != nil {
 		tx.Rollback()
-		return 0, errors.Wrap(err, "Can not save version on contetent id: "+strconv.Itoa(id))
+		return 0, fmt.Errorf("Can not save version on contetent id %v: %w ", id, err)
 	}
 	log.Debug("Version created.", "contenthandler.CreateVersion", ctx)
 	return version.ID, nil
@@ -333,10 +333,10 @@ func CreateVersion(ctx context.Context, content contenttype.ContentTyper, versio
 func UpdateByContentID(ctx context.Context, contentType string, contentID int, inputs InputMap, userId int) (bool, error) {
 	content, err := query.FetchByCID(ctx, contentType, contentID)
 	if err != nil {
-		return false, errors.Wrap(err, "Failed to get content via content id.")
+		return false, fmt.Errorf("Failed to get content via content id: %w", err)
 	}
 	if content.GetCID() == 0 {
-		return false, errors.Wrap(err, "Got empty content.")
+		return false, fmt.Errorf("Got empty content: %w", err)
 	}
 
 	return Update(ctx, content, inputs, userId)
@@ -345,10 +345,10 @@ func UpdateByContentID(ctx context.Context, contentType string, contentID int, i
 func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (bool, error) {
 	content, err := query.FetchByID(ctx, id)
 	if err != nil {
-		return false, errors.Wrap(err, "Failed to get content via id.")
+		return false, fmt.Errorf("Failed to get content via id: %w", err)
 	}
 	if content.GetCID() == 0 {
-		return false, errors.Wrap(err, "Got empty content.")
+		return false, errors.New("Got empty content")
 	}
 
 	return Update(ctx, content, inputs, userId)
@@ -418,7 +418,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	//Save to new version
 	tx, err := db.CreateTx()
 	if err != nil {
-		return false, errors.Wrap(err, "Create transaction error.")
+		return false, fmt.Errorf("Create transaction error: %w", err)
 	}
 
 	//Save new version and set to content
@@ -429,7 +429,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if err != nil {
 			//todo: rollback here not inside.
 			log.Debug("Create new version failed: "+err.Error(), "contenthandler.update", ctx)
-			return false, errors.Wrap(err, "Can not save version.")
+			return false, fmt.Errorf("Can not save version: %w", err)
 		}
 		log.Debug("New version created", "contenthandler.update", ctx)
 		content.SetValue("version", version)
@@ -458,7 +458,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	if err != nil {
 		tx.Rollback()
 		log.Debug("Saving content failed: "+err.Error(), "contenthandler.update", ctx)
-		return false, errors.Wrap(err, "Saving content error. ")
+		return false, fmt.Errorf("Saving content error: %w", err)
 	}
 
 	//Updated location related
@@ -472,7 +472,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if err != nil {
 			tx.Rollback()
 			log.Debug("Updating location failed: "+err.Error(), "contenthandler.update", ctx)
-			return false, errors.Wrap(err, "Updating location info error.")
+			return false, fmt.Errorf("Updating location info error: %w", err)
 		}
 		log.Debug("Location updated", "contenthandler.update", ctx)
 	}
@@ -499,7 +499,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	err = InvokeCallback(ctx, "update", true, matchData, content, tx, inputs)
 	if err != nil {
 		tx.Rollback()
-		return false, errors.Wrap(err, "Invoking callback error.")
+		return false, fmt.Errorf("Invoking callback error: %w", err)
 	}
 
 	log.Debug("All done. Commitinng.", "contenthandler.update", ctx)
@@ -507,7 +507,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	if err != nil {
 		tx.Rollback()
 		log.Error("Commit error: "+err.Error(), "contenthandler.update", ctx)
-		return false, errors.Wrap(err, "Commit error.")
+		return false, fmt.Errorf("Commit error: %w", err)
 	}
 
 	return true, nil
@@ -688,7 +688,7 @@ func DeleteByContent(ctx context.Context, content contenttype.ContentTyper, user
 	err = InvokeCallback(ctx, "delete", true, matchData, content, tx)
 	if err != nil {
 		tx.Rollback()
-		return errors.Wrap(err, "Invoking callback error.")
+		return fmt.Errorf("Invoking callback error: %w", err)
 	}
 
 	err = tx.Commit()

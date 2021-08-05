@@ -8,7 +8,6 @@ import (
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
-	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/queries"
 )
 
@@ -208,7 +207,7 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 	if fetchEntity {
 		db, err := DB()
 		if err != nil {
-			return -1, errors.Wrap(err, "Error when connecting db.")
+			return -1, fmt.Errorf("Error when connecting db: %w", err)
 		}
 
 		//Fill in with DatamapList or other entity
@@ -251,7 +250,7 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 			err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
 			if err != nil {
 				if err != sql.ErrNoRows {
-					return -1, errors.Wrap(err, "Error when binding entity")
+					return -1, fmt.Errorf("Error when binding entity: %w", err)
 				}
 			}
 		}
@@ -278,7 +277,7 @@ func countWithQuery(ctx context.Context, query Query) (int, error) {
 
 	db, err := DB()
 	if err != nil {
-		return -1, errors.Wrap(err, "Error when connecting db.")
+		return -1, fmt.Errorf("Error when connecting db: %w", err)
 	}
 	entity := struct {
 		Count int `boil:"count"`
@@ -287,7 +286,7 @@ func countWithQuery(ctx context.Context, query Query) (int, error) {
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, &entity)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			return -1, errors.Wrap(err, "Count error when binding entity")
+			return -1, fmt.Errorf("Count error when binding entity: %w", err)
 		}
 	}
 

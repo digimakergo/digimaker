@@ -2,6 +2,8 @@ package sitekit
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -14,8 +16,6 @@ import (
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
-
-	"github.com/pkg/errors"
 
 	"github.com/flosch/pongo2"
 	"github.com/gorilla/mux"
@@ -63,7 +63,7 @@ func LoadSite(siteConfig map[string]interface{}) error {
 	root := siteConfig["root"].(int)
 	rootContent, err := query.FetchByID(context.Background(), root)
 	if err != nil {
-		return errors.Wrap(err, "Root doesn't exist.")
+		return fmt.Errorf("Root doesn't exist: %w", err)
 	}
 
 	//todo: default can be optional.
@@ -77,7 +77,7 @@ func LoadSite(siteConfig map[string]interface{}) error {
 	} else {
 		defaultContent, err = query.FetchByID(context.Background(), defaultInt)
 		if err != nil {
-			return errors.Wrap(err, "Default doesn't exist.")
+			return fmt.Errorf("Default doesn't exist: %w", err)
 		}
 	}
 
@@ -214,7 +214,7 @@ func OutputContent(w io.Writer, id int, siteIdentifier string, sitePath string, 
 	content, err := query.FetchByID(ctx, id)
 
 	if err != nil {
-		return errors.Wrap(err, "Error of outputing content while fetching content")
+		return fmt.Errorf("Error of outputing content while fetching content: %w", err)
 	}
 
 	if content == nil {

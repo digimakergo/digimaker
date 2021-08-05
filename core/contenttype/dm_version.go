@@ -13,9 +13,9 @@ import (
 	"sync"
 	"time"
 
+	"errors"
 	"github.com/digimakergo/digimaker/core/db"
 	. "github.com/digimakergo/digimaker/core/db"
-	"github.com/pkg/errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/queries"
 	"github.com/volatiletech/sqlboiler/queries/qmhelper"
@@ -354,10 +354,10 @@ func (q versionQuery) One(ctx context.Context, exec boil.ContextExecutor) (*Vers
 
 	err := q.Bind(ctx, exec, o)
 	if err != nil {
-		if errors.Cause(err) == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, sql.ErrNoRows
 		}
-		return nil, errors.Wrap(err, "contenttype: failed to execute a one query for dm_version")
+		return nil, fmt.Errorf("contenttype: failed to execute a one query for dm_version: %w", err)
 	}
 
 	if err := o.doAfterSelectHooks(ctx, exec); err != nil {
@@ -373,7 +373,7 @@ func (q versionQuery) All(ctx context.Context, exec boil.ContextExecutor) (Versi
 
 	err := q.Bind(ctx, exec, &o)
 	if err != nil {
-		return nil, errors.Wrap(err, "contenttype: failed to assign all query results to Version slice")
+		return nil, fmt.Errorf("contenttype: failed to assign all query results to Version slice: %w", err)
 	}
 
 	if len(versionAfterSelectHooks) != 0 {
@@ -396,7 +396,7 @@ func (q versionQuery) Count(ctx context.Context, exec boil.ContextExecutor) (int
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return 0, errors.Wrap(err, "contenttype: failed to count dm_version rows")
+		return 0, fmt.Errorf("contenttype: failed to count dm_version rows: %w", err)
 	}
 
 	return count, nil
@@ -412,7 +412,7 @@ func (q versionQuery) Exists(ctx context.Context, exec boil.ContextExecutor) (bo
 
 	err := q.Query.QueryRowContext(ctx, exec).Scan(&count)
 	if err != nil {
-		return false, errors.Wrap(err, "contenttype: failed to check if dm_version exists")
+		return false, fmt.Errorf("contenttype: failed to check if dm_version exists: %w", err)
 	}
 
 	return count > 0, nil
@@ -519,7 +519,7 @@ func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 	result, err := exec.ExecContext(ctx, cache.query, vals...)
 
 	if err != nil {
-		return errors.Wrap(err, "contenttype: unable to upsert for dm_version")
+		return fmt.Errorf("contenttype: unable to upsert for dm_version: %w", err)
 	}
 
 	var lastID int64
@@ -542,7 +542,7 @@ func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 
 	uniqueMap, err = queries.BindMapping(versionType, versionMapping, nzUniques)
 	if err != nil {
-		return errors.Wrap(err, "contenttype: unable to retrieve unique values for dm_version")
+		return fmt.Errorf("contenttype: unable to retrieve unique values for dm_version: %w", err)
 	}
 	nzUniqueCols = queries.ValuesFromMapping(reflect.Indirect(reflect.ValueOf(o)), uniqueMap)
 
@@ -553,7 +553,7 @@ func (o *Version) Upsert(ctx context.Context, exec boil.ContextExecutor, updateC
 
 	err = exec.QueryRowContext(ctx, cache.retQuery, nzUniqueCols...).Scan(returns...)
 	if err != nil {
-		return errors.Wrap(err, "contenttype: unable to populate default values for dm_version")
+		return fmt.Errorf("contenttype: unable to populate default values for dm_version: %w", err)
 	}
 
 CacheNoHooks:

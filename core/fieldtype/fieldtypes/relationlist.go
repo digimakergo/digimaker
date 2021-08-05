@@ -8,12 +8,13 @@ import (
 	"strconv"
 	"strings"
 
+	"errors"
+
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/util"
-	"github.com/pkg/errors"
 )
 
 type RelationListHandler struct {
@@ -147,7 +148,7 @@ func (handler RelationListHandler) Store(ctx context.Context, value interface{},
 				currentCondition.Cond("from_content_id", relation.FromContentID).Cond("from_type", relation.FromType),
 				transaction)
 			if err != nil {
-				return errors.Wrap(err, "Update relationlist error")
+				return fmt.Errorf("Update relationlist error: %w", err)
 			}
 		}
 	}

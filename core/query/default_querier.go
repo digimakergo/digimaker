@@ -2,12 +2,12 @@ package query
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
-	"github.com/pkg/errors"
 )
 
 type Querier struct {
@@ -117,7 +117,7 @@ func BindRelation(content contenttype.ContentTyper) error {
 				if value, ok := relationMap[identifier]; ok {
 					err := content.SetValue(identifier, value)
 					if err != nil {
-						return errors.Wrap(err, "Error when binding relationlist "+identifier)
+						return fmt.Errorf("Error when binding relationlist %v: %w", identifier, err)
 					}
 				}
 			}

@@ -11,7 +11,6 @@ import (
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
-	"github.com/pkg/errors"
 )
 
 type AccessType int
@@ -31,7 +30,7 @@ func GetUserAccess(ctx context.Context, userID int, operation string) (AccessTyp
 	policyList, err := GetUserPolicies(ctx, userID)
 	log.Debug("Got policy list: "+fmt.Sprint(policyList), "permission", ctx)
 	if err != nil {
-		return AccessNo, nil, errors.Wrap(err, "Error when fetching policy list for user:"+strconv.Itoa(userID))
+		return AccessNo, nil, fmt.Errorf("Error when fetching policy list for user %v: %w", userID, err)
 	}
 	//todo: cache limits to user, and cache anoymous globally.
 	limitList := GetLimitsFromPolicy(policyList, operation)

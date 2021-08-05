@@ -6,7 +6,7 @@ package contenttype
 import (
 	"strconv"
 
-	"github.com/pkg/errors"
+	"errors"
 	"github.com/volatiletech/sqlboiler/boil"
 	"github.com/volatiletech/sqlboiler/strmangle"
 )

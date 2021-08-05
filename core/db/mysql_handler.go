@@ -5,6 +5,8 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -14,7 +16,6 @@ import (
 	"github.com/volatiletech/sqlboiler/queries"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
-	"github.com/pkg/errors"
 )
 
 type Datamap map[string]interface{}
@@ -297,7 +298,7 @@ func (MysqlHandler) Insert(ctx context.Context, tablename string, values map[str
 	if len(transation) == 0 {
 		db, err := DB()
 		if err != nil {
-			return 0, errors.Wrap(err, "MysqlHandler.Insert] Error when getting db connection.")
+			return 0, fmt.Errorf("MysqlHandler.Insert] Error when getting db connection: %w", err)
 		}
 		//todo: create context to isolate queries.
 		result, error = db.ExecContext(context.Background(), sqlStr, valueParameters...)
@@ -306,12 +307,12 @@ func (MysqlHandler) Insert(ctx context.Context, tablename string, values map[str
 	}
 	//execution error
 	if error != nil {
-		return 0, errors.Wrap(error, "MysqlHandler.Insert]Error when executing. sql - "+sqlStr)
+		return 0, fmt.Errorf("MysqlHandler.Insert]Error when executing. sql - %v: %w ", sqlStr, error)
 	}
 	id, err := result.LastInsertId()
 	//Get id error
 	if err != nil {
-		return 0, errors.Wrap(err, "MysqlHandler.Insert]Error when inserting. sql - "+sqlStr)
+		return 0, fmt.Errorf("MysqlHandler.Insert]Error when inserting. sql - %v: %w ", sqlStr, err)
 	}
 
 	log.Debug("Insert results in id: "+strconv.FormatInt(id, 10), "db", ctx)
@@ -342,14 +343,14 @@ func (MysqlHandler) Update(ctx context.Context, tablename string, values map[str
 	if len(transation) == 0 {
 		db, err := DB()
 		if err != nil {
-			return errors.Wrap(err, "MysqlHandler.Update] Error when getting db connection.")
+			return fmt.Errorf("MysqlHandler.Update] Error when getting db connection: %w", err)
 		}
 		result, error = db.ExecContext(context.Background(), sqlStr, valueParameters...)
 	} else {
 		result, error = transation[0].ExecContext(context.Background(), sqlStr, valueParameters...)
 	}
 	if error != nil {
-		return errors.Wrap(error, "[MysqlHandler.Update]Error when updating. sql - "+sqlStr)
+		return fmt.Errorf("[MysqlHandler.Update]Error when updating. sql - %v: %w ", sqlStr, error)
 	}
 	resultRows, _ := result.RowsAffected()
 	log.Debug("Updated rows:"+strconv.FormatInt(resultRows, 10), "db", ctx)
@@ -369,14 +370,14 @@ func (MysqlHandler) Delete(ctx context.Context, tableName string, condition Cond
 	if len(transation) == 0 {
 		db, err := DB()
 		if err != nil {
-			return errors.Wrap(err, "MysqlHandler.Delete] Error when getting db connection.")
+			return fmt.Errorf("MysqlHandler.Delete] Error when getting db connection: %w", err)
 		}
 		result, error = db.ExecContext(context.Background(), sqlStr, conditionValues...)
 	} else {
 		result, error = transation[0].ExecContext(context.Background(), sqlStr, conditionValues...)
 	}
 	if error != nil {
-		return errors.Wrap(error, "[MysqlHandler.Delete]Error when deleting. sql - "+sqlStr)
+		return fmt.Errorf("[MysqlHandler.Delete]Error when deleting. sql - %v: %w", sqlStr, error)
 	}
 
 	//todo: return this because it's useful for error handling
