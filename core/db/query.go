@@ -251,7 +251,7 @@ func BindEntityWithQuery(ctx context.Context, entity interface{}, query Query) (
 			err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, entity)
 			if err != nil {
 				if err != sql.ErrNoRows {
-					return -1, errors.Wrap(err, "Error when binding entity."+err.Error())
+					return -1, errors.Wrap(err, "Error when binding entity")
 				}
 			}
 		}
@@ -287,7 +287,7 @@ func countWithQuery(ctx context.Context, query Query) (int, error) {
 	err = queries.Raw(sqlStr, values...).Bind(context.Background(), db, &entity)
 	if err != nil {
 		if err != sql.ErrNoRows {
-			return -1, errors.Wrap(err, "Count error when binding entity."+err.Error())
+			return -1, errors.Wrap(err, "Count error when binding entity")
 		}
 	}
 
