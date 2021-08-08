@@ -2,6 +2,7 @@
 package main
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"os"
@@ -13,6 +14,10 @@ import (
 	_ "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/util"
 )
+
+//go:embed contenttype.tpl
+//go:embed contenttype_entity.tpl
+var fs embed.FS
 
 //Generate content types
 func main() {
@@ -26,12 +31,10 @@ func main() {
 
 func Generate(subFolder string) error {
 	tpl := template.Must(template.New("contenttype.tpl").
-		Funcs(funcMap()).
-		ParseFiles(util.DMPath() + "/codegen/entity/contenttype.tpl"))
+		Funcs(funcMap()).ParseFS(fs, "contenttype.tpl"))
 
 	tplEntity := template.Must(template.New("contenttype_entity.tpl").
-		Funcs(funcMap()).
-		ParseFiles(util.DMPath() + "/codegen/entity/contenttype_entity.tpl"))
+		Funcs(funcMap()).ParseFS(fs, "contenttype_entity.tpl"))
 
 	fieldtypeMap := fieldtype.GetAllFieldtype()
 
