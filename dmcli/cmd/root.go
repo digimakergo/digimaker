@@ -7,7 +7,7 @@ var (
 		Use:   "dmcli",
 		Short: "Cli tools for digimaker cmf",
 		Long: `dmtool is cli tool for digimaker Content Management Framework. 
-It helps to genrate database entities, database schema sql, etc`,
+It helps to generate database entities, database schema sql, etc`,
 	}
 )
 

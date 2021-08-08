@@ -14,7 +14,7 @@ var (
 	tableCmd = &cobra.Command{
 		Use:   "db-table",
 		Short: "Generates database tables",
-		Long:  `Generates database table. note: only mysql is supported for now`,
+		Long:  `Generates database table, args: <contenttype 1>,<contenttype 2>. With empty arg will generate all tables. note: only mysql is supported for now`,
 		Run: func(cmd *cobra.Command, args []string) {
 			var contenttypes []string
 			if len(args) == 0 {
