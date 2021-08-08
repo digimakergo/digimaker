@@ -16,13 +16,15 @@ A Content Management Framework which balances simplicity & flexibility with high
 - Online debug tool
 - Client components for content related ui
 
+### How to use
+Check here to see demo project&create project: https://github.com/digimakergo/dmdemo
+
 ### Documentation
 See https://digimaker.org/doc for documentation and references.
 
-For installation & demo, check https://github.com/digimakergo/dmdemo
-
-
 ### Related repositories
+Client components:
+
 Editorial UI (Admin) see https://github.com/digimakergo/eui 
 
 Client UI components: https://github.com/digimakergo/ui
