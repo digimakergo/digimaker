@@ -21,7 +21,15 @@ func AppFolder() string {
 		//Init App config
 		appPath := os.Getenv("dmapp")
 		if appPath == "" {
-			log.Fatal("Please set dmapp environment variable to run the application.")
+			log.Info("dmapp env not set, use current directory")
+			var err error
+			appPath, err = os.Getwd()
+			if err != nil {
+				log.Fatal(err.Error())
+			}
+			if !FileExists(appPath + "/configs/dm.yaml") {
+				log.Fatal("Not a digimaker working directory.")
+			}
 		}
 
 		if _, err := os.Stat(appPath); os.IsNotExist(err) {
