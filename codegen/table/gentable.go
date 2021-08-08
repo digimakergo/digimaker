@@ -1,39 +1,12 @@
-package main
+package table
 
 import (
 	"fmt"
-	"os"
-	"sort"
-	"strings"
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	_ "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
-	"github.com/digimakergo/digimaker/core/util"
 )
-
-func main() {
-	contenttypes := []string{}
-	if len(os.Args) >= 2 && os.Args[1] != "" {
-		contenttypes = util.Split(os.Args[1], ",")
-	} else {
-		contenttypeList := definition.GetDefinitionList()["default"]
-		for identifier, _ := range contenttypeList {
-			contenttypes = append(contenttypes, identifier)
-		}
-		sort.Strings(contenttypes)
-	}
-
-	fmt.Println("Generating table for " + strings.Join(contenttypes, ","))
-	fmt.Println("----------")
-	for _, contenttype := range contenttypes {
-		err := GenerateTable(contenttype)
-		if err != nil {
-			fmt.Println("Fail to generate: " + err.Error())
-		}
-		fmt.Println("")
-	}
-}
 
 func GenerateTable(ctype string) error {
 	def, err := definition.GetDefinition(ctype)

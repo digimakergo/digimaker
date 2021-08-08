@@ -1,5 +1,5 @@
 //Package dm/codegen/main generate content entity model based on contenttype.json.
-package main
+package entity
 
 import (
 	"embed"
@@ -20,15 +20,6 @@ import (
 var fs embed.FS
 
 //Generate content types
-func main() {
-
-	fmt.Println("Generating content entities for " + util.AbsHomePath())
-	err := Generate("entity")
-	if err != nil {
-		fmt.Println("Fail to generate: " + err.Error())
-	}
-}
-
 func Generate(subFolder string) error {
 	tpl := template.Must(template.New("contenttype.tpl").
 		Funcs(funcMap()).ParseFS(fs, "contenttype.tpl"))

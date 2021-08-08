@@ -15,7 +15,8 @@ require (
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/rs/xid v1.3.0
 	github.com/sirupsen/logrus v1.8.1
-	github.com/spf13/viper v1.7.1
+	github.com/spf13/cobra v1.2.1
+	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
 	github.com/volatiletech/inflect v0.0.1 // indirect
 	github.com/volatiletech/null v8.0.0+incompatible // indirect
