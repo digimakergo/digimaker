@@ -2,11 +2,11 @@ package sitekit
 
 import (
 	"context"
+	_ "embed"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 
@@ -20,6 +20,9 @@ import (
 	"github.com/flosch/pongo2"
 	"github.com/gorilla/mux"
 )
+
+//go:embed templates/main.html
+var mainTemplate []byte
 
 var siteSettings = map[string]SiteSettings{}
 var siteIdentifiers = []string{}
@@ -249,8 +252,9 @@ func Output(w io.Writer, variables map[string]interface{}, ctx context.Context) 
 	if log.GetContextInfo(ctx).CanDebug() {
 		variables["debug"] = true
 	}
-	gopath := os.Getenv("GOPATH")
-	tpl := pongo2.Must(pongo2.FromCache(gopath + "/src/github.com/digimakergo/digimaker/sitekit/templates/main.html")) //todo: use configuration
+
+	tpl := pongo2.Must(pongo2.FromBytes(mainTemplate))
+	//todo: support import in template - hard in go embed?
 
 	info := RequestInfo{Context: ctx, Site: variables["site"].(string), SitePath: variables["sitepath"].(string)}
 

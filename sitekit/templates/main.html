@@ -1,5 +1,3 @@
-{%import "micros.html" output_content,output_field,output%}
-
 {% comment %}
 Available varilables:
 
@@ -15,6 +13,31 @@ For non content(tbd):
 - site
 - parameter given in handler/controller
 {% endcomment %}
+
+{% macro output_content( content, viewmode) export%}
+    {%with dm.tpl_content(content, viewmode) as path%}
+        {% if path=="" %}
+            {OVERRIDE NOT FOUND, PLEASE OVERRIDE. {{content.ID}},{{content.Name}},{{viewmode}}}
+        {%else%}
+                {% if debug %}<!-- {{path}} -->{%endif%}
+                {%include path|dm_abs_path %}
+        {% endif %}
+    {%endwith%}
+{% endmacro %}
+
+{% macro output_field( field ) export%}
+    {%with "fieldtype/"|add:field.Type()|add:".html"|dm_abs_path:"github.com/digimakergo/digimaker/sitekit" as path%}
+        {%include path with field=field%}
+    {%endwith%}
+{% endmacro %}
+
+{#include path from override #}
+{% macro output( path, match_data ) export%}
+    {#todo: match it#}
+    {%with "../default/"|add:path|add:".html" as template%}
+        {%include template%}
+    {%endwith%}
+{% endmacro %}
 
 {%if error != nil %}
   {{error}} {%comment%} todo: use include {%endcomment%}
