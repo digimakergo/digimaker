@@ -332,12 +332,12 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	RegisterRoute("/content/create/{contenttype}/{parent:[0-9]+}", Create)
-	RegisterRoute("/content/create/{contenttype}", Create)
+	RegisterRoute("/content/create/{contenttype}/{parent:[0-9]+}", Create, "POST")
+	RegisterRoute("/content/create/{contenttype}", Create, "POST")
 	RegisterRoute("/content/move/{contents}/{target}", Move)
-	RegisterRoute("/content/update/{id:[0-9]+}", Update)
-	RegisterRoute("/content/update/{contenttype}/{id:[0-9]+}", Update)
+	RegisterRoute("/content/update/{id:[0-9]+}", Update, "POST")
+	RegisterRoute("/content/update/{contenttype}/{id:[0-9]+}", Update, "POST")
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)
-	RegisterRoute("/content/savedraft/{id:[0-9]+}/{type}", SaveDraft)
+	RegisterRoute("/content/savedraft/{id:[0-9]+}/{type}", SaveDraft, "POST")
 }
