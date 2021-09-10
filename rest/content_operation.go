@@ -35,16 +35,20 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	parent := params["parent"]
-	parentInt, err := strconv.Atoi(parent)
-	if err != nil {
-		HandleError(errors.New("parent id should be integer."), w)
-		return
+	parentInt := 0
+	if parent != "" {
+		var err error
+		parentInt, err = strconv.Atoi(parent)
+		if err != nil {
+			HandleError(errors.New("parent id should be integer."), w)
+			return
+		}
 	}
 	contentType := params["contenttype"]
 
 	inputs := map[string]interface{}{}
 	decorder := json.NewDecoder(r.Body)
-	err = decorder.Decode(&inputs)
+	err := decorder.Decode(&inputs)
 
 	if err != nil {
 		HandleError(errors.New("Invalid input for json."), w)
@@ -328,11 +332,12 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	RegisterRoute("/content/create/{parent}/{contenttype}", Create)
+	RegisterRoute("/content/create/{contenttype}/{parent:[0-9]+}", Create)
+	RegisterRoute("/content/create/{contenttype}", Create)
 	RegisterRoute("/content/move/{contents}/{target}", Move)
-	RegisterRoute("/content/update/{id}", Update)
-	RegisterRoute("/content/update/{contenttype}/{id}", Update)
+	RegisterRoute("/content/update/{id:[0-9]+}", Update)
+	RegisterRoute("/content/update/{contenttype}/{id:[0-9]+}", Update)
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)
-	RegisterRoute("/content/savedraft/{id}/{type}", SaveDraft)
+	RegisterRoute("/content/savedraft/{id:[0-9]+}/{type}", SaveDraft)
 }

@@ -139,13 +139,21 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 
 // Create creates a content(same behavior as Draft&Publish but store published version directly)
 func Create(ctx context.Context, userID int, contentType string, inputs InputMap, parentID int) (contenttype.ContentTyper, error) {
-	parent, _ := query.FetchByID(ctx, parentID)
-	if parent == nil {
-		return nil, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
-	}
-
 	contentDefinition, _ := definition.GetDefinition(contentType)
 	fieldsDefinition := contentDefinition.FieldMap
+
+	var parent contenttype.ContentTyper
+
+	if contentDefinition.HasLocation {
+		if parentID == 0 {
+			return nil, errors.New("Parent id cann't be 0")
+		} else {
+			parent, _ = query.FetchByID(ctx, parentID)
+			if parent == nil {
+				return nil, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
+			}
+		}
+	}
 
 	if !permission.CanCreate(ctx, parent, contentType, userID) {
 		return nil, errors.New("User doesn't have access to create")
