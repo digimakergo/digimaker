@@ -26,7 +26,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func New(w http.ResponseWriter, r *http.Request) {
+func Create(w http.ResponseWriter, r *http.Request) {
 
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
@@ -328,8 +328,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-
-	RegisterRoute("/content/new/{parent}/{contenttype}", New)
+	RegisterRoute("/content/create/{parent}/{contenttype}", Create)
 	RegisterRoute("/content/move/{contents}/{target}", Move)
 	RegisterRoute("/content/update/{id}", Update)
 	RegisterRoute("/content/update/{contenttype}/{id}", Update)
