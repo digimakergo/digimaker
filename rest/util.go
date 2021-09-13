@@ -4,7 +4,6 @@
 package rest
 
 import (
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"log"
@@ -36,12 +35,12 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	filename, err := HandleUploadFile(r, "*")
 	result := ""
 	if err != nil {
-		w.WriteHeader(500)
-		result = err.Error()
-	} else {
-		result = filename
+		HandleError(err, w)
+		return
 	}
-	w.Write([]byte(result))
+
+	result = filename
+	WriteResponse(result, w)
 }
 
 //Upload image, return path or error
@@ -53,12 +52,12 @@ func UploadImage(w http.ResponseWriter, r *http.Request) {
 	filename, err := HandleUploadFile(r, ".gif,.jpg,.jpeg,.png")
 	result := ""
 	if err != nil {
-		w.WriteHeader(500)
-		result = err.Error()
-	} else {
-		result = filename
+		HandleError(err, w)
+		return
 	}
-	w.Write([]byte(result))
+
+	result = filename
+	WriteResponse(result, w)
 }
 
 //Handler uploaded file, return filename & error
@@ -200,10 +199,9 @@ func GetAllowedLimitations(w http.ResponseWriter, r *http.Request) {
 	_, limits, err := permission.GetUserAccess(r.Context(), userId, operation)
 	if err != nil {
 		HandleError(err, w)
-	} else {
-		result, _ := json.Marshal(limits)
-		w.Write(result)
+		return
 	}
+	WriteResponse(limits, w)
 }
 
 func init() {

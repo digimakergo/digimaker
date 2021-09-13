@@ -63,8 +63,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, _ := json.Marshal(content)
-	w.Write(data)
+	WriteResponse(content, w)
 }
 
 func SaveDraft(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +153,7 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(strconv.Itoa(newVersion.Created)))
+	WriteResponse(newVersion.Created, w)
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
@@ -194,7 +193,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
 }
 
 func SetPriority(w http.ResponseWriter, r *http.Request) {
@@ -244,7 +243,7 @@ func SetPriority(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	tx.Commit()
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
 }
 
 func Move(w http.ResponseWriter, r *http.Request) {
@@ -274,8 +273,7 @@ func Move(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w, 410)
 		return
 	}
-
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
@@ -328,7 +326,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
 }
 
 func init() {

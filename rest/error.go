@@ -2,7 +2,6 @@ package rest
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 
@@ -22,28 +21,20 @@ type errorBody struct {
 	Detail  interface{} `json:"detail"`
 }
 
-type responseError struct {
-	Error errorBody `json:"error"`
-}
-
 func HandleError(err error, w http.ResponseWriter, httpCode ...int) {
 	//todo: output debug info if needed.
 	var statusCode int = StatusServer
 
-	body := errorBody{Code: "10001", Message: err.Error(), Detail: ""} //todo: use error code here
+	errData := errorBody{Code: "10001", Message: err.Error(), Detail: ""} //todo: use error code here
 	var validation handler.ValidationResult
 	if errors.As(err, &validation) {
-		body.Detail = err
-		body.Code = "20001"
+		errData.Detail = err
+		errData.Code = "20001"
 		statusCode = StatusWrongParams
 	}
-	resError := responseError{}
-	resError.Error = body
-	errStr, _ := json.Marshal(resError)
 
-	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(statusCode)
-	w.Write([]byte(errStr))
+	WriteResponse(errData, w, true)
 }
 
 //Check if there is user id, if not output error and return 0

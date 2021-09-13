@@ -41,11 +41,7 @@ func CurrentUser(w http.ResponseWriter, r *http.Request) {
 			result, _ := contenttype.ContentToMap(user)
 			result["roles"] = roleResult
 
-			data, err := json.Marshal(result)
-			if err != nil {
-				log.Error(err.Error(), "")
-			}
-			w.Write(data)
+			WriteResponse(result, w)
 		} else {
 			HandleError(errors.New("Doesn't have access"), w, 403)
 		}
@@ -105,7 +101,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 			"reset password",
 			"Click to reset password: <a href="+url+">url</a>")
 		//todo: rollback
-		w.Write([]byte("1"))
+		WriteResponse(true, w)
 	}
 
 }
@@ -155,7 +151,7 @@ func ResetPasswordDone(w http.ResponseWriter, r *http.Request) {
 
 			db.Delete(r.Context(), "dm_activation", db.Cond("id", activation.ID))
 
-			w.Write([]byte("1"))
+			WriteResponse(true, w)
 		}
 
 	}
@@ -201,7 +197,7 @@ func EnableUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
 }
 
 func init() {

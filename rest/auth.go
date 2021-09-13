@@ -64,9 +64,7 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	resultObj := map[string]interface{}{"refresh_token": refreshToken, "access_token": accessToken}
-	result, _ := json.Marshal(resultObj)
-
-	w.Write(result)
+	WriteResponse(resultObj, w)
 }
 
 func AuthRevokeRefreshToken(w http.ResponseWriter, r *http.Request) {
@@ -89,7 +87,7 @@ func AuthRevokeRefreshToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
 }
 
 func getToken(r *http.Request) (string, error) {
@@ -163,7 +161,7 @@ func AuthVerifyAccessToken(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w, StatusUnauthed)
 		return
 	}
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
 }
 
 //Renew refresh token
@@ -200,7 +198,7 @@ func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w)
 	}
 
-	w.Write([]byte(newToken))
+	WriteResponse(newToken, w)
 }
 
 //Renew access token
@@ -225,7 +223,7 @@ func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Write([]byte(accessToken))
+	WriteResponse(accessToken, w)
 }
 
 func init() {

@@ -32,8 +32,7 @@ func CurrentUserEditField(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, _ := json.Marshal(fields)
-	w.Write(data)
+	WriteResponse(fields, w)
 }
 
 func AssignedUsers(w http.ResponseWriter, r *http.Request) {
@@ -80,8 +79,8 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 		resultList = append(resultList, cmap)
 	}
 
-	data, _ := json.Marshal(map[string]interface{}{"list": resultList, "count": count})
-	w.Write(data)
+	data := map[string]interface{}{"list": resultList, "count": count}
+	WriteResponse(data, w)
 }
 
 func UserRoles(w http.ResponseWriter, r *http.Request) {
@@ -97,8 +96,7 @@ func UserRoles(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w)
 		return
 	}
-	data, _ := json.Marshal(list)
-	w.Write(data)
+	WriteResponse(list, w)
 }
 
 func AssignUser(w http.ResponseWriter, r *http.Request) {
@@ -154,7 +152,7 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 		HandleError(errors.New("Error when assigning: "+err.Error()), w, 400)
 		return
 	}
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
 }
 
 //unassign user from role
@@ -179,13 +177,24 @@ func UnassignUser(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w)
 		return
 	}
-	w.Write([]byte("1"))
+	WriteResponse(true, w)
+}
+
+func AllRoles(w http.ResponseWriter, r *http.Request) {
+	//todo: add check
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+	roles := permission.GetRoles()
+	WriteResponse(roles, w)
 }
 
 func init() {
 	RegisterRoute("/access/update-fields/current-user", CurrentUserEditField)
 	RegisterRoute("/access/assigned-users", AssignedUsers)
 	RegisterRoute("/access/roles/{user}", UserRoles)
+	RegisterRoute("/access/allroles", AllRoles)
 	RegisterRoute("/access/assign/{user}", AssignUser)
 	RegisterRoute("/access/unassign/{user}/{role}", UnassignUser)
 }

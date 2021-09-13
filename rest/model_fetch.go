@@ -25,10 +25,8 @@ func GetDefinition(w http.ResponseWriter, r *http.Request) {
 	definition, _ := definition.GetDefinition(containers[0], language)
 
 	resultMap := filterDefinition(definition)
-	result, _ := json.Marshal(resultMap)
 
-	w.Header().Set("content-type", "application/json")
-	w.Write(result)
+	WriteResponse(resultMap, w)
 }
 
 func filterDefinition(definition definition.ContentType) map[string]interface{} {
@@ -62,10 +60,7 @@ func GetAllDefinitions(w http.ResponseWriter, r *http.Request) {
 		result[contenttype] = resultMap
 	}
 
-	data, _ := json.Marshal(result)
-	w.Header().Set("content-type", "application/json")
-
-	w.Write(data)
+	WriteResponse(result, w)
 }
 
 func init() {

@@ -4,7 +4,6 @@
 package rest
 
 import (
-	"encoding/json"
 	"errors"
 	"net/http"
 	"net/url"
@@ -60,15 +59,13 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		HandleError(err, w)
 		return
-	} else {
-		if content != nil && !permission.CanRead(r.Context(), userID, content) {
-			HandleError(errors.New("Doesn't have permission."), w, 403)
-			return
-		}
-		w.Header().Set("content-type", "application/json")
-		data, _ := contenttype.ContentToJson(content) //todo: use export for same serilization?
-		w.Write([]byte(data))
 	}
+
+	if content != nil && !permission.CanRead(r.Context(), userID, content) {
+		HandleError(errors.New("Doesn't have permission."), w, 403)
+		return
+	}
+	WriteResponse(content, w)
 }
 
 func GetVersion(w http.ResponseWriter, r *http.Request) {
@@ -116,9 +113,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, _ := json.Marshal(version)
-	w.Header().Set("content-type", "application/json")
-	w.Write([]byte(data))
+	WriteResponse(version, w)
 }
 
 func buildCondition(userid int, def definition.ContentType, query url.Values) (db.Condition, error) {
@@ -311,8 +306,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 	result.List = list
 
-	data, _ := json.Marshal(result)
-	w.Write([]byte(data))
+	WriteResponse(result, w)
 }
 
 //Get content list from relation definition
@@ -344,8 +338,7 @@ func RelationOptionList(w http.ResponseWriter, r *http.Request) {
 
 	result.List = list
 
-	data, _ := json.Marshal(result)
-	w.Write([]byte(data))
+	WriteResponse(result, w)
 }
 
 //Get tree menu under a node
@@ -402,8 +395,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		}
 	})
 
-	data, _ := json.Marshal(tree)
-	w.Write([]byte(data))
+	WriteResponse(tree, w)
 }
 
 func init() {
