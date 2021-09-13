@@ -18,11 +18,24 @@ import (
 	"github.com/digimakergo/digimaker/core/util"
 )
 
+type AuthInput struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
 //AuthAuthenticate generate refresh toke and access token based on username and password
 func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 	//Check matches
-	username := strings.TrimSpace(r.FormValue("username"))
-	password := r.FormValue("password")
+	input := AuthInput{}
+	decorder := json.NewDecoder(r.Body)
+	err := decorder.Decode(&input)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+
+	username := input.Username
+	password := input.Password
 	if username == "" || password == "" {
 		HandleError(errors.New("Please input username or password"), w)
 		return
@@ -216,7 +229,7 @@ func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	RegisterRoute("/auth/auth", AuthAuthenticate)
+	RegisterRoute("/auth/auth", AuthAuthenticate, "POST")
 	RegisterRoute("/auth/token/revoke", AuthRevokeRefreshToken)
 	RegisterRoute("/auth/token/refresh/renew", AuthRenewRefreshToken)
 	RegisterRoute("/auth/token/access/renew", AuthRenewAccessToken)
