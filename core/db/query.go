@@ -129,7 +129,12 @@ func CreateQuery(targets string, condition Condition) (string, Query) {
 //todo: might be better in another package since it better involves content model?
 func BindContent(ctx context.Context, entity interface{}, targets string, condition Condition) (int, error) {
 	contentType, query := CreateQuery(targets, condition)
-	count, err := BindContentWithQuery(ctx, entity, contentType, query, ContentOption{WithAuthor: true})
+	def, _ := definition.GetDefinition(contentType)
+	withAuthor := false
+	if def.HasLocation {
+		withAuthor = true
+	}
+	count, err := BindContentWithQuery(ctx, entity, contentType, query, ContentOption{WithAuthor: withAuthor})
 	return count, err
 }
 
