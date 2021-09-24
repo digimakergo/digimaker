@@ -22,4 +22,8 @@ func (c *ContentEntity) GetID() int {
 	return c.ID
 }
 
+func (c *ContentEntity) GetAuthor() int {
+	return c.Author
+}
+
 //TODO: add more common methods related to content here.

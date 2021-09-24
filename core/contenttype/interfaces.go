@@ -18,6 +18,8 @@ type ContentTyper interface {
 
 	GetName() string
 
+	GetAuthor() int
+
 	SetValue(identifier string, value interface{}) error
 
 	Store(ctx context.Context, transaction ...*sql.Tx) error

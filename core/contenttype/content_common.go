@@ -83,6 +83,10 @@ func (c *ContentCommon) GetCID() int {
 	return c.CID
 }
 
+func (c *ContentCommon) GetAuthor() int {
+	return c.Author
+}
+
 func (c *ContentCommon) GetRelations() ContentRelationList {
 	return c.Relations
 }
