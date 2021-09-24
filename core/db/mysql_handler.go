@@ -334,7 +334,9 @@ func (MysqlHandler) Update(ctx context.Context, tablename string, values map[str
 	sqlStr = sqlStr[:len(sqlStr)-1]
 	conditionString, conditionValues := BuildCondition(condition)
 	valueParameters = append(valueParameters, conditionValues...)
-	sqlStr += " WHERE " + conditionString
+	if conditionString != "" {
+		sqlStr += " WHERE " + conditionString
+	}
 
 	log.Debug(sqlStr, "db", ctx)
 
