@@ -122,7 +122,7 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
             {{end}}         
         {{end}}
 	default:
-
+          return c.ContentEntity.SetValue(identifier, value)        
 	}
 	//todo: check if identifier exist
 	return nil

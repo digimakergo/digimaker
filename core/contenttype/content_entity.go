@@ -10,6 +10,14 @@ type ContentEntity struct {
 	Relations  ContentRelationList `boil:"relations" json:"relations" toml:"relations" yaml:"relations"`
 }
 
+func (c *ContentEntity) SetValue(identifier string, value interface{}) error {
+	switch identifier {
+	case "author":
+		c.Author = value.(int)
+	}
+	return nil
+}
+
 func (c *ContentEntity) GetRelations() ContentRelationList {
 	return c.Relations
 }
