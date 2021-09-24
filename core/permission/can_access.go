@@ -123,7 +123,10 @@ func CanDelete(ctx context.Context, content contenttype.ContentTyper, userId int
 
 //support keys: contenttype, id(parent locaton id), under, parent author(include "self")
 func CanCreate(ctx context.Context, parent contenttype.ContentTyper, contenttype string, userId int) bool {
-	data := getMatchData(parent, userId)
+	data := MatchData{}
+	if parent != nil {
+		data = getMatchData(parent, userId)
+	}
 	data["contenttype"] = contenttype
 	return HasAccessTo(ctx, userId, "content/create", data)
 }
