@@ -218,10 +218,14 @@ func (handler MysqlHandler) BuildQuery(query Query, count bool) (string, []inter
 	}
 
 	sqlStr := ""
+	whereStr := ""
+	if conditionStr != "" {
+		whereStr = " WHERE " + conditionStr
+	}
 	if !count {
-		sqlStr = `SELECT ` + fieldStr + ` FROM ` + tableStr + leftJoinStr + " WHERE " + conditionStr + groupbyStr + sortby + limit
+		sqlStr = `SELECT ` + fieldStr + ` FROM ` + tableStr + leftJoinStr + whereStr + groupbyStr + sortby + limit
 	} else {
-		sqlStr = `SELECT COUNT(*) AS count FROM ` + tableStr + " WHERE " + conditionStr + groupbyStr
+		sqlStr = `SELECT COUNT(*) AS count FROM ` + tableStr + whereStr + groupbyStr
 	}
 
 	return sqlStr, values, nil
@@ -334,9 +338,7 @@ func (MysqlHandler) Update(ctx context.Context, tablename string, values map[str
 	sqlStr = sqlStr[:len(sqlStr)-1]
 	conditionString, conditionValues := BuildCondition(condition)
 	valueParameters = append(valueParameters, conditionValues...)
-	if conditionString != "" {
-		sqlStr += " WHERE " + conditionString
-	}
+	sqlStr += " WHERE " + conditionString
 
 	log.Debug(sqlStr, "db", ctx)
 
