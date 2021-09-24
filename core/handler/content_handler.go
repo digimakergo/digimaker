@@ -325,7 +325,7 @@ func CreateVersion(ctx context.Context, content contenttype.ContentTyper, versio
 	version := contenttype.Version{}
 	version.ContentType = content.ContentType()
 	version.ContentID = content.GetCID()
-	version.Author = content.Value("author").(int)
+	version.Author = content.GetAuthor()
 	version.Version = versionNumber
 	version.Data = data
 	//version.Created = content.Value("created").(int)
