@@ -21,7 +21,6 @@ var config_database string
 func DB() (*sql.DB, error) {
 	if db == nil {
 		dbConfig := util.GetConfigSection("database")
-		config_database = dbConfig["database"]
 		connString := dbConfig["username"] + ":" + dbConfig["password"] +
 			"@" + dbConfig["protocal"] +
 			"(" + dbConfig["host"] + ")/" +
@@ -66,4 +65,8 @@ func CreateTx(ctx ...context.Context) (*sql.Tx, error) {
 
 type DBEntitier interface {
 	GetByID(contentType string, id int) interface{}
+}
+
+func init() {
+	config_database = util.GetConfig("database", "database")
 }
