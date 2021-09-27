@@ -8,7 +8,11 @@ import (
 	"github.com/digimakergo/digimaker/core/fieldtype"
 )
 
+//Map defines a key - value map
 type Map map[string]interface{}
+
+//List defines an array Map
+type MapList []Map
 
 func (a Map) Value() (driver.Value, error) {
 	value, err := json.Marshal(a)
@@ -48,6 +52,24 @@ func (handler MapHandler) DBField() string {
 	return "JSON"
 }
 
+type MapListHandler struct {
+	definition.FieldDef
+}
+
+func (handler MapListHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+	if _, ok := input.(MapList); ok {
+		return input, nil
+	}
+	data, _ := json.Marshal(input)
+	list := MapList{}
+	err := json.Unmarshal(data, &list)
+	return list, err
+}
+
+func (handler MapListHandler) DBField() string {
+	return "JSON"
+}
+
 func init() {
 	fieldtype.Register(
 		fieldtype.Definition{Name: "map",
@@ -56,4 +78,10 @@ func init() {
 			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 				return MapHandler{FieldDef: def}
 			}})
+	fieldtype.Register(fieldtype.Definition{Name: "maplist",
+		DataType: "fieldtypes.List",
+		Package:  "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes",
+		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			return MapListHandler{FieldDef: def}
+		}})
 }
