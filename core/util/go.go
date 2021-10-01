@@ -28,6 +28,20 @@ func Contains(strings []string, element string) bool {
 	return false
 }
 
+//If key exists in a map list
+func ListContains(list []map[string]string, key string, value string) bool {
+	result := false
+	for _, item := range list {
+		if itemValue, exist := item[key]; exist {
+			if itemValue == value {
+				result = true
+				break
+			}
+		}
+	}
+	return result
+}
+
 //Iterate string slice so it will be easy to do operation inside. eg. make ["1","2"] to be ["a-1", "a-2"]
 func Iterate(strings []string, f func(s string) string) []string {
 	result := []string{}

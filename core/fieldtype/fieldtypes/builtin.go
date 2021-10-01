@@ -181,7 +181,7 @@ func (handler CheckboxHandler) LoadInput(input interface{}, mode string) (interf
 }
 
 func (handler CheckboxHandler) DBField() string {
-	return "TINYINT 1"
+	return "TINYINT(1)"
 }
 
 /** Radio handler ***/
@@ -264,6 +264,49 @@ func ConvertParameters(params definition.FieldParameters, paramStruct interface{
 	return nil
 }
 
+/** Select handler ***/
+
+const selectMultMax = 255 //max characters of multi select
+
+type SelectParameters struct {
+	Multi bool                `mapstructure:"multi"`
+	List  []map[string]string `mapstructure:"list"`
+}
+
+type SelectHandler struct {
+	definition.FieldDef
+	Params SelectParameters
+}
+
+//Only allow 1/0 or "1"/"0"
+func (handler SelectHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+	value := fmt.Sprint(input)
+	params := handler.Params
+
+	if params.Multi {
+		if len(value) > selectMultMax {
+			return nil, fieldtype.NewValidationError(fmt.Sprintf("Value can not be longer than, %v", selectMultMax))
+		}
+	}
+
+	fmt.Println(params.List)
+	valueArr := util.Split(value, ";")
+	for _, v := range valueArr {
+		if !util.ListContains(params.List, "value", v) {
+			return nil, fieldtype.NewValidationError("Value is not defined in list: " + v)
+		}
+	}
+
+	return value, nil
+}
+
+func (handler SelectHandler) DBField() string {
+	if handler.Params.Multi {
+		return fmt.Sprintf("VARCHAR(%v) NOT NULL DEFAULT ''", selectMultMax)
+	}
+	return "varchar(50) NOT NULL DEFAULT ''"
+}
+
 func init() {
 	fieldtype.Register(
 		fieldtype.Definition{
@@ -309,11 +352,21 @@ func init() {
 				return DatetimeHandler{FieldDef: def}
 			}})
 
+	fieldtype.Register(
+		fieldtype.Definition{Name: "select",
+			DataType: "string",
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+				params := SelectParameters{}
+				err := ConvertParameters(def.Parameters, &params)
+				if err != nil {
+					log.Error("Definition error on select, parameters ignored: "+err.Error(), "")
+				}
+				return SelectHandler{FieldDef: def, Params: params}
+			}})
+
 	// Register("number", "int", TextHandler{})                       //number is postive int
 	// Register("float", "float", TextHandler{})                      //number is postive float
 	// Register("full_float", "fieldtype.NilablFloat", TextHandler{}) //all float
-	// Register("select", "string", TextHandler{})
-	// Register("json", "json", TextHandler{})
 	// Register(
 	// 	Definition{
 	// 		Name:     "image",
