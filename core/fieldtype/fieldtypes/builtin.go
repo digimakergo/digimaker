@@ -283,16 +283,18 @@ func (handler SelectHandler) LoadInput(input interface{}, mode string) (interfac
 	value := fmt.Sprint(input)
 	params := handler.Params
 
-	if params.Multi {
-		if len(value) > selectMultMax {
-			return nil, fieldtype.NewValidationError(fmt.Sprintf("Value can not be longer than, %v", selectMultMax))
+	if value != "" {
+		if params.Multi {
+			if len(value) > selectMultMax {
+				return nil, fieldtype.NewValidationError(fmt.Sprintf("Value can not be longer than, %v", selectMultMax))
+			}
 		}
-	}
 
-	valueArr := util.Split(value, ";")
-	for _, v := range valueArr {
-		if !util.ListContains(params.List, "value", v) {
-			return nil, fieldtype.NewValidationError("Value is not defined in list: " + v)
+		valueArr := util.Split(value, ";")
+		for _, v := range valueArr {
+			if !util.ListContains(params.List, "value", v) {
+				return nil, fieldtype.NewValidationError("Value is not defined in list: " + v)
+			}
 		}
 	}
 
