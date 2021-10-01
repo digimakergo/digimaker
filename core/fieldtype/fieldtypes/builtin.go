@@ -289,7 +289,6 @@ func (handler SelectHandler) LoadInput(input interface{}, mode string) (interfac
 		}
 	}
 
-	fmt.Println(params.List)
 	valueArr := util.Split(value, ";")
 	for _, v := range valueArr {
 		if !util.ListContains(params.List, "value", v) {
