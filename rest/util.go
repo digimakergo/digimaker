@@ -27,7 +27,8 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 	needAuth := section["upload_file_auth"].(bool)
 	if needAuth {
 		userId := CheckUserID(r.Context(), w)
-		if userId == 0 {
+		if userId == 0 || !permission.HasAccessTo(r.Context(), userId, "util/upload") {
+			HandleError(errors.New("Need authorization"), w)
 			return
 		}
 	}
@@ -205,8 +206,8 @@ func GetAllowedLimitations(w http.ResponseWriter, r *http.Request) {
 }
 
 func init() {
-	RegisterRoute("/util/uploadfile", UploadFile)
-	RegisterRoute("/util/uploadimage", UploadImage)
+	RegisterRoute("/util/uploadfile", UploadFile, "POST")
+	RegisterRoute("/util/uploadimage", UploadImage, "POST")
 	RegisterRoute("/util/limitations/{operation}", GetAllowedLimitations)
 
 	RegisterRoute("/pdf/{id}", ExportPDF)
