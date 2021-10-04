@@ -34,7 +34,7 @@ func (handler FileHandler) LoadInput(input interface{}, mode string) (interface{
 			validFormat := false
 			for _, format := range formats {
 				lowerPath := strings.ToLower(filePath)
-				if strings.HasSuffix(lowerPath, "."+format) {
+				if strings.HasSuffix(lowerPath, format) {
 					validFormat = true
 				}
 			}

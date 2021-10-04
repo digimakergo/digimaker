@@ -45,7 +45,7 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 			validFormat := false
 			for _, format := range formats {
 				lowImagePath := strings.ToLower(imagePath)
-				if strings.HasSuffix(lowImagePath, "."+format) {
+				if strings.HasSuffix(lowImagePath, format) {
 					validFormat = true
 				}
 			}
