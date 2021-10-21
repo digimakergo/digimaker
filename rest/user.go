@@ -200,9 +200,31 @@ func EnableUser(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(true, w)
 }
 
+func FetchUserRoles(w http.ResponseWriter, r *http.Request) {
+	currentUserID := CheckUserID(r.Context(), w)
+	if currentUserID == 0 {
+		return
+	}
+
+	if !permission.HasAccessTo(r.Context(), currentUserID, ACCESS_MANAGE_ACCESS, permission.MatchData{}) {
+		HandleError(errors.New("No access"), w)
+		return
+	}
+
+	params := mux.Vars(r)
+	userID, _ := strconv.Atoi(params["user"])
+	list, err := handler.FetchUserRoles(r.Context(), userID)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	WriteResponse(list, w)
+}
+
 func init() {
 	RegisterRoute("/user/current/{site}", CurrentUser)
 	RegisterRoute("/user/resetpassword/{email}", ResetPassword)
 	RegisterRoute("/user/enable/{type}", EnableUser)
+	RegisterRoute("/user/roles/{user}", FetchUserRoles)
 	RegisterRoute("/user/resetpassword-confirm/{hash}", ResetPasswordDone)
 }

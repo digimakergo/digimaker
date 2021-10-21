@@ -18,6 +18,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var ACCESS_MANAGE_ACCESS = "access/manage"
+
 //Get current user's updatefields on him/herself
 func CurrentUserEditField(w http.ResponseWriter, r *http.Request) {
 	userID := CheckUserID(r.Context(), w)
