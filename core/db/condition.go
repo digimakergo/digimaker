@@ -202,7 +202,11 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 			for _ = range value {
 				operatorArr = append(operatorArr, "?")
 			}
-			operatorStr = " (" + strings.Join(operatorArr, ",") + ")"
+			if len(operatorArr) > 0 {
+				operatorStr = " (" + strings.Join(operatorArr, ",") + ")"
+			} else {
+				operatorStr = " ('') AND FALSE"
+			}
 			//when value is int slice
 		case []int:
 			for _, item := range expression.Value.([]int) {
@@ -212,7 +216,11 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 			for _ = range value {
 				operatorArr = append(operatorArr, "?")
 			}
-			operatorStr = " (" + strings.Join(operatorArr, ",") + ")"
+			if len(operatorArr) > 0 {
+				operatorStr = " (" + strings.Join(operatorArr, ",") + ")"
+			} else {
+				operatorStr = " (1) AND FALSE"
+			}
 			//when value is string/int
 		default:
 			//when expression has no field and operator(eg. true/false)
