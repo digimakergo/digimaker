@@ -19,7 +19,7 @@ import (
 type TreeNode struct {
 	*contenttype.Location
 	Fields   interface{}              `json:"fields"` //todo: maybe more generaic attributes instead of hard coded 'Fields' here, or use custom MarshalJSON(remove *Locatoin then)?
-	Content  contenttype.ContentTyper `json:"-"`
+	Content  contenttype.ContentTyper `json:"content"`
 	Children []TreeNode               `json:"children"`
 }
 
@@ -43,6 +43,24 @@ func FetchByID(ctx context.Context, locationID int) (contenttype.ContentTyper, e
 	}
 	if location.ID == 0 {
 		return nil, errors.New("[contentquery.fetchbyid]Location is empty.")
+	}
+
+	//fetch by content id.
+	contentID := location.ContentID
+	contentType := location.ContentType
+	result, err := FetchByCID(ctx, contentType, contentID)
+	return result, err
+}
+
+func FetchByPath(ctx context.Context, path string) (contenttype.ContentTyper, error) {
+	//get type first by location.
+	location := contenttype.Location{}
+	_, err := db.BindEntity(ctx, &location, "dm_location", db.Cond("identifier_path", path))
+	if err != nil {
+		return nil, fmt.Errorf("[contentquery.fetchbypath]Can not fetch location by location path %v: %w", path, err)
+	}
+	if location.ID == 0 {
+		return nil, errors.New("[contentquery.fetchbypath]Location is empty.")
 	}
 
 	//fetch by content id.
