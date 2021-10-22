@@ -49,12 +49,21 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 			content, err = query.FetchByCID(r.Context(), contentType, id)
 		}
 	} else {
-		id, err := strconv.Atoi(params["id"])
-		if err != nil {
-			HandleError(errors.New("Invalid id"), w)
-			return
+		if params["id"] != "" {
+			id, err := strconv.Atoi(params["id"])
+			if err != nil {
+				HandleError(errors.New("Invalid id"), w)
+				return
+			}
+			content, err = query.FetchByID(r.Context(), id)
+		} else {
+			path := r.URL.Query().Get("path")
+			if path != "" {
+				content, err = query.FetchByPath(r.Context(), path)
+			} else {
+				err = errors.New("Parameter not supported")
+			}
 		}
-		content, err = query.FetchByID(r.Context(), id)
 	}
 	if err != nil {
 		HandleError(err, w)
@@ -400,6 +409,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	RegisterRoute("/content/get/{id:[0-9]+}", GetContent)
+	RegisterRoute("/content/get", GetContent)
 	RegisterRoute("/content/get/{contenttype}/{id}", GetContent)
 	RegisterRoute("/content/version/{id:[0-9]+}/{version:[0-9]+}", GetVersion)
 
