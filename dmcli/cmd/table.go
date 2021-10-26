@@ -15,7 +15,12 @@ var (
 		Use:   "db-table",
 		Short: "Generates database tables",
 		Long:  `Generates database table, args: <contenttype 1>,<contenttype 2>. With empty arg will generate all tables. note: only mysql is supported for now`,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err := LoadPlugin(cmd)
+			if err != nil {
+				return err
+			}
+
 			var contenttypes []string
 			if len(args) == 0 {
 				contenttypeList := definition.GetDefinitionList()["default"]
@@ -36,6 +41,7 @@ var (
 				}
 				fmt.Println("")
 			}
+			return nil
 		},
 	}
 )

@@ -14,6 +14,10 @@ var (
 		Short: "Generates entities",
 		Long:  `Generates entities for data model.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			err := LoadPlugin(cmd)
+			if err != nil {
+				return err
+			}
 			fmt.Println("Generating content entities for " + util.AbsHomePath())
 			return entity.Generate("entity")
 		},
