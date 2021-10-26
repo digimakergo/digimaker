@@ -3,6 +3,7 @@ package fieldtypes
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"fmt"
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
@@ -33,18 +34,18 @@ func (a *Map) Scan(value interface{}) error {
 	return nil
 }
 
+//MapHandler
 type MapHandler struct {
 	definition.FieldDef
 }
 
-//Only allow 1/0 or "1"/"0"
 func (handler MapHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	if _, ok := input.(Map); ok {
 		return input, nil
 	}
-	data, _ := json.Marshal(input)
+	data := fmt.Sprint(input)
 	m := Map{}
-	err := json.Unmarshal(data, &m)
+	err := json.Unmarshal([]byte(data), &m)
 	return m, err
 }
 
@@ -52,6 +53,7 @@ func (handler MapHandler) DBField() string {
 	return "JSON"
 }
 
+//MapListHandler
 type MapListHandler struct {
 	definition.FieldDef
 }
@@ -60,13 +62,36 @@ func (handler MapListHandler) LoadInput(input interface{}, mode string) (interfa
 	if _, ok := input.(MapList); ok {
 		return input, nil
 	}
-	data, _ := json.Marshal(input)
-	list := MapList{}
-	err := json.Unmarshal(data, &list)
-	return list, err
+	data := fmt.Sprint(input)
+	m := Map{}
+	err := json.Unmarshal([]byte(data), &m)
+	return m, err
 }
 
 func (handler MapListHandler) DBField() string {
+	return "JSON"
+}
+
+//JSON Handler
+type JSONHandler struct {
+	definition.FieldDef
+}
+
+func (handler JSONHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+	if input == nil {
+		return "", nil
+	}
+
+	data := fmt.Sprint(input)
+	isValid := json.Valid([]byte(data))
+	if !isValid {
+		return "", fieldtype.NewValidationError("Not a valid json")
+	}
+
+	return data, nil
+}
+
+func (handler JSONHandler) DBField() string {
 	return "JSON"
 }
 
@@ -79,9 +104,14 @@ func init() {
 				return MapHandler{FieldDef: def}
 			}})
 	fieldtype.Register(fieldtype.Definition{Name: "maplist",
-		DataType: "fieldtypes.List",
+		DataType: "fieldtypes.MapList",
 		Package:  "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes",
 		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 			return MapListHandler{FieldDef: def}
+		}})
+	fieldtype.Register(fieldtype.Definition{Name: "json",
+		DataType: "string",
+		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			return JSONHandler{FieldDef: def}
 		}})
 }
