@@ -79,11 +79,16 @@ type JSONHandler struct {
 
 func (handler JSONHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	if input == nil {
-		return "", nil
+		return []byte{}, nil
 	}
 
-	data := fmt.Sprint(input)
-	isValid := json.Valid([]byte(data))
+	dataStr := fmt.Sprint(input)
+	if dataStr == "" {
+		return []byte{}, nil
+	}
+
+	data := []byte(dataStr)
+	isValid := json.Valid(data)
 	if !isValid {
 		return "", fieldtype.NewValidationError("Not a valid json")
 	}
@@ -110,7 +115,7 @@ func init() {
 			return MapListHandler{FieldDef: def}
 		}})
 	fieldtype.Register(fieldtype.Definition{Name: "json",
-		DataType: "string",
+		DataType: "[]byte",
 		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 			return JSONHandler{FieldDef: def}
 		}})
