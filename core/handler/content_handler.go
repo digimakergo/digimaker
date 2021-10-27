@@ -748,3 +748,54 @@ func GenerateName(content contenttype.ContentTyper) string {
 	result := util.ReplaceStrVar(pattern, values)
 	return result
 }
+
+func SaveDraft(ctx context.Context, userId int, data string, contentType string, id int) (contenttype.Version, error) {
+	var parent contenttype.ContentTyper
+	if id != 0 {
+		var err error
+		parent, err = query.FetchByID(ctx, id)
+		if err != nil {
+			return contenttype.Version{}, err
+		}
+	}
+	if !permission.CanCreate(ctx, parent, contentType, userId) {
+		return contenttype.Version{}, errors.New("Not permission to create content type" + contentType)
+	}
+	_, err := definition.GetDefinition(contentType)
+	if err != nil {
+		return contenttype.Version{}, errors.New("type doesn't exist.")
+	}
+
+	version := contenttype.Version{}
+	db.BindEntity(ctx,
+		&version,
+		version.TableName(),
+		db.Cond("author", userId).Cond("location_id", id).Cond("version", 0).Cond("content_type", contentType))
+	if version.ID == 0 {
+		version.ContentType = contentType
+		version.LocationID = id
+		version.Author = userId
+		version.Version = 0
+	}
+	version.Data = data
+	createdTime := int(time.Now().Unix())
+	version.Created = createdTime
+	tx, _ := db.CreateTx()
+	if err != nil {
+		return contenttype.Version{}, err
+	}
+	err = version.Store(ctx, tx)
+	tx.Commit()
+	if err != nil {
+		return contenttype.Version{}, err
+	}
+
+	//refetch to make sure it's saved
+	newVersion := contenttype.Version{}
+	db.BindEntity(ctx,
+		&newVersion,
+		version.TableName(),
+		db.Cond("author", userId).Cond("location_id", id).Cond("version", 0).Cond("content_type", contentType),
+	)
+	return newVersion, nil
+}

@@ -6,22 +6,15 @@ package rest
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/query"
-	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/gorilla/mux"
 )
@@ -66,8 +59,10 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(content, w)
 }
 
+//Save draft. url: /<id>/<ctype> where id can be 0 or parent location id
+//request json: data: string(mostly json string)
+//return new created time
 func SaveDraft(w http.ResponseWriter, r *http.Request) {
-	//todo: more permission check
 	userId := CheckUserID(r.Context(), w)
 	if userId == 0 {
 		return
@@ -75,11 +70,6 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 
 	params := mux.Vars(r)
 	ctype := params["type"]
-	_, err := definition.GetDefinition(ctype)
-	if err != nil {
-		HandleError(errors.New("type doesn't exist."), w)
-		return
-	}
 
 	id, err := strconv.Atoi(params["id"])
 	if err != nil {
@@ -87,25 +77,9 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	agent := r.UserAgent()
-	folderName := util.HomePath() + "/log/draft/" + strconv.Itoa(userId)
-	if _, existError := os.Stat(folderName); os.IsNotExist(existError) {
-		os.Mkdir(folderName, 0775)
-	}
-	logPath := folderName + "/" + time.Now().Format("20060102_150405.log")
-	ip := r.Header.Get("X-Forwarded-For")
-
 	inputs := map[string]string{}
 	decorder := json.NewDecoder(r.Body)
 	err = decorder.Decode(&inputs)
-	if err != nil {
-		HandleError(errors.New("wrong format"), w)
-		ioutil.WriteFile(logPath, []byte(ip+","+agent+"\n"+err.Error()), 0775)
-		return
-	}
-
-	logConent := []byte(ip + "," + agent + "\n" + fmt.Sprint(inputs))
-	ioutil.WriteFile(logPath, logConent, 0775)
 
 	data, ok := inputs["data"]
 	if !ok {
@@ -113,43 +87,9 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	version := contenttype.Version{}
-	db.BindEntity(r.Context(),
-		&version,
-		version.TableName(),
-		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype))
-	if version.ID == 0 {
-		version.ContentType = ctype
-		version.ContentID = id
-		version.Author = userId
-		version.Version = 0
-	}
-	version.Data = data
-	createdTime := int(time.Now().Unix())
-	version.Created = createdTime
-	tx, _ := db.CreateTx()
+	newVersion, err := handler.SaveDraft(r.Context(), userId, data, ctype, id)
 	if err != nil {
 		HandleError(err, w)
-		return
-	}
-	err = version.Store(r.Context(), tx)
-	tx.Commit()
-	if err != nil {
-		HandleError(err, w)
-		return
-	}
-
-	//refetch to make sure it's saved
-	newVersion := contenttype.Version{}
-	db.BindEntity(r.Context(),
-		&newVersion,
-		version.TableName(),
-		db.Cond("author", userId).Cond("content_id", id).Cond("version", 0).Cond("content_type", ctype),
-	)
-	if newVersion.ID == 0 || newVersion.ID > 0 && newVersion.Created != createdTime {
-		message := "Not saved. new id:" + strconv.Itoa(newVersion.ID) + " .new saved time:" +
-			strconv.Itoa(newVersion.Created) + ", should saved time:" + strconv.Itoa(createdTime)
-		HandleError(errors.New(message), w)
 		return
 	}
 
