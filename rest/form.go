@@ -44,14 +44,12 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 	arr := strings.Split(contentType, "/")
 	result, validationResult := handler.Validate(arr[0], fieldMap, inputs, true)
 	if result {
-		w.Write([]byte("1"))
+		WriteResponse(true, w)
 	} else {
-		w.WriteHeader(400)
-		data, _ := json.Marshal(validationResult)
-		w.Write(data)
+		WriteResponse(validationResult, w)
 	}
 }
 
 func init() {
-	RegisterRoute("/form/validate/{contenttype}", Validate)
+	RegisterRoute("/form/validate/{contenttype}", Validate, "POST")
 }

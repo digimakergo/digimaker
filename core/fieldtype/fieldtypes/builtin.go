@@ -165,6 +165,24 @@ func (handler PasswordHandler) DBField() string {
 	return "BINARY(60)"
 }
 
+/** Int handler **/
+type IntHandler struct {
+	definition.FieldDef
+}
+
+func (handler IntHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+	s := fmt.Sprint(input)
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return -1, fieldtype.NewValidationError(err.Error())
+	}
+	return i, nil
+}
+
+func (handler IntHandler) DBField() string {
+	return "INT NOT NULL DEFAULT -1" //todo: make default configurable
+}
+
 /** Checkbox handler ***/
 type CheckboxHandler struct {
 	definition.FieldDef
@@ -365,14 +383,12 @@ func init() {
 				return SelectHandler{FieldDef: def, Params: params}
 			}})
 
-	// Register("number", "int", TextHandler{})                       //number is postive int
+	fieldtype.Register(
+		fieldtype.Definition{Name: "int",
+			DataType: "int", //in practise it's for positive int
+			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+				return IntHandler{FieldDef: def}
+			}})
+
 	// Register("float", "float", TextHandler{})                      //number is postive float
-	// Register("full_float", "fieldtype.NilablFloat", TextHandler{}) //all float
-	// Register(
-	// 	Definition{
-	// 		Name:     "image",
-	// 		DataType: "string",
-	// 	})
-	// Register("file", "string", TextHandler{})
-	// Register("relation", "string", TextHandler{})
 }
