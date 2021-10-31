@@ -34,6 +34,20 @@ func (a *Map) Scan(value interface{}) error {
 	return nil
 }
 
+func (a *MapList) Scan(value interface{}) error {
+	obj := MapList{}
+	if value != nil {
+		err := json.Unmarshal(value.([]byte), &obj)
+		if err != nil {
+			return err
+		}
+		*a = obj
+	} else {
+		*a = nil
+	}
+	return nil
+}
+
 //MapHandler
 type MapHandler struct {
 	definition.FieldDef
@@ -77,17 +91,32 @@ type JSONHandler struct {
 	definition.FieldDef
 }
 
+//support string, []byte, object
 func (handler JSONHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	if input == nil {
 		return []byte{}, nil
 	}
 
-	dataStr := fmt.Sprint(input)
-	if dataStr == "" {
-		return []byte{}, nil
+	var data []byte
+	switch input.(type) {
+	case string:
+		dataStr := input.(string)
+		if dataStr == "" {
+			return []byte{}, nil
+		}
+		data = []byte(dataStr)
+		break
+	case []byte:
+		data = input.([]byte)
+		break
+	default:
+		var err error
+		data, err = json.Marshal(input)
+		if err != nil {
+			return nil, fieldtype.NewValidationError("Not a valid json: " + err.Error())
+		}
 	}
 
-	data := []byte(dataStr)
 	isValid := json.Valid(data)
 	if !isValid {
 		return "", fieldtype.NewValidationError("Not a valid json")
