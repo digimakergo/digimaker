@@ -3,6 +3,7 @@ package fieldtypes
 import (
 	"database/sql/driver"
 	"encoding/json"
+	"errors"
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
@@ -112,6 +113,33 @@ func unmarshalInput(input interface{}, target interface{}) error {
 	return err
 }
 
+//generaic json
+
+type Json struct {
+	Content []byte
+}
+
+func (j *Json) Scan(value interface{}) error {
+	if value != nil {
+		data := value.([]byte)
+		if json.Valid(data) {
+			j.Content = data
+		} else {
+			return errors.New("Not a valid json")
+		}
+	}
+	return nil
+}
+
+func (j *Json) MarshalJSON() ([]byte, error) {
+	return j.Content, nil
+}
+
+//insert as string
+func (j Json) Value() (driver.Value, error) {
+	return string(j.Content), nil
+}
+
 //JSON Handler
 type JSONHandler struct {
 	definition.FieldDef
@@ -119,18 +147,15 @@ type JSONHandler struct {
 
 //support string, []byte, object
 func (handler JSONHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+	obj := Json{}
 	if input == nil {
-		return []byte{}, nil
+		return obj, nil
 	}
 
 	var data []byte
 	switch input.(type) {
 	case string:
-		dataStr := input.(string)
-		if dataStr == "" {
-			return []byte{}, nil
-		}
-		data = []byte(dataStr)
+		data = []byte(input.(string))
 		break
 	case []byte:
 		data = input.([]byte)
@@ -147,8 +172,9 @@ func (handler JSONHandler) LoadInput(input interface{}, mode string) (interface{
 	if !isValid {
 		return "", fieldtype.NewValidationError("Not a valid json")
 	}
+	obj.Content = data
 
-	return string(data), nil
+	return obj, nil
 }
 
 func (handler JSONHandler) DBField() string {
@@ -170,7 +196,8 @@ func init() {
 			return MapListHandler{FieldDef: def}
 		}})
 	fieldtype.Register(fieldtype.Definition{Name: "json",
-		DataType: "string",
+		DataType: "fieldtypes.Json",
+		Package:  "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes",
 		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 			return JSONHandler{FieldDef: def}
 		}})
