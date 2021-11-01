@@ -172,6 +172,9 @@ type IntHandler struct {
 
 func (handler IntHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
 	s := fmt.Sprint(input)
+	if s == "" {
+		return -1, nil
+	}
 	i, err := strconv.Atoi(s)
 	if err != nil {
 		return -1, fieldtype.NewValidationError(err.Error())
