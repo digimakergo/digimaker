@@ -3,7 +3,6 @@ package fieldtypes
 import (
 	"database/sql/driver"
 	"encoding/json"
-	"fmt"
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
@@ -14,11 +13,6 @@ type Map map[string]interface{}
 
 //List defines an array Map
 type MapList []Map
-
-func (a Map) Value() (driver.Value, error) {
-	value, err := json.Marshal(a)
-	return value, err
-}
 
 func (a *Map) Scan(value interface{}) error {
 	obj := Map{}
@@ -32,6 +26,11 @@ func (a *Map) Scan(value interface{}) error {
 		*a = nil
 	}
 	return nil
+}
+
+func (a Map) Value() (driver.Value, error) {
+	value, err := json.Marshal(a)
+	return value, err
 }
 
 func (a *MapList) Scan(value interface{}) error {
@@ -48,6 +47,11 @@ func (a *MapList) Scan(value interface{}) error {
 	return nil
 }
 
+func (a MapList) Value() (driver.Value, error) {
+	data, err := json.Marshal(a)
+	return data, err
+}
+
 //MapHandler
 type MapHandler struct {
 	definition.FieldDef
@@ -57,9 +61,8 @@ func (handler MapHandler) LoadInput(input interface{}, mode string) (interface{}
 	if _, ok := input.(Map); ok {
 		return input, nil
 	}
-	data := fmt.Sprint(input)
 	m := Map{}
-	err := json.Unmarshal([]byte(data), &m)
+	err := unmarshalInput(input, &m)
 	return m, err
 }
 
@@ -76,14 +79,37 @@ func (handler MapListHandler) LoadInput(input interface{}, mode string) (interfa
 	if _, ok := input.(MapList); ok {
 		return input, nil
 	}
-	data := fmt.Sprint(input)
-	m := Map{}
-	err := json.Unmarshal([]byte(data), &m)
+	m := MapList{}
+	err := unmarshalInput(input, &m)
 	return m, err
 }
 
 func (handler MapListHandler) DBField() string {
 	return "JSON"
+}
+
+func unmarshalInput(input interface{}, target interface{}) error {
+	var data []byte
+	switch input.(type) {
+	case string:
+		dataStr := input.(string)
+		if dataStr == "" {
+			return nil
+		}
+		data = []byte(dataStr)
+		break
+	case []byte:
+		data = input.([]byte)
+		break
+	default:
+		var err error
+		data, err = json.Marshal(input)
+		if err != nil {
+			return fieldtype.NewValidationError("Not a valid json: " + err.Error())
+		}
+	}
+	err := json.Unmarshal(data, target)
+	return err
 }
 
 //JSON Handler
@@ -122,7 +148,7 @@ func (handler JSONHandler) LoadInput(input interface{}, mode string) (interface{
 		return "", fieldtype.NewValidationError("Not a valid json")
 	}
 
-	return data, nil
+	return string(data), nil
 }
 
 func (handler JSONHandler) DBField() string {
@@ -144,7 +170,7 @@ func init() {
 			return MapListHandler{FieldDef: def}
 		}})
 	fieldtype.Register(fieldtype.Definition{Name: "json",
-		DataType: "[]byte",
+		DataType: "string",
 		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
 			return JSONHandler{FieldDef: def}
 		}})
