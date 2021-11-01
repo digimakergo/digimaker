@@ -121,14 +121,14 @@ func verifyRefreshToken(token string) (auth.RefreshClaims, error) {
 	if jwtToken.Valid {
 		entity := auth.GetTokenManager().Get(claims.GUID)
 		if entity == nil {
-			return claims, TokenErrorRevoked
+			return claims, auth.TokenErrorRevoked
 		}
 		return claims, nil
 	} else {
 		if ve, ok := err.(*jwt.ValidationError); ok {
 			switch ve.Errors {
 			case jwt.ValidationErrorExpired:
-				return auth.RefreshClaims{}, TokenErrorExpired
+				return auth.RefreshClaims{}, auth.TokenErrorExpired
 			default:
 				return auth.RefreshClaims{}, err
 			}
@@ -136,11 +136,6 @@ func verifyRefreshToken(token string) (auth.RefreshClaims, error) {
 		return auth.RefreshClaims{}, err
 	}
 }
-
-var (
-	TokenErrorExpired = errors.New("Expired token")
-	TokenErrorRevoked = errors.New("Expired revoked")
-)
 
 func VerifyAccessToken(r *http.Request) (error, auth.UserClaims) {
 	token, err := getToken(r)
@@ -176,7 +171,7 @@ func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
 	refreshClaims, err := verifyRefreshToken(token)
 	if err != nil {
 		log.Error(err.Error(), "", r.Context())
-		if err == TokenErrorExpired || err == TokenErrorRevoked {
+		if err == auth.TokenErrorExpired || err == auth.TokenErrorRevoked {
 			HandleError(err, w, StatusExpired)
 			return
 		}

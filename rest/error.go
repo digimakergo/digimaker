@@ -24,6 +24,9 @@ type errorBody struct {
 func HandleError(err error, w http.ResponseWriter, httpCode ...int) {
 	//todo: output debug info if needed.
 	var statusCode int = StatusWrongParams
+	if len(httpCode) > 0 {
+		statusCode = httpCode[0]
+	}
 
 	errData := errorBody{Code: "10001", Message: err.Error(), Detail: ""} //todo: use error code here
 	var validation handler.ValidationResult

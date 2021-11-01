@@ -5,6 +5,7 @@ import (
 	"errors"
 	"net/http"
 
+	"github.com/digimakergo/digimaker/core/auth"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/log/httplog"
 	"github.com/digimakergo/digimaker/core/util"
@@ -52,7 +53,7 @@ func InitRequest(next http.Handler) http.Handler {
 			err, claims := VerifyAccessToken(r)
 
 			if err != nil {
-				if err == TokenErrorExpired {
+				if err == auth.TokenErrorExpired {
 					HandleError(err, w, StatusExpired)
 				} else {
 					log.Error("Token verification error: "+err.Error(), "")
