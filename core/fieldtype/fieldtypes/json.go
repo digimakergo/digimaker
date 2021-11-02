@@ -18,9 +18,11 @@ type MapList []Map
 func (a *Map) Scan(value interface{}) error {
 	obj := Map{}
 	if value != nil {
-		err := json.Unmarshal(value.([]byte), &obj)
-		if err != nil {
-			return err
+		if string(value.([]byte)) != "" {
+			err := json.Unmarshal(value.([]byte), &obj)
+			if err != nil {
+				return err
+			}
 		}
 		*a = obj
 	} else {
@@ -37,9 +39,11 @@ func (a Map) Value() (driver.Value, error) {
 func (a *MapList) Scan(value interface{}) error {
 	obj := MapList{}
 	if value != nil {
-		err := json.Unmarshal(value.([]byte), &obj)
-		if err != nil {
-			return err
+		if string(value.([]byte)) != "" {
+			err := json.Unmarshal(value.([]byte), &obj)
+			if err != nil {
+				return err
+			}
 		}
 		*a = obj
 	} else {
@@ -120,19 +124,36 @@ type Json struct {
 }
 
 func (j *Json) Scan(value interface{}) error {
+	obj := Json{}
 	if value != nil {
 		data := value.([]byte)
-		if json.Valid(data) {
-			j.Content = data
-		} else {
-			return errors.New("Not a valid json")
+		if string(data) != "" {
+			if json.Valid(data) {
+				obj.Content = data
+			} else {
+				return errors.New("Not a valid json")
+			}
 		}
 	}
+	*j = obj
 	return nil
 }
 
 func (j *Json) MarshalJSON() ([]byte, error) {
-	return j.Content, nil
+	if j.Content == nil {
+		return nil, nil
+	}
+	//slice
+	v := []*json.RawMessage{}
+	err := json.Unmarshal(j.Content, &v)
+	if err == nil {
+		return json.Marshal(v)
+	}
+
+	//map
+	m := map[string]*json.RawMessage{}
+	err = json.Unmarshal(j.Content, &m)
+	return json.Marshal(m)
 }
 
 //insert as string
