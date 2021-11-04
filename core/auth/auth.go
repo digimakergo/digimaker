@@ -36,9 +36,15 @@ type UserClaims struct {
 	Name   string `json:"user_name"`
 }
 
-func NewRefreshToken(ctx context.Context, userID int) (string, error) {
+func NewRefreshToken(ctx context.Context, userID int, rememberMe bool) (string, error) {
 	guid := util.GenerateGUID()
-	refreshExpiry := util.GetConfigSectionI("auth")["refresh_token_expiry"].(int)
+	var refreshExpiry int
+	if rememberMe {
+		refreshExpiry = util.GetConfigSectionI("auth")["refresh_token_expiry_rememberme"].(int)
+		refreshExpiry = refreshExpiry * 60 * 24
+	} else {
+		refreshExpiry = util.GetConfigSectionI("auth")["refresh_token_expiry"].(int)
+	}
 	expiry := time.Now().Add(time.Minute * time.Duration(refreshExpiry)).Unix()
 	refreshClaims := jwt.MapClaims{
 		"user_id": userID,

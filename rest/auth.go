@@ -19,8 +19,9 @@ import (
 )
 
 type AuthInput struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	RememberMe bool   `json:"rememberme"`
 }
 
 //AuthAuthenticate generate refresh toke and access token based on username and password
@@ -49,7 +50,11 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 
 	//Generate refresh token and access token
 	userID := user.GetCID()
-	refreshToken, err := auth.NewRefreshToken(r.Context(), userID)
+	rememberMe := false
+	if util.GetConfigSectionI("auth")["enable_rememberme"].(bool) {
+		rememberMe = input.RememberMe
+	}
+	refreshToken, err := auth.NewRefreshToken(r.Context(), userID, rememberMe)
 	if err != nil {
 		log.Error("Error in generating token on "+strconv.Itoa(userID)+": "+err.Error(), "")
 		HandleError(errors.New("Error when generating refresh token"), w)
