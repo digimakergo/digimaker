@@ -40,7 +40,7 @@ func NewRefreshToken(ctx context.Context, userID int, rememberMe bool) (string, 
 	guid := util.GenerateGUID()
 	var refreshExpiry int
 	if rememberMe {
-		refreshExpiry = util.GetConfigSectionI("auth")["refresh_token_expiry_rememberme"].(int)
+		refreshExpiry = util.GetConfigSectionI("auth")["rememberme_token_expiry"].(int)
 		refreshExpiry = refreshExpiry * 60 * 24
 	} else {
 		refreshExpiry = util.GetConfigSectionI("auth")["refresh_token_expiry"].(int)

@@ -51,7 +51,7 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 	//Generate refresh token and access token
 	userID := user.GetCID()
 	rememberMe := false
-	if util.GetConfigSectionI("auth")["enable_rememberme"].(bool) {
+	if util.GetConfigSectionI("auth")["rememberme_enabled"].(bool) {
 		rememberMe = input.RememberMe
 	}
 	refreshToken, err := auth.NewRefreshToken(r.Context(), userID, rememberMe)
