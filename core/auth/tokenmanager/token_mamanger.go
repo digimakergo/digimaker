@@ -15,8 +15,8 @@ const tableName = "dm_token_state"
 type DBTokenManager struct {
 }
 
-func (d DBTokenManager) Store(ctx context.Context, id string, expiry int64, claims map[string]interface{}) error {
-	tokenState := map[string]interface{}{"guid": id, "expiry": expiry}
+func (d DBTokenManager) Store(ctx context.Context, id string, userID int, expiry int64, claims map[string]interface{}) error {
+	tokenState := map[string]interface{}{"guid": id, "user_id": userID, "expiry": expiry}
 	_, err := db.Insert(ctx, tableName, tokenState)
 	return err
 }

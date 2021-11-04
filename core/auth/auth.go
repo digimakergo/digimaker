@@ -10,14 +10,14 @@ import (
 	"strconv"
 	"time"
 
-        "github.com/golang-jwt/jwt"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/golang-jwt/jwt"
 )
 
 type RefreshTokenManager interface {
-	Store(ctx context.Context, id string, Expiry int64, claims map[string]interface{}) error
+	Store(ctx context.Context, id string, userID int, Expiry int64, claims map[string]interface{}) error
 	Get(id string) interface{}
 	Delete(ctx context.Context, id string) error
 }
@@ -53,7 +53,7 @@ func NewRefreshToken(ctx context.Context, userID int) (string, error) {
 	}
 
 	//store guid in db
-	err = tokenManager.Store(ctx, guid, expiry, refreshClaims)
+	err = tokenManager.Store(ctx, guid, userID, expiry, refreshClaims)
 	if err != nil {
 		log.Error(err.Error(), "")
 		return "", errors.New("Error when storing refresh token info.")
