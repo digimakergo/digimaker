@@ -159,43 +159,6 @@ func AuthVerifyAccessToken(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(true, w)
 }
 
-//Renew refresh token
-func AuthRenewRefreshToken(w http.ResponseWriter, r *http.Request) {
-	//verify refresh token
-	token := r.FormValue("token")
-	if token == "" {
-		HandleError(errors.New("Token parameter is needed"), w, StatusUnauthed)
-		return
-	}
-
-	refreshClaims, err := verifyRefreshToken(token)
-	if err != nil {
-		log.Error(err.Error(), "", r.Context())
-		if err == auth.TokenErrorExpired || err == auth.TokenErrorRevoked {
-			HandleError(err, w, StatusExpired)
-			return
-		}
-		HandleError(errors.New("Invalid token"), w, StatusUnauthed)
-		return
-	}
-
-	//generate new refresh token.
-	userID := refreshClaims.UserID
-	guid := refreshClaims.GUID
-	newToken, err := auth.NewRefreshToken(r.Context(), userID)
-	if err != nil {
-		HandleError(err, w)
-		return
-	}
-	err = auth.GetTokenManager().Delete(r.Context(), guid)
-	if err != nil {
-		log.Error("Error when deleting token: "+err.Error(), "", r.Context())
-		HandleError(err, w)
-	}
-
-	WriteResponse(newToken, w)
-}
-
 //Renew access token
 func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
@@ -224,7 +187,6 @@ func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
 func init() {
 	RegisterRoute("/auth/auth", AuthAuthenticate, "POST")
 	RegisterRoute("/auth/token/revoke", AuthRevokeRefreshToken)
-	RegisterRoute("/auth/token/refresh/renew", AuthRenewRefreshToken)
 	RegisterRoute("/auth/token/access/renew", AuthRenewAccessToken)
 	RegisterRoute("/auth/token/access/verify", AuthVerifyAccessToken)
 }
