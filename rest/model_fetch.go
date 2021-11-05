@@ -46,6 +46,32 @@ func filterDefinition(definition definition.ContentType) map[string]interface{} 
 	return resultMap
 }
 
+type columnDef = struct {
+	Identifier string `json:"identifier"`
+	Type       string `json:"type"`
+	Name       string `json:"name"`
+}
+
+//fetch columns of a contenttype. assuming contentType is checked
+func getColumns(contentType string) map[string]columnDef {
+	def, _ := definition.GetDefinition(contentType)
+
+	columns := map[string]columnDef{}
+	for _, field := range def.FieldMap {
+		columns[field.Identifier] = columnDef{Identifier: field.Identifier,
+			Type: field.FieldType,
+			Name: field.Name,
+		}
+	}
+	for _, field := range def.DataFields {
+		columns[field.Identifier] = columnDef{Identifier: field.Identifier,
+			Type: field.FieldType,
+			Name: field.Name,
+		}
+	}
+	return columns
+}
+
 func GetAllDefinitions(w http.ResponseWriter, r *http.Request) {
 	language := r.URL.Query().Get("language")
 	if language == "" {

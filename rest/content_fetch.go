@@ -262,6 +262,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//sort by
 	condition = condition.Sortby(sortby...)
 	if len(limit) == 2 {
 		condition = condition.Limit(limit[0], limit[1])
@@ -307,13 +308,16 @@ func List(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	result := ResultItem{}
+	result["list"] = list
+	result["count"] = count
 
-	result := struct {
-		List  interface{} `json:"list"`
-		Count int         `json:"count"`
-	}{Count: count}
-
-	result.List = list
+	//columns
+	withColumns := r.URL.Query().Get("columns") == "true"
+	if withColumns {
+		columns := getColumns(ctype)
+		result["columns"] = columns
+	}
 
 	WriteResponse(result, w)
 }
