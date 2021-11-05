@@ -74,7 +74,13 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 		HandleError(errors.New("Doesn't have permission."), w, 403)
 		return
 	}
-	WriteResponse(content, w)
+
+	outputContent, err := query.Output(r.Context(), content)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	WriteResponse(outputContent, w)
 }
 
 func GetVersion(w http.ResponseWriter, r *http.Request) {
@@ -309,7 +315,12 @@ func List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	result := ResultItem{}
-	result["list"] = list
+	outputList, err := query.OutputList(ctx, list)
+	if err != nil {
+		HandleError(err, w)
+		return
+	}
+	result["list"] = outputList
 	result["count"] = count
 
 	//columns

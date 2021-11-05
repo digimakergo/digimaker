@@ -28,12 +28,12 @@ func JsonToContent(contentJson string, content ContentTyper) error {
 }
 
 //Convert content to map
-func ContentToMap(content ContentTyper) (map[string]interface{}, error) {
+func ContentToMap(content ContentTyper) (ContentMap, error) {
 	jsonData, err := json.Marshal(content)
 	if err != nil {
 		return nil, err
 	}
-	result := map[string]interface{}{}
+	result := ContentMap{}
 	err = json.Unmarshal(jsonData, &result)
 	if err != nil {
 		return nil, err

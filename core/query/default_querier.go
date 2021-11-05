@@ -7,7 +7,6 @@ import (
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
-	"github.com/digimakergo/digimaker/core/fieldtype"
 )
 
 type Querier struct {
@@ -40,25 +39,7 @@ func (q Querier) finishBind(ctx context.Context, content contenttype.ContentType
 		return err
 	}
 
-	//wash output
-	q.washOutput(ctx, content)
 	return nil
-}
-
-func (q Querier) washOutput(ctx context.Context, content contenttype.ContentTyper) {
-	if content != nil {
-		def, _ := definition.GetDefinition(content.ContentType())
-		for identifier, fieldDef := range def.FieldMap {
-			handler := fieldtype.GethHandler(fieldDef)
-			if handler != nil {
-				if washer, ok := handler.(fieldtype.Outputer); ok {
-					value := content.Value(identifier)
-					washedValue := washer.Ouput(ctx, q, value)
-					content.SetValue(identifier, washedValue)
-				}
-			}
-		}
-	}
 }
 
 // ListWithUser fetches a list of content which the user has read permission to.

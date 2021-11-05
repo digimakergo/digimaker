@@ -322,6 +322,29 @@ func (handler SelectHandler) LoadInput(input interface{}, mode string) (interfac
 	return value, nil
 }
 
+func (handler SelectHandler) Ouput(ctx context.Context, querier querier.Querier, value interface{}) interface{} {
+	params := handler.Params
+	result := []map[string]string{}
+	values := util.Split(value.(string), ";")
+
+	if params.Multi {
+		for _, item := range params.List {
+			if util.Contains(values, item["value"]) {
+				result = append(result, item)
+			}
+		}
+		return result
+	} else {
+		for _, item := range params.List {
+			if util.Contains(values, item["value"]) {
+				return item
+
+			}
+		}
+		return nil
+	}
+}
+
 func (handler SelectHandler) DBField() string {
 	if handler.Params.Multi {
 		return fmt.Sprintf("VARCHAR(%v) NOT NULL DEFAULT ''", selectMultMax)

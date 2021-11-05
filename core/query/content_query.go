@@ -322,3 +322,39 @@ func RelationOptions(ctx context.Context, ctype string, identifier string, limit
 	}
 	return List(ctx, params.Type, condition)
 }
+
+//Output converts content into output format.(eg. add text to select, name in relation, etc)
+func Output(ctx context.Context, content contenttype.ContentTyper) (contenttype.ContentMap, error) {
+	if content != nil {
+		def, _ := definition.GetDefinition(content.ContentType())
+		contentMap, err := contenttype.ContentToMap(content)
+		if err != nil {
+			return nil, err
+		}
+		for identifier, fieldDef := range def.FieldMap {
+			handler := fieldtype.GethHandler(fieldDef)
+			if handler != nil {
+				if washer, ok := handler.(fieldtype.Outputer); ok {
+					value := content.Value(identifier)
+					washedValue := washer.Ouput(ctx, DefaultQuerier, value)
+					contentMap[identifier] = washedValue
+				}
+			}
+		}
+		return contentMap, nil
+	}
+	return nil, nil
+}
+
+//OutputList converts contents into output format, see Output for single content.
+func OutputList(ctx context.Context, contentList []contenttype.ContentTyper) ([]contenttype.ContentMap, error) {
+	result := []contenttype.ContentMap{}
+	for _, content := range contentList {
+		contentMap, err := Output(ctx, content)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, contentMap)
+	}
+	return result, nil
+}

@@ -10,6 +10,8 @@ import (
 	"github.com/digimakergo/digimaker/core/definition"
 )
 
+type ContentMap map[string]interface{}
+
 //All the content type(eg. article, folder) will implement this interface.
 type ContentTyper interface {
 	GetCID() int
@@ -42,5 +44,3 @@ type ContentTyper interface {
 type GetRelations interface {
 	GetRelations() ContentRelationList
 }
-
-type ContentList []ContentTyper
