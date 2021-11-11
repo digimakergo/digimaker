@@ -142,7 +142,7 @@ func (r RichTextHandler) Ouput(ctx context.Context, querier querier.Querier, val
 			return fmt.Sprintf(`<img src="not-available.png" %v %v %v />`, widthStr, heightStr, dataAttribute) //todo: make it configurable
 		}
 
-		path := imagePrefix + content.Value("image").(string)
+		path := imagePrefix + "/" + content.Value("image").(string)
 
 		result := fmt.Sprintf(`<img src="%v" %v %v %v />`, path, widthStr, heightStr, dataAttribute)
 		return result
