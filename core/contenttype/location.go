@@ -24,7 +24,6 @@ type Location struct {
 	Depth          int    `boil:"depth" json:"depth" toml:"depth" yaml:"depth"`
 	ContentType    string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID      int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
-	Language       string `boil:"language" json:"language" toml:"language" yaml:"language"`
 	Name           string `boil:"name" json:"name" toml:"name" yaml:"name"`
 	IsHidden       bool   `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
 	IsInvisible    bool   `boil:"is_invisible" json:"is_invisible" toml:"is_invisible" yaml:"is_invisible"`
@@ -45,7 +44,6 @@ func (c *Location) ToDBValues() map[string]interface{} {
 	result["depth"] = c.Depth
 	result["content_type"] = c.ContentType
 	result["content_id"] = c.ContentID
-	result["language"] = c.Language
 	result["name"] = c.Name
 	result["is_hidden"] = c.IsHidden
 	result["is_invisible"] = c.IsInvisible
@@ -85,8 +83,6 @@ func (c *Location) Field(name string) interface{} {
 		result = c.ContentType
 	case "content_id", "ContentID":
 		result = c.ContentID
-	case "language", "Language":
-		result = c.Language
 	case "name", "Name":
 		result = c.Name
 	case "is_hidden", "IsHidden":
