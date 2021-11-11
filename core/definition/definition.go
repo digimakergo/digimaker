@@ -24,7 +24,6 @@ var LocationColumns []string = []string{
 	"identifier_path",
 	"content_type",
 	"content_id",
-	"language",
 	"identifier_path",
 	"name",
 	"is_hidden",
