@@ -7,6 +7,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
@@ -101,7 +102,7 @@ func UserRoles(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(list, w)
 }
 
-func AssignUser(w http.ResponseWriter, r *http.Request) {
+func AssignCreateRole(w http.ResponseWriter, r *http.Request) {
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
 		return
@@ -112,7 +113,6 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 
 	assignParams := struct {
 		Parameters fieldtypes.Map `json:"parameters"`
-		RoleID     int            `json:"role_id"`
 		Role       string         `json:"role"`
 		Title      string         `json:"title"`
 	}{}
@@ -124,8 +124,8 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if assignParams.RoleID == 0 && (assignParams.Role == "" || assignParams.Title == "") {
-		HandleError(errors.New("Please input role id or role & title"), w, 400)
+	if assignParams.Role == "" || assignParams.Title == "" {
+		HandleError(errors.New("Please input role & title"), w, 400)
 		return
 	}
 
@@ -134,26 +134,59 @@ func AssignUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if assignParams.RoleID != 0 {
-		err = permission.AssignToUser(r.Context(), assignParams.RoleID, assignedUserID)
-	} else {
-		input := handler.InputMap{}
-		input["title"] = assignParams.Title
-		input["identifier"] = assignParams.Role
-		input["parameters"] = assignParams.Parameters
-		role, createErr := handler.Create(r.Context(), userID, "role", input, 7) //todo: make parent id as optional
-		if createErr != nil {
-			log.Error(createErr.Error(), "permission")
-			HandleError(err, w)
-			return
-		}
-		err = permission.AssignToUser(r.Context(), role.GetCID(), assignedUserID)
+	input := handler.InputMap{}
+	input["title"] = assignParams.Title
+	input["identifier"] = assignParams.Role
+	input["parameters"] = assignParams.Parameters
+	role, createErr := handler.Create(r.Context(), userID, "role", input, 7) //todo: make parent id as optional
+	if createErr != nil {
+		log.Error(createErr.Error(), "permission")
+		HandleError(err, w)
+		return
 	}
+	err = permission.AssignToUser(r.Context(), role.GetCID(), assignedUserID)
 
 	if err != nil {
 		HandleError(errors.New("Error when assigning: "+err.Error()), w, 400)
 		return
 	}
+	WriteResponse(true, w)
+}
+
+func AssignUserRoles(w http.ResponseWriter, r *http.Request) {
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
+	params := mux.Vars(r)
+	assignedUserID, _ := strconv.Atoi(params["user"])
+
+	if !permission.HasAccessTo(r.Context(), userID, "access/assign-user", permission.MatchData{}) {
+		HandleError(errors.New("No access"), w)
+		return
+	}
+
+	roles := strings.Split(params["roles"], ",")
+	roleIDs := []int{}
+	for _, roleStr := range roles {
+		roleID, _ := strconv.Atoi(roleStr)
+		roleContent, _ := query.FetchByCID(r.Context(), "role", roleID)
+		if roleContent == nil {
+			HandleError(errors.New("Role not found "+roleStr), w, 400)
+			return
+		}
+		roleIDs = append(roleIDs, roleID)
+	}
+
+	for _, roleID := range roleIDs {
+		err := permission.AssignToUser(r.Context(), roleID, assignedUserID)
+		if err != nil {
+			HandleError(errors.New("Error when assigning: "+err.Error()), w, 400)
+			return
+		}
+	}
+
 	WriteResponse(true, w)
 }
 
@@ -197,6 +230,7 @@ func init() {
 	RegisterRoute("/access/assigned-users", AssignedUsers)
 	RegisterRoute("/access/roles/{user}", UserRoles)
 	RegisterRoute("/access/allroles", AllRoles)
-	RegisterRoute("/access/assign/{user}", AssignUser)
+	RegisterRoute("/access/assign/{user}/{roles}", AssignUserRoles)
+	RegisterRoute("/access/assign-create/{user}", AssignCreateRole, "POST")
 	RegisterRoute("/access/unassign/{user}/{role}", UnassignUser)
 }
