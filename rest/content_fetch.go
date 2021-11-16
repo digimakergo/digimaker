@@ -131,7 +131,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(version, w)
 }
 
-func buildCondition(userid int, def definition.ContentType, query url.Values) (db.Condition, error) {
+func buildCondition(userid int, cType string, def definition.ContentType, query url.Values) (db.Condition, error) {
 	author := query.Get("author")
 	condition := db.EmptyCond()
 	if author != "" {
@@ -167,18 +167,23 @@ func buildCondition(userid int, def definition.ContentType, query url.Values) (d
 	}
 
 	//contain. todo: merge with filter below
-	nameStr := query.Get("name")
-
-	if nameStr != "" {
-		contains := util.Split(nameStr, ":")
-		if len(contains) > 0 && contains[0] == "contain" {
-			//todo: esc % to inside in condition
-			cValue := "%" + contains[1] + "%"
-			condition = condition.And("l.name like", cValue)
+	for key, _ := range query {
+		value := query.Get(key)
+		if strings.HasPrefix(value, "contain:") {
+			enabledFields := util.GetConfigArr("rest", "like_fields")
+			if util.Contains(enabledFields, cType+"/"+key) {
+				fieldValue := strings.TrimPrefix(value, "contain:")
+				fieldValue = strings.ReplaceAll(fieldValue, "%", "")
+				if def.HasLocation && util.Contains(definition.LocationColumns, key) {
+					condition = condition.And("l."+key+" like", "%"+fieldValue+"%")
+				} else {
+					condition = condition.And("c."+key+" like", "%"+fieldValue+"%")
+				}
+			}
 		}
 	}
-	//filter
 
+	//filter
 	for field := range def.FieldMap {
 		value := query.Get("field." + field)
 		if value != "" {
@@ -262,7 +267,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//filter
-	condition, err := buildCondition(userID, def, r.URL.Query())
+	condition, err := buildCondition(userID, ctype, def, r.URL.Query())
 	if err != nil {
 		HandleError(err, w, 410)
 		return
