@@ -239,10 +239,6 @@ func (r MysqlHandler) getSortBy(sortby []string) (string, error) {
 		if strings.TrimSpace(item) != "" {
 			itemArr := util.Split(item, " ")
 			sortByField := itemArr[0]
-			locationColumns := definition.LocationColumns
-			if len(locationColumns) > 0 && util.Contains(locationColumns, sortByField) {
-				sortByField = "l." + sortByField
-			}
 			sortByOrder := "ASC"
 
 			if len(itemArr) == 2 {

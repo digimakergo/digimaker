@@ -131,9 +131,26 @@ func BindContent(ctx context.Context, entity interface{}, targets string, condit
 	contentType, query := CreateQuery(targets, condition)
 	def, _ := definition.GetDefinition(contentType)
 	withAuthor := false
+	sortbyArr := condition.Option.Sortby
 	if def.HasLocation {
 		withAuthor = true
+		//add l. to location field
+		for i, sortbyStr := range sortbyArr {
+			itemArr := util.Split(sortbyStr, " ")
+			sortByField := itemArr[0]
+			locationColumns := definition.LocationColumns
+			if len(locationColumns) > 0 && util.Contains(locationColumns, sortByField) {
+				sortByField = "l." + sortByField
+			}
+
+			sortbyUpdated := sortByField
+			if len(itemArr) == 2 {
+				sortbyUpdated = sortbyUpdated + " " + itemArr[1]
+			}
+			condition.Option.Sortby[i] = sortbyUpdated
+		}
 	}
+
 	count, err := BindContentWithQuery(ctx, entity, contentType, query, ContentOption{WithAuthor: withAuthor})
 	return count, err
 }
