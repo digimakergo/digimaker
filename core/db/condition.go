@@ -236,6 +236,9 @@ func BuildCondition(cond Condition, locationColumns ...[]string) (string, []inte
 				fieldName = "c." + fieldName
 			}
 		}
+		if expression.Operator == "like" {
+			return fieldName + " LIKE CONCAT('%',?,'%')", value
+		}
 		return fieldName + " " + expression.Operator + operatorStr, value
 	} else {
 		//If it's a container

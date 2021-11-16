@@ -173,11 +173,10 @@ func buildCondition(userid int, cType string, def definition.ContentType, query 
 			enabledFields := util.GetConfigArr("rest", "like_fields")
 			if util.Contains(enabledFields, cType+"/"+key) {
 				fieldValue := strings.TrimPrefix(value, "contain:")
-				fieldValue = strings.ReplaceAll(fieldValue, "%", "")
 				if def.HasLocation && util.Contains(definition.LocationColumns, key) {
-					condition = condition.And("l."+key+" like", "%"+fieldValue+"%")
+					condition = condition.And("l."+key+" like", fieldValue)
 				} else {
-					condition = condition.And("c."+key+" like", "%"+fieldValue+"%")
+					condition = condition.And("c."+key+" like", fieldValue)
 				}
 			}
 		}
