@@ -161,6 +161,10 @@ func (j Json) Value() (driver.Value, error) {
 	return string(j.Content), nil
 }
 
+func (j Json) String() string {
+	return string(j.Content)
+}
+
 //JSON Handler
 type JSONHandler struct {
 	definition.FieldDef
