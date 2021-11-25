@@ -1,9 +1,9 @@
 package fieldtypes
 
 import (
-	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
@@ -15,10 +15,14 @@ type RelationHandler struct {
 
 //max 30 length
 func (handler RelationHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
-	str := fmt.Sprint(input)
-	i, err := strconv.Atoi(str)
-	if err != nil {
-		return nil, errors.New("Input is not a int. ref value:" + str)
+	str := strings.TrimSpace(fmt.Sprint(input))
+	var i int
+	if str != "" {
+		var err error
+		i, err = strconv.Atoi(str)
+		if err != nil {
+			return nil, fieldtype.NewValidationError("Input is not a int. ref value:" + str)
+		}
 	}
 	//todo: verify with parameters
 	return i, nil
