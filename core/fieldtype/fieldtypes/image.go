@@ -30,7 +30,11 @@ func (handler ImageHandler) LoadInput(input interface{}, mode string) (interface
 func (handler ImageHandler) BeforeStore(value interface{}, existing interface{}, mode string) (interface{}, error) {
 	imagePath := value.(string)
 
-	if imagePath != "" && (existing == nil || existing != nil && imagePath != existing.(string)) { //means there is a valid image change
+	if imagePath == "" {
+		return "", nil //todo: remove existing if there is
+	}
+
+	if existing == nil || existing != nil && imagePath != existing.(string) { //means there is a valid image change
 		//todo: support other image services or remote image
 
 		params := ImageParameter{}

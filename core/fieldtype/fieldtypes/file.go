@@ -64,14 +64,14 @@ func (handler FileHandler) LoadInput(input interface{}, mode string) (interface{
 func (handler FileHandler) BeforeStore(value interface{}, existing interface{}, mode string) (interface{}, error) {
 	filePath := value.(string)
 
-	//no change
-	if existing != nil && filePath == existing.(string) {
-		return filePath, nil
-	}
-
 	//delete or new empty
 	if filePath == "" {
 		return "", nil
+	}
+
+	//no change
+	if existing != nil && filePath == existing.(string) {
+		return filePath, nil
 	}
 
 	//todo: support other file services or remote
