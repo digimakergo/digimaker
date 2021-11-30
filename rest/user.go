@@ -85,7 +85,6 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	//create hash
 	activation := Activiation{}
 	activation.Hash = util.GenerateUID()
-	fmt.Println(activation.Hash)
 	activation.Ref = strconv.Itoa(user.GetCID())
 	activation.Created = int(time.Now().Unix())
 	activation.Type = "resetpassword"
@@ -95,11 +94,32 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	_, err := db.Insert(r.Context(), "dm_activation", dbMap)
 	if err == nil {
 		//send password
-		url := "http://xxxx.com/api/user/resetpassword-confirm/" + activation.Hash
-		util.SendMail(
+		settings := util.GetConfigSection("resetpassword_email")
+
+		cond := util.Split(settings["condition"], ",")
+		template, templateErr := query.Fetch(r.Context(), settings["type"], db.Cond(cond[0], cond[1]))
+		if templateErr != nil {
+			log.Error(templateErr, "", r.Context())
+			return
+		}
+
+		if template == nil {
+			log.Error(errors.New("No resset password template found"), "", r.Context())
+			return
+		}
+
+		subject := template.Value(settings["subject"]).(string)
+		body := template.Value(settings["body"]).(string)
+		body = strings.ReplaceAll(body, "{hash}", activation.Hash)
+
+		err = util.SendMail(
 			[]string{email},
-			"reset password",
-			"Click to reset password: <a href="+url+">url</a>")
+			subject,
+			body)
+		if err != nil {
+			log.Error(fmt.Errorf("Mail not sent. %v", err), "", r.Context())
+			return
+		}
 		//todo: rollback
 		WriteResponse(true, w)
 	}
@@ -226,5 +246,5 @@ func init() {
 	RegisterRoute("/user/resetpassword/{email}", ResetPassword)
 	RegisterRoute("/user/enable/{type}", EnableUser)
 	RegisterRoute("/user/roles/{user}", FetchUserRoles)
-	RegisterRoute("/user/resetpassword-confirm/{hash}", ResetPasswordDone)
+	RegisterRoute("/user/resetpassword-confirm/{hash}", ResetPasswordDone, "POST")
 }
