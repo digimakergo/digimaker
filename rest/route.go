@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/digimakergo/digimaker/core/auth"
 	"github.com/digimakergo/digimaker/core/log"
@@ -49,7 +50,8 @@ func InitRequest(next http.Handler) http.Handler {
 
 		//set user_id to context
 		userID := 0
-		if r.Header.Get("Authorization") != "" {
+		authStr := r.Header.Get("Authorization")
+		if authStr != "" && strings.HasPrefix(authStr, "Bearer ") {
 			err, claims := VerifyAccessToken(r)
 
 			if err != nil {
