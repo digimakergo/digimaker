@@ -1,6 +1,7 @@
 package sitekit
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
 	"errors"
@@ -110,7 +111,7 @@ func HandleContent(w http.ResponseWriter, r *http.Request) {
 	site := vars["site"]
 
 	ctx := r.Context()
-	err := OutputContent(w, id, site, sitePath, ctx)
+	err := OutputContentByID(w, id, site, sitePath, ctx)
 	if err != nil {
 		log.Error(err.Error(), "template", r.Context())
 		requestID := log.GetContextInfo(ctx).RequestID
@@ -204,8 +205,23 @@ func RouteContent(siteRouters SiteRouters, defaultRouters SiteRouters) {
 	}
 }
 
+type RequestInfo struct {
+	Context  context.Context
+	Site     string
+	SitePath string
+}
+
+func OutputContentByID(w io.Writer, id int, siteIdentifier string, sitePath string, ctx context.Context) error {
+	content, err := query.FetchByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("Error of outputing content while fetching content: %w", err)
+	}
+	err = OutputContent(w, content, siteIdentifier, sitePath, ctx)
+	return err
+}
+
 //Output content using conent template
-func OutputContent(w io.Writer, id int, siteIdentifier string, sitePath string, ctx context.Context) error {
+func OutputContent(w io.Writer, content contenttype.ContentTyper, siteIdentifier string, sitePath string, ctx context.Context) error {
 	siteSettings := GetSiteSettings(siteIdentifier)
 	variables := map[string]interface{}{
 		"root":     siteSettings.RootContent,
@@ -214,59 +230,70 @@ func OutputContent(w io.Writer, id int, siteIdentifier string, sitePath string, 
 		"site":     siteIdentifier,
 		"sitepath": sitePath}
 
-	content, err := query.FetchByID(ctx, id)
-
-	if err != nil {
-		return fmt.Errorf("Error of outputing content while fetching content: %w", err)
-	}
-
 	if content == nil {
 		variables["error"] = "Content not found" //todo: use error code and set variables(from template) so can we customize it in template
 	} else {
-		if !util.ContainsInt(content.GetLocation().Path(), siteSettings.RootContent.GetLocation().ID) {
+		if content.GetLocation() != nil &&
+			!util.ContainsInt(content.GetLocation().Path(), siteSettings.RootContent.GetLocation().ID) {
 			variables["error"] = "Content not found in this site"
 		}
 
 		userID := util.CurrentUserID(ctx)
-		if !permission.CanRead(ctx, userID, content) {
+		if userID > 0 && !permission.CanRead(ctx, userID, content) {
 			variables["error"] = "No permission to this content"
 		}
 	}
 	variables["content"] = content
 
-	err = Output(w, variables, ctx)
-	return err
-}
-
-type RequestInfo struct {
-	Context  context.Context
-	Site     string
-	SitePath string
-}
-
-//Output using template
-func Output(w io.Writer, variables map[string]interface{}, ctx context.Context) error {
-	// siteSettings := GetSiteSettings(siteIdentifier)
-
-	// pongo2.DefaultSet.SetBaseDirectory("../templates/" + siteSettings.TemplateBase)
 	if log.GetContextInfo(ctx).CanDebug() {
 		variables["debug"] = true
 	}
+	info := RequestInfo{
+		Context:  ctx,
+		Site:     variables["site"].(string),
+		SitePath: variables["sitepath"].(string)}
 
-	tpl := pongo2.Must(pongo2.FromBytes(mainTemplate))
-	//todo: support import in template - hard in go embed?
+	err := Output(w, variables, templateViewContent, info)
+	return err
+}
 
-	info := RequestInfo{Context: ctx, Site: variables["site"].(string), SitePath: variables["sitepath"].(string)}
-
+//Output proceeds template and output the results
+//If variables includes "content" it will proceed as content,
+//otherwise it process path(eg. email, sms, etc)
+//see sitekit/templates/main.html
+//common variables: debug, error
+//match_data for non-content template matching
+func Output(w io.Writer, variables map[string]interface{}, viewType string, requestInfo RequestInfo) error {
+	//register all functions with request info
+	if viewType == "" {
+		return errors.New("Empty view type")
+	}
+	variables["viewtype"] = viewType
+	if _, ok := variables["match_data"]; !ok {
+		variables["match_data"] = map[string]interface{}{}
+	}
 	for name, newFunctions := range allFunctions {
 		functions := newFunctions()
-		functions.SetInfo(info)
+		functions.SetInfo(requestInfo)
 		functionMap := functions.GetMap()
 		variables[name] = functionMap
 	}
 
+	//proceed templates
+	tpl := pongo2.Must(pongo2.FromBytes(mainTemplate))
 	err := tpl.ExecuteWriter(pongo2.Context(variables), w)
 	return err
+}
+
+//OutputString output template result as string
+//See Output
+func OutputString(variables map[string]interface{}, viewType string, requestInfo RequestInfo) (string, error) {
+	buf := bytes.Buffer{}
+	err := Output(&buf, variables, viewType, requestInfo)
+	if err != nil {
+		return "", err
+	}
+	return buf.String(), nil
 }
 
 func init() {

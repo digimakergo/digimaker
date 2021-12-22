@@ -2,6 +2,7 @@ package functions
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
@@ -24,6 +25,18 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			settings := sitekit.GetSiteSettings(dm.Site)
 			path := sitekit.GetContentTemplate(content, mode, settings, dm.Context)
 			log.Debug("Template for content "+content.GetName()+", mode "+mode+": "+path, "template", dm.Context)
+			return path
+		},
+
+		"tpl_match": func(matchData interface{}, viewType string) string {
+			var data map[string]interface{}
+			if matchData == nil {
+				data = map[string]interface{}{}
+			} else {
+				data = matchData.(map[string]interface{})
+			}
+			path, matchLog := sitekit.MatchTemplate(viewType, data)
+			log.Debug("Template for view "+viewType+": "+path+"log:"+strings.Join(matchLog, "\n"), "template", dm.Context)
 			return path
 		},
 

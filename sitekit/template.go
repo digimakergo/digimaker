@@ -69,9 +69,17 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 	return result
 }
 
-//MatchTemplate returns overrided template based on override rule in template_override.yaml
-func MatchTemplate(source string, matchData map[string]interface{}, overrideFile string) (string, []string) {
-	rules := util.GetConfigSectionAll(source, overrideFile).([]interface{})
+//MatchTemplate returns overrided template based on override config(eg. template_override.yaml)
+func MatchTemplate(viewSection string, matchData map[string]interface{}, fileName ...string) (string, []string) {
+	overrideFileName := overrideFile
+	if len(fileName) > 0 {
+		overrideFileName = fileName[1]
+	}
+	rulesI := util.GetConfigSectionAll(viewSection, overrideFileName)
+	if rulesI == nil {
+		return "", []string{"view section not found: " + viewSection}
+	}
+	rules := rulesI.([]interface{})
 	result := ""
 	matchLog := []string{}
 	for i, item := range rules {

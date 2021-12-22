@@ -1,17 +1,19 @@
 {% comment %}
 Available varilables:
 
+- viewtype: "content_view" for content, eg. "email" for email
+- debug: true/false
+- error: error message
+
 For content:
 - site
 - content
 - root
 - viewmode
 - prefix
-- debug
 
-For non content(tbd):
-- site
-- parameter given in handler/controller
+For non content:
+- match_data: map[string]interface{} for template matching
 {% endcomment %}
 
 {% macro output_content( content, viewmode) export%}
@@ -31,18 +33,23 @@ For non content(tbd):
     {%endwith%}
 {% endmacro %}
 
-{#include path from override #}
-{% macro output( path, match_data ) export%}
-    {#todo: match it#}
-    {%with "../default/"|add:path|add:".html" as template%}
-        {%include template%}
+{% macro output_view( viewtype, match_data ) export%}
+    {%with dm.tpl_match(match_data, viewtype) as path%}
+    {% if path=="" %}
+            {OVERRIDE NOT FOUND, PLEASE OVERRIDE. viewtype: {{viewtype}} }
+        {%else%}
+                {% if debug %}<!-- {{path}} -->{%endif%}
+                {%include path|dm_abs_path %}
+        {% endif %}
     {%endwith%}
 {% endmacro %}
 
 {%if error != nil %}
   {{error}} {%comment%} todo: use include {%endcomment%}
 {%else%}
-  {%if content != nil %}
-    {{output_content( content, viewmode )}}
+  {%if viewtype == "content_view" %}
+     {{output_content( content, viewmode )}}
+   {%else%}
+     {{output_view( viewtype, match_data )}}
    {% endif %}
 {%endif%}
