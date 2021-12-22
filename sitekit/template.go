@@ -73,7 +73,7 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 func MatchTemplate(viewSection string, matchData map[string]interface{}, fileName ...string) (string, []string) {
 	overrideFileName := overrideFile
 	if len(fileName) > 0 {
-		overrideFileName = fileName[1]
+		overrideFileName = fileName[0]
 	}
 	rulesI := util.GetConfigSectionAll(viewSection, overrideFileName)
 	if rulesI == nil {
