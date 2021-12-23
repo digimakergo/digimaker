@@ -6,6 +6,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
@@ -38,6 +39,24 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			path, matchLog := sitekit.MatchTemplate(viewType, data)
 			log.Debug("Template for view "+viewType+": "+path+"log:"+strings.Join(matchLog, "\n"), "template", dm.Context)
 			return path
+		},
+
+		"map": func(params ...interface{}) map[string]interface{} {
+			result := map[string]interface{}{}
+			for i := 0; i < len(params); i = i + 2 {
+				key := params[i].(string)
+				value := params[i+1]
+				result[key] = value
+			}
+			return result
+		},
+
+		"fieldtype": func(field string, content contenttype.ContentTyper) string {
+			def, _ := definition.GetDefinition(content.ContentType())
+			if fieldDef, ok := def.FieldMap[field]; ok {
+				return fieldDef.FieldType
+			}
+			return ""
 		},
 
 		"fetch_byid": func(id int) contenttype.ContentTyper {

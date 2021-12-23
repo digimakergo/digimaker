@@ -27,12 +27,6 @@ For non content:
     {%endwith%}
 {% endmacro %}
 
-{% macro output_field( field ) export%}
-    {%with "fieldtype/"|add:field.Type()|add:".html"|dm_abs_path:"github.com/digimakergo/digimaker/sitekit" as path%}
-        {%include path with field=field%}
-    {%endwith%}
-{% endmacro %}
-
 {% macro output_view( viewtype, match_data ) export%}
     {%with dm.tpl_match(match_data, viewtype) as path%}
     {% if path=="" %}
@@ -44,8 +38,21 @@ For non content:
     {%endwith%}
 {% endmacro %}
 
+{% macro output_field( field, content ) export%}
+    {%with dm.fieldtype( field, content ) as fieldtype%}
+        {%with dm.tpl_match( dm.map( "fieldtype", fieldtype, "field", field, "contentype", content.ContentType(), "site", site ), "field" ) as path%}
+            {%if path==""%}
+                {TEMPLATE FOR {{fieldtype}} IS NOT FOUND}
+            {%else%}
+                {% if debug %}<!-- {{path}} -->{%endif%}
+                {%include path|dm_abs_path with field=field value=content.Value(field)%}
+            {%endif%}
+        {%endwith%}
+    {%endwith%}
+{% endmacro %}
+
 {%if error != nil %}
-  {{error}} {%comment%} todo: use include {%endcomment%}
+  {{error}} {%comment%} todo: use include with override {%endcomment%}
 {%else%}
   {%if viewtype == "content_view" %}
      {{output_content( content, viewmode )}}
