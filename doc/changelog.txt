@@ -1,0 +1,8 @@
+Change log
+===============
+
+0.1.0-beta.4
+- 2021-12-23 [template] supports variable in template override, eg. to=fieldtype/{fieldtype}.html
+- 2021-12-23 [template] supports output_field which use template_override.yaml for field templating
+- 2021-12-22 [template] support invoking template without site: sitekit.OutputContent, sitekit.Output, sitekit.OutputString can be used independently
+- 2021-11-04 [auth] Suppport remember me 

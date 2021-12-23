@@ -98,7 +98,16 @@ func MatchTemplate(viewSection string, matchData map[string]interface{}, fileNam
 		matchLog = append(matchLog, "matching on rule"+strconv.Itoa(i)+" on file "+overrideFile)
 		matchLog = append(matchLog, currentMatchLog...)
 		if matched {
-			result = to
+			washedVars := map[string]string{}
+			for key, value := range matchData {
+				switch value.(type) {
+				case string:
+					washedVars[key] = value.(string)
+				case int:
+					washedVars[key] = strconv.Itoa(value.(int))
+				}
+			}
+			result = util.ReplaceStrVar(to, washedVars)
 			break
 		}
 	}
