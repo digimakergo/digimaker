@@ -239,7 +239,7 @@ func (handler DatetimeHandler) LoadInput(input interface{}, mode string) (interf
 	str := strings.TrimSpace(fmt.Sprint(input))
 
 	//unix format
-	if ok, _ := regexp.Match(`\d+`, []byte(str)); ok {
+	if ok, _ := regexp.Match(`ˆ\d+$`, []byte(str)); ok {
 		unixInt, _ := strconv.Atoi(str)
 		value := time.Unix(int64(unixInt), 0)
 		return value, nil
