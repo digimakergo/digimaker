@@ -253,9 +253,9 @@ func (handler DatetimeHandler) LoadInput(input interface{}, mode string) (interf
 		return value, nil
 	} else {
 		if strings.Contains(str, " ") {
-			value, err := time.Parse("2006-01-02 15:04:05", str)
+			value, err := time.Parse("2006-01-02 15:04", str)
 			if err != nil {
-				return nil, fieldtype.NewValidationError("Wrong format, only allow like 2006-01-02 15:04:05")
+				return nil, fieldtype.NewValidationError("Wrong format, only allow like 2006-01-02 15:04")
 			}
 			return value, nil
 		} else {
