@@ -239,7 +239,7 @@ func (handler DatetimeHandler) LoadInput(input interface{}, mode string) (interf
 	str := strings.TrimSpace(fmt.Sprint(input))
 
 	if str == "" {
-		str = "1000-01-01 00:00" //use this as null since go's time.Time doesn't support null
+		return time.Time{}, nil
 	}
 
 	//unix format

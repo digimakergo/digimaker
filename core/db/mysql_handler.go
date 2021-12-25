@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
@@ -272,12 +273,24 @@ func (r MysqlHandler) getLimit(limit []int) (string, error) {
 	return limitStr, nil
 }
 
+func fixEmptyType(value interface{}) interface{} {
+	//fix golang time doesn't support datetime null in db
+	if v, ok := value.(time.Time); ok {
+		emptyTime := time.Time{}
+		if v == emptyTime {
+			value, _ = time.Parse("2006-01-02 15:04", "1000-01-01 00:00")
+		}
+	}
+	return value
+}
+
 func (MysqlHandler) Insert(ctx context.Context, tablename string, values map[string]interface{}, transation ...*sql.Tx) (int, error) {
 	sqlStr := "INSERT INTO " + tablename + " ("
 	valuesString := "VALUES("
 	var valueParameters []interface{}
 	if len(values) > 0 {
 		for name, value := range values {
+			value = fixEmptyType(value)
 			if name != "id" {
 				sqlStr += name + ","
 				valuesString += "?,"
@@ -325,6 +338,7 @@ func (MysqlHandler) Update(ctx context.Context, tablename string, values map[str
 	sqlStr := "UPDATE " + tablename + " SET "
 	var valueParameters []interface{}
 	for name, value := range values {
+		value = fixEmptyType(value)
 		if name != "id" {
 			sqlStr += name + "=?,"
 			valueParameters = append(valueParameters, value)
