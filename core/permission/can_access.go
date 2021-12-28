@@ -23,6 +23,8 @@ const (
 	AccessWithLimit = 2
 )
 
+var allowedFieldtypes []string = []string{"select", "radio", "checkbox"}
+
 //Get user's limits.
 //empty result means no access - not no limit, while a empty limit(empty map) in the slice means no limit(can do anything)
 // return access list, access type, error
@@ -171,6 +173,11 @@ func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fie
 	def := parent.Definition()
 	data := MatchData{}
 	data["parent_contenttype"] = parent.ContentType()
+	for key, v := range def.FieldMap {
+		if util.Contains(allowedFieldtypes, v.FieldType) {
+			data["parent/"+key] = parent.Value(key)
+		}
+	}
 	data["contenttype"] = contenttype
 	if def.HasLocation {
 		location := parent.GetLocation()
