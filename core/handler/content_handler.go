@@ -27,6 +27,14 @@ import (
 
 type InputMap map[string]interface{}
 
+func (inputs InputMap) Keys() []string {
+	result := []string{}
+	for key, _ := range inputs {
+		result = append(result, key)
+	}
+	return result
+}
+
 var ErrorNoPermission = errors.New("The user doesn't have access to the action.")
 
 // Validate validates and returns a validation result.
@@ -155,7 +163,8 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 		}
 	}
 
-	if !permission.CanCreate(ctx, parent, contentType, userID) {
+	inputFields := getInputFields(inputs, contentDefinition)
+	if !permission.CanCreate(ctx, parent, contentType, inputFields, userID) {
 		return nil, errors.New("User doesn't have access to create")
 	}
 
@@ -362,6 +371,19 @@ func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (bool,
 	return Update(ctx, content, inputs, userId)
 }
 
+//Filter input fields in content
+func getInputFields(inputs InputMap, def definition.ContentType) []string {
+	keys := inputs.Keys()
+	result := []string{}
+	fieldMap := def.FieldMap
+	for _, key := range keys {
+		if _, ok := fieldMap[key]; ok {
+			result = append(result, key)
+		}
+	}
+	return result
+}
+
 //Update content.
 //The inputs doesn't need to include all required fields. However if it's there,
 // it will check if it's required&empty
@@ -371,20 +393,9 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	fieldsDefinition := contentDef.FieldMap
 
 	//permission check
-	if !permission.CanUpdate(ctx, content, userId) {
+	updatedFields := getInputFields(inputs, contentDef)
+	if !permission.CanUpdate(ctx, content, updatedFields, userId) {
 		return false, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
-	}
-	//todo: think about merging 'content/update' and 'content/fields_update'
-	allowedFields, err := permission.GetUpdateFields(ctx, content, userId)
-	if err != nil {
-		return false, err
-	}
-	if len(allowedFields) > 0 && allowedFields[0] != "*" {
-		for field, _ := range inputs {
-			if _, ok := fieldsDefinition[field]; ok && !util.Contains(allowedFields, field) {
-				return false, errors.New("User doesn't have permission to update field " + field + ".")
-			}
-		}
 	}
 
 	//Validate
@@ -414,6 +425,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 			existing := content.Value(identifier)
 			//Invoke BeforeSaving
 			if fieldWithEvent, ok := handler.(fieldtype.Event); ok {
+				var err error
 				value, err = fieldWithEvent.BeforeStore(value, existing, "")
 				if err != nil {
 					return false, err
@@ -556,7 +568,7 @@ func Move(ctx context.Context, contentIds []int, targetId int, userId int) error
 			tx.Rollback() //error if no commit?
 			return ErrorNoPermission
 		}
-		if !permission.CanCreate(ctx, target, content.ContentType(), userId) {
+		if !permission.CanCreate(ctx, target, content.ContentType(), []string{}, userId) {
 			log.Warning("No permission to create when moving "+strconv.Itoa(location.ID), "")
 			tx.Rollback() //error if no commit?
 			return ErrorNoPermission
@@ -758,7 +770,7 @@ func SaveDraft(ctx context.Context, userId int, data string, contentType string,
 			return contenttype.Version{}, err
 		}
 	}
-	if !permission.CanCreate(ctx, parent, contentType, userId) {
+	if !permission.CanCreate(ctx, parent, contentType, []string{}, userId) {
 		return contenttype.Version{}, errors.New("Not permission to create content type" + contentType)
 	}
 	_, err := definition.GetDefinition(contentType)

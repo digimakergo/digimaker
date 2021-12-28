@@ -169,10 +169,35 @@ func MatchCondition(conditions map[string]interface{}, target map[string]interfa
 						}
 					}
 				default:
-					errorLog := ""
-					matchResult, errorLog = matchItem(conditionValue, realValue)
-					if errorLog != "" {
-						matchLog = append(matchLog, errorLog)
+					if conditionValueMap, ok := conditionValue.(map[string]interface{}); ok {
+						if conditionSlice, ok := conditionValueMap["subset"]; ok {
+							//real value should be subset of condition value, 'subset' support []string for now.
+							matchSubset := true
+							for _, realValueItem := range realValue.([]string) {
+								conditionSliceStr := []string{}
+								for _, v := range conditionSlice.([]interface{}) {
+									conditionSliceStr = append(conditionSliceStr, v.(string))
+								}
+								matched, matchItemLog := matchItem(realValueItem, conditionSliceStr)
+								if matchItemLog != "" {
+									matchLog = append(matchLog, matchItemLog)
+								}
+								if !matched {
+									matchSubset = false
+									break
+								}
+
+							}
+							matchResult = matchSubset
+						} else {
+							matchLog = append(matchLog, "map only support subset")
+						}
+					} else {
+						errorLog := ""
+						matchResult, errorLog = matchItem(conditionValue, realValue)
+						if errorLog != "" {
+							matchLog = append(matchLog, errorLog)
+						}
 					}
 				}
 			}
@@ -192,33 +217,33 @@ func MatchCondition(conditions map[string]interface{}, target map[string]interfa
 
 //condition value: int|string
 //target value: int|[]int|string|[]string
-func matchItem(conditionValue interface{}, realValue interface{}) (bool, string) {
+func matchItem(current interface{}, targetValue interface{}) (bool, string) {
 	result := false
-	if _, ok := conditionValue.(float64); ok {
-		conditionValue = int(conditionValue.(float64))
+	if _, ok := current.(float64); ok {
+		current = int(current.(float64))
 	}
 
-	switch conditionValue.(type) {
+	switch current.(type) {
 	case string:
-		switch realValue.(type) {
+		switch targetValue.(type) {
 		case string:
-			result = conditionValue.(string) == realValue.(string)
+			result = current.(string) == targetValue.(string)
 		case []string:
-			result = Contains(realValue.([]string), conditionValue.(string))
+			result = Contains(targetValue.([]string), current.(string))
 		default:
 			return false, "Target is not string/[]string"
 		}
 	case int:
-		switch realValue.(type) {
+		switch targetValue.(type) {
 		case int:
-			result = conditionValue.(int) == realValue.(int)
+			result = current.(int) == targetValue.(int)
 		case []int: //real value contains condition int
-			result = ContainsInt(realValue.([]int), conditionValue.(int))
+			result = ContainsInt(targetValue.([]int), current.(int))
 		default:
 			return false, "Target is not int/[]int"
 		}
 	default:
-		return false, "unsupported condition type:" + fmt.Sprintf("%T", conditionValue)
+		return false, "unsupported current type:" + fmt.Sprintf("%T", current)
 	}
 	return result, ""
 }

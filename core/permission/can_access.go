@@ -5,6 +5,7 @@ package permission
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strconv"
 
@@ -26,7 +27,7 @@ const (
 //empty result means no access - not no limit, while a empty limit(empty map) in the slice means no limit(can do anything)
 // return access list, access type, error
 // if accessType is AccessWithLimit, there must be valid values in the access list
-func GetUserAccess(ctx context.Context, userID int, operation string) (AccessType, []map[string]interface{}, error) {
+func GetUserAccess(ctx context.Context, userID int, operation string) (AccessType, []AccessLimit, error) {
 	policyList, err := GetUserPolicies(ctx, userID)
 	log.Debug("Got policy list: "+fmt.Sprint(policyList), "permission", ctx)
 	if err != nil {
@@ -54,29 +55,35 @@ func GetUserAccess(ctx context.Context, userID int, operation string) (AccessTyp
 //If the user has acccess given data(targetData here)
 //If realData is empty, just check if the user has given operation(can be full access or partly access to that operation)
 func HasAccessTo(ctx context.Context, userID int, operation string, targetData ...MatchData) bool {
+	result, _ := AccessMatched(ctx, userID, operation, targetData...)
+	return result
+}
+
+//if it returns true, also it return limit, false doesn't return limit. also full access doesn't return
+func AccessMatched(ctx context.Context, userID int, operation string, targetData ...MatchData) (bool, AccessLimit) {
 	//get permission limits
 	accessType, limits, err := GetUserAccess(ctx, userID, operation)
 
 	if err != nil {
 		log.Error(err.Error(), "permission")
-		return false
+		return false, nil
 	}
 
 	if accessType == AccessFull {
-		return true
+		return true, nil
 	}
 
 	//When match data is not provided, if there is partly access it will be success.
 	if len(targetData) == 0 {
 		if accessType == AccessWithLimit {
-			return true
+			return true, nil
 		} else {
-			return false
+			return false, nil
 		}
 	}
 
 	if accessType == AccessNo {
-		return false
+		return false, nil
 	}
 
 	log.Debug("Access limits: "+fmt.Sprintln(limits), "permission", ctx)
@@ -91,10 +98,10 @@ func HasAccessTo(ctx context.Context, userID int, operation string, targetData .
 
 		if policyResult {
 			log.Debug("Policy matched.", "permission", ctx)
-			return true
+			return true, limit
 		}
 	}
-	return false
+	return false, nil
 }
 
 //todo: support more
@@ -122,22 +129,94 @@ func CanDelete(ctx context.Context, content contenttype.ContentTyper, userId int
 }
 
 //support keys: contenttype, id(parent locaton id), under, parent author(include "self")
-func CanCreate(ctx context.Context, parent contenttype.ContentTyper, contenttype string, userId int) bool {
-	data := MatchData{}
-	if parent != nil {
-		data = getMatchData(parent, userId)
-	}
-	data["contenttype"] = contenttype
+func CanCreate(ctx context.Context, parent contenttype.ContentTyper, contenttype string, fields []string, userId int) bool {
+	data := getCreateMatchData(parent, contenttype, fields, userId)
 	return HasAccessTo(ctx, userId, "content/create", data)
 }
 
 //support keys: contenttype, id(locaton id), under, author(include "self")
-func CanUpdate(ctx context.Context, content contenttype.ContentTyper, userId int) bool {
-	data := getMatchData(content, userId)
+func CanUpdate(ctx context.Context, content contenttype.ContentTyper, fields []string, userId int) bool {
+	data := getUpdateMatchData(content, fields, userId)
 	return HasAccessTo(ctx, userId, "content/update", data)
 }
 
-//todo: add more conditions(keys)
+func GetUpdateFields(ctx context.Context, content contenttype.ContentTyper, userId int) ([]string, error) {
+	data := getUpdateMatchData(content, []string{}, userId)
+	if content.ContentType() == "user" && content.GetCID() == userId {
+		data["user"] = "self"
+	}
+	matched, limit := AccessMatched(ctx, userId, "content/update", data)
+	result := []string{}
+	if matched {
+		if limit == nil {
+			result = content.Definition().FieldIdentifierList
+		} else {
+			if _, ok := limit["fields"]; ok {
+				fields := limit["fields"].(map[string]interface{})
+				subset := fields["subset"]
+				for _, v := range subset.([]interface{}) {
+					result = append(result, v.(string))
+				}
+			} else {
+				result = content.Definition().FieldIdentifierList
+			}
+		}
+	} else {
+		return nil, errors.New("No access to update")
+	}
+	return result, nil
+}
+
+func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fields []string, userId int) MatchData {
+	def := parent.Definition()
+	data := MatchData{}
+	data["parent_contenttype"] = parent.ContentType()
+	data["contenttype"] = contenttype
+	if def.HasLocation {
+		location := parent.GetLocation()
+		data["id"] = location.ID
+		data["under"] = location.Path()
+	}
+	author := parent.Value("author")
+	if author != nil && (userId == author.(int)) {
+		data["author"] = "self"
+	}
+	data["fields"] = getFieldMatch(fields)
+	return data
+}
+
+func getUpdateMatchData(parent contenttype.ContentTyper, fields []string, userId int) MatchData {
+	def := parent.Definition()
+	data := MatchData{}
+	data["contenttype"] = parent.ContentType()
+	if def.HasLocation {
+		location := parent.GetLocation()
+		data["id"] = location.ID
+		data["under"] = location.Path()
+	}
+	author := parent.Value("author")
+	if author != nil && (userId == author.(int)) {
+		data["author"] = "self"
+	}
+
+	if parent.ContentType() == "user" && parent.GetCID() == userId {
+		data["user"] = "self"
+	}
+	data["fields"] = getFieldMatch(fields)
+	return data
+}
+
+//if fields is empty, use nil - meaning alway match "fields" limit
+func getFieldMatch(fields []string) interface{} {
+	var result interface{}
+	if len(fields) > 0 {
+		result = fields
+	} else {
+		result = nil
+	}
+	return result
+}
+
 func getMatchData(content contenttype.ContentTyper, userId int) MatchData {
 	def := content.Definition()
 	data := MatchData{}
@@ -146,39 +225,13 @@ func getMatchData(content contenttype.ContentTyper, userId int) MatchData {
 		location := content.GetLocation()
 		data["id"] = location.ID
 		data["under"] = location.Path()
-		author := content.Value("author")
-		if author != nil && (userId == author.(int)) {
-			data["author"] = "self"
-		}
+	}
+	author := content.Value("author")
+	if author != nil && (userId == author.(int)) {
+		data["author"] = "self"
+	}
+	if content.ContentType() == "user" && content.GetCID() == userId {
+		data["user"] = "self"
 	}
 	return data
-}
-
-//Get update fields for this user. If content is a user content, it supports "cid":"self"
-//return fields list, if all matches, return ["*"]
-//Note: fields can not be set in different rules, meaning first matches will get the fields
-func GetUpdateFields(ctx context.Context, content contenttype.ContentTyper, userID int) ([]string, error) {
-	accessType, accessMap, err := GetUserAccess(ctx, userID, "content/update_fields")
-	if err != nil {
-		return nil, err
-	}
-	result := []string{}
-	if accessType == AccessFull {
-		result = append(result, "*")
-	} else if accessType == AccessWithLimit {
-		matchData := getMatchData(content, userID)
-		if content.ContentType() == "user" && content.GetCID() == userID { //todo: make "user" configurable
-			matchData["cid"] = "self"
-		}
-		matchData["fields"] = nil          //todo: maybe a better way to get fields instead of using nil to match pass
-		for _, limits := range accessMap { //todo: is it sure it will be the first one(golang's random order on map)?
-			matched, _ := util.MatchCondition(limits, matchData) //todo: set log
-			if matched {
-				fieldsI := limits["fields"]
-				result = util.InterfaceToStringArray(fieldsI.([]interface{}))
-				break
-			}
-		}
-	}
-	return result, nil
 }

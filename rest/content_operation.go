@@ -164,7 +164,7 @@ func SetPriority(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if !permission.CanUpdate(r.Context(), content, userID) {
+		if !permission.CanUpdate(r.Context(), content, []string{}, userID) {
 			HandleError(errors.New("No permision for "+strconv.Itoa(id)), w)
 			tx.Rollback()
 			return

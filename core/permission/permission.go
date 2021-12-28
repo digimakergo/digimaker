@@ -20,9 +20,11 @@ import (
 Policy & Permission
 *************/
 
+type AccessLimit map[string]interface{}
+
 type Policy struct {
-	Operation []string               `json:"operation"`
-	LimitedTo map[string]interface{} `json:"limited_to"` //todo: use a type Limitations/Limits?
+	Operation []string    `json:"operation"`
+	LimitedTo AccessLimit `json:"limited_to"` //todo: use a type Limitations/Limits?
 }
 
 //Policy collection. For merge Policy list, use []Policy
@@ -141,8 +143,8 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 }
 
 // GetLimitsFromPolicy gets all limits from a policies
-func GetLimitsFromPolicy(policyList []Policy, operation string) []map[string]interface{} {
-	var result []map[string]interface{}
+func GetLimitsFromPolicy(policyList []Policy, operation string) []AccessLimit {
+	var result []AccessLimit
 	for _, policy := range policyList {
 		for _, item := range policy.Operation {
 			if item == operation {
