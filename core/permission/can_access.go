@@ -178,15 +178,16 @@ func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fie
 			data["parent/"+key] = parent.Value(key)
 		}
 	}
+	author := parent.Value("author")
+	if author != nil && (userId == author.(int)) {
+		data["parent_author"] = "self"
+	}
+
 	data["contenttype"] = contenttype
 	if def.HasLocation {
 		location := parent.GetLocation()
 		data["id"] = location.ID
 		data["under"] = location.Path()
-	}
-	author := parent.Value("author")
-	if author != nil && (userId == author.(int)) {
-		data["author"] = "self"
 	}
 	data["fields"] = getFieldMatch(fields)
 	return data
