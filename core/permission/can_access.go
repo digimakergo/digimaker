@@ -186,7 +186,7 @@ func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fie
 	data["contenttype"] = contenttype
 	if def.HasLocation {
 		location := parent.GetLocation()
-		data["id"] = location.ID
+		data["parent_id"] = location.ID
 		data["under"] = location.Path()
 	}
 	data["fields"] = getFieldMatch(fields)
