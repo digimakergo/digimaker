@@ -13,6 +13,8 @@ import (
 const templateViewContent = "content_view"
 const overrideFile = "template_override"
 
+var overrideFieldtypes = []string{"radio", "select", "checkbox"}
+
 //TemplateFolder() returns folder of templates. eg. under "templates" or "web/templates"
 func TemplateFolder() string {
 	path := util.AbsHomePath() + "/" + util.GetConfig("general", "template_folder")
@@ -33,6 +35,11 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 		matchData["under"] = location.Path()
 		matchData["level"] = location.Depth
 		matchData["section"] = location.Section
+	}
+	for field, fieldDef := range content.Definition().FieldMap {
+		if util.Contains(overrideFieldtypes, fieldDef.FieldType) {
+			matchData["field_"+field] = content.Value(field)
+		}
 	}
 
 	path := ""
