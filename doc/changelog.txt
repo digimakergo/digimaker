@@ -2,6 +2,8 @@ Change log
 ===============
 
 0.1.0-beta.4
+
+- 2021-12-28 [permission] support role variables in policy. eg. "under":"{subsite}" where "subsite" is a role field
 - 2021-12-28 [sitekit] support "field_<field identifier>" in override, with type "select, radio, check"
 - 2021-12-28 [permission] support "parent/<field identifier>" when creating, with type "select, radio, check"
 - 2021-12-28 [permission] support "fields" in create or update. content/update "user":"self"

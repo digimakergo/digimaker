@@ -7,7 +7,9 @@ package permission
 import (
 	"context"
 	"fmt"
+	"strings"
 
+	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/log"
@@ -32,11 +34,13 @@ type PolicyList []Policy
 
 var policyDefinition map[string]PolicyList
 var rolePolicyMap map[string][]string
+var roleVariables []string
 
 func LoadPolicies() error {
 	policyRoles := struct {
-		Policies map[string]PolicyList `json:"policies"`
-		Roles    map[string][]string   `json:"roles"`
+		Policies      map[string]PolicyList `json:"policies"`
+		Roles         map[string][]string   `json:"roles"`
+		RoleVariables []string              `json:"role_variables"`
 	}{}
 
 	err := util.UnmarshalData(util.ConfigPath()+"/policies.json", &policyRoles)
@@ -45,6 +49,7 @@ func LoadPolicies() error {
 	}
 	policyDefinition = policyRoles.Policies
 	rolePolicyMap = policyRoles.Roles
+	roleVariables = policyRoles.RoleVariables
 
 	for _, policies := range policyRoles.Roles {
 		for _, policyIdentifer := range policies {
@@ -120,19 +125,32 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 
 	//get permissions
 	result := []Policy{}
+	roleIDs := []int{}
 	for _, userRole := range userRoleList {
-		role := Role{}
-		db.BindEntity(ctx, &role, "dm_role", db.Cond("id", userRole.RoleID))
+		roleIDs = append(roleIDs, userRole.RoleID)
+	}
+	roles := contenttype.NewList("role")
+	_, err = db.BindContent(ctx, roles, "role", db.Cond("id", roleIDs))
+	if err != nil {
+		return nil, err
+	}
 
-		policyList := GetRolePolicies(ctx, role.Identifier)
-		//set variables to "{assigned}"
-		params := role.Parameters
+	roleList := contenttype.ToList("role", roles)
+	for _, role := range roleList {
+		policyList := GetRolePolicies(ctx, role.Value("identifier").(string))
+		params := map[string]interface{}{}
+		for _, field := range roleVariables {
+			params[field] = role.Value(field)
+		}
 		for _, policy := range policyList {
+			//assign role field values to policy variables
 			for key, value := range policy.LimitedTo {
-				if v, ok := value.(string); ok && v == "{assigned}" {
-					if assignedValue, ok := params[key]; ok {
-						policy.LimitedTo[key] = assignedValue
-						log.Debug("Setting variable to "+key+" :"+fmt.Sprint(assignedValue), "permission", ctx)
+				if v, ok := value.(string); ok && strings.HasPrefix(v, "{") && strings.HasSuffix(v, "}") {
+					vars := util.GetStrVar(v)
+					varName := vars[0]
+					if varValue, ok := params[varName]; ok {
+						policy.LimitedTo[key] = varValue
+						log.Debug("Set variable "+varName+" to "+key+": "+fmt.Sprint(varValue), "permission", ctx)
 					}
 				}
 			}
