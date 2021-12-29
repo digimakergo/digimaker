@@ -117,17 +117,14 @@ func CanRead(ctx context.Context, userID int, content contenttype.ContentTyper) 
 		data["under"] = location.Path()
 	}
 
-	author := content.Value("author")
-	if author != nil && (userID == author.(int)) {
-		data["author"] = "self"
-	}
+	data["author"] = getAuthorMatchData(content, userID)
 	result := HasAccessTo(ctx, userID, "content/read", data)
 	return result
 }
 
 //support keys: contenttype, id(locaton id), under, author(include "self")
 func CanDelete(ctx context.Context, content contenttype.ContentTyper, userId int) bool {
-	return HasAccessTo(ctx, userId, "content/delete", getMatchData(content, userId))
+	return HasAccessTo(ctx, userId, "content/delete", getDeleteMatchData(content, userId))
 }
 
 //support keys: contenttype, id(parent locaton id), under, parent author(include "self")
@@ -178,10 +175,7 @@ func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fie
 			data["parent/"+key] = parent.Value(key)
 		}
 	}
-	author := parent.Value("author")
-	if author != nil && (userId == author.(int)) {
-		data["parent_author"] = "self"
-	}
+	data["parent_author"] = getAuthorMatchData(parent, userId)
 
 	data["contenttype"] = contenttype
 	if def.HasLocation {
@@ -193,21 +187,18 @@ func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fie
 	return data
 }
 
-func getUpdateMatchData(parent contenttype.ContentTyper, fields []string, userId int) MatchData {
-	def := parent.Definition()
+func getUpdateMatchData(content contenttype.ContentTyper, fields []string, userId int) MatchData {
+	def := content.Definition()
 	data := MatchData{}
-	data["contenttype"] = parent.ContentType()
+	data["contenttype"] = content.ContentType()
 	if def.HasLocation {
-		location := parent.GetLocation()
+		location := content.GetLocation()
 		data["id"] = location.ID
 		data["under"] = location.Path()
 	}
-	author := parent.Value("author")
-	if author != nil && (userId == author.(int)) {
-		data["author"] = "self"
-	}
+	data["author"] = getAuthorMatchData(content, userId)
 
-	if parent.ContentType() == "user" && parent.GetCID() == userId {
+	if content.ContentType() == "user" && content.GetCID() == userId {
 		data["user"] = "self"
 	}
 	data["fields"] = getFieldMatch(fields)
@@ -225,21 +216,23 @@ func getFieldMatch(fields []string) interface{} {
 	return result
 }
 
-func getMatchData(content contenttype.ContentTyper, userId int) MatchData {
+func getDeleteMatchData(content contenttype.ContentTyper, userId int) MatchData {
 	def := content.Definition()
 	data := MatchData{}
 	data["contenttype"] = content.ContentType()
 	if def.HasLocation {
 		location := content.GetLocation()
-		data["id"] = location.ID
 		data["under"] = location.Path()
 	}
-	author := content.Value("author")
-	if author != nil && (userId == author.(int)) {
-		data["author"] = "self"
-	}
-	if content.ContentType() == "user" && content.GetCID() == userId {
-		data["user"] = "self"
-	}
+	data["author"] = getAuthorMatchData(content, userId)
 	return data
+}
+
+func getAuthorMatchData(content contenttype.ContentTyper, userID int) string {
+	author := content.Value("author")
+	if author != nil && (userID == author.(int)) {
+		return "self"
+	} else {
+		return strconv.Itoa(author.(int))
+	}
 }
