@@ -86,7 +86,7 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 	}
 
 	contentDefinition := content.Definition()
-	if !contentDefinition.HasLocation && contentDefinition.HasDataField("location_id") {
+	if contentDefinition.HasLocationID {
 		content.SetValue("location_id", parentID)
 	}
 
@@ -152,14 +152,14 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 
 	var parent contenttype.ContentTyper
 
-	if contentDefinition.HasLocation {
-		if parentID == 0 {
-			return nil, errors.New("Parent id cann't be 0")
-		} else {
-			parent, _ = query.FetchByID(ctx, parentID)
-			if parent == nil {
-				return nil, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
-			}
+	if parentID == 0 {
+		if contentDefinition.HasLocation || contentDefinition.HasLocationID {
+			return nil, errors.New("Parent id can't be 0")
+		}
+	} else {
+		parent, _ = query.FetchByID(ctx, parentID)
+		if parent == nil {
+			return nil, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
 		}
 	}
 

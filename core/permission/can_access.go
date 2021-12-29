@@ -110,10 +110,13 @@ func AccessMatched(ctx context.Context, userID int, operation string, targetData
 //If the use can read the content
 //support keys: contenttype, id(locaton id), under, author(include "self")
 func CanRead(ctx context.Context, userID int, content contenttype.ContentTyper) bool {
-	location := content.GetLocation()
+	def := content.Definition()
 	data := map[string]interface{}{"contenttype": content.ContentType()}
-	if location != nil {
-		data["id"] = location.ID
+	if def.HasLocation || def.HasLocationID {
+		location := content.GetLocation()
+		if def.HasLocation {
+			data["id"] = location.ID
+		}
 		data["under"] = location.Path()
 	}
 
@@ -178,7 +181,7 @@ func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fie
 	data["parent_author"] = getAuthorMatchData(parent, userId)
 
 	data["contenttype"] = contenttype
-	if def.HasLocation {
+	if def.HasLocation || def.HasLocationID {
 		location := parent.GetLocation()
 		data["parent_id"] = location.ID
 		data["under"] = location.Path()
@@ -191,7 +194,7 @@ func getUpdateMatchData(content contenttype.ContentTyper, fields []string, userI
 	def := content.Definition()
 	data := MatchData{}
 	data["contenttype"] = content.ContentType()
-	if def.HasLocation {
+	if def.HasLocation || def.HasLocationID {
 		location := content.GetLocation()
 		data["id"] = location.ID
 		data["under"] = location.Path()

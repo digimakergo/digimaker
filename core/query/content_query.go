@@ -240,7 +240,7 @@ func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 			}
 		}
 	} else {
-		if def.HasDataField("location_id") {
+		if def.HasLocationID {
 			condition = condition.Cond("location_id", rootLocation.ID)
 		}
 	}
