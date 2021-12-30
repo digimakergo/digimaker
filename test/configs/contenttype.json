@@ -4,14 +4,7 @@
     "table_name": "dm_folder",
     "name_pattern": "{title}",
     "has_version": false,
-    "has_location": true,
-    "allowed_types": [
-      "folder",
-      "article",
-      "report",
-      "usergroup",
-      "user"
-    ],
+    "has_location": true,  
     "fields": [{
         "identifier": "title",
         "type": "text",
@@ -105,10 +98,7 @@
     "table_name": "dm_usergroup",
     "has_version": false,
     "name_pattern": "{title}",
-    "has_location": true,
-    "allowed_types": [
-      "usergroup","user"
-    ],
+    "has_location": true,    
     "fields": [{
         "identifier": "title",
         "type": "text",
@@ -129,9 +119,6 @@
     "has_version": false,
     "name_pattern": "{title}",
     "has_location": true,
-    "allowed_types": [
-      "role"
-    ],
     "fields": [{
         "identifier": "title",
         "type": "text",

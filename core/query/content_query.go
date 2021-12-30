@@ -12,7 +12,6 @@ import (
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/permission"
-	"github.com/digimakergo/digimaker/core/util"
 )
 
 //TreeNode is a query result when querying SubTree
@@ -115,10 +114,6 @@ func LocationList(condition db.Condition) ([]contenttype.Location, int, error) {
 
 // Children fetches children content directly under the given parentContent
 func Children(ctx context.Context, userID int, parentContent contenttype.ContentTyper, contenttype string, cond db.Condition) ([]contenttype.ContentTyper, int, error) {
-	contentTypeList := parentContent.Definition().AllowedTypes
-	if !util.Contains(contentTypeList, contenttype) {
-		return nil, -1, errors.New("content type " + contenttype + "doesn't exist or not allowed.")
-	}
 	result, countResult, err := SubList(ctx, userID, parentContent, contenttype, 1, cond)
 	return result, countResult, err
 }

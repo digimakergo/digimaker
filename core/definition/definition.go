@@ -49,7 +49,6 @@ type ContentType struct {
 	HasVersion    bool        `json:"has_version"`
 	HasLocation   bool        `json:"has_location"`
 	HasLocationID bool        `json:"has_location_id"` //for non-location content
-	AllowedTypes  []string    `json:"allowed_types"`
 	Fields        []FieldDef  `json:"fields"`
 	DataFields    []DataField `json:"data_fields"`
 	//All fields where identifier is the key.
