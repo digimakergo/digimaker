@@ -10,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 )
@@ -24,6 +25,8 @@ const (
 )
 
 var allowedFieldtypes []string = []string{"select", "radio", "checkbox"}
+
+var cachedPolicyLocation map[int]contenttype.Location = map[int]contenttype.Location{}
 
 //Get user's limits.
 //empty result means no access - not no limit, while a empty limit(empty map) in the slice means no limit(can do anything)
@@ -61,7 +64,7 @@ func HasAccessTo(ctx context.Context, userID int, operation string, targetData .
 	return result
 }
 
-//if it returns true, also it return limit, false doesn't return limit. also full access doesn't return
+//if it returns true, also it return the matched limit, false doesn't return limit. also full access doesn't return
 func AccessMatched(ctx context.Context, userID int, operation string, targetData ...MatchData) (bool, AccessLimit) {
 	//get permission limits
 	accessType, limits, err := GetUserAccess(ctx, userID, operation)
@@ -106,12 +109,16 @@ func AccessMatched(ctx context.Context, userID int, operation string, targetData
 	return false, nil
 }
 
-//todo: support more
+func getDefaultReadMatchData() MatchData {
+	return MatchData{"contenttype": nil, "id": nil, "under": nil, "author": nil}
+}
+
 //If the use can read the content
 //support keys: contenttype, id(locaton id), under, author(include "self")
 func CanRead(ctx context.Context, userID int, content contenttype.ContentTyper) bool {
 	def := content.Definition()
-	data := map[string]interface{}{"contenttype": content.ContentType()}
+	data := getDefaultReadMatchData()
+	data["contenttype"] = content.ContentType()
 	if def.HasLocation || def.HasLocationID {
 		location := content.GetLocation()
 		if def.HasLocation {
@@ -144,9 +151,6 @@ func CanUpdate(ctx context.Context, content contenttype.ContentTyper, fields []s
 
 func GetUpdateFields(ctx context.Context, content contenttype.ContentTyper, userId int) ([]string, error) {
 	data := getUpdateMatchData(content, []string{}, userId)
-	if content.ContentType() == "user" && content.GetCID() == userId {
-		data["user"] = "self"
-	}
 	matched, limit := AccessMatched(ctx, userId, "content/update", data)
 	result := []string{}
 	if matched {
@@ -238,4 +242,97 @@ func getAuthorMatchData(content contenttype.ContentTyper, userID int) string {
 	} else {
 		return strconv.Itoa(author.(int))
 	}
+}
+
+// add condition from permission.
+// so if matched with limit, add that limit to condition
+// if matches with a empty limit(if there is), return empty(meaning no limit)
+// if doesn't match, return a False condition(no result in query)
+func GetListCondition(ctx context.Context, userID int, contentType string, parent contenttype.ContentTyper) db.Condition {
+	accessType, limits, err := GetUserAccess(ctx, userID, "content/read")
+	if err != nil {
+		log.Error(err, "permission", ctx)
+		return db.FalseCond()
+	}
+
+	if accessType == AccessNo {
+		return db.FalseCond()
+	}
+
+	if accessType == AccessFull {
+		return db.EmptyCond()
+	}
+
+	result := db.EmptyCond()
+	if accessType == AccessWithLimit {
+		//add conditions based on limits
+		matchData := getDefaultReadMatchData()
+
+		for _, limit := range limits {
+			itemMatched, matchLog := util.MatchCondition(limit, matchData)
+			if !itemMatched {
+				continue
+			}
+
+			log.Debug("Matching permission for query", "permission-query", ctx)
+			for _, item := range matchLog {
+				log.Debug(item, "permission-query", ctx)
+			}
+
+			log.Debug("Matched for query", "permission-query", ctx)
+
+			currentCond := db.EmptyCond()
+			//under
+			if under, ok := limit["under"]; ok {
+				switch under.(type) {
+				case int:
+					underLocation := GetPolicyLocation(under.(int))
+					//empty parent will use 'under' policy
+					if parent == nil {
+						currentCond = db.Cond("l.hierarchy like", underLocation.Hierarchy+"/%")
+					} else {
+						parentLocation := parent.GetLocation()
+						if contenttype.IsUnderLocation(underLocation, *parentLocation) {
+							currentCond = currentCond.Cond("l.hierarchy like", underLocation.Hierarchy+"/%")
+						}
+					}
+				case []interface{}:
+					for _, item := range under.([]interface{}) {
+						//empty parent will use 'under' policy
+						if parent == nil {
+							underLocation := GetPolicyLocation(int(item.(float64))) //todo: improve to use []int instead of []interface{}
+							currentCond = currentCond.Or(db.Cond("l.hierarchy like", underLocation.Hierarchy+"/%"))
+						} else {
+							parentLocation := parent.GetLocation()
+							underLocation := GetPolicyLocation(item.(int))
+							if contenttype.IsUnderLocation(underLocation, *parentLocation) {
+								currentCond = currentCond.Or(db.Cond("l.hierarchy like", underLocation.Hierarchy+"/%"))
+							}
+						}
+					}
+				}
+			}
+			//author
+			if author, ok := limit["author"]; ok {
+				if author.(string) == "self" {
+					currentCond = currentCond.Cond("author", userID)
+				}
+			}
+
+			result = result.Or(currentCond)
+		}
+	}
+
+	return result
+}
+
+func GetPolicyLocation(id int) contenttype.Location {
+	if _, ok := cachedPolicyLocation[id]; !ok {
+		location, _ := contenttype.GetLocationByID(id)
+		if location.ID == 0 {
+			log.Error("Location with id"+strconv.Itoa(id)+"Not found", "permission")
+		}
+		cachedPolicyLocation[id] = *location
+	}
+	return cachedPolicyLocation[id]
 }

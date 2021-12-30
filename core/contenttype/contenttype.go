@@ -5,6 +5,7 @@ package contenttype
 
 import (
 	"encoding/json"
+	"strings"
 )
 
 //Content to json, used for internal content storing(eg. version data, draft data )
@@ -39,4 +40,15 @@ func ContentToMap(content ContentTyper) (ContentMap, error) {
 		return nil, err
 	}
 	return result, nil
+}
+
+func IsUnderLocation(subLocation Location, location Location) bool {
+	underHierarchy := subLocation.Hierarchy
+	hierarchy := location.Hierarchy
+
+	if strings.HasPrefix(hierarchy, underHierarchy) {
+		return true
+	} else {
+		return false
+	}
 }

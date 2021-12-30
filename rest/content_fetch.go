@@ -255,7 +255,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	ctype := params["contenttype"]
 	def, err := definition.GetDefinition(ctype)
 	if err != nil {
-		HandleError(errors.New("Cann't get content type"), w)
+		HandleError(errors.New("Can't get content type"), w)
 		return
 	}
 

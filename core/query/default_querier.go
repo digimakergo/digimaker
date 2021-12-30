@@ -42,17 +42,6 @@ func (q Querier) finishBind(ctx context.Context, content contenttype.ContentType
 	return nil
 }
 
-// ListWithUser fetches a list of content which the user has read permission to.
-func (Querier) ListWithUser(ctx context.Context, userID int, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
-	//permission condition
-	permissionCondition := accessCondition(userID, contentType, ctx)
-	condition = condition.And(permissionCondition)
-
-	//fetch
-	list, count, err := List(ctx, contentType, condition)
-	return list, count, err
-}
-
 // List fetches a list of content based on conditions. This is a database level 'list' WITHOUT permission check.
 //
 // For permission included, use query.ListWithUser

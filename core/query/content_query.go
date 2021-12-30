@@ -161,68 +161,6 @@ func buildTree(treenode *TreeNode, list []contenttype.ContentTyper) {
 	}
 }
 
-// add condition from permission.
-// so if matched with limit, add that limit to condition
-// if matches with a empty limit(if there is), return empty(meaning no limit)
-// if doesn't match, return a False condition(no result in query)
-func accessCondition(userID int, contenttype string, context context.Context) db.Condition {
-	accessType, limits, err := permission.GetUserAccess(context, userID, "content/read")
-	if err != nil {
-		//todo: debug messsage it
-	}
-
-	if accessType == permission.AccessNo {
-		return db.FalseCond()
-	}
-
-	if accessType == permission.AccessFull {
-		return db.EmptyCond()
-	}
-
-	//add conditions based on limits
-	result := db.EmptyCond()
-	for _, limit := range limits {
-		if ctype, ok := limit["contenttype"]; ok {
-			ctypeList := ctype.([]interface{})
-			ctypeMatched := false
-			for _, value := range ctypeList {
-				if value.(string) == contenttype {
-					ctypeMatched = true
-					break
-				}
-			}
-			//if the limit doesn't include the type, get next limit.
-			if !ctypeMatched {
-				continue
-			}
-		}
-
-		currentCond := db.EmptyCond()
-
-		if section, ok := limit["section"]; ok {
-			currentCond = currentCond.Cond("l.section", util.InterfaceToStringArray(section.([]interface{})))
-		}
-
-		//comment below out to have a better/different way of subtree limit, in that case currentCondition will be and.
-		// if sTree, ok := limit["subtree"]; ok {
-		// 	item := sTree.(string) //todo: support array
-		// 	itemInt, _ := strconv.Atoi(item)
-		// 	subtree = append(subtree, itemInt)
-		// }
-
-		//todo: current self author will override the other policy. to be fixed.
-		if author, ok := limit["author"]; ok {
-			if author.(string) == "self" {
-				currentCond = currentCond.Cond("author", userID)
-			}
-		}
-
-		result = result.Or(currentCond)
-	}
-
-	return result
-}
-
 // SubList fetches content list with permission considered(only return contents the user has access to).
 func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyper, contentType string, depth int, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	rootLocation := rootContent.GetLocation()
@@ -246,15 +184,25 @@ func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 	}
 
 	//fetch
-	list, count, err := ListWithUser(ctx, userID, contentType, condition)
+	permissionCond := permission.GetListCondition(ctx, userID, contentType, rootContent)
+	condition = condition.And(permissionCond)
+	list, count, err := List(ctx, contentType, condition)
 	return list, count, err
 }
 
 // ListWithUser fetches a list of content which the user has read permission to.
+// Note: If you have parent condition, use SubList, because this will not optimize 'under' policy and parent paramter
 func ListWithUser(ctx context.Context, userID int, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
-	return DefaultQuerier.ListWithUser(ctx, userID, contentType, condition)
+	//permission condition
+	permissionCondition := permission.GetListCondition(ctx, userID, contentType, nil)
+	condition = condition.And(permissionCondition)
+
+	//fetch
+	list, count, err := List(ctx, contentType, condition)
+	return list, count, err
 }
 
+//List without considering permission
 func List(ctx context.Context, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	return DefaultQuerier.List(ctx, contentType, condition)
 }
