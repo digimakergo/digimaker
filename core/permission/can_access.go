@@ -284,8 +284,12 @@ func GetListCondition(ctx context.Context, userID int, contentType string, paren
 			currentCond := db.EmptyCond()
 			//under
 			if under, ok := limit["under"]; ok {
+
 				switch under.(type) {
-				case int:
+				case int, float64:
+					if f, ok := under.(float64); ok {
+						under = int(f)
+					}
 					underLocation := GetPolicyLocation(under.(int))
 					//empty parent will use 'under' policy
 					if parent == nil {
@@ -304,7 +308,7 @@ func GetListCondition(ctx context.Context, userID int, contentType string, paren
 							currentCond = currentCond.Or(db.Cond("l.hierarchy like", underLocation.Hierarchy+"/%"))
 						} else {
 							parentLocation := parent.GetLocation()
-							underLocation := GetPolicyLocation(item.(int))
+							underLocation := GetPolicyLocation(int(item.(float64)))
 							if contenttype.IsUnderLocation(underLocation, *parentLocation) {
 								currentCond = currentCond.Or(db.Cond("l.hierarchy like", underLocation.Hierarchy+"/%"))
 							}
