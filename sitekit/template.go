@@ -42,20 +42,8 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 		}
 	}
 
-	path := ""
 	matchLog := []string{}
-
-	siteOverride := overrideFile + "-" + settings.Site
-	if util.FileExists(util.ConfigPath() + "/" + siteOverride + ".yaml") { //todo: use viper way so json/tomal can be supported also
-		currentPath, currentMatchLog := MatchTemplate(templateViewContent, matchData, siteOverride)
-		path = currentPath
-		matchLog = append(matchLog, currentMatchLog...)
-	}
-	if path == "" {
-		currentPath, currentMatchLog := MatchTemplate(templateViewContent, matchData, overrideFile)
-		path = currentPath
-		matchLog = append(matchLog, currentMatchLog...)
-	}
+	path, matchLog := MatchTemplate(templateViewContent, matchData)
 
 	log.Debug("Matching on "+content.GetName()+", got: "+path+"\n "+strings.Join(matchLog, "\n"), "template-match", ctx)
 
@@ -78,8 +66,40 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 
 //MatchTemplate returns overrided template based on override config(eg. template_override.yaml)
 func MatchTemplate(viewSection string, matchData map[string]interface{}, fileName ...string) (string, []string) {
-	overrideFileName := overrideFile
-	if len(fileName) > 0 {
+	overrideFileName := ""
+	result := ""
+	matchLog := []string{}
+	if len(fileName) == 0 {
+		overrideFileName = overrideFile
+		//if there is include, match in included file
+		includeI := util.GetConfigSectionAll("include", overrideFileName)
+		if includeI != nil {
+			for _, item := range includeI.([]interface{}) {
+				includeRules := map[string]interface{}{}
+				includedFile := ""
+				for key, value := range item.(map[interface{}]interface{}) {
+					keyS := key.(string)
+					if keyS == "file" {
+						includedFile = value.(string)
+					} else {
+						includeRules[keyS] = value
+					}
+				}
+				includeMatched, _ := util.MatchCondition(includeRules, matchData)
+				if includeMatched {
+					matchLog = append(matchLog, "Matching on include file: "+includedFile)
+					var includedMatchLog []string
+					result, includedMatchLog = MatchTemplate(viewSection, matchData, includedFile)
+					matchLog = append(matchLog, includedMatchLog...)
+					if result != "" {
+						return result, matchLog
+					} else {
+						matchLog = append(matchLog, "Not matched on include file : "+includedFile)
+					}
+				}
+			}
+		}
+	} else {
 		overrideFileName = fileName[0]
 	}
 	rulesI := util.GetConfigSectionAll(viewSection, overrideFileName)
@@ -87,8 +107,6 @@ func MatchTemplate(viewSection string, matchData map[string]interface{}, fileNam
 		return "", []string{"view section not found: " + viewSection}
 	}
 	rules := rulesI.([]interface{})
-	result := ""
-	matchLog := []string{}
 	for i, item := range rules {
 		conditions := map[string]interface{}{}
 		to := ""
@@ -101,8 +119,8 @@ func MatchTemplate(viewSection string, matchData map[string]interface{}, fileNam
 			conditions[keyStr] = value
 		}
 
+		matchLog = append(matchLog, "Matching on rule"+strconv.Itoa(i)+" on file "+overrideFile)
 		matched, currentMatchLog := util.MatchCondition(conditions, matchData)
-		matchLog = append(matchLog, "matching on rule"+strconv.Itoa(i)+" on file "+overrideFile)
 		matchLog = append(matchLog, currentMatchLog...)
 		if matched {
 			washedVars := map[string]string{}

@@ -135,17 +135,18 @@ func GetConfigSectionI(section string, config ...string) map[string]interface{} 
 	return result
 }
 
-func GetConfigSectionAll(section string, config string) interface{} {
-	all := GetAll(config)
+//return nil if section doesn't exist
+func GetConfigSectionAll(section string, configFile string) interface{} {
+	all := GetAll(configFile)
 	value, exist := all[section]
 	if !exist {
-		log.Warning("Key "+section+" doesn't exist in config "+config, "config")
+		return nil
 	}
 	return value
 }
 
-func GetAll(config string) map[string]interface{} {
-	viper.SetConfigName(config)
+func GetAll(configFile string) map[string]interface{} {
+	viper.SetConfigName(configFile)
 	viper.AddConfigPath(ConfigPath())
 	//todo: support override in section&setting level with order.
 	//todo: did viper cached all? need to verify.
