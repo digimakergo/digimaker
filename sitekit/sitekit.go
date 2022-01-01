@@ -31,7 +31,6 @@ var siteIdentifiers = []string{}
 //a basic setting to run a site.
 type SiteSettings struct {
 	Site           string
-	TemplateFolder string
 	RootContent    contenttype.ContentTyper
 	DefaultContent contenttype.ContentTyper
 	Host           string
@@ -54,11 +53,6 @@ func SetSiteSettings(identifier string, settings SiteSettings) {
 //Initialize sites setting to memory
 func LoadSite(siteConfig map[string]interface{}) error {
 	siteIdentifier := siteConfig["identifier"].(string)
-
-	if _, ok := siteConfig["template_folder"]; !ok {
-		return errors.New("Need template_folder setting.")
-	}
-	templateFolder := siteConfig["template_folder"].(string)
 
 	if _, ok := siteConfig["root"]; !ok {
 		return errors.New("Need root setting.")
@@ -91,7 +85,6 @@ func LoadSite(siteConfig map[string]interface{}) error {
 	}
 	siteSettings := SiteSettings{
 		Site:           siteIdentifier,
-		TemplateFolder: templateFolder,
 		RootContent:    rootContent,
 		DefaultContent: defaultContent,
 		Host:           host,
@@ -316,18 +309,13 @@ func TemplateExist(path string) bool {
 
 //add site template folder to template path
 //if path starts from ~/, use path after ~/
-func WashTemplatePath(path string, site string) string {
-	if path == "" {
-		return ""
-	}
-
+func WashTemplatePath(path string, folder string) string {
 	result := path
 	if strings.HasPrefix(path, "~/") {
 		result = strings.TrimPrefix(path, "~/")
 	} else {
-		if site != "" {
-			settings := GetSiteSettings(site)
-			result = settings.TemplateFolder + "/" + path
+		if folder != "" {
+			result = folder + "/" + path
 		}
 	}
 	return result

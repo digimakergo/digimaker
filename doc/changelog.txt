@@ -3,6 +3,7 @@ Change log
 
 0.1.0-beta.4
 
+- 2022-01-01 [template] Move tempate_folder from dm.yaml to template_override's include so it supports multi and easier to manage
 - 2021-12-31 [template] Support "~/" in template override, support site template folder in 'tpl_match'
 - 2021-12-31 [template] Support "include" in template_override.yaml
 - 2021-12-30 [go api] List filters permission condition of 'under'

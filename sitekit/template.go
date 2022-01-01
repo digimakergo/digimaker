@@ -61,10 +61,13 @@ func MatchTemplate(viewSection string, matchData map[string]interface{}, fileNam
 			for _, item := range includeI.([]interface{}) {
 				includeRules := map[string]interface{}{}
 				includedFile := ""
+				templateFolder := ""
 				for key, value := range item.(map[interface{}]interface{}) {
 					keyS := key.(string)
 					if keyS == "file" {
 						includedFile = value.(string)
+					} else if keyS == "template_folder" {
+						templateFolder = value.(string)
 					} else {
 						includeRules[keyS] = value
 					}
@@ -76,6 +79,7 @@ func MatchTemplate(viewSection string, matchData map[string]interface{}, fileNam
 					result, includedMatchLog = MatchTemplate(viewSection, matchData, includedFile)
 					matchLog = append(matchLog, includedMatchLog...)
 					if result != "" {
+						result = WashTemplatePath(result, templateFolder)
 						return result, matchLog
 					} else {
 						matchLog = append(matchLog, "Not matched on include file : "+includedFile)
@@ -121,5 +125,6 @@ func MatchTemplate(viewSection string, matchData map[string]interface{}, fileNam
 		}
 	}
 
+	result = WashTemplatePath(result, "")
 	return result, matchLog
 }

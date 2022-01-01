@@ -31,7 +31,6 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			}
 
 			path := sitekit.GetContentTemplate(dm.Context, content, mode, siteIdentifer)
-			path = sitekit.WashTemplatePath(path, siteIdentifer)
 
 			log.Debug("Template for content "+content.GetName()+", mode "+mode+": "+path, "template", dm.Context)
 			if path != "" && !sitekit.TemplateExist(path) {
@@ -51,9 +50,6 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			}
 
 			path, matchLog := sitekit.MatchTemplate(viewType, data)
-			if site, ok := data["site"]; ok {
-				path = sitekit.WashTemplatePath(path, site.(string))
-			}
 
 			log.Debug("Template for view "+viewType+": "+path+"log:"+strings.Join(matchLog, "\n"), "template", dm.Context)
 			if path != "" && !sitekit.TemplateExist(path) {
