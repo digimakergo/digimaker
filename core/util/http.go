@@ -18,8 +18,10 @@ func CurrentUserID(ctx context.Context) int {
 	return result
 }
 
+//Site visiting anonymous user
 func AnonymousUser() int {
-	return 2 //todo: get from config
+	siteUser := GetConfigSectionI("site_settings")["site_user"].(int)
+	return siteUser
 }
 
 func IsAnonymousUser(ctx context.Context) bool {
