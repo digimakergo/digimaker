@@ -21,14 +21,27 @@ type DMFunctions struct {
 
 func (dm DMFunctions) GetMap() map[string]interface{} {
 	result := map[string]interface{}{
-
+		//if there is site, use site template folder, otherwise use template directly
 		"tpl_content": func(content contenttype.ContentTyper, mode string) string {
-			settings := sitekit.GetSiteSettings(dm.Site)
-			path := sitekit.GetContentTemplate(content, mode, settings, dm.Context)
+			siteIdentifer := ""
+			//if site is empty, use empty siteIdentifier
+			if dm.Site != "" {
+				settings := sitekit.GetSiteSettings(dm.Site)
+				siteIdentifer = settings.Site
+			}
+
+			path := sitekit.GetContentTemplate(dm.Context, content, mode, siteIdentifer)
+			path = sitekit.WashTemplatePath(path, siteIdentifer)
+
 			log.Debug("Template for content "+content.GetName()+", mode "+mode+": "+path, "template", dm.Context)
+			if path != "" && !sitekit.TemplateExist(path) {
+				log.Warning("Template file not found: "+path, "template", dm.Context)
+			}
+
 			return path
 		},
 
+		//Note: site template folder will apply if there is site in matchData
 		"tpl_match": func(matchData interface{}, viewType string) string {
 			var data map[string]interface{}
 			if matchData == nil {
@@ -36,8 +49,17 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			} else {
 				data = matchData.(map[string]interface{})
 			}
+
 			path, matchLog := sitekit.MatchTemplate(viewType, data)
+			if site, ok := data["site"]; ok {
+				path = sitekit.WashTemplatePath(path, site.(string))
+			}
+
 			log.Debug("Template for view "+viewType+": "+path+"log:"+strings.Join(matchLog, "\n"), "template", dm.Context)
+			if path != "" && !sitekit.TemplateExist(path) {
+				log.Warning("Template file not found: "+path, "template", dm.Context)
+			}
+
 			return path
 		},
 

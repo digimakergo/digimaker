@@ -307,3 +307,28 @@ func init() {
 		}
 	}
 }
+
+//check if template exists under web/templates(default) folder
+func TemplateExist(path string) bool {
+	absPath := TemplateFolder() + "/" + path
+	return util.FileExists(absPath)
+}
+
+//add site template folder to template path
+//if path starts from ~/, use path after ~/
+func WashTemplatePath(path string, site string) string {
+	if path == "" {
+		return ""
+	}
+
+	result := path
+	if strings.HasPrefix(path, "~/") {
+		result = strings.TrimPrefix(path, "~/")
+	} else {
+		if site != "" {
+			settings := GetSiteSettings(site)
+			result = settings.TemplateFolder + "/" + path
+		}
+	}
+	return result
+}

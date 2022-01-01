@@ -3,6 +3,7 @@ Change log
 
 0.1.0-beta.4
 
+- 2021-12-31 [template] Support "~/" in template override, support site template folder in 'tpl_match'
 - 2021-12-31 [template] Support "include" in template_override.yaml
 - 2021-12-30 [go api] List filters permission condition of 'under'
 - 2021-12-29 [content model] support has_location_id definition for non-location content to support permission&handle better

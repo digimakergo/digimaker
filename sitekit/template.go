@@ -21,13 +21,12 @@ func TemplateFolder() string {
 	return path
 }
 
-//Get content view template.
-func GetContentTemplate(content contenttype.ContentTyper, viewmode string, settings SiteSettings, ctx context.Context) string {
-	templateFolder := TemplateFolder()
+//Get content view template, with site setting's template folder
+func GetContentTemplate(ctx context.Context, content contenttype.ContentTyper, viewmode string, siteIdentifier string) string {
 
 	matchData := map[string]interface{}{}
 	matchData["viewmode"] = viewmode
-	matchData["site"] = settings.Site
+	matchData["site"] = siteIdentifier
 	matchData["contenttype"] = content.ContentType()
 	location := content.GetLocation()
 	if location != nil {
@@ -46,17 +45,7 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 	path, matchLog := MatchTemplate(templateViewContent, matchData)
 
 	log.Debug("Matching on "+content.GetName()+", got: "+path+"\n "+strings.Join(matchLog, "\n"), "template-match", ctx)
-
-	result := ""
-	if path != "" {
-		pathWithTemplateFolder := settings.TemplateFolder + "/" + path
-		if util.FileExists(templateFolder + "/" + pathWithTemplateFolder) {
-			result = pathWithTemplateFolder
-		} else {
-			log.Warning("Matched file not found: "+path, "template", ctx)
-		}
-	}
-	return result
+	return path
 }
 
 //MatchTemplate returns overrided template based on override config(eg. template_override.yaml)
