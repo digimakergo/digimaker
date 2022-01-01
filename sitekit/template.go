@@ -47,18 +47,13 @@ func GetContentTemplate(content contenttype.ContentTyper, viewmode string, setti
 
 	log.Debug("Matching on "+content.GetName()+", got: "+path+"\n "+strings.Join(matchLog, "\n"), "template-match", ctx)
 
-	templateFolders := settings.TemplateFolders
 	result := ""
-	//get the match based on template folder order
-	for _, folder := range templateFolders {
-		if path != "" {
-			pathWithTemplateFolder := folder + "/" + path
-			if util.FileExists(templateFolder + "/" + pathWithTemplateFolder) {
-				result = pathWithTemplateFolder
-				break
-			} else {
-				log.Warning("Matched file not found: "+path, "template", ctx)
-			}
+	if path != "" {
+		pathWithTemplateFolder := settings.TemplateFolder + "/" + path
+		if util.FileExists(templateFolder + "/" + pathWithTemplateFolder) {
+			result = pathWithTemplateFolder
+		} else {
+			log.Warning("Matched file not found: "+path, "template", ctx)
 		}
 	}
 	return result

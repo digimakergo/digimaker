@@ -30,13 +30,12 @@ var siteIdentifiers = []string{}
 
 //a basic setting to run a site.
 type SiteSettings struct {
-	Site            string
-	TemplateBase    string
-	TemplateFolders []string
-	RootContent     contenttype.ContentTyper
-	DefaultContent  contenttype.ContentTyper
-	Host            string
-	Path            string
+	Site           string
+	TemplateFolder string
+	RootContent    contenttype.ContentTyper
+	DefaultContent contenttype.ContentTyper
+	Host           string
+	Path           string
 }
 
 func GetSiteSettings(identifier string) SiteSettings {
@@ -59,7 +58,7 @@ func LoadSite(siteConfig map[string]interface{}) error {
 	if _, ok := siteConfig["template_folder"]; !ok {
 		return errors.New("Need template_folder setting.")
 	}
-	templateFolder := util.InterfaceToStringArray(siteConfig["template_folder"].([]interface{}))
+	templateFolder := siteConfig["template_folder"].(string)
 
 	if _, ok := siteConfig["root"]; !ok {
 		return errors.New("Need root setting.")
@@ -91,13 +90,12 @@ func LoadSite(siteConfig map[string]interface{}) error {
 		path = siteConfig["path"].(string)
 	}
 	siteSettings := SiteSettings{
-		Site:            siteIdentifier,
-		TemplateBase:    templateFolder[0],
-		TemplateFolders: templateFolder,
-		RootContent:     rootContent,
-		DefaultContent:  defaultContent,
-		Host:            host,
-		Path:            path}
+		Site:           siteIdentifier,
+		TemplateFolder: templateFolder,
+		RootContent:    rootContent,
+		DefaultContent: defaultContent,
+		Host:           host,
+		Path:           path}
 	SetSiteSettings(siteIdentifier, siteSettings)
 	log.Info("Site settings loaded: " + siteIdentifier)
 	return nil
