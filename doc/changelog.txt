@@ -3,6 +3,7 @@ Change log
 
 0.1.0-beta.4
 
+- 2022-01-03 [rest/sitekit] Support generate debug token and attach it to header. (setting: general/debug_header, general/debug_token_last)
 - 2022-01-01 [template] Move tempate_folder from dm.yaml to template_override's include so it supports multi and easier to manage
 - 2021-12-31 [template] Support "~/" in template override, support site template folder in 'tpl_match'
 - 2021-12-31 [template] Support "include" in template_override.yaml

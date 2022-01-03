@@ -236,7 +236,7 @@ func OutputContent(w io.Writer, content contenttype.ContentTyper, siteIdentifier
 	}
 	variables["content"] = content
 
-	if log.GetContextInfo(ctx).CanDebug() {
+	if log.GetContextInfo(ctx).Debug {
 		variables["debug"] = true
 	}
 	info := RequestInfo{

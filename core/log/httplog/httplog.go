@@ -9,25 +9,22 @@ import (
 )
 
 func InitLog(r *http.Request, ctx context.Context, userID int) *http.Request {
-	requestID := util.GenerateGUID() //todo: use debug id
-	debugKey := "DebugID"
 
-	debugID := ""
-	if r.Header.Get(debugKey) != "" {
-		debugID = r.Header.Get(debugKey)
-	} else {
-		cookie, err := r.Cookie(debugKey)
-		if err != nil {
-			debugID = cookie.String()
-		}
+	//check if is debuggable
+	canDebug := false
+	debugHeader := util.GetConfig("general", "debug_header")
+	debugToken := r.Header.Get(debugHeader)
+	if debugToken != "" && debugToken == util.GetDebugToken() {
+		canDebug = true
 	}
 
+	requestID := util.GenerateGUID()
 	info := log.ContextInfo{
 		RequestID: requestID,
 		IP:        util.GetIP(r),
 		UserID:    userID,
 		URI:       r.RequestURI,
-		DebugID:   debugID,
+		Debug:     canDebug,
 	}
 
 	ctx = log.InitContext(ctx, &info)

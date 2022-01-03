@@ -15,25 +15,13 @@ import (
 	"github.com/sirupsen/logrus/hooks/writer"
 )
 
-var DebugIDs []string
-
 type ContextInfo struct {
-	DebugID   string
 	IP        string
 	RequestID string
 	URI       string
 	UserID    int
 	Timers    map[string]TimePoint
-}
-
-func (info ContextInfo) CanDebug() bool {
-	result := false
-	for _, item := range DebugIDs {
-		if item == info.DebugID {
-			result = true
-		}
-	}
-	return result
+	Debug     bool
 }
 
 type TimePoint struct {
@@ -80,7 +68,7 @@ func Debug(message interface{}, category string, ctx ...context.Context) {
 	caller := getCallerInfo(runtime.Caller(1))
 	if len(ctx) == 1 {
 		info := GetContextInfo(ctx[0])
-		if info != nil && info.CanDebug() {
+		if info != nil && info.Debug {
 			fields := GetContextFields(ctx[0])
 			fields["caller"] = caller
 			fields["category"] = category
@@ -108,7 +96,6 @@ func GetContextFields(ctx context.Context) logrus.Fields {
 		fields["ip"] = info.IP
 		fields["request_id"] = info.RequestID
 		fields["user_id"] = info.UserID
-		fields["debug_id"] = info.DebugID
 		fields["uri"] = info.URI
 	}
 	return fields
@@ -181,7 +168,6 @@ func init() {
 	if envValue := os.Getenv("env"); envValue != "" {
 		environment = envValue
 	}
-	DebugIDs = []string{""} //todo: read from somewhere else
 
 	logrus.SetLevel(logrus.DebugLevel)
 
