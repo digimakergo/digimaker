@@ -202,7 +202,7 @@ func init() {
 		})
 	} else {
 		logrus.SetFormatter(&logrus.TextFormatter{
-			DisableColors:   false,
+			DisableColors:   true,
 			FullTimestamp:   true,
 			TimestampFormat: "2006-01-02 15:04:05.0000"})
 	}
