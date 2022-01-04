@@ -41,5 +41,6 @@ func (hook *RemoteHook) Fire(entry *log.Entry) error {
 
 // Levels define on which log levels this hook would trigger
 func (hook *RemoteHook) Levels() []log.Level {
-	return log.AllLevels
+	//only log debug for now
+	return []log.Level{log.DebugLevel}
 }
