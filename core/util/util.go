@@ -5,7 +5,6 @@
 package util
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -13,7 +12,6 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
-	"net/smtp"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -277,48 +275,30 @@ func MatchPassword(password string, hash string) bool {
 	return true
 }
 
-//todo: rewrite this.
+var sendMailHandler func(mail MailMessage) error
+
+type MailMessage struct {
+	To          []string //multi to in one mail, for name,use "name<email>" format
+	Bcc         []string //bcc
+	From        string
+	Subject     string
+	Body        string
+	Attachments []string
+}
+
+func HandleSendMail(sendMail func(mail MailMessage) error) {
+	sendMailHandler = sendMail
+}
+
+//Simple sending mail without attachment
 func SendMail(to []string, subject, body string) error {
-	from := GetConfig("general", "send_from", "dm")
-	r := strings.NewReplacer("\r\n", "", "\r", "", "\n", "", "%0a", "", "%0d", "")
-
-	addr := "127.0.0.1:25"
-	c, err := smtp.Dial(addr)
-	if err != nil {
-		return err
+	//if it's not set up, ignore sending
+	if sendMailHandler == nil {
+		log.Error("Mail sending function is not registered", "")
+		return nil
 	}
-	defer c.Close()
-	if err = c.Mail(r.Replace(from)); err != nil {
-		return err
-	}
-	for i := range to {
-		to[i] = r.Replace(to[i])
-		if err = c.Rcpt(to[i]); err != nil {
-			return err
-		}
-	}
-
-	w, err := c.Data()
-	if err != nil {
-		return err
-	}
-
-	msg := "To: " + strings.Join(to, ",") + "\r\n" +
-		"From: " + from + "\r\n" +
-		"Subject: " + subject + "\r\n" +
-		"Content-Type: text/html; charset=\"UTF-8\"\r\n" +
-		"Content-Transfer-Encoding: base64\r\n" +
-		"\r\n" + base64.StdEncoding.EncodeToString([]byte(body))
-
-	_, err = w.Write([]byte(msg))
-	if err != nil {
-		return err
-	}
-	err = w.Close()
-	if err != nil {
-		return err
-	}
-	return c.Quit()
+	err := sendMailHandler(MailMessage{To: to, Subject: subject, Body: body})
+	return err
 }
 
 //RandomStr generate a random string. no number only small letters.
