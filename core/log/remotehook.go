@@ -23,7 +23,7 @@ func (hook *RemoteHook) Fire(entry *log.Entry) error {
 	}
 
 	//todo: based on settings(eg. debug by ip/user), output context log information.
-	logFolder := dmapp + "/var/debug"
+	logFolder := dmapp + "/debug"
 	logFile := logFolder + "/request-debug.log"
 	if _, err := os.Stat(logFolder); os.IsNotExist(err) {
 		os.Mkdir(logFolder, 0775)
