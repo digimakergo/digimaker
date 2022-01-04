@@ -176,10 +176,11 @@ func init() {
 		dmapp = "."
 	}
 
+	//log debug output
+	logrus.AddHook(&RemoteHook{})
+
 	if environment == "prod" {
 		logrus.SetOutput(ioutil.Discard)
-		//log server output
-		logrus.AddHook(&RemoteHook{})
 
 		//default output
 		//todo: create /var/log/digimaker/digimaker.log automatically. need to think about permission
