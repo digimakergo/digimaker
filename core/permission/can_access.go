@@ -267,6 +267,7 @@ func GetListCondition(ctx context.Context, userID int, contentType string, paren
 	if accessType == AccessWithLimit {
 		//add conditions based on limits
 		matchData := getDefaultReadMatchData()
+		matchData["contenttype"] = contentType
 
 		for _, limit := range limits {
 			itemMatched, matchLog := util.MatchCondition(limit, matchData)
@@ -319,7 +320,7 @@ func GetListCondition(ctx context.Context, userID int, contentType string, paren
 			//author
 			if author, ok := limit["author"]; ok {
 				if author.(string) == "self" {
-					currentCond = currentCond.Cond("author", userID)
+					currentCond = currentCond.Cond("c.author", userID)
 				}
 			}
 
