@@ -130,7 +130,7 @@ func GetUserPolicies(ctx context.Context, userID int) ([]Policy, error) {
 		roleIDs = append(roleIDs, userRole.RoleID)
 	}
 	roles := contenttype.NewList("role")
-	_, err = db.BindContent(ctx, roles, "role", db.Cond("id", roleIDs))
+	_, err = db.BindContent(ctx, roles, "role", db.Cond("c.id", roleIDs))
 	if err != nil {
 		return nil, err
 	}
