@@ -116,6 +116,10 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			}
 			return result
 		},
+
+		"request_id": func() string {
+			return log.GetContextInfo(dm.Context).RequestID
+		},
 	}
 
 	return result

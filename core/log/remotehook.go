@@ -3,6 +3,7 @@
 package log
 
 import (
+	"encoding/json"
 	"os"
 
 	log "github.com/sirupsen/logrus"
@@ -12,10 +13,20 @@ type RemoteHook struct {
 }
 
 func (hook *RemoteHook) Fire(entry *log.Entry) error {
-	line, err := entry.Bytes()
+	// line, err := entry.Bytes()
+	// if err != nil {
+	// 	return err
+	// }
+
+	data := entry.Data
+	data["time"] = entry.Time
+	data["level"] = entry.Level
+	data["message"] = entry.Message
+	line, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
+	line = append(line, []byte("\n")...)
 
 	dmapp := os.Getenv("dmapp")
 	if dmapp == "" {

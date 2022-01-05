@@ -1,3 +1,8 @@
+//Author xc, Created on 2020-12-27 20:00
+//{COPYRIGHTS}
+
+//localmail send mail from local server.
+//Note: attachment will be ignored when using SendFullMail
 package localmail
 
 import (
