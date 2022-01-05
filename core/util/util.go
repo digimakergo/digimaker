@@ -290,15 +290,22 @@ func HandleSendMail(sendMail func(mail MailMessage) error) {
 	sendMailHandler = sendMail
 }
 
-//Simple sending mail without attachment
-func SendMail(to []string, subject, body string) error {
+// Send mail with possible attachments.
+// Note: From in most case(depending on handler) will be from config file
+// Security: attachment needs to be checked to make sure it can not send any file
+func SendFullMail(mailMessage MailMessage) error {
 	//if it's not set up, ignore sending
 	if sendMailHandler == nil {
 		log.Error("Mail sending function is not registered", "")
 		return nil
 	}
-	err := sendMailHandler(MailMessage{To: to, Subject: subject, Body: body})
-	return err
+	return sendMailHandler(mailMessage)
+}
+
+//Simple sending mail without attachment
+func SendMail(to []string, subject, body string, bcc ...string) error {
+	mailMessage := MailMessage{To: to, Subject: subject, Body: body, Bcc: bcc}
+	return SendFullMail(mailMessage)
 }
 
 //RandomStr generate a random string. no number only small letters.
