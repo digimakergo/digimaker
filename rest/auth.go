@@ -155,15 +155,6 @@ func VerifyAccessToken(r *http.Request) (error, auth.UserClaims) {
 	return nil, claims
 }
 
-func AuthVerifyAccessToken(w http.ResponseWriter, r *http.Request) {
-	err, _ := VerifyAccessToken(r)
-	if err != nil {
-		HandleError(err, w, StatusUnauthed)
-		return
-	}
-	WriteResponse(true, w)
-}
-
 //Renew access token
 func AuthRenewAccessToken(w http.ResponseWriter, r *http.Request) {
 	token := r.FormValue("token")
@@ -193,5 +184,4 @@ func init() {
 	RegisterRoute("/auth/auth", AuthAuthenticate, "POST")
 	RegisterRoute("/auth/token/revoke", AuthRevokeRefreshToken)
 	RegisterRoute("/auth/token/access/renew", AuthRenewAccessToken)
-	RegisterRoute("/auth/token/access/verify", AuthVerifyAccessToken)
 }
