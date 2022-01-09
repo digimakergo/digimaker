@@ -119,7 +119,7 @@ func CanRead(ctx context.Context, userID int, content contenttype.ContentTyper) 
 	def := content.Definition()
 	data := getDefaultReadMatchData()
 	data["contenttype"] = content.ContentType()
-	if def.HasLocation || def.HasLocationID {
+	if def.HasLocation {
 		location := content.GetLocation()
 		if def.HasLocation {
 			data["id"] = location.ID
@@ -185,7 +185,7 @@ func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fie
 	data["parent_author"] = getAuthorMatchData(parent, userId)
 
 	data["contenttype"] = contenttype
-	if def.HasLocation || def.HasLocationID {
+	if def.HasLocation {
 		location := parent.GetLocation()
 		data["parent_id"] = location.ID
 		data["under"] = location.Path()
