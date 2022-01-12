@@ -38,14 +38,20 @@ type UserClaims struct {
 
 func NewRefreshToken(ctx context.Context, userID int, rememberMe bool) (string, error) {
 	guid := util.GenerateGUID()
-	var refreshExpiry int
+	var refreshExpiry time.Duration
 	if rememberMe {
-		refreshExpiry = util.GetConfigSectionI("auth")["rememberme_token_expiry"].(int)
-		refreshExpiry = refreshExpiry * 60 * 24
+		refreshExpiryInt := util.GetConfigSectionI("auth")["rememberme_token_expiry"].(int)
+		refreshExpiry = time.Hour * time.Duration(refreshExpiryInt*24)
 	} else {
-		refreshExpiry = util.GetConfigSectionI("auth")["refresh_token_expiry"].(int)
+		refreshExpiryStr := util.GetConfigSectionI("auth")["refresh_token_expiry"].(string)
+		var err error
+		refreshExpiry, err = time.ParseDuration(refreshExpiryStr)
+		if err != nil {
+			log.Error(err.Error(), "")
+			return "", errors.New("Set up error")
+		}
 	}
-	expiry := time.Now().Add(time.Minute * time.Duration(refreshExpiry)).Unix()
+	expiry := time.Now().Add(refreshExpiry).Unix()
 	refreshClaims := jwt.MapClaims{
 		"user_id": userID,
 		"guid":    guid,
@@ -62,7 +68,7 @@ func NewRefreshToken(ctx context.Context, userID int, rememberMe bool) (string, 
 	err = tokenManager.Store(ctx, guid, userID, expiry, refreshClaims)
 	if err != nil {
 		log.Error(err.Error(), "")
-		return "", errors.New("Error when storing refresh token info.")
+		return "", errors.New("Error when storing refresh token info")
 	}
 	return token, nil
 }
@@ -95,11 +101,16 @@ func NewAccessToken(refreshToken string, r *http.Request) (string, error) {
 	}
 
 	//Generate new access token
-	accessExpiry := util.GetConfigSectionI("auth")["access_token_expiry"].(int)
+	accessExpiryStr := util.GetConfigSectionI("auth")["access_token_expiry"].(string)
+	accessExpiry, err := time.ParseDuration(accessExpiryStr)
+	if err != nil {
+		log.Error(fmt.Errorf("Set up error: %v", err), "", r.Context())
+		return "", errors.New("Internal error")
+	}
 	accessClaims := jwt.MapClaims{
 		"user_id":   userID,
 		"user_name": user.GetName(),
-		"exp":       time.Now().Add(time.Minute * time.Duration(accessExpiry)).Unix()}
+		"exp":       time.Now().Add(accessExpiry).Unix()}
 
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
 	accessKey := util.GetConfigSectionI("auth")["access_token_secret_key"].(string)
