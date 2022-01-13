@@ -198,7 +198,7 @@ func getUpdateMatchData(content contenttype.ContentTyper, fields []string, userI
 	def := content.Definition()
 	data := MatchData{}
 	data["contenttype"] = content.ContentType()
-	if def.HasLocation || def.HasLocationID {
+	if def.HasLocation {
 		location := content.GetLocation()
 		data["id"] = location.ID
 		data["under"] = location.Path()
