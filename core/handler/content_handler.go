@@ -486,7 +486,11 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		//todo: update all locations to this content.
 		location := content.GetLocation()
 		location.Name = GenerateName(content)
-		//todo: location.IdentifierPath =
+
+		pathList := strings.Split(location.IdentifierPath, "/")
+		pathList[len(pathList)-1] = util.NameToIdentifier(location.Name)
+		location.IdentifierPath = strings.Join(pathList, "/")
+
 		log.Debug("Updating location info", "contenthandler.update", ctx)
 		err := location.Store(ctx, tx)
 		if err != nil {
