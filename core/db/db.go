@@ -18,13 +18,21 @@ var db *sql.DB
 //Note: when using it, the related driver should be imported already
 func DB() (*sql.DB, error) {
 	if db == nil {
-		dbConfig := viper.GetStringMapString("database")
-		connString := dbConfig["username"] + ":" + dbConfig["password"] +
-			"@" + dbConfig["protocal"] +
-			"(" + dbConfig["host"] + ")/" +
-			dbConfig["database"] + "?parseTime=true" //todo: fix what if there is @ or / in the password?
 
-		currentDB, err := sql.Open(dbConfig["type"], connString)
+		host := viper.GetString("database.host")
+		database := viper.GetString("database.database")
+		username := viper.GetString("database.username")
+		password := viper.GetString("database.password")
+		protocal := viper.GetString("database.protocal")
+
+		dbType := viper.GetString("database.type")
+
+		connString := username + ":" + password +
+			"@" + protocal +
+			"(" + host + ")/" +
+			database + "?parseTime=true" //todo: fix what if there is @ or / in the password?
+
+		currentDB, err := sql.Open(dbType, connString)
 		if err != nil {
 			errorMessage := "[DB]Can not open. error: " + err.Error() + " Conneciton string: " + connString
 			return nil, errors.New(errorMessage)
