@@ -3,11 +3,10 @@ package rest
 import (
 	"errors"
 	"net/http"
-	"time"
 
-	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 func GenerateDebugToken(w http.ResponseWriter, r *http.Request) {
@@ -18,13 +17,7 @@ func GenerateDebugToken(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if permission.HasAccessTo(ctx, userID, "util/debug") {
-		durationStr := util.GetConfig("general", "debug_token_last")
-		duration, err := time.ParseDuration(durationStr)
-		if err != nil {
-			log.Error(err, "system")
-			HandleError(errors.New("Internal error"), w)
-			return
-		}
+		duration := viper.GetDuration("general.debug_token_last")
 		token := util.NewDebugToken(duration)
 		WriteResponse(token, w)
 	} else {

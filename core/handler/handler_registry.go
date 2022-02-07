@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
 )
@@ -52,7 +53,9 @@ func RegisterOperationHandler(handler OperationHandler) {
 //target should not include 'event' key since it's in the parameter already.
 func GetOperationHandlerByCondition(event string, target map[string]interface{}) ([]OperationHandler, []string) {
 	//todo: preserve order in the config so matched event will be called from top to down
-	handlers := util.GetConfigSectionI("handlers", "handler")
+	viperHandler := config.GetViper("handler")
+	handlers := viperHandler.GetStringMap("handlers")
+	//todo: test this after config change
 	target["event"] = event
 	matchLog := []string{}
 	keys := []string{}

@@ -16,6 +16,7 @@ import (
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 
 	"github.com/gorilla/mux"
 )
@@ -94,7 +95,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	_, err := db.Insert(r.Context(), "dm_activation", dbMap)
 	if err == nil {
 		//send password
-		settings := util.GetConfigSection("resetpassword_email")
+		settings := viper.GetStringMapString("resetpassword_email")
 
 		cond := util.Split(settings["condition"], ",")
 		template, templateErr := query.Fetch(r.Context(), settings["type"], db.Cond(cond[0], cond[1]))

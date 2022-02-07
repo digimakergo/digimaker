@@ -6,10 +6,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 const defaultMaxSize = 10.0
@@ -43,7 +45,7 @@ func (handler FileHandler) LoadInput(input interface{}, mode string) (interface{
 			}
 		}
 
-		absPath := util.VarFolder() + "/" + filePath
+		absPath := config.VarFolder() + "/" + filePath
 		info, err := os.Stat(absPath)
 		if err != nil {
 			return nil, fieldtype.NewValidationError("Can't find file of " + filePath)
@@ -81,7 +83,7 @@ func (handler FileHandler) BeforeStore(value interface{}, existing interface{}, 
 	//new upload
 	//
 	//file path should be under temp
-	temp := util.GetConfig("general", "upload_tempfolder")
+	temp := viper.GetString("general.upload_tempfolder")
 	if !strings.HasPrefix(filePath, temp+"/") {
 		return nil, fieldtype.NewValidationError("File needs to be under temp")
 	}
@@ -95,7 +97,7 @@ func (handler FileHandler) BeforeStore(value interface{}, existing interface{}, 
 	firstLevel := string(rand[0])
 
 	newFolder := "file/" + firstLevel + "/" + secondLevel
-	newFolderAbs := util.VarFolder() + "/" + newFolder
+	newFolderAbs := config.VarFolder() + "/" + newFolder
 	_, err := os.Stat(newFolderAbs)
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(newFolderAbs, 0775)
@@ -105,9 +107,9 @@ func (handler FileHandler) BeforeStore(value interface{}, existing interface{}, 
 	}
 
 	newPath := newFolder + "/" + filename
-	newPathAbs := util.VarFolder() + "/" + newPath
+	newPathAbs := config.VarFolder() + "/" + newPath
 
-	oldAbsPath := util.VarFolder() + "/" + filePath
+	oldAbsPath := config.VarFolder() + "/" + filePath
 	err = os.Rename(oldAbsPath, newPathAbs)
 
 	if err != nil {
@@ -120,7 +122,7 @@ func (handler FileHandler) BeforeStore(value interface{}, existing interface{}, 
 
 //After delete content, delete file, skip error if there is any wrong(eg. image not existing).
 func (handler FileHandler) AfterDelete(value interface{}) error {
-	path := util.VarFolder() + "/" + value.(string)
+	path := config.VarFolder() + "/" + value.(string)
 	err := os.Remove(path)
 	if err != nil {
 		message := fmt.Sprintf("Deleting file(path: %v) of %v error: %v. Deleting continued.", path, handler.FieldDef.Identifier, err.Error())

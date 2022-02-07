@@ -10,15 +10,16 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 
 	"github.com/gorilla/mux"
 )
 
 func UploadFile(w http.ResponseWriter, r *http.Request) {
-	section := util.GetConfigSectionI("rest")
-	needAuth := section["upload_file_auth"].(bool)
+	needAuth := viper.GetBool("rest.upload_file_auth")
 	if needAuth {
 		userId := CheckUserID(r.Context(), w)
 		if userId == 0 || !permission.HasAccessTo(r.Context(), userId, "util/upload") {
@@ -77,8 +78,8 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 		return "", errors.New("File format not allowed.")
 	}
 
-	tempFolder := util.GetConfig("general", "upload_tempfolder")
-	tempFolderAbs := util.VarFolder() + "/" + tempFolder
+	tempFolder := viper.GetString("general.upload_tempfolder")
+	tempFolderAbs := config.VarFolder() + "/" + tempFolder
 
 	//Strip file name
 	reg := regexp.MustCompile("[^-A-Za-z0-9_.]")
@@ -111,7 +112,7 @@ func GetAllowedLimitations(w http.ResponseWriter, r *http.Request) {
 	operation := params["operation"]
 	operation = strings.ReplaceAll(operation, "_", "/")
 
-	allowedOperations := util.GetConfigArr("permission", "rest_allowed_operations", "dm")
+	allowedOperations := viper.GetStringSlice("permission.rest_allowed_operations")
 	if !util.Contains(allowedOperations, operation) {
 		HandleError(errors.New("Operation not allowed"), w, 403)
 		return

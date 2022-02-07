@@ -14,6 +14,7 @@ import (
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/golang-jwt/jwt"
+	"github.com/spf13/viper"
 )
 
 type RefreshTokenManager interface {
@@ -40,16 +41,10 @@ func NewRefreshToken(ctx context.Context, userID int, rememberMe bool) (string, 
 	guid := util.GenerateGUID()
 	var refreshExpiry time.Duration
 	if rememberMe {
-		refreshExpiryInt := util.GetConfigSectionI("auth")["rememberme_token_expiry"].(int)
+		refreshExpiryInt := viper.GetInt("auth.rememberme_token_expiry")
 		refreshExpiry = time.Hour * time.Duration(refreshExpiryInt*24)
 	} else {
-		refreshExpiryStr := util.GetConfigSectionI("auth")["refresh_token_expiry"].(string)
-		var err error
-		refreshExpiry, err = time.ParseDuration(refreshExpiryStr)
-		if err != nil {
-			log.Error(err.Error(), "")
-			return "", errors.New("Set up error")
-		}
+		refreshExpiry = viper.GetDuration("auth.refresh_token_expiry")
 	}
 	expiry := time.Now().Add(refreshExpiry).Unix()
 	refreshClaims := jwt.MapClaims{
@@ -58,7 +53,7 @@ func NewRefreshToken(ctx context.Context, userID int, rememberMe bool) (string, 
 		"exp":     expiry} //todo: make it configurable
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims)
 	//todo: better way to read configuration.
-	refreshKey := util.GetConfigSectionI("auth")["refresh_token_secret_key"].(string)
+	refreshKey := viper.GetString("auth.refresh_token_secret_key")
 	token, err := jwt.SignedString([]byte(refreshKey))
 	if err != nil {
 		return "", err
@@ -101,19 +96,14 @@ func NewAccessToken(refreshToken string, r *http.Request) (string, error) {
 	}
 
 	//Generate new access token
-	accessExpiryStr := util.GetConfigSectionI("auth")["access_token_expiry"].(string)
-	accessExpiry, err := time.ParseDuration(accessExpiryStr)
-	if err != nil {
-		log.Error(fmt.Errorf("Set up error: %v", err), "", r.Context())
-		return "", errors.New("Internal error")
-	}
+	accessExpiry := viper.GetDuration("auth.access_token_expiry")
 	accessClaims := jwt.MapClaims{
 		"user_id":   userID,
 		"user_name": user.GetName(),
 		"exp":       time.Now().Add(accessExpiry).Unix()}
 
 	jwt := jwt.NewWithClaims(jwt.SigningMethodHS256, accessClaims)
-	accessKey := util.GetConfigSectionI("auth")["access_token_secret_key"].(string)
+	accessKey := viper.GetString("auth.access_token_secret_key")
 	accessToken, err := jwt.SignedString([]byte(accessKey))
 	if err != nil {
 		log.Error(err, "")
@@ -130,7 +120,7 @@ func VerifyRefreshToken(token string) (RefreshClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Wrong signing method: %v", token.Header["alg"])
 		}
-		refreshKey := util.GetConfigSectionI("auth")["refresh_token_secret_key"].(string)
+		refreshKey := viper.GetString("auth.refresh_token_secret_key")
 		return []byte(refreshKey), nil
 	})
 	if err != nil {
@@ -168,7 +158,7 @@ func VerifyToken(token string) (error, UserClaims) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Wrong signing method: %v", token.Header["alg"])
 		}
-		accessKey := util.GetConfigSectionI("auth")["access_token_secret_key"].(string)
+		accessKey := viper.GetString("auth.access_token_secret_key")
 		return []byte(accessKey), nil
 	})
 

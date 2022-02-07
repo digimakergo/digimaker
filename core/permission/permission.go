@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
@@ -43,7 +44,7 @@ func LoadPolicies() error {
 		RoleVariables []string              `json:"role_variables"`
 	}{}
 
-	err := util.UnmarshalData(util.ConfigPath()+"/policies.json", &policyRoles)
+	err := util.UnmarshalData(config.ConfigPath()+"/policies.json", &policyRoles)
 	if err != nil {
 		return err
 	}

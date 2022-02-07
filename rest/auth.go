@@ -14,8 +14,7 @@ import (
 	"github.com/digimakergo/digimaker/core/handler"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/golang-jwt/jwt"
-
-	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 type AuthInput struct {
@@ -51,7 +50,7 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 	//Generate refresh token and access token
 	userID := user.GetCID()
 	rememberMe := false
-	if util.GetConfigSectionI("auth")["rememberme_enabled"].(bool) {
+	if viper.GetBool("auth.rememberme_enabled") {
 		rememberMe = input.RememberMe
 	}
 	refreshToken, err := auth.NewRefreshToken(r.Context(), userID, rememberMe)
@@ -117,7 +116,7 @@ func verifyRefreshToken(token string) (auth.RefreshClaims, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Wrong signing method: %v", token.Header["alg"])
 		}
-		refreshKey := util.GetConfigSectionI("auth")["refresh_token_secret_key"].(string)
+		refreshKey := viper.GetString("auth.refresh_token_secret_key")
 		return []byte(refreshKey), nil
 	})
 	if err != nil {

@@ -16,6 +16,7 @@ import (
 	"github.com/digimakergo/digimaker/core/query/querier"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
 )
 
 /***** TextHandler ******/
@@ -106,7 +107,7 @@ func (r RichTextHandler) Ouput(ctx context.Context, querier querier.Querier, val
 
 	strValue := value.(string)
 
-	imagePrefix := util.GetConfig("general", "var_baseurl")
+	imagePrefix := viper.GetString("general.var_baseurl")
 	replaceFunc := func(currentStr string) string {
 		re2 := regexp.MustCompile(`([^ =]+)="([0-9a-zA-Z]|;)+"`)
 		attributes := re2.FindAllString(currentStr, -1)

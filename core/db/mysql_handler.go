@@ -14,6 +14,7 @@ import (
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 	"github.com/volatiletech/sqlboiler/queries"
 
 	_ "github.com/go-sql-driver/mysql" //todo: move this to loader
@@ -32,7 +33,7 @@ type MysqlHandler struct {
 //get table columns with Cache
 func (handler MysqlHandler) GetColumns(table string) []string {
 	if _, ok := tableColumns[table]; !ok {
-		sql := "SELECT COLUMN_NAME AS 'column' FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='" + config_database + "' AND TABLE_NAME=?"
+		sql := "SELECT COLUMN_NAME AS 'column' FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='" + getDBName() + "' AND TABLE_NAME=?"
 		db, err := DB()
 
 		if err != nil {
@@ -398,6 +399,15 @@ func (MysqlHandler) Delete(ctx context.Context, tableName string, condition Cond
 	resultRows, _ := result.RowsAffected()
 	log.Debug("Deleted rows:"+strconv.FormatInt(resultRows, 10), "db", ctx)
 	return nil
+}
+
+var config_database string
+
+func getDBName() string {
+	if config_database == "" {
+		config_database = viper.GetString("database.database")
+	}
+	return config_database
 }
 
 func init() {

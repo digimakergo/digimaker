@@ -3,6 +3,8 @@ package util
 import (
 	"context"
 	"time"
+
+	"github.com/spf13/viper"
 )
 
 type key int
@@ -45,7 +47,7 @@ func ClearDebugToken() {
 
 //Site visiting anonymous user
 func AnonymousUser() int {
-	siteUser := GetConfigSectionI("site_settings")["site_user"].(int)
+	siteUser := viper.GetInt("site_settings.site_user")
 	return siteUser
 }
 

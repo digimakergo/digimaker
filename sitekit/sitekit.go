@@ -17,6 +17,7 @@ import (
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
+	"github.com/spf13/viper"
 
 	"github.com/flosch/pongo2"
 	"github.com/gorilla/mux"
@@ -289,10 +290,10 @@ func OutputString(variables map[string]interface{}, viewType string, requestInfo
 
 func init() {
 	//Route sites
-	sitesConfig := util.GetConfigSectionAll("sites", "dm")
+	sitesConfig := viper.Get("sites")
 	if sitesConfig != nil {
-		for i, item := range sitesConfig.([]interface{}) {
-			siteConfig := util.ConvertToMap(item)
+		for i, _ := range sitesConfig.([]interface{}) {
+			siteConfig := viper.GetStringMap("sites." + strconv.Itoa(i))
 			err := LoadSite(siteConfig)
 			if err != nil {
 				log.Fatal("Error when loading site " + strconv.Itoa(i) + ". Detail: " + err.Error())

@@ -17,6 +17,7 @@ import (
 	"github.com/digimakergo/digimaker/core/permission"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 
 	"github.com/gorilla/mux"
 )
@@ -170,7 +171,7 @@ func buildCondition(userid int, cType string, def definition.ContentType, query 
 	for key, _ := range query {
 		value := query.Get(key)
 		if strings.HasPrefix(value, "contain:") {
-			enabledFields := util.GetConfigArr("rest", "like_fields")
+			enabledFields := viper.GetStringSlice("rest.like_fields")
 			if util.Contains(enabledFields, cType+"/"+key) {
 				fieldValue := strings.TrimPrefix(value, "contain:")
 				if def.HasLocation && util.Contains(definition.LocationColumns, key) {

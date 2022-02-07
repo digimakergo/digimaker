@@ -6,10 +6,12 @@ import (
 	"os"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 type ImageParameter struct {
@@ -58,10 +60,10 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 			}
 		}
 
-		oldAbsPath := util.VarFolder() + "/" + imagePath
+		oldAbsPath := config.VarFolder() + "/" + imagePath
 
 		//image path should be under temp
-		temp := util.GetConfig("general", "upload_tempfolder")
+		temp := viper.GetString("general.upload_tempfolder")
 
 		if _, err := os.Stat(oldAbsPath); err != nil {
 			return nil, errors.New("Can't find file on " + oldAbsPath)
@@ -76,7 +78,7 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 		firstLevel := string(rand[0])
 
 		newFolder := "images/" + firstLevel + "/" + secondLevel
-		newFolderAbs := util.VarFolder() + "/" + newFolder
+		newFolderAbs := config.VarFolder() + "/" + newFolder
 		_, err = os.Stat(newFolderAbs)
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(newFolderAbs, 0775)
@@ -86,7 +88,7 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 		}
 
 		newPath := newFolder + "/" + filename
-		newPathAbs := util.VarFolder() + "/" + newPath
+		newPathAbs := config.VarFolder() + "/" + newPath
 
 		underTemp := strings.HasPrefix(imagePath, temp)
 		if underTemp {
@@ -115,7 +117,7 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 
 //After delete content, delete image&thumbnail, skip error if there is any wrong(eg. image not existing).
 func (handler ImageHandler) AfterDelete(value interface{}) error {
-	path := util.VarFolder() + "/" + value.(string)
+	path := config.VarFolder() + "/" + value.(string)
 	err := os.Remove(path)
 	if err != nil {
 		message := fmt.Sprintf("Deleting image(path: %v) of %v error: %v. Deleting continued.", path, handler.FieldDef.Identifier, err.Error())
@@ -136,14 +138,14 @@ func (handler ImageHandler) DBField() string {
 }
 
 func GenerateThumbnail(imagePath string) error {
-	varFolder := util.VarFolder()
-	size := util.GetConfig("general", "image_thumbnail_size")
+	varFolder := config.VarFolder()
+	size := viper.GetString("general.image_thumbnail_size")
 	thumbCacheFolder := ThumbnailFolder()
 	return util.ResizeImage(varFolder+"/"+imagePath, thumbCacheFolder+"/"+imagePath, size)
 }
 
 func ThumbnailFolder() string {
-	thumbFolder := util.VarFolder() + "/" + util.GetConfig("general", "image_thumbnail_folder")
+	thumbFolder := config.VarFolder() + "/" + viper.GetString("general.image_thumbnail_folder")
 	return thumbFolder
 }
 

@@ -9,18 +9,16 @@ import (
 	"database/sql"
 	"errors"
 
-	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 var db *sql.DB
-
-var config_database string
 
 //Get DB connection cached globally
 //Note: when using it, the related driver should be imported already
 func DB() (*sql.DB, error) {
 	if db == nil {
-		dbConfig := util.GetConfigSection("database")
+		dbConfig := viper.GetStringMapString("database")
 		connString := dbConfig["username"] + ":" + dbConfig["password"] +
 			"@" + dbConfig["protocal"] +
 			"(" + dbConfig["host"] + ")/" +
@@ -65,8 +63,4 @@ func CreateTx(ctx ...context.Context) (*sql.Tx, error) {
 
 type DBEntitier interface {
 	GetByID(contentType string, id int) interface{}
-}
-
-func init() {
-	config_database = util.GetConfig("database", "database")
 }

@@ -9,6 +9,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/fsnotify/fsnotify"
@@ -170,7 +171,7 @@ var contentTypeDefinition ContentTypeList
 func LoadDefinition() error {
 	//Load contenttype.json into ContentTypeDefinition
 	var def map[string]ContentType
-	err := util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
+	err := util.UnmarshalData(config.ConfigPath()+"/contenttype.json", &def)
 	if err != nil {
 		return err
 	}
@@ -194,11 +195,11 @@ func LoadDefinition() error {
 func loadTranslations(languages []string) {
 	for _, language := range languages {
 		var def map[string]ContentType
-		util.UnmarshalData(util.ConfigPath()+"/contenttype.json", &def)
+		util.UnmarshalData(config.ConfigPath()+"/contenttype.json", &def)
 
 		//todo: formalize this: use folder, and loop through language
 		viper := viper.New()
-		viper.AddConfigPath(util.ConfigPath())
+		viper.AddConfigPath(config.ConfigPath())
 		filename := "contenttype_" + language
 		viper.SetConfigName(filename)
 		viper.ReadInConfig()
@@ -209,7 +210,7 @@ func loadTranslations(languages []string) {
 		var translation = map[string][]map[string]string{}
 		json.Unmarshal(str, &translation)
 		viper.OnConfigChange(func(e fsnotify.Event) {
-			if e.Name == util.ConfigPath()+"/"+filename+".json" {
+			if e.Name == config.ConfigPath()+"/"+filename+".json" {
 				log.Println("Translation changed. file: " + filename)
 				translationObj := viper.AllSettings()
 				str, _ = json.Marshal(translationObj)

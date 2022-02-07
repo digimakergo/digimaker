@@ -358,6 +358,11 @@ func GetIP(r *http.Request) string {
 	return ip
 }
 
+//WashPath remove .. and . to make sure it can only go under, not upp
+func SecurePath(path string) string {
+	return strings.ReplaceAll(path, ".", "")
+}
+
 func init() {
 	path, err := exec.LookPath("vipsthumbnail")
 	if err != nil {

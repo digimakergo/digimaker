@@ -5,9 +5,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 const templateViewContent = "content_view"
@@ -17,7 +19,7 @@ var overrideFieldtypes = []string{"radio", "select", "checkbox"}
 
 //TemplateFolder() returns folder of templates. eg. under "templates" or "web/templates"
 func TemplateFolder() string {
-	path := util.AbsHomePath() + "/" + util.GetConfig("general", "template_folder")
+	path := config.AbsHomePath() + "/" + viper.GetString("general.template_folder")
 	return path
 }
 
@@ -56,7 +58,8 @@ func MatchTemplate(viewSection string, matchData map[string]interface{}, fileNam
 	if len(fileName) == 0 {
 		overrideFileName = overrideFile
 		//if there is include, match in included file
-		includeI := util.GetConfigSectionAll("include", overrideFileName)
+		viper := config.GetViper(overrideFileName)
+		includeI := viper.Get("include")
 		if includeI != nil {
 			for _, item := range includeI.([]interface{}) {
 				includeRules := map[string]interface{}{}
@@ -90,7 +93,9 @@ func MatchTemplate(viewSection string, matchData map[string]interface{}, fileNam
 	} else {
 		overrideFileName = fileName[0]
 	}
-	rulesI := util.GetConfigSectionAll(viewSection, overrideFileName)
+
+	overrideViper := config.GetViper(overrideFileName)
+	rulesI := overrideViper.Get(viewSection)
 	if rulesI == nil {
 		return "", []string{"view section not found: " + viewSection}
 	}

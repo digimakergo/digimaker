@@ -12,11 +12,12 @@ import (
 
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 func sendFromLocal(to []string, subject, body string) error {
-	from := util.GetConfig("general", "send_from")
-	addr := util.GetConfig("general", "mail_host")
+	from := viper.GetString("general.send_from")
+	addr := viper.GetString("general.mail_host")
 
 	client, err := smtp.Dial(addr)
 	if err != nil {

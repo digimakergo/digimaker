@@ -8,11 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/query"
-	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit"
+	"github.com/spf13/viper"
 	"golang.org/x/text/message"
 
 	"github.com/flosch/pongo2"
@@ -88,7 +89,15 @@ func dmConfig(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Err
 		return pongo2.AsValue(""), &err
 	}
 	section := param.String()
-	result := util.GetConfigSectionAll(section, filename)
+	var result interface{}
+	if filename == "dm" {
+		result = viper.Get(section)
+	} else {
+		v := config.GetViper(filename)
+		if v != nil {
+			result = v.Get(section)
+		}
+	}
 	return pongo2.AsValue(result), nil
 }
 

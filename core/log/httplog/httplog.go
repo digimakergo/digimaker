@@ -6,13 +6,14 @@ import (
 
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 func InitLog(r *http.Request, ctx context.Context, userID int) *http.Request {
 
 	//check if is debuggable
 	canDebug := false
-	debugHeader := util.GetConfig("general", "debug_header")
+	debugHeader := viper.GetString("general.debug_header")
 	debugToken := r.Header.Get(debugHeader)
 	if debugToken != "" && debugToken == util.GetDebugToken() {
 		canDebug = true
