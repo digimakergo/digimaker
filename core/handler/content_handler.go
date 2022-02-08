@@ -197,7 +197,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 			var err error
 			if fieldtypeEvent, ok := handler.(fieldtype.Event); ok {
 				log.Debug("Invoking before storing on field: "+identifier, "handler", ctx)
-				value, err = fieldtypeEvent.BeforeStore(value, nil, "create")
+				value, err = fieldtypeEvent.BeforeStore(ctx, value, nil, "create")
 				if err != nil {
 					return nil, err
 				}
@@ -426,7 +426,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 			//Invoke BeforeSaving
 			if fieldWithEvent, ok := handler.(fieldtype.Event); ok {
 				var err error
-				value, err = fieldWithEvent.BeforeStore(value, existing, "")
+				value, err = fieldWithEvent.BeforeStore(ctx, value, existing, "")
 				if err != nil {
 					return false, err
 				}
@@ -727,7 +727,7 @@ func DeleteByContent(ctx context.Context, content contenttype.ContentTyper, user
 		handler := fieldtype.GethHandler(field)
 		if handler != nil {
 			if event, ok := handler.(fieldtype.Event); ok {
-				event.AfterDelete(content.Value(identifier))
+				event.AfterDelete(ctx, content.Value(identifier))
 			}
 		}
 	}

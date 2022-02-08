@@ -59,9 +59,9 @@ func (err EmptyError) Error() string {
 
 //BeforeSaving is implemented when fieldtype has event before saving and transaction starts.
 type Event interface {
-	BeforeStore(value interface{}, existing interface{}, mode string) (interface{}, error)
+	BeforeStore(ctx context.Context, value interface{}, existing interface{}, mode string) (interface{}, error)
 
-	AfterDelete(value interface{}) error
+	AfterDelete(ctx context.Context, value interface{}) error
 }
 
 type StoreHandler interface {

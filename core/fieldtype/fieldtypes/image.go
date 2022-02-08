@@ -30,7 +30,7 @@ func (handler ImageHandler) LoadInput(ctx context.Context, input interface{}, mo
 }
 
 //Image can be loaded from rest, or local api
-func (handler ImageHandler) BeforeStore(value interface{}, existing interface{}, mode string) (interface{}, error) {
+func (handler ImageHandler) BeforeStore(ctx context.Context, value interface{}, existing interface{}, mode string) (interface{}, error) {
 	imagePath := value.(string)
 
 	if imagePath == "" {
@@ -117,7 +117,7 @@ func (handler ImageHandler) BeforeStore(value interface{}, existing interface{},
 }
 
 //After delete content, delete image&thumbnail, skip error if there is any wrong(eg. image not existing).
-func (handler ImageHandler) AfterDelete(value interface{}) error {
+func (handler ImageHandler) AfterDelete(ctx context.Context, value interface{}) error {
 	path := config.VarFolder() + "/" + value.(string)
 	err := os.Remove(path)
 	if err != nil {
