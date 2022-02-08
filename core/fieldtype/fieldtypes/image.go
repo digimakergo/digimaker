@@ -61,7 +61,7 @@ func (handler ImageHandler) BeforeStore(ctx context.Context, value interface{}, 
 			}
 		}
 
-		oldAbsPath := config.VarFolder() + "/" + imagePath
+		oldAbsPath := config.PathWithVar(imagePath)
 
 		//image path should be under temp
 		temp := viper.GetString("general.upload_tempfolder")
@@ -79,7 +79,7 @@ func (handler ImageHandler) BeforeStore(ctx context.Context, value interface{}, 
 		firstLevel := string(rand[0])
 
 		newFolder := "images/" + firstLevel + "/" + secondLevel
-		newFolderAbs := config.VarFolder() + "/" + newFolder
+		newFolderAbs := config.PathWithVar(newFolder)
 		_, err = os.Stat(newFolderAbs)
 		if os.IsNotExist(err) {
 			err = os.MkdirAll(newFolderAbs, 0775)
@@ -89,7 +89,7 @@ func (handler ImageHandler) BeforeStore(ctx context.Context, value interface{}, 
 		}
 
 		newPath := newFolder + "/" + filename
-		newPathAbs := config.VarFolder() + "/" + newPath
+		newPathAbs := config.PathWithVar(newPath)
 
 		underTemp := strings.HasPrefix(imagePath, temp)
 		if underTemp {
@@ -118,7 +118,7 @@ func (handler ImageHandler) BeforeStore(ctx context.Context, value interface{}, 
 
 //After delete content, delete image&thumbnail, skip error if there is any wrong(eg. image not existing).
 func (handler ImageHandler) AfterDelete(ctx context.Context, value interface{}) error {
-	path := config.VarFolder() + "/" + value.(string)
+	path := config.PathWithVar(value.(string))
 	err := os.Remove(path)
 	if err != nil {
 		message := fmt.Sprintf("Deleting image(path: %v) of %v error: %v. Deleting continued.", path, handler.FieldDef.Identifier, err.Error())
@@ -139,14 +139,13 @@ func (handler ImageHandler) DBField() string {
 }
 
 func GenerateThumbnail(imagePath string) error {
-	varFolder := config.VarFolder()
 	size := viper.GetString("general.image_thumbnail_size")
 	thumbCacheFolder := ThumbnailFolder()
-	return util.ResizeImage(varFolder+"/"+imagePath, thumbCacheFolder+"/"+imagePath, size)
+	return util.ResizeImage(config.PathWithVar(imagePath), config.PathWithVar(thumbCacheFolder+"/"+imagePath), size)
 }
 
 func ThumbnailFolder() string {
-	thumbFolder := config.VarFolder() + "/" + viper.GetString("general.image_thumbnail_folder")
+	thumbFolder := config.PathWithVar(viper.GetString("general.image_thumbnail_folder"))
 	return thumbFolder
 }
 

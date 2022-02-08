@@ -46,7 +46,7 @@ func (handler FileHandler) LoadInput(ctx context.Context, input interface{}, mod
 			}
 		}
 
-		absPath := config.VarFolder() + "/" + filePath
+		absPath := config.PathWithVar(filePath)
 		info, err := os.Stat(absPath)
 		if err != nil {
 			return nil, fieldtype.NewValidationError("Can't find file of " + filePath)
@@ -98,7 +98,7 @@ func (handler FileHandler) BeforeStore(ctx context.Context, value interface{}, e
 	firstLevel := string(rand[0])
 
 	newFolder := "file/" + firstLevel + "/" + secondLevel
-	newFolderAbs := config.VarFolder() + "/" + newFolder
+	newFolderAbs := config.PathWithVar(newFolder)
 	_, err := os.Stat(newFolderAbs)
 	if os.IsNotExist(err) {
 		err = os.MkdirAll(newFolderAbs, 0775)
@@ -108,9 +108,9 @@ func (handler FileHandler) BeforeStore(ctx context.Context, value interface{}, e
 	}
 
 	newPath := newFolder + "/" + filename
-	newPathAbs := config.VarFolder() + "/" + newPath
+	newPathAbs := config.PathWithVar(newPath)
 
-	oldAbsPath := config.VarFolder() + "/" + filePath
+	oldAbsPath := config.PathWithVar(filePath)
 	err = os.Rename(oldAbsPath, newPathAbs)
 
 	if err != nil {
@@ -123,7 +123,7 @@ func (handler FileHandler) BeforeStore(ctx context.Context, value interface{}, e
 
 //After delete content, delete file, skip error if there is any wrong(eg. image not existing).
 func (handler FileHandler) AfterDelete(ctx context.Context, value interface{}) error {
-	path := config.VarFolder() + "/" + value.(string)
+	path := config.PathWithVar(value.(string))
 	err := os.Remove(path)
 	if err != nil {
 		message := fmt.Sprintf("Deleting file(path: %v) of %v error: %v. Deleting continued.", path, handler.FieldDef.Identifier, err.Error())

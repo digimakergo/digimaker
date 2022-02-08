@@ -79,7 +79,7 @@ func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	}
 
 	tempFolder := viper.GetString("general.upload_tempfolder")
-	tempFolderAbs := config.VarFolder() + "/" + tempFolder
+	tempFolderAbs := config.PathWithVar(tempFolder)
 
 	//Strip file name
 	reg := regexp.MustCompile("[^-A-Za-z0-9_.]")

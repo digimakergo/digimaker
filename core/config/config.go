@@ -81,6 +81,14 @@ func VarFolder() string {
 	return result
 }
 
+//get full path under var
+func PathWithVar(path string) string {
+	safePath := util.SecurePath(path)
+	varPath := VarFolder()
+	result := filepath.Join(varPath, safePath)
+	return result
+}
+
 var viperMap map[string]*viper.Viper = map[string]*viper.Viper{}
 
 func GetViper(configFile string) *viper.Viper {
