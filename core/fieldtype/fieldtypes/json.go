@@ -129,7 +129,9 @@ func (j *Json) Scan(value interface{}) error {
 		data := value.([]byte)
 		if string(data) != "" {
 			if json.Valid(data) {
-				obj.Content = data
+				var jsonData = make([]byte, len(data))
+				copy(jsonData, data)
+				obj.Content = jsonData
 			} else {
 				return errors.New("Not a valid json")
 			}
