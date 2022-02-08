@@ -42,7 +42,7 @@ func Validate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	arr := strings.Split(contentType, "/")
-	result, validationResult := handler.Validate(arr[0], fieldMap, inputs, true)
+	result, validationResult := handler.Validate(r.Context(), arr[0], fieldMap, inputs, true)
 	if result {
 		WriteResponse(true, w)
 	} else {

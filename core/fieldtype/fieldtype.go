@@ -26,7 +26,7 @@ type Definition struct {
 //Fieldtyper is a implementation of a fieldtype, including main logic
 type Handler interface {
 	//Load from input, should return the value of BaseType, (eg. int), return error or validation error or empty error
-	LoadInput(input interface{}, mode string) (interface{}, error)
+	LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error)
 
 	//output database field. todo: can support this to generate database field automatically
 	DBField() string

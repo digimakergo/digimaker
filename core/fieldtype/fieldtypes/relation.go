@@ -1,6 +1,7 @@
 package fieldtypes
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -14,7 +15,7 @@ type RelationHandler struct {
 }
 
 //max 30 length
-func (handler RelationHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler RelationHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := strings.TrimSpace(fmt.Sprint(input))
 	var i int
 	if str != "" {

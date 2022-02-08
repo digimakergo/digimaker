@@ -50,7 +50,7 @@ func (handler *TextHandler) getParams() (TextParameters, error) {
 	return handler.params, nil
 }
 
-func (handler TextHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler TextHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
 	params, err := handler.getParams()
 	if err != nil {
@@ -92,7 +92,7 @@ type RichTextHandler struct {
 	definition.FieldDef
 }
 
-func (handler RichTextHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler RichTextHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	//replace html like <img src="var/f/fg/fge1ff.png" data-content="image;sdf319432424b432341" /> with real image path and size.
 	return input, nil
 }
@@ -157,7 +157,7 @@ type PasswordHandler struct {
 	definition.FieldDef
 }
 
-func (handler PasswordHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler PasswordHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
 	return util.HashPassword(str)
 }
@@ -171,7 +171,7 @@ type IntHandler struct {
 	definition.FieldDef
 }
 
-func (handler IntHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler IntHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	s := fmt.Sprint(input)
 	if s == "" {
 		return -1, nil
@@ -193,7 +193,7 @@ type CheckboxHandler struct {
 }
 
 //Only allow 1/0 or "1"/"0"
-func (handler CheckboxHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler CheckboxHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
 	valueInt, err := strconv.Atoi(str)
 	if err != nil || (valueInt != 0 && valueInt != 1) {
@@ -212,7 +212,7 @@ type RadioHandler struct {
 }
 
 //max 30 length
-func (handler RadioHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler RadioHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
 	length := len(str)
 	if length > 30 {
@@ -236,7 +236,7 @@ type DatetimeHandler struct {
 }
 
 //support 3 format: 2020-01-10, 2020-01-10 12:12:00(server side timezone), 2021-01-10T11:45:26+02:00, 1722145855(unix)
-func (handler DatetimeHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler DatetimeHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := strings.TrimSpace(fmt.Sprint(input))
 
 	if str == "" {
@@ -305,7 +305,7 @@ type SelectHandler struct {
 }
 
 //Only allow 1/0 or "1"/"0"
-func (handler SelectHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler SelectHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	value := fmt.Sprint(input)
 	params := handler.Params
 

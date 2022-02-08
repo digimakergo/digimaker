@@ -22,7 +22,7 @@ type RelationListHandler struct {
 }
 
 //LoadFromInput load data from input before validation
-func (handler RelationListHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler RelationListHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	s := fmt.Sprint(input)
 	result := contenttype.RelationList{}
 	if s != "" {

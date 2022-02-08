@@ -1,6 +1,7 @@
 package fieldtypes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -22,7 +23,7 @@ type ImageHandler struct {
 	definition.FieldDef
 }
 
-func (handler ImageHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler ImageHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	//todo: check image format
 	str := fmt.Sprint(input)
 	return str, nil

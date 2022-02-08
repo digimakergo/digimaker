@@ -1,6 +1,7 @@
 package fieldtypes
 
 import (
+	"context"
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
@@ -62,7 +63,7 @@ type MapHandler struct {
 	definition.FieldDef
 }
 
-func (handler MapHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler MapHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	if _, ok := input.(Map); ok {
 		return input, nil
 	}
@@ -80,7 +81,7 @@ type MapListHandler struct {
 	definition.FieldDef
 }
 
-func (handler MapListHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler MapListHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	if _, ok := input.(MapList); ok {
 		return input, nil
 	}
@@ -173,7 +174,7 @@ type JSONHandler struct {
 }
 
 //support string, []byte, object
-func (handler JSONHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler JSONHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	obj := Json{}
 	if input == nil {
 		return obj, nil

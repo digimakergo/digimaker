@@ -40,7 +40,7 @@ var ErrorNoPermission = errors.New("The user doesn't have access to the action."
 // Validate validates and returns a validation result.
 // Validate is used in Create and Update, but can be also used separately
 //  eg. when you have several steps, you want to validate one step only(only the fields in that step).
-func Validate(contentType string, fieldsDef map[string]definition.FieldDef, inputs InputMap, checkAllRequired bool) (bool, ValidationResult) {
+func Validate(ctx context.Context, contentType string, fieldsDef map[string]definition.FieldDef, inputs InputMap, checkAllRequired bool) (bool, ValidationResult) {
 	//todo: check max length
 	//todo: check all kind of validation
 	result := ValidationResult{Fields: map[string]string{}}
@@ -58,7 +58,7 @@ func Validate(contentType string, fieldsDef map[string]definition.FieldDef, inpu
 				fieldtypeDef := fieldtype.GetFieldtype(fieldDef.FieldType)
 				handler := fieldtypeDef.NewHandler(fieldDef)
 				if handler != nil {
-					_, err := handler.LoadInput(input, "")
+					_, err := handler.LoadInput(ctx, input, "")
 					if _, ok := err.(fieldtype.ValidationError); ok {
 						fieldResult = err.Error()
 					}
@@ -169,7 +169,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	}
 
 	//Validate
-	valid, validationResult := Validate(contentType, fieldsDefinition, inputs, true)
+	valid, validationResult := Validate(ctx, contentType, fieldsDefinition, inputs, true)
 	if !valid {
 		return nil, validationResult
 	}
@@ -191,7 +191,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 			handler := fieldtype.GethHandler(fieldDef)
 
 			//set value
-			value, _ := handler.LoadInput(input, "")
+			value, _ := handler.LoadInput(ctx, input, "")
 
 			//Invoke BeforeStore
 			var err error
@@ -400,7 +400,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 
 	//Validate
 	log.Debug("Validating", "contenthandler.update", ctx)
-	valid, validationResult := Validate(contentType, fieldsDefinition, inputs, false)
+	valid, validationResult := Validate(ctx, contentType, fieldsDefinition, inputs, false)
 	if !valid {
 		return false, validationResult
 	}
@@ -421,7 +421,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if input, ok := inputs[identifier]; ok {
 			//get field from loaded content
 			handler := fieldtype.GethHandler(fieldDef)
-			value, _ := handler.LoadInput(input, "")
+			value, _ := handler.LoadInput(ctx, input, "")
 			existing := content.Value(identifier)
 			//Invoke BeforeSaving
 			if fieldWithEvent, ok := handler.(fieldtype.Event); ok {

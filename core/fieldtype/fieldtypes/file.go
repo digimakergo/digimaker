@@ -1,6 +1,7 @@
 package fieldtypes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -26,7 +27,7 @@ type FileHandler struct {
 	Params FileParameters
 }
 
-func (handler FileHandler) LoadInput(input interface{}, mode string) (interface{}, error) {
+func (handler FileHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	filePath := fmt.Sprint(input)
 	if filePath != "" {
 		//check format
