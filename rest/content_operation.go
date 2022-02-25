@@ -97,6 +97,53 @@ func SaveDraft(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(newVersion.Created, w)
 }
 
+func HideUpdate(w http.ResponseWriter, r *http.Request) {
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
+	params := mux.Vars(r)
+	id := params["id"]
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		HandleError(errors.New("id should be integer."), w)
+		return
+	}
+
+	isHidden := params["isHidden"]
+	isHiddenInt, err := strconv.Atoi(isHidden)
+	if err != nil {
+		HandleError(errors.New("isHidden should be integer."), w)
+		return
+	}
+
+	content, err := query.FetchByID(r.Context(), idInt)
+
+	if err != nil {
+		log.Error(err.Error(), "")
+		HandleError(errors.New("Can't find content"), w)
+		return
+	}
+
+	location := content.GetLocation()
+
+	if isHiddenInt == 0 {
+		location.IsHidden = true
+	} else {
+		location.IsHidden = false
+	}
+
+	err = location.Store(r.Context())
+	if err != nil {
+		log.Error(err.Error(), "")
+		HandleError(errors.New("Content Hide Error"), w)
+		return
+	}
+
+	WriteResponse(true, w)
+}
+
 func Update(w http.ResponseWriter, r *http.Request) {
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
@@ -335,6 +382,7 @@ func init() {
 	RegisterRoute("/content/create/{contenttype}", Create, "POST")
 	RegisterRoute("/content/move/{contents}/{target}", Move)
 	RegisterRoute("/content/update/{id:[0-9]+}", Update, "POST")
+	RegisterRoute("/content/hide/{id:[0-9]+}/{isHidden:[0-1]?}", HideUpdate, "POST")
 	RegisterRoute("/content/update/{contenttype}/{id:[0-9]+}", Update, "POST")
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)
