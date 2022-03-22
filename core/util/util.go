@@ -116,6 +116,12 @@ func InterfaceToStringArray(input []interface{}) []string {
 	return result
 }
 
+func IsIdentifier(input string) bool {
+	reg, _ := regexp.Compile("^[a-z][a-z0-9_]+$")
+	valid := reg.Match([]byte(input))
+	return valid
+}
+
 //convert name lie "Hello world.?" to "hello-world"
 func NameToIdentifier(input string) string {
 	lowerStr := strings.ToLower(strings.TrimSpace(input))

@@ -6,6 +6,7 @@ package definition
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -35,7 +36,35 @@ var LocationColumns []string = []string{
 	"p",
 }
 
-type ContentTypeList map[string]map[string]ContentType
+var (
+	ErrInvalidIdentifier = errors.New("Invalid identifier")
+)
+
+var DataFieldTypes = []string{"int", "string", "datetime"}
+
+type ContentTypeMap map[string]ContentType
+
+func (c *ContentTypeMap) Init() error {
+	cMap := *c
+	for cType, def := range cMap {
+		if len(cType) > 50 {
+			return fmt.Errorf("Content type identifier %v can not be longer than 50", cType)
+		}
+
+		if !util.IsIdentifier(cType) {
+			return fmt.Errorf("Content type '%v': %v", cType, ErrInvalidIdentifier)
+		}
+		err := def.Init()
+		if err != nil {
+			return fmt.Errorf("Content type '%v' error: %v", cType, err)
+		}
+		cMap[cType] = def
+	}
+	c = &cMap
+	return nil
+}
+
+type ContentTypeList map[string]ContentTypeMap
 
 //ValidationRule defines rule for a field's validation. eg. max length
 type VaidationRule map[string]interface{}
@@ -93,7 +122,91 @@ func (c ContentType) HasRelationlist() bool {
 	}
 }
 
-func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) {
+func (c *ContentType) Validate() error {
+	//name
+	if len(c.Name) > 50 {
+		return errors.New("Name shouldn't be longer than 50")
+	}
+
+	if !util.IsIdentifier(c.TableName) {
+		return fmt.Errorf("Table name %v: %v", c.TableName, ErrInvalidIdentifier)
+	}
+
+	if len(c.TableName) > 50 {
+		return errors.New("Table name shouldn't be longer than 50")
+	}
+
+	if len(c.NamePattern) > 200 {
+		return errors.New("Name pattern shouldn't be longer than 200")
+	}
+
+	if len(c.DataFields) > 100 {
+		return errors.New("Data fields shouldn't be more than 50")
+	}
+
+	fieldIdentifierList := c.FieldIdentifierList
+
+	if len(fieldIdentifierList)+len(c.DataFields) > 200 {
+		return errors.New("Data field and fields together shouldn't be more than 200")
+	}
+
+	for _, dataField := range c.DataFields {
+		dIdentifier := dataField.Identifier
+		if dIdentifier == "" {
+			return errors.New("Empty data identifier")
+		}
+
+		dFieldType := dataField.FieldType
+		if dFieldType == "" {
+			return fmt.Errorf("Empty data field type on '%v'", dIdentifier)
+		}
+
+		if !util.Contains(DataFieldTypes, dFieldType) {
+			return fmt.Errorf("Data field type '%v' is not supported on '%v'", dFieldType, dIdentifier)
+		}
+
+		if !util.IsIdentifier(dIdentifier) {
+			return fmt.Errorf("Data field %v: %v", dIdentifier, ErrInvalidIdentifier)
+		}
+
+		if len(dIdentifier) > 50 {
+			return errors.New("Data field identifier shouldn't be longer than 50")
+		}
+
+		if util.Contains(c.FieldIdentifierList, dIdentifier) {
+			return errors.New("Field " + dIdentifier + " also exists in data fields.")
+		}
+	}
+
+	for _, field := range c.FieldMap {
+		identifier := field.Identifier
+		if identifier == "" {
+			return errors.New("Empty field identifier")
+		}
+
+		if field.Name == "" {
+			return fmt.Errorf("Empty field Name on '%v'", identifier)
+		}
+
+		if !util.IsIdentifier(identifier) {
+			return fmt.Errorf("Field %v: %v", identifier, ErrInvalidIdentifier)
+		}
+		if len(identifier) > 50 {
+			return errors.New("Field identifier shouldn't be longer than 50")
+		}
+
+		//todo: check if the fieldtype exist
+		// fType := fieldtype.GetFieldtype(field.FieldType)
+		// if fType == nil {
+		// 	return fmt.Errorf("Fieldtype %v doesn't exist", fType)
+		// }
+
+		//todo: check if parameters is valid or not
+	}
+	return nil
+}
+
+func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) error {
 	//set all fields into FieldMap
 	fieldMap := map[string]FieldDef{}
 	identifierList := []string{}
@@ -103,6 +216,9 @@ func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) {
 			fieldCallback[0](&field)
 		}
 
+		if _, ok := fieldMap[field.Identifier]; ok {
+			return errors.New("Field '" + field.Identifier + "' already exists")
+		}
 		fieldMap[identifier] = field
 		identifierList = append(identifierList, identifier)
 		//get sub fields
@@ -115,6 +231,9 @@ func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) {
 	}
 	c.FieldMap = fieldMap
 	c.FieldIdentifierList = identifierList
+
+	err := c.Validate()
+	return err
 }
 
 //Content field definition
@@ -176,10 +295,9 @@ func LoadDefinition() error {
 		return err
 	}
 
-	for identifier, _ := range def {
-		cDef := def[identifier]
-		cDef.Init()
-		def[identifier] = cDef
+	err = def.Init()
+	if err != nil {
+		return err
 	}
 	contentTypeDefinition = map[string]map[string]ContentType{"default": def}
 
