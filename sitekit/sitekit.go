@@ -294,7 +294,7 @@ func OutputString(variables map[string]interface{}, viewType string, requestInfo
 	return buf.String(), nil
 }
 
-func init() {
+func Load() {
 	//Route sites
 	sitesConfig := viper.Get("sites")
 	if sitesConfig != nil {

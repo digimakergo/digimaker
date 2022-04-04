@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query/querier"
@@ -18,9 +17,9 @@ type Map map[string]interface{}
 //List defines an array Map
 type MapList []Map
 
-var jsonOutputerMap map[string]fieldtype.Outputer = map[string]fieldtype.Outputer{}
+var jsonOutputerMap map[string]querier.Outputer = map[string]querier.Outputer{}
 
-func RegisterJSONOutputer(identifier string, outputer fieldtype.Outputer) {
+func RegisterJSONOutputer(identifier string, outputer querier.Outputer) {
 	jsonOutputerMap[identifier] = outputer
 }
 
@@ -68,7 +67,7 @@ func (a MapList) Value() (driver.Value, error) {
 
 //MapHandler
 type MapHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 func (handler MapHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
@@ -86,7 +85,7 @@ func (handler MapHandler) DBField() string {
 
 //MapListHandler
 type MapListHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 func (handler MapListHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
@@ -188,7 +187,7 @@ type JSONParameters struct {
 
 //JSON Handler
 type JSONHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 	Params JSONParameters
 }
 
@@ -247,19 +246,19 @@ func init() {
 		fieldtype.Definition{Name: "map",
 			DataType: "fieldtypes.Map",
 			Package:  "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return MapHandler{FieldDef: def}
 			}})
 	fieldtype.Register(fieldtype.Definition{Name: "maplist",
 		DataType: "fieldtypes.MapList",
 		Package:  "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes",
-		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+		NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 			return MapListHandler{FieldDef: def}
 		}})
 	fieldtype.Register(fieldtype.Definition{Name: "json",
 		DataType: "fieldtypes.Json",
 		Package:  "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes",
-		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+		NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 			params := JSONParameters{}
 			err := ConvertParameters(def.Parameters, &params)
 			if err != nil {

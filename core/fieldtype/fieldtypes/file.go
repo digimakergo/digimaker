@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/config"
-	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
@@ -23,7 +22,7 @@ type FileParameters struct {
 }
 
 type FileHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 	Params FileParameters
 }
 
@@ -142,7 +141,7 @@ func init() {
 		fieldtype.Definition{
 			Name:     "file",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				params := FileParameters{}
 				err := ConvertParameters(def.Parameters, &params)
 				if err != nil {

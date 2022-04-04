@@ -10,6 +10,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
+	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
@@ -76,7 +77,7 @@ func getFilterType(cType string) *graphql.Scalar {
 	return filterInput
 }
 
-func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[string]definition.FieldDef) (db.Condition, error) {
+func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[string]fieldtype.FieldDef) (db.Condition, error) {
 	switch v := valueAST.(type) {
 	case *ast.ListValue:
 		for _, item := range v.Values {

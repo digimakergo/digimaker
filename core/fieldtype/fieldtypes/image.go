@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/config"
-	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/util"
@@ -20,7 +19,7 @@ type ImageParameter struct {
 }
 
 type ImageHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 func (handler ImageHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
@@ -154,7 +153,7 @@ func init() {
 		fieldtype.Definition{
 			Name:     "image",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return ImageHandler{FieldDef: def}
 			}})
 }

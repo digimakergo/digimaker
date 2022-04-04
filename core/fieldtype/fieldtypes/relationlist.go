@@ -18,7 +18,7 @@ import (
 )
 
 type RelationListHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 //LoadFromInput load data from input before validation
@@ -184,7 +184,7 @@ func init() {
 		fieldtype.Definition{
 			Name:     "relationlist",
 			DataType: "contenttype.RelationList",
-			NewHandler: func(fieldDef definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(fieldDef fieldtype.FieldDef) fieldtype.Handler {
 				return RelationListHandler{FieldDef: fieldDef}
 			}})
 }

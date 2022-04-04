@@ -22,7 +22,7 @@ func CanLogin(ctx context.Context, usernameEmail string, password string) (error
 	}
 	user, err := query.Fetch(ctx, "user", cond)
 	if err != nil {
-		return fmt.Errorf("Fetching user error: %v", err), nil
+		return err, nil
 	}
 	if user == nil {
 		return errors.New("User not found"), nil

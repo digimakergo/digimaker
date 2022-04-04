@@ -62,6 +62,7 @@ func Generate(subFolder string) error {
 		//todo: genereate to a template folder first and then copy&override target,
 		//and if there is error remove that folder
 		fmt.Println("Generating " + name)
+		fmt.Println(path)
 		file, _ := os.Create(path)
 		var err error
 		if settings.HasLocation {

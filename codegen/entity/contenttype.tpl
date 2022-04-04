@@ -1,7 +1,7 @@
 //This file is generated automatically, DO NOT EDIT IT.
 //Generated time:
 
-package entity
+package main
 
 import (
     "context"
@@ -78,6 +78,11 @@ func (c *{{$struct_name}}) ToDBValues() map[string]interface{} {
 //Get identifier list of fields(NOT including data_fields )
 func (c *{{$struct_name}}) IdentifierList() []string {
 	return []string{ {{range $identifier, $fieldtype := .fields}}{{if not $fieldtype.IsOutput}}"{{$identifier}}",{{end}}{{end}}}
+}
+
+func (c *{{$struct_name}}) Definition( language ...string) definition.ContentType {
+	def, _ := definition.GetDefinition( c.ContentType(), language... )
+    return def
 }
 
 //Get field value
@@ -173,7 +178,7 @@ func init() {
         return list
     }
 
-	contenttype.Register("{{.name}}",
+	contenttype.Register( "{{.customer_identifier}}", "{{.name}}",
 		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
