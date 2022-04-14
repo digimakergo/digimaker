@@ -23,7 +23,7 @@ For non content:
             {OVERRIDE NOT FOUND, PLEASE OVERRIDE. {{content.ID}},{{content.Name}},{{viewmode}}}
         {%else%}
                 {% if debug %}<!-- dm-template: {{path}} -->{%endif%}
-                {%include path|dm_abs_path %}
+                {%include dm.abs_path(path) %}
         {% endif %}
     {%endwith%}
 {% endmacro %}
@@ -34,7 +34,7 @@ For non content:
             {OVERRIDE NOT FOUND, PLEASE OVERRIDE. viewtype: {{viewtype}} }
         {%else%}
                 {% if debug %}<!-- dm-template: {{path}} -->{%endif%}
-                {%include path|dm_abs_path %}
+                {%include dm.abs_path(path) %}
         {% endif %}
     {%endwith%}
 {% endmacro %}
@@ -46,7 +46,7 @@ For non content:
                 {TEMPLATE FOR {{fieldtype}} IS NOT FOUND}
             {%else%}
                 {% if debug %}<!-- dm-template: {{path}} -->{%endif%}
-                {%include path|dm_abs_path with field=field value=content.Value(field)%}
+                {%include dm.abs_path(path) with field=field value=content.Value(field)%}
             {%endif%}
         {%endwith%}
     {%endwith%}

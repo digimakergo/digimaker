@@ -120,6 +120,12 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 		"request_id": func() string {
 			return log.GetContextInfo(dm.Context).RequestID
 		},
+
+		"abs_path": func(path string) string {
+			//get path under current package
+			path = sitekit.TemplateFolder() + "/" + util.SecurePath(path)
+			return path
+		},
 	}
 
 	return result
