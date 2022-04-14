@@ -364,9 +364,10 @@ func GetIP(r *http.Request) string {
 	return ip
 }
 
-//WashPath remove .. and . to make sure it can only go under, not upp
+//WashPath remove .. make sure it can only go under, not upp
 func SecurePath(path string) string {
-	return strings.ReplaceAll(path, ".", "")
+	reg := regexp.MustCompile(`\.\.+`)
+	return reg.ReplaceAllString(path, "")
 }
 
 func init() {
