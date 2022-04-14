@@ -44,14 +44,14 @@ func GetContentTemplate(ctx context.Context, content contenttype.ContentTyper, v
 	}
 
 	matchLog := []string{}
-	path, matchLog := MatchTemplate(templateViewContent, matchData)
+	path, matchLog := MatchTemplate(ctx, templateViewContent, matchData)
 
 	log.Debug("Matching on "+content.GetName()+", got: "+path+"\n "+strings.Join(matchLog, "\n"), "template-match", ctx)
 	return path
 }
 
 //MatchTemplate returns overrided template based on override config(eg. template_override.yaml)
-func MatchTemplate(viewSection string, matchData map[string]interface{}, fileName ...string) (string, []string) {
+func MatchTemplate(ctx context.Context, viewSection string, matchData map[string]interface{}, fileName ...string) (string, []string) {
 	overrideFileName := ""
 	result := ""
 	matchLog := []string{}

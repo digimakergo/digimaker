@@ -52,14 +52,14 @@ func SetSiteSettings(identifier string, settings SiteSettings) {
 }
 
 //Initialize sites setting to memory
-func LoadSite(siteConfig map[string]interface{}) error {
+func LoadSite(ctx context.Context, siteConfig map[string]interface{}) error {
 	siteIdentifier := siteConfig["identifier"].(string)
 
 	if _, ok := siteConfig["root"]; !ok {
 		return errors.New("Need root setting.")
 	}
 	root := siteConfig["root"].(int)
-	rootContent, err := query.FetchByID(context.Background(), root)
+	rootContent, err := query.FetchByID(ctx, root)
 	if err != nil {
 		return fmt.Errorf("Root doesn't exist: %w", err)
 	}
@@ -73,7 +73,7 @@ func LoadSite(siteConfig map[string]interface{}) error {
 	if defaultInt == root {
 		defaultContent = rootContent
 	} else {
-		defaultContent, err = query.FetchByID(context.Background(), defaultInt)
+		defaultContent, err = query.FetchByID(ctx, defaultInt)
 		if err != nil {
 			return fmt.Errorf("Default doesn't exist: %w", err)
 		}
@@ -294,7 +294,7 @@ func init() {
 	if sitesConfig != nil {
 		for i, _ := range sitesConfig.([]interface{}) {
 			siteConfig := viper.GetStringMap("sites." + strconv.Itoa(i))
-			err := LoadSite(siteConfig)
+			err := LoadSite(context.Background(), siteConfig)
 			if err != nil {
 				log.Fatal("Error when loading site " + strconv.Itoa(i) + ". Detail: " + err.Error())
 			}

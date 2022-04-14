@@ -49,7 +49,7 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 				data = matchData.(map[string]interface{})
 			}
 
-			path, matchLog := sitekit.MatchTemplate(viewType, data)
+			path, matchLog := sitekit.MatchTemplate(dm.Context, viewType, data)
 
 			log.Debug("Template for view "+viewType+": "+path+"log:"+strings.Join(matchLog, "\n"), "template", dm.Context)
 			if path != "" && !sitekit.TemplateExist(path) {
@@ -70,7 +70,7 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 		},
 
 		"fieldtype": func(field string, content contenttype.ContentTyper) string {
-			def, _ := definition.GetDefinition(content.ContentType())
+			def, _ := definition.GetDefinition(dm.Context, content.ContentType())
 			if fieldDef, ok := def.FieldMap[field]; ok {
 				return fieldDef.FieldType
 			}
