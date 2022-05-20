@@ -84,7 +84,7 @@ func (handler TextHandler) LoadInput(ctx context.Context, input interface{}, mod
 func (handler TextHandler) DBField() string {
 	rule, _ := handler.getParams()
 	maxLength := rule.MaxLength
-	return fmt.Sprintf("VARCHAR (%v) DEFAULT ''", maxLength)
+	return fmt.Sprintf("VARCHAR (%v) NOT NULL DEFAULT ''", maxLength)
 }
 
 /***** RichTextHandler ******/
