@@ -126,6 +126,11 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			path = sitekit.TemplateFolder() + "/" + util.SecurePath(path)
 			return path
 		},
+
+		"output_field": func(content contenttype.ContentTyper, fieldIdentifier string) interface{} {
+			value := query.OutputField(dm.Context, content, fieldIdentifier)
+			return value
+		},
 	}
 
 	return result

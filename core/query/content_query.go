@@ -289,6 +289,24 @@ func Output(ctx context.Context, content contenttype.ContentTyper) (contenttype.
 	return nil, nil
 }
 
+func OutputField(ctx context.Context, content contenttype.ContentTyper, fieldIdentifier string) interface{} {
+	def := content.Definition()
+	if fieldDef, ok := def.FieldMap[fieldIdentifier]; ok {
+		handler := fieldtype.GethHandler(fieldDef)
+		value := content.Value(fieldIdentifier)
+		if handler != nil {
+			if washer, ok := handler.(querier.Outputer); ok {
+				washedValue := washer.Ouput(ctx, DefaultQuerier, value)
+				return washedValue
+			}
+		}
+		return value
+	} else {
+		//todo: log error - field doesn't exist
+		return ""
+	}
+}
+
 //OutputList converts contents into output format, see Output for single content.
 func OutputList(ctx context.Context, contentList []contenttype.ContentTyper) ([]contenttype.ContentMap, error) {
 	result := []contenttype.ContentMap{}
