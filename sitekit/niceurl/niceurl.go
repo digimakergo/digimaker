@@ -18,7 +18,8 @@ func GenerateUrl(content contenttype.ContentTyper, root contenttype.ContentTyper
 	location := content.GetLocation()
 	result := ""
 	if location != nil {
-		path := strings.TrimPrefix(location.IdentifierPath, root.GetLocation().IdentifierPath)
+		rootDepth := root.GetLocation().Depth
+		path := strings.Join(strings.Split(location.IdentifierPath, "/")[rootDepth-1:], "/")
 		pattern := "digit" //todo: read from config file.
 		switch pattern {
 		case "digit":
