@@ -94,9 +94,27 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			return parent
 		},
 
-		"children": func(parent contenttype.ContentTyper, contenttype string) []contenttype.ContentTyper {
+		"children": func(parent contenttype.ContentTyper, contenttype string, params ...interface{}) []contenttype.ContentTyper {
 			userID := util.CurrentUserID(dm.Context)
-			children, _, err := query.Children(dm.Context, userID, parent, contenttype, db.EmptyCond().Sortby("l.priority desc", "id asc"))
+			limit := -1
+			sortBy := []string{"l.priority desc", "id asc"}
+			if len(params) > 0 {
+				//sort
+
+				if params[0] != "" {
+					sortBy = strings.Split(params[0].(string), ",")
+				}
+
+				if len(params) >= 2 {
+					//0 means no limit(default max limit)
+					paramLimit := params[1].(int)
+					if paramLimit > 0 {
+						limit = paramLimit
+					}
+				}
+
+			}
+			children, _, err := query.Children(dm.Context, userID, parent, contenttype, db.EmptyCond().Sortby(sortBy...).Limit(0, limit))
 			if err != nil {
 				log.Debug("Error when fetch children on id "+strconv.Itoa(parent.GetID())+": "+err.Error(), "template", dm.Context)
 			}

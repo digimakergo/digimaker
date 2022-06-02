@@ -269,7 +269,13 @@ func (r MysqlHandler) getLimit(limit []int) (string, error) {
 		if len(limit) != 2 {
 			return "", errors.New("limit should be array with only 2 int. There are: " + strconv.Itoa(len(limit)))
 		}
-		limitStr = " LIMIT " + strconv.Itoa(limit[0]) + "," + strconv.Itoa(limit[1])
+		limitStr = " LIMIT " + strconv.Itoa(limit[0])
+		if limit[1] == -1 {
+			defaultLimit := 10000000
+			limitStr += "," + strconv.Itoa(defaultLimit)
+		} else {
+			limitStr += "," + strconv.Itoa(limit[1])
+		}
 	}
 	return limitStr, nil
 }
