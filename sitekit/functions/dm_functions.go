@@ -97,7 +97,13 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 		"children": func(parent contenttype.ContentTyper, contenttype string, params ...interface{}) []contenttype.ContentTyper {
 			userID := util.CurrentUserID(dm.Context)
 			limit := -1
-			sortBy := []string{"l.priority desc", "id asc"}
+			var sortBy []string
+			def, _ := definition.GetDefinition(dm.Context, contenttype)
+			if def.HasLocation {
+				sortBy = []string{"l.priority desc", "published desc"}
+			} else {
+				sortBy = []string{"published desc"}
+			}
 			if len(params) > 0 {
 				//sort
 
