@@ -100,7 +100,7 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			var sortBy []string
 			def, _ := definition.GetDefinition(dm.Context, contenttype)
 			if def.HasLocation {
-				sortBy = []string{"l.priority desc", "published desc"}
+				sortBy = []string{"l.priority desc", "id asc"}
 			} else {
 				sortBy = []string{"published desc"}
 			}
