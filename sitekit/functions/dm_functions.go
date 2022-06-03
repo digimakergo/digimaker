@@ -104,9 +104,11 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			} else {
 				sortBy = []string{"published desc"}
 			}
+
+			cond := db.EmptyCond()
+			offset := 0
 			if len(params) > 0 {
 				//sort
-
 				if params[0] != "" {
 					sortBy = strings.Split(params[0].(string), ",")
 				}
@@ -119,8 +121,18 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 					}
 				}
 
+				if len(params) >= 3 {
+					if param2, ok := params[2].(db.Condition); ok {
+						cond = param2
+					}
+				}
+
+				if len(params) >= 4 {
+					offset = params[3].(int)
+				}
 			}
-			children, _, err := query.Children(dm.Context, userID, parent, contenttype, db.EmptyCond().Sortby(sortBy...).Limit(0, limit))
+
+			children, _, err := query.Children(dm.Context, userID, parent, contenttype, cond.Sortby(sortBy...).Limit(offset, limit))
 			if err != nil {
 				log.Debug("Error when fetch children on id "+strconv.Itoa(parent.GetID())+": "+err.Error(), "template", dm.Context)
 			}

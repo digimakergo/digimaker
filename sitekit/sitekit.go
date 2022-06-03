@@ -268,7 +268,13 @@ func Output(w io.Writer, variables map[string]interface{}, viewType string, requ
 		functions := newFunctions()
 		functions.SetInfo(requestInfo)
 		functionMap := functions.GetMap()
-		variables[name] = functionMap
+		if name == "_" {
+			for fnName, fn := range functionMap {
+				variables[fnName] = fn
+			}
+		} else {
+			variables[name] = functionMap
+		}
 	}
 
 	//proceed templates
