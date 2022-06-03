@@ -3,6 +3,7 @@ package functions
 import (
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
@@ -161,6 +162,10 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			//get path under current package
 			path = sitekit.TemplateFolder() + "/" + util.SecurePath(path)
 			return path
+		},
+
+		"now": func() time.Time {
+			return time.Now()
 		},
 
 		"output_field": func(content contenttype.ContentTyper, fieldIdentifier string) interface{} {
