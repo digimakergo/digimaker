@@ -289,7 +289,7 @@ var contentTypeDefinition ContentTypeList
 //LoadDefinition Load all setting in file into memory.
 func LoadDefinition() error {
 	//Load contenttype.json into ContentTypeDefinition
-	var def map[string]ContentType
+	var def ContentTypeMap
 	err := util.UnmarshalData(config.ConfigPath()+"/contenttype.json", &def)
 	if err != nil {
 		return err
@@ -299,7 +299,7 @@ func LoadDefinition() error {
 	if err != nil {
 		return err
 	}
-	contentTypeDefinition = map[string]map[string]ContentType{"default": def}
+	contentTypeDefinition = map[string]ContentTypeMap{"default": def}
 
 	//todo: use config or scan folder.
 	//todo nb: the translation can be add later but listener should be there
