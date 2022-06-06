@@ -18,6 +18,7 @@ import (
 //TreeNode is a query result when querying SubTree
 type TreeNode struct {
 	*contenttype.Location
+	Name     string                   `json:"name"`
 	Fields   interface{}              `json:"fields"` //todo: maybe more generaic attributes instead of hard coded 'Fields' here, or use custom MarshalJSON(remove *Locatoin then)?
 	Content  contenttype.ContentTyper `json:"content"`
 	Children []TreeNode               `json:"children"`
@@ -135,7 +136,7 @@ func SubTree(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 		}
 	}
 
-	treenode := TreeNode{Content: rootContent, Location: rootContent.GetLocation()}
+	treenode := TreeNode{Content: rootContent, Name: rootContent.GetName(), Location: rootContent.GetLocation()}
 	buildTree(&treenode, list)
 	return treenode, nil
 }
@@ -148,7 +149,7 @@ func buildTree(treenode *TreeNode, list []contenttype.ContentTyper) {
 	for _, item := range list {
 		location := item.GetLocation()
 		if location.Depth == parentLocation.Depth+1 && location.ParentID == parentLocation.ID {
-			treenode.Children = append(treenode.Children, TreeNode{Content: item, Location: location})
+			treenode.Children = append(treenode.Children, TreeNode{Content: item, Name: item.GetName(), Location: location})
 		}
 	}
 
