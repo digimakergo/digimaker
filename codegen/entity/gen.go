@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/digimakergo/digimaker/core/config"
@@ -78,6 +79,9 @@ func Generate(subFolder string) error {
 func funcMap() template.FuncMap {
 	funcMap := template.FuncMap{
 		"UpperName": util.UpperName,
+		"InternalIdentifier": func(identifier string) bool {
+			return strings.HasPrefix(identifier, "_")
+		},
 	}
 	return funcMap
 }
