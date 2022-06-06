@@ -3,7 +3,7 @@ package contenttype
 import "github.com/digimakergo/digimaker/core/definition"
 
 type Metadata struct {
-	ContentType string `boil:"_contenttype" json:"contenttype" toml:"contenttype" yaml:"contenttype"`
+	Contenttype string `boil:"_contenttype" json:"contenttype" toml:"contenttype" yaml:"contenttype"`
 	Name        string `boil:"_name" json:"name" toml:"name" yaml:"name"`
 	Version     int    `boil:"_version" json:"version" toml:"version" yaml:"version"`
 	Published   int    `boil:"_published" json:"published" toml:"published" yaml:"published"`
@@ -32,7 +32,7 @@ func (c Metadata) ToDBValues() map[string]interface{} {
 	}
 
 	//for non-location content, delete undefined
-	def, _ := definition.GetDefinition(c.ContentType)
+	def, _ := definition.GetDefinition(c.Contenttype)
 	if !def.HasLocation {
 		for _, dataField := range def.DataFields {
 			identifier := dataField.Identifier
@@ -49,8 +49,12 @@ func (c Metadata) GetName() string {
 	return c.Name
 }
 
+func (c Metadata) ContentType() string {
+	return c.Contenttype
+}
+
 func (c Metadata) Definition(language ...string) definition.ContentType {
-	def, _ := definition.GetDefinition(c.ContentType, language...)
+	def, _ := definition.GetDefinition(c.Contenttype, language...)
 	return def
 }
 

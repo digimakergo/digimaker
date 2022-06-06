@@ -119,7 +119,7 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 		location := content.GetLocation()
 		location.ParentID = parentID
 		location.ContentID = content.GetID()
-		location.ContentType = content.ContentType()
+		location.Contenttype = content.ContentType()
 		location.UID = util.GenerateUID()
 		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(content.GetName())
 		location.Depth = parent.Depth + 1

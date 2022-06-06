@@ -35,10 +35,6 @@ type {{$struct_name}} struct{
     {{end}}
 }
 
-func (c *{{$struct_name}} ) ContentType() string{
-	 return "{{.name}}"
-}
-
 func (c {{$struct_name}} ) GetID() int{
         return c.ID
 }
@@ -148,7 +144,7 @@ func (c *{{$struct_name}}) Delete(ctx context.Context, transaction ...*sql.Tx) e
 func init() {
 	new := func() contenttype.ContentTyper {
     entity := &{{$struct_name}}{}
-    entity.Metadata.ContentType = "{{.name}}"
+    entity.Metadata.Contenttype = "{{.name}}"
     return entity
 	}
 

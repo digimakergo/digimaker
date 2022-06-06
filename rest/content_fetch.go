@@ -419,7 +419,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 
 	//todo: make this configurable
 	tree.Iterate(func(node *query.TreeNode) {
-		if node.ContentType == "folder" {
+		if node.Contenttype == "folder" {
 			node.Fields = map[string]interface{}{"subtype": node.Content.Value("folder_type")}
 		}
 	})

@@ -22,7 +22,7 @@ type Location struct {
 	IdentifierPath string `boil:"identifier_path" json:"identifier_path" toml:"identifier_path" yaml:"identifier_path"`
 	Hierarchy      string `boil:"hierarchy" json:"hierarchy" toml:"hierarchy" yaml:"hierarchy"`
 	Depth          int    `boil:"depth" json:"depth" toml:"depth" yaml:"depth"`
-	ContentType    string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
+	Contenttype    string `boil:"content_type" json:"content_type" toml:"content_type" yaml:"content_type"`
 	ContentID      int    `boil:"content_id" json:"content_id" toml:"content_id" yaml:"content_id"`
 	IsHidden       bool   `boil:"is_hidden" json:"is_hidden" toml:"is_hidden" yaml:"is_hidden"`
 	IsInvisible    bool   `boil:"is_invisible" json:"is_invisible" toml:"is_invisible" yaml:"is_invisible"`
@@ -41,7 +41,7 @@ func (c *Location) ToDBValues() map[string]interface{} {
 	result["main_id"] = c.MainID
 	result["hierarchy"] = c.Hierarchy
 	result["depth"] = c.Depth
-	result["content_type"] = c.ContentType
+	result["content_type"] = c.Contenttype
 	result["content_id"] = c.ContentID
 	result["is_hidden"] = c.IsHidden
 	result["is_invisible"] = c.IsInvisible
@@ -77,8 +77,8 @@ func (c *Location) Field(name string) interface{} {
 		result = c.Hierarchy
 	case "depth", "Depth":
 		result = c.Depth
-	case "content_type", "ContentType":
-		result = c.ContentType
+	case "content_type", "Contenttype":
+		result = c.Contenttype
 	case "content_id", "ContentID":
 		result = c.ContentID
 	case "is_hidden", "IsHidden":
@@ -124,7 +124,7 @@ func (c *Location) Store(ctx context.Context, transaction ...*sql.Tx) error {
 //Count how many locations for the same content
 //Note: the count is instant so not cached.
 func (l *Location) CountLocations() int {
-	count, err := db.Count("dm_location", db.Cond("content_type", l.ContentType).Cond("content_id", l.ContentID))
+	count, err := db.Count("dm_location", db.Cond("content_type", l.Contenttype).Cond("content_id", l.ContentID))
 	if err != nil {
 		//todo: panic to top
 	}

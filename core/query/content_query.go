@@ -47,7 +47,7 @@ func FetchByLID(ctx context.Context, locationID int) (contenttype.ContentTyper, 
 
 	//fetch by content id.
 	contentID := location.ContentID
-	contentType := location.ContentType
+	contentType := location.Contenttype
 	result, err := FetchByCID(ctx, contentType, contentID)
 
 	return result, err
@@ -66,7 +66,7 @@ func FetchByPath(ctx context.Context, path string) (contenttype.ContentTyper, er
 
 	//fetch by content id.
 	contentID := location.ContentID
-	contentType := location.ContentType
+	contentType := location.Contenttype
 	result, err := FetchByCID(ctx, contentType, contentID)
 	return result, err
 }
@@ -85,7 +85,7 @@ func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, erro
 
 	//fetch by content id.
 	contentID := location.ContentID
-	contentType := location.ContentType
+	contentType := location.Contenttype
 	result, err := FetchByCID(ctx, contentType, contentID)
 	return result, err
 }
