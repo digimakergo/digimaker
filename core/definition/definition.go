@@ -72,15 +72,14 @@ type VaidationRule map[string]interface{}
 type FieldParameters map[string]interface{}
 
 type ContentType struct {
-	Name          string      `json:"name"`
-	TableName     string      `json:"table_name"`
-	RelationData  []string    `json:"relation_data"`
-	NamePattern   string      `json:"name_pattern"`
-	HasVersion    bool        `json:"has_version"`
-	HasLocation   bool        `json:"has_location"`
-	HasLocationID bool        `json:"has_location_id"` //for non-location content
-	Fields        []FieldDef  `json:"fields"`
-	DataFields    []DataField `json:"data_fields"`
+	Name         string      `json:"name"`
+	TableName    string      `json:"table_name"`
+	RelationData []string    `json:"relation_data"`
+	NamePattern  string      `json:"name_pattern"`
+	HasVersion   bool        `json:"has_version"`
+	HasLocation  bool        `json:"has_location"`
+	Fields       []FieldDef  `json:"fields"`
+	DataFields   []DataField `json:"data_fields"`
 	//All fields where identifier is the key.
 	FieldMap            map[string]FieldDef `json:"-"`
 	FieldIdentifierList []string            `json:"-"`
