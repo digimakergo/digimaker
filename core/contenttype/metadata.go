@@ -1,6 +1,8 @@
 package contenttype
 
-import "github.com/digimakergo/digimaker/core/definition"
+import (
+	"github.com/digimakergo/digimaker/core/definition"
+)
 
 type Metadata struct {
 	Contenttype string `boil:"_contenttype" json:"contenttype" toml:"contenttype" yaml:"contenttype"`
@@ -34,9 +36,8 @@ func (c Metadata) ToDBValues() map[string]interface{} {
 	//for non-location content, delete undefined
 	def, _ := definition.GetDefinition(c.Contenttype)
 	if !def.HasLocation {
-		for _, dataField := range def.DataFields {
-			identifier := dataField.Identifier
-			if _, ok := result[identifier]; ok {
+		for identifier, _ := range result {
+			if !def.HasDataField(identifier) {
 				delete(result, identifier)
 			}
 		}
