@@ -140,11 +140,12 @@ func (handler MysqlHandler) WithContent(query Query, contentType string, option 
 	//add author join if needed
 	if option.WithAuthor {
 		authorAlias := contentAlias + "_l_author"
+		userDef, _ := definition.GetDefinition("user")
 		authorQuery := SingleQuery{
-			Table:    "dm_location",
+			Table:    userDef.TableName,
 			Alias:    authorAlias,
-			Select:   []string{authorAlias + ".name AS " + "'" + fieldPrefix + "_author_name'"},
-			Relation: Cond(contentAlias+"._author ==", authorAlias+".content_id").Cond(authorAlias+".content_type ==", "'user'"),
+			Select:   []string{authorAlias + "._name AS " + "'" + fieldPrefix + "_author_name'"},
+			Relation: Cond(contentAlias+"._author ==", authorAlias+".id"),
 		}
 		query.Add(authorQuery)
 	}
