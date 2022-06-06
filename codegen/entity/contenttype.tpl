@@ -42,7 +42,7 @@ func (c {{$struct_name}} ) GetID() int{
 	 return c.ID
 }
 
-func (c {{$struct_name}} ) GetMetadata() *contenttype.Metadata{
+func (c *{{$struct_name}} ) GetMetadata() *contenttype.Metadata{
 	 return &c.Metadata
 }
 

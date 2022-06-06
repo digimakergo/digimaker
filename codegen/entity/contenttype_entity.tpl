@@ -25,7 +25,9 @@ type {{$struct_name}} struct{
      ID int `boil:"id" json:"id" toml:"id" yaml:"id"`
 
      {{range $identifier, $fieldtype := .data_fields}}
-          {{$identifier|UpperName}}  {{$fieldtype}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+            {{if not ($identifier|InternalIdentifier)}}
+                {{$identifier|UpperName}}  {{$fieldtype}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
+            {{end}}
      {{end}}
     {{range $identifier, $fieldtype := .fields}}
          {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}    
@@ -39,7 +41,7 @@ func (c {{$struct_name}} ) GetID() int{
         return c.ID
 }
 
-func (c {{$struct_name}} ) GetMetadata() *contenttype.Metadata{
+func (c *{{$struct_name}} ) GetMetadata() *contenttype.Metadata{
         return &c.Metadata
 }
 
@@ -52,7 +54,9 @@ func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
 func (c *{{$struct_name}}) ToDBValues() map[string]interface{} {
 	result := make(map[string]interface{})
     {{range $identifier, $fieldtype := .data_fields}}
+         {{if not ($identifier|InternalIdentifier)}}
          result["{{$identifier}}"]=c.{{$identifier|UpperName}}
+         {{end}}
     {{end}}
 
     {{range $identifier, $fieldtype := .fields}}
@@ -62,6 +66,11 @@ func (c *{{$struct_name}}) ToDBValues() map[string]interface{} {
         {{end}}
         {{end}}
     {{end}}
+
+    for key, value := range c.Metadata.ToDBValues() {
+		result[key] = value
+	}
+
 	return result
 }
 
@@ -80,8 +89,10 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
     var result interface{}
 	switch identifier {
     {{range $identifier, $fieldtype := .data_fields}}
+      {{if not ($identifier|InternalIdentifier)}}
       case "{{$identifier}}":
          result = c.{{$identifier|UpperName}}
+      {{end}}
     {{end}}
     {{range $identifier, $fieldtype := .fields}}
     {{if not $fieldtype.IsOutput}}
@@ -99,8 +110,10 @@ func (c *{{$struct_name}}) Value(identifier string) interface{} {
 func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error {
 	switch identifier {
         {{range $identifier, $fieldtype := .data_fields}}
+         {{if not ($identifier|InternalIdentifier)}}
           case "{{$identifier}}":
              c.{{$identifier|UpperName}} = value.({{$fieldtype}})
+        {{end}}
         {{end}}
         {{range $identifier, $fieldtype := .fields}}
             {{$type_settings := index $.def_fieldtype $fieldtype.FieldType}}
