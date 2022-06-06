@@ -164,8 +164,13 @@ func (c *ContentType) Validate() error {
 			return fmt.Errorf("Data field type '%v' is not supported on '%v'", dFieldType, dIdentifier)
 		}
 
-		if !util.IsIdentifier(dIdentifier) {
-			return fmt.Errorf("Data field %v: %v", dIdentifier, ErrInvalidIdentifier)
+		stripedIdentifier := dIdentifier
+		if strings.HasPrefix(dIdentifier, "_") {
+			stripedIdentifier = strings.TrimPrefix(dIdentifier, "_")
+		} else {
+			if !util.IsIdentifier(stripedIdentifier) {
+				return fmt.Errorf("Data field %v: %v", dIdentifier, ErrInvalidIdentifier)
+			}
 		}
 
 		if len(dIdentifier) > 50 {
