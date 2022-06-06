@@ -79,7 +79,7 @@ func MatchTemplate(ctx context.Context, viewSection string, matchData map[string
 				if includeMatched {
 					matchLog = append(matchLog, "Matching on include file: "+includedFile)
 					var includedMatchLog []string
-					result, includedMatchLog = MatchTemplate(viewSection, matchData, includedFile)
+					result, includedMatchLog = MatchTemplate(ctx, viewSection, matchData, includedFile)
 					matchLog = append(matchLog, includedMatchLog...)
 					if result != "" {
 						result = WashTemplatePath(result, templateFolder)

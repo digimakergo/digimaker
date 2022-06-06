@@ -1,8 +1,8 @@
 package functions
 
 import (
-	"github.com/digimakeras/digimaker/core/db"
-	"github.com/digimakeras/digimaker/sitekit"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/sitekit"
 )
 
 //default dm functions

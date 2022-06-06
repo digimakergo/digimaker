@@ -71,7 +71,7 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 		},
 
 		"fieldtype": func(field string, content contenttype.ContentTyper) string {
-			def, _ := definition.GetDefinition(dm.Context, content.ContentType())
+			def, _ := definition.GetDefinition(content.ContentType())
 			if fieldDef, ok := def.FieldMap[field]; ok {
 				return fieldDef.FieldType
 			}
@@ -99,7 +99,7 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			userID := util.CurrentUserID(dm.Context)
 			limit := -1
 			var sortBy []string
-			def, _ := definition.GetDefinition(dm.Context, contenttype)
+			def, _ := definition.GetDefinition(contenttype)
 			if def.HasLocation {
 				sortBy = []string{"l.priority desc", "id asc"}
 			} else {

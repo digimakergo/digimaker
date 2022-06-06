@@ -12,3 +12,7 @@ type Querier interface {
 
 	List(ctx context.Context, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error)
 }
+
+type Outputer interface {
+	Ouput(ctx context.Context, querier Querier, value interface{}) interface{}
+}
