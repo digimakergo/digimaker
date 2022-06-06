@@ -48,7 +48,7 @@ func AuthAuthenticate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Generate refresh token and access token
-	userID := user.GetCID()
+	userID := user.GetID()
 	rememberMe := false
 	if viper.GetBool("auth.rememberme_enabled") {
 		rememberMe = input.RememberMe

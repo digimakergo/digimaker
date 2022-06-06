@@ -81,19 +81,19 @@ func Validate(ctx context.Context, contentType string, fieldsDef map[string]defi
 //Store content. Note it doesn't rollback - please rollback in invoking part if error happens.
 //If it's no-location content, ingore the parentID.
 func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, userId int, tx *sql.Tx, parentID int) error {
-	if content.GetCID() == 0 {
+	if content.GetID() == 0 {
 		log.Debug("Content is new.", "contenthandler.StoreCreatedContent", ctx)
 	}
 
 	contentDefinition := content.Definition()
-	if contentDefinition.HasLocationID {
+	if contentDefinition.HasDataField("location_id") {
 		content.SetValue("location_id", parentID)
 	}
 
 	for identifier, fieldDef := range contentDefinition.FieldMap {
 		handler := fieldtype.GethHandler(fieldDef)
 		if storeHandler, ok := handler.(fieldtype.StoreHandler); ok {
-			err := storeHandler.Store(ctx, content.Value(identifier), content.ContentType(), content.GetCID(), tx)
+			err := storeHandler.Store(ctx, content.Value(identifier), content.ContentType(), content.GetID(), tx)
 			if err != nil {
 				return err
 			}
@@ -105,7 +105,7 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 		return err
 	}
 
-	log.Debug("Content is saved. id :"+strconv.Itoa(content.GetCID())+". ", "contenthandler.StoreCreatedContent", ctx)
+	log.Debug("Content is saved. id :"+strconv.Itoa(content.GetID())+". ", "contenthandler.StoreCreatedContent", ctx)
 
 	//todo: deal with relations
 
@@ -118,7 +118,7 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 		//Save location
 		location := content.GetLocation()
 		location.ParentID = parentID
-		location.ContentID = content.GetCID()
+		location.ContentID = content.GetID()
 		location.ContentType = content.ContentType()
 		location.UID = util.GenerateUID()
 		contentName := GenerateName(content)
@@ -157,7 +157,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 			return nil, errors.New("Parent id can't be 0")
 		}
 	} else {
-		parent, _ = query.FetchByID(ctx, parentID)
+		parent, _ = query.FetchByLID(ctx, parentID)
 		if parent == nil {
 			return nil, errors.New("parent doesn't exist. parent id: " + strconv.Itoa(parentID))
 		}
@@ -207,18 +207,12 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	}
 
 	now := int(time.Now().Unix())
-	if contentDefinition.HasLocation || contentDefinition.HasDataField("published") {
-		content.SetValue("published", now)
-	}
-	if contentDefinition.HasLocation || contentDefinition.HasDataField("modified") {
-		content.SetValue("modified", now)
-	}
-	if contentDefinition.HasLocation || contentDefinition.HasDataField("author") {
-		content.SetValue("author", userID)
-	}
-	if contentDefinition.HasLocation || contentDefinition.HasDataField("cuid") {
-		content.SetValue("cuid", util.GenerateUID())
-	}
+	//set metadata
+	metadata := content.GetMetadata()
+	metadata.Published = now
+	metadata.Modified = now
+	metadata.Author = userID
+	metadata.CUID = util.GenerateUID()
 
 	log.StartTiming(ctx, "contenthandler_create.database")
 	log.Debug("Validation passed. Start saving content.", "contenthandler.Create", ctx)
@@ -231,7 +225,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	//Save content and location if needed
 	versionIfNeeded := 1
 	if contentDefinition.HasVersion {
-		content.SetValue("version", versionIfNeeded)
+		content.GetMetadata().Version = versionIfNeeded
 	}
 
 	err = storeCreatedContent(ctx, content, userID, tx, parentID)
@@ -326,15 +320,15 @@ func InvokeCallback(ctx context.Context, event string, stopOnError bool, matchDa
 //It doesn't validate version number is increment
 func CreateVersion(ctx context.Context, content contenttype.ContentTyper, versionNumber int, tx *sql.Tx) (int, error) {
 	log.Debug("Creating version: "+strconv.Itoa(versionNumber), "contenthandler.CreateVersion", ctx)
-	id := content.GetCID()
+	id := content.GetID()
 	data, err := contenttype.ContentToJson(content)
 	if err != nil {
 		return 0, fmt.Errorf("Can not create version data on content id %v: %w", id, err)
 	}
 	version := contenttype.Version{}
 	version.ContentType = content.ContentType()
-	version.ContentID = content.GetCID()
-	version.Author = content.GetAuthor()
+	version.ContentID = content.GetID()
+	version.Author = content.GetMetadata().Author
 	version.Version = versionNumber
 	version.Data = data
 	//version.Created = content.Value("created").(int)
@@ -352,7 +346,7 @@ func UpdateByContentID(ctx context.Context, contentType string, contentID int, i
 	if err != nil {
 		return false, fmt.Errorf("Failed to get content via content id: %w", err)
 	}
-	if content.GetCID() == 0 {
+	if content.GetID() == 0 {
 		return false, fmt.Errorf("Got empty content: %w", err)
 	}
 
@@ -360,11 +354,11 @@ func UpdateByContentID(ctx context.Context, contentType string, contentID int, i
 }
 
 func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (bool, error) {
-	content, err := query.FetchByID(ctx, id)
+	content, err := query.FetchByLID(ctx, id)
 	if err != nil {
 		return false, fmt.Errorf("Failed to get content via id: %w", err)
 	}
-	if content.GetCID() == 0 {
+	if content.GetID() == 0 {
 		return false, errors.New("Got empty content")
 	}
 
@@ -452,13 +446,11 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 			return false, fmt.Errorf("Can not save version: %w", err)
 		}
 		log.Debug("New version created", "contenthandler.update", ctx)
-		content.SetValue("version", version)
+		content.GetMetadata().Version = version
 	}
 
-	if contentDef.HasLocation || contentDef.HasDataField("modified") {
-		now := int(time.Now().Unix())
-		content.SetValue("modified", now)
-	}
+	now := int(time.Now().Unix())
+	content.GetMetadata().Modified = now
 
 	//Save update content.
 	log.Debug("Saving content", "contenthandler.update", ctx)
@@ -466,7 +458,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	for identifier, fieldDef := range contentDef.FieldMap {
 		handler := fieldtype.GethHandler(fieldDef)
 		if storeHandler, ok := handler.(fieldtype.StoreHandler); ok {
-			err := storeHandler.Store(ctx, content.Value(identifier), content.ContentType(), content.GetCID(), tx)
+			err := storeHandler.Store(ctx, content.Value(identifier), content.ContentType(), content.GetID(), tx)
 			if err != nil {
 				tx.Rollback()
 				return false, err
@@ -541,7 +533,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 //Check delete&create permission.
 //note: it dosn't check if target can create sub-children(only check if it can create direct children)
 func Move(ctx context.Context, contentIds []int, targetId int, userId int) error {
-	target, err := query.FetchByID(ctx, targetId)
+	target, err := query.FetchByLID(ctx, targetId)
 	targetLocation := target.GetLocation()
 	if err != nil {
 		log.Error(err.Error(), "")
@@ -550,7 +542,7 @@ func Move(ctx context.Context, contentIds []int, targetId int, userId int) error
 
 	contents := []contenttype.ContentTyper{}
 	for _, id := range contentIds {
-		content, err := query.FetchByID(ctx, id)
+		content, err := query.FetchByLID(ctx, id)
 		if err != nil {
 			log.Error(err.Error(), "")
 			return errors.New("Content id " + strconv.Itoa(id) + " is not found for this user.")
@@ -594,7 +586,7 @@ func Move(ctx context.Context, contentIds []int, targetId int, userId int) error
 		subLocations := []contenttype.Location{}
 		db.BindEntity(ctx, &subLocations, "dm_location", db.Cond("hierarchy like", oldHiearachy+"/%"))
 		for _, subLocation := range subLocations {
-			subContent, _ := query.FetchByID(ctx, subLocation.ID)
+			subContent, _ := query.FetchByLID(ctx, subLocation.ID)
 			if !permission.CanDelete(ctx, subContent, userId) {
 				tx.Rollback()
 				log.Warning("No permission to delete "+strconv.Itoa(location.ID), "")
@@ -623,7 +615,7 @@ func DeleteByCID(ctx context.Context, cid int, contenttype string, userId int) e
 
 //Delete content by location id
 func DeleteByID(ctx context.Context, id int, userId int, toTrash bool) error {
-	content, err := query.FetchByID(ctx, id)
+	content, err := query.FetchByLID(ctx, id)
 	//todo: check how many. if more than 1, delete current only(and set main_id if needed)
 	if err != nil {
 		return errors.New("[handler.delete]Content doesn't exist with id: " + strconv.Itoa(id))
@@ -639,7 +631,7 @@ func DeleteByContent(ctx context.Context, content contenttype.ContentTyper, user
 	//todo: check delete children. There should be more consideration if there are more children.
 
 	if !permission.CanDelete(ctx, content, userId) {
-		return errors.New("User " + strconv.Itoa(userId) + " Doesn't have access to delete. cid: " + strconv.Itoa(content.GetCID()))
+		return errors.New("User " + strconv.Itoa(userId) + " Doesn't have access to delete. cid: " + strconv.Itoa(content.GetID()))
 	}
 
 	tx, err := db.CreateTx()
@@ -683,7 +675,7 @@ func DeleteByContent(ctx context.Context, content contenttype.ContentTyper, user
 				//delete versions
 				if content.Definition().HasVersion {
 					db.Delete(ctx, "dm_version", db.Cond("content_type", content.ContentType()).
-						Cond("content_id", content.GetCID()), tx)
+						Cond("content_id", content.GetID()), tx)
 				}
 
 				//Delete content
@@ -769,7 +761,7 @@ func SaveDraft(ctx context.Context, userId int, data string, contentType string,
 	var parent contenttype.ContentTyper
 	if id != 0 {
 		var err error
-		parent, err = query.FetchByID(ctx, id)
+		parent, err = query.FetchByLID(ctx, id)
 		if err != nil {
 			return contenttype.Version{}, err
 		}

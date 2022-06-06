@@ -26,7 +26,7 @@ func (q Querier) Fetch(ctx context.Context, contentType string, condition db.Con
 		return nil, err
 	}
 
-	if content.GetCID() == 0 {
+	if content.GetID() == 0 {
 		return nil, nil
 	}
 	return content, err

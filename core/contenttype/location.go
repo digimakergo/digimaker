@@ -54,7 +54,7 @@ func (c *Location) ToDBValues() map[string]interface{} {
 	return result
 }
 
-func (c *Location) GetID() int {
+func (c *Location) GetLocationID() int {
 	return c.ID
 }
 

@@ -56,7 +56,7 @@ func GetContent(w http.ResponseWriter, r *http.Request) {
 				HandleError(errors.New("Invalid id"), w)
 				return
 			}
-			content, err = query.FetchByID(r.Context(), id)
+			content, err = query.FetchByLID(r.Context(), id)
 		} else {
 			path := r.URL.Query().Get("path")
 			if path != "" {
@@ -96,7 +96,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 
 	versionNo, _ := strconv.Atoi(params["version"])
 
-	content, err := query.FetchByID(r.Context(), id)
+	content, err := query.FetchByLID(r.Context(), id)
 	if err != nil {
 		HandleError(errors.New("Can not find content. error: "+err.Error()), w)
 		return
@@ -123,7 +123,7 @@ func GetVersion(w http.ResponseWriter, r *http.Request) {
 	db.BindEntity(r.Context(),
 		&version,
 		version.TableName(),
-		db.Cond("content_id", content.GetCID()).Cond("content_type", content.ContentType()).Cond("version", versionNo))
+		db.Cond("content_id", content.GetID()).Cond("content_type", content.ContentType()).Cond("version", versionNo))
 	if version.ID == 0 {
 		HandleError(errors.New("version doesn't exist."), w)
 		return
@@ -137,13 +137,13 @@ func buildCondition(userid int, cType string, def definition.ContentType, query 
 	condition := db.EmptyCond()
 	if author != "" {
 		if author == "self" {
-			condition = condition.Cond("c.author", userid)
+			condition = condition.Cond("c._author", userid)
 		} else {
 			authorInt, err := strconv.Atoi(author)
 			if err != nil {
 				return db.EmptyCond(), errors.New("wrong author format")
 			}
-			condition = condition.Cond("c.author", authorInt)
+			condition = condition.Cond("c._author", authorInt)
 		}
 	}
 
@@ -289,7 +289,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 			HandleError(errors.New("Invalid parent"), w)
 			return
 		}
-		rootContent, err = query.FetchByID(r.Context(), rootID)
+		rootContent, err = query.FetchByLID(r.Context(), rootID)
 		if err != nil {
 			log.Error(err.Error(), "", r.Context())
 			HandleError(errors.New("Can't get parent"), w, 410)
@@ -394,7 +394,7 @@ func TreeMenu(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	rootContent, err := query.FetchByID(r.Context(), id)
+	rootContent, err := query.FetchByLID(r.Context(), id)
 
 	if err != nil {
 		HandleError(err, w)

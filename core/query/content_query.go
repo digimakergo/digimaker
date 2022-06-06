@@ -12,6 +12,7 @@ import (
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/permission"
+	"github.com/digimakergo/digimaker/core/query/querier"
 )
 
 //TreeNode is a query result when querying SubTree
@@ -31,23 +32,24 @@ func (tn *TreeNode) Iterate(operation func(node *TreeNode)) {
 	}
 }
 
-// FetchByID fetches content by location id.
+// FetchByLID fetches content by location id.
 //If no location found. it will return nil and error message.
-func FetchByID(ctx context.Context, locationID int) (contenttype.ContentTyper, error) {
+func FetchByLID(ctx context.Context, locationID int) (contenttype.ContentTyper, error) {
 	//get type first by location.
 	location := contenttype.Location{}
 	_, err := db.BindEntity(ctx, &location, "dm_location", db.Cond("id", locationID))
 	if err != nil {
-		return nil, fmt.Errorf("[contentquery.fetchbyid]Can not fetch location by locationID %v: %w", locationID, err)
+		return nil, fmt.Errorf("[contentquery.FetchByLID]Can not fetch location by locationID %v: %w", locationID, err)
 	}
 	if location.ID == 0 {
-		return nil, errors.New("[contentquery.fetchbyid]Location is empty.")
+		return nil, errors.New("[contentquery.FetchByLID]Location is empty.")
 	}
 
 	//fetch by content id.
 	contentID := location.ContentID
 	contentType := location.ContentType
 	result, err := FetchByCID(ctx, contentType, contentID)
+
 	return result, err
 }
 
@@ -78,7 +80,7 @@ func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, erro
 		return nil, fmt.Errorf("[contentquery.fetchbyuid]Can not fetch location by uid %v: %w", uid, err)
 	}
 	if location.ID == 0 {
-		return nil, errors.New("[contentquery.fetchbyid]Location is empty.")
+		return nil, errors.New("[contentquery.FetchByLID]Location is empty.")
 	}
 
 	//fetch by content id.

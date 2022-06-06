@@ -55,13 +55,13 @@ func AssignedUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	role, _ := query.FetchByID(r.Context(), parentID)
+	role, _ := query.FetchByLID(r.Context(), parentID)
 	if role == nil {
 		HandleError(errors.New("Roles doesn't exist"), w)
 		return
 	}
 
-	roleID := role.GetCID()
+	roleID := role.GetID()
 
 	userRoles := []permission.UserRole{}
 
@@ -144,7 +144,7 @@ func AssignCreateRole(w http.ResponseWriter, r *http.Request) {
 		HandleError(err, w)
 		return
 	}
-	err = permission.AssignToUser(r.Context(), role.GetCID(), assignedUserID)
+	err = permission.AssignToUser(r.Context(), role.GetID(), assignedUserID)
 
 	if err != nil {
 		HandleError(errors.New("Error when assigning: "+err.Error()), w, 400)

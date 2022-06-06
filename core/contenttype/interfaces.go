@@ -14,13 +14,9 @@ type ContentMap map[string]interface{}
 
 //All the content type(eg. article, folder) will implement this interface.
 type ContentTyper interface {
-	GetCID() int
-
 	GetID() int
 
 	GetName() string
-
-	GetAuthor() int
 
 	SetValue(identifier string, value interface{}) error
 
@@ -38,7 +34,7 @@ type ContentTyper interface {
 
 	Definition(language ...string) definition.ContentType
 
-	ToMap() map[string]interface{}
+	GetMetadata() *Metadata
 }
 
 type GetRelations interface {

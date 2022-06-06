@@ -59,7 +59,7 @@ func LoadSite(ctx context.Context, siteConfig map[string]interface{}) error {
 		return errors.New("Need root setting.")
 	}
 	root := siteConfig["root"].(int)
-	rootContent, err := query.FetchByID(ctx, root)
+	rootContent, err := query.FetchByLID(ctx, root)
 	if err != nil {
 		return fmt.Errorf("Root doesn't exist: %w", err)
 	}
@@ -73,7 +73,7 @@ func LoadSite(ctx context.Context, siteConfig map[string]interface{}) error {
 	if defaultInt == root {
 		defaultContent = rootContent
 	} else {
-		defaultContent, err = query.FetchByID(ctx, defaultInt)
+		defaultContent, err = query.FetchByLID(ctx, defaultInt)
 		if err != nil {
 			return fmt.Errorf("Default doesn't exist: %w", err)
 		}
@@ -204,7 +204,7 @@ type RequestInfo struct {
 }
 
 func OutputContentByID(w io.Writer, id int, siteIdentifier string, sitePath string, ctx context.Context) error {
-	content, err := query.FetchByID(ctx, id)
+	content, err := query.FetchByLID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("Error of outputing content while fetching content: %w", err)
 	}

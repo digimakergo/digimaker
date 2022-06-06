@@ -79,7 +79,7 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 		},
 
 		"fetch_byid": func(id int) contenttype.ContentTyper {
-			content, err := query.FetchByID(dm.Context, id)
+			content, err := query.FetchByLID(dm.Context, id)
 			if err != nil {
 				log.Debug("Error when fetch ", "tempalte", dm.Context)
 			}
@@ -88,7 +88,7 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 
 		"parent": func(content contenttype.ContentTyper) contenttype.ContentTyper {
 			parentID := content.Value("parent_id").(int)
-			parent, err := query.FetchByID(dm.Context, parentID)
+			parent, err := query.FetchByLID(dm.Context, parentID)
 			if err != nil {
 				log.Debug("Error when fetch parent", "tempalte", dm.Context)
 			}

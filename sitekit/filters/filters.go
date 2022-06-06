@@ -35,7 +35,7 @@ func dmWashNumber(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2
 func dmParent(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	content := in.Interface().(contenttype.ContentTyper)
 	parentID := content.Value("parent_id").(int)
-	parent, _ := query.FetchByID(context.Background(), parentID)
+	parent, _ := query.FetchByLID(context.Background(), parentID)
 	return pongo2.AsValue(parent), nil
 }
 

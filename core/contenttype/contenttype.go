@@ -16,9 +16,8 @@ func ContentToJson(content ContentTyper) (string, error) {
 }
 
 func MarchallToOutput(content ContentTyper) ([]byte, error) {
-	contentMap := content.ToMap()
 	//todo: use a new tag instead of json(eg. version: 'summary', version: '-' to ignore that.)
-	result, err := json.Marshal(contentMap)
+	result, err := json.Marshal(content)
 	return result, err
 }
 

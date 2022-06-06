@@ -205,7 +205,7 @@ func getUpdateMatchData(content contenttype.ContentTyper, fields []string, userI
 	}
 	data["author"] = getAuthorMatchData(content, userId)
 
-	if content.ContentType() == "user" && content.GetCID() == userId {
+	if content.ContentType() == "user" && content.GetID() == userId {
 		data["user"] = "self"
 	}
 	data["fields"] = getFieldMatch(fields)
@@ -236,11 +236,11 @@ func getDeleteMatchData(content contenttype.ContentTyper, userId int) MatchData 
 }
 
 func getAuthorMatchData(content contenttype.ContentTyper, userID int) string {
-	author := content.Value("author")
-	if author != nil && (userID == author.(int)) {
+	author := content.GetMetadata().Author
+	if author != 0 && (userID == author) {
 		return "self"
 	} else {
-		return strconv.Itoa(author.(int))
+		return strconv.Itoa(author)
 	}
 }
 
@@ -320,7 +320,7 @@ func GetListCondition(ctx context.Context, userID int, contentType string, paren
 			//author
 			if author, ok := limit["author"]; ok {
 				if author.(string) == "self" {
-					currentCond = currentCond.Cond("c.author", userID)
+					currentCond = currentCond.Cond("c._author", userID)
 				}
 			}
 

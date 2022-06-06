@@ -48,7 +48,7 @@ func (uh UserHandler) ValidateUpdate(ctx context.Context, inputs handler.InputMa
 	loginField := content.Value("login").(string)
 	if loginField != login {
 		existing, _ := query.Fetch(context.Background(), "user", db.Cond("login", login))
-		if existing != nil && existing.GetCID() != content.GetCID() { //NB. uppcase change is allowed
+		if existing != nil && existing.GetID() != content.GetID() { //NB. uppcase change is allowed
 			result.Fields["login"] = "Username is used already"
 		}
 	}
@@ -57,7 +57,7 @@ func (uh UserHandler) ValidateUpdate(ctx context.Context, inputs handler.InputMa
 	if emailField != email {
 		if viper.GetBool("user.unique_email") {
 			existing, _ := query.Fetch(context.Background(), "user", db.Cond("email", email))
-			if existing != nil && existing.GetCID() != content.GetCID() { //NB. uppcase change is allowed
+			if existing != nil && existing.GetID() != content.GetID() { //NB. uppcase change is allowed
 				result.Fields["email"] = "Email is used already"
 			}
 		}

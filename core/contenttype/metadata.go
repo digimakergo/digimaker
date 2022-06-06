@@ -1,0 +1,53 @@
+package contenttype
+
+import "github.com/digimakergo/digimaker/core/definition"
+
+type Metadata struct {
+	ContentType string `boil:"_contenttype" json:"contenttype" toml:"contenttype" yaml:"contenttype"`
+	Version     int    `boil:"_version" json:"version" toml:"version" yaml:"version"`
+	Published   int    `boil:"_published" json:"published" toml:"published" yaml:"published"`
+	Modified    int    `boil:"_modified" json:"modified" toml:"modified" yaml:"modified"`
+	CUID        string `boil:"_cuid" json:"cuid" toml:"cuid" yaml:"cuid"`
+	Author      int    `boil:"_author" json:"author" toml:"author" yaml:"author"`
+	AuthorName  string `boil:"_author_name" json:"author_name" toml:"author_name" yaml:"author_name"`
+	//Relations is used for binding all relationlist. See FinishBind to assign to different relationlist
+	Relations ContentRelationList `boil:"_relations" json:"-" toml:"relations" yaml:"relations"`
+}
+
+//IdentifierList return list of all field names
+func (c Metadata) IdentifierList() []string {
+	return []string{"version", "published", "modified", "author", "author_name", "cuid"}
+}
+
+//Values return values for insert/update DB. todo: rename to ToDBValues()
+func (c Metadata) ToDBValues() map[string]interface{} {
+	result := map[string]interface{}{
+		"_version":   c.Version,
+		"_published": c.Published,
+		"_modified":  c.Modified,
+		"_author":    c.Author,
+		"_cuid":      c.CUID,
+	}
+
+	//for non-location content, delete undefined
+	def, _ := definition.GetDefinition(c.ContentType)
+	if !def.HasLocation {
+		for _, dataField := range def.DataFields {
+			identifier := dataField.Identifier
+			if _, ok := result[identifier]; ok {
+				delete(result, identifier)
+			}
+		}
+	}
+
+	return result
+}
+
+func (c Metadata) Definition(language ...string) definition.ContentType {
+	def, _ := definition.GetDefinition(c.ContentType, language...)
+	return def
+}
+
+func (c *Metadata) GetRelations() ContentRelationList {
+	return c.Relations
+}

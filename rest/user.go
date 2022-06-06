@@ -86,7 +86,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	//create hash
 	activation := Activiation{}
 	activation.Hash = util.GenerateUID()
-	activation.Ref = strconv.Itoa(user.GetCID())
+	activation.Ref = strconv.Itoa(user.GetID())
 	activation.Created = int(time.Now().Unix())
 	activation.Type = "resetpassword"
 	data, _ := json.Marshal(activation)

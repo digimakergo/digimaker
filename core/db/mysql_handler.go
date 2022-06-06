@@ -91,11 +91,9 @@ func (handler MysqlHandler) WithContent(query Query, contentType string, option 
 		contentFields = fieldsWithPrefix
 	}
 
-	//add cid to content fields
-	contentFields = append(contentFields, contentPrefix+"id AS '"+fieldPrefix+"cid'")
-	if !def.HasLocation {
-		contentFields = append(contentFields, "'"+contentType+"'AS content_type")
-	}
+	//add _contenttype to metadata
+	contentFields = append(contentFields, "'"+contentType+"'AS _contenttype")
+
 	contentQuery.Select = contentFields
 
 	//Add relation join if there is
@@ -145,8 +143,8 @@ func (handler MysqlHandler) WithContent(query Query, contentType string, option 
 		authorQuery := SingleQuery{
 			Table:    "dm_location",
 			Alias:    authorAlias,
-			Select:   []string{authorAlias + ".name AS " + "'" + fieldPrefix + "author_name'"},
-			Relation: Cond(contentAlias+".author ==", authorAlias+".content_id").Cond(authorAlias+".content_type ==", "'user'"),
+			Select:   []string{authorAlias + ".name AS " + "'" + fieldPrefix + "_author_name'"},
+			Relation: Cond(contentAlias+"._author ==", authorAlias+".content_id").Cond(authorAlias+".content_type ==", "'user'"),
 		}
 		query.Add(authorQuery)
 	}

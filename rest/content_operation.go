@@ -157,7 +157,7 @@ func SetPriority(w http.ResponseWriter, r *http.Request) {
 			HandleError(errors.New("Invalid params format on priority"), w)
 			return
 		}
-		content, err := query.FetchByID(r.Context(), id)
+		content, err := query.FetchByLID(r.Context(), id)
 		if err != nil {
 			log.Error(err.Error(), "")
 			HandleError(errors.New("Can't find content"), w)

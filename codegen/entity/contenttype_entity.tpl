@@ -21,7 +21,9 @@ import (
 {{$struct_name :=.name|UpperName}}
 
 type {{$struct_name}} struct{
-     contenttype.ContentEntity `boil:",bind"`
+     contenttype.Metadata `boil:",bind" json:"metadata"`
+
+     ID int `boil:"id" json:"id" toml:"id" yaml:"id"`
 
      {{range $identifier, $fieldtype := .data_fields}}
           {{$identifier|UpperName}}  {{$fieldtype}} `boil:"{{$identifier}}" json:"{{$identifier}}" toml:"{{$identifier}}" yaml:"{{$identifier}}"`
@@ -42,16 +44,16 @@ func (c *{{$struct_name}} ) GetName() string{
 	 return ""
 }
 
-func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
-    return nil
+func (c {{$struct_name}} ) GetID() int{
+        return c.ID
 }
 
-func (c *{{$struct_name}}) ToMap() map[string]interface{}{
-    result := map[string]interface{}{}
-    for _, identifier := range c.IdentifierList(){
-      result[identifier] = c.Value(identifier)
-    }
-    return result
+func (c {{$struct_name}} ) GetMetadata() *contenttype.Metadata{
+        return &c.Metadata
+}
+
+func (c *{{$struct_name}}) GetLocation() *contenttype.Location{
+    return nil
 }
 
 //Get map of the all fields(including data_fields)
@@ -121,8 +123,6 @@ func (c *{{$struct_name}}) SetValue(identifier string, value interface{}) error 
             c.{{$identifier|UpperName}} = value.({{$type_settings.DataType}})
             {{end}}         
         {{end}}
-	default:
-          return c.ContentEntity.SetValue(identifier, value)        
 	}
 	//todo: check if identifier exist
 	return nil
@@ -158,7 +158,7 @@ func (c *{{$struct_name}}) Delete(ctx context.Context, transaction ...*sql.Tx) e
 func init() {
 	new := func() contenttype.ContentTyper {
     entity := &{{$struct_name}}{}
-    entity.ContentEntity.ContentType = "{{$struct_name}}"
+    entity.Metadata.ContentType = "{{.name}}"
     return entity
 	}
 
