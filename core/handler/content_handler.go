@@ -204,7 +204,7 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 		}
 	}
 
-	now := int(time.Now().Unix())
+	now := time.Now()
 	//set metadata
 	metadata := content.GetMetadata()
 
@@ -450,7 +450,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		content.GetMetadata().Version = version
 	}
 
-	now := int(time.Now().Unix())
+	now := time.Now()
 	metadata := content.GetMetadata()
 	metadata.Modified = now
 	metadata.Name = GenerateName(content)
