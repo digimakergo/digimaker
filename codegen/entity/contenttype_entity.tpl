@@ -39,10 +39,6 @@ func (c *{{$struct_name}} ) ContentType() string{
 	 return "{{.name}}"
 }
 
-func (c *{{$struct_name}} ) GetName() string{
-	 return ""
-}
-
 func (c {{$struct_name}} ) GetID() int{
         return c.ID
 }

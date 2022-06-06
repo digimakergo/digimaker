@@ -121,11 +121,9 @@ func storeCreatedContent(ctx context.Context, content contenttype.ContentTyper, 
 		location.ContentID = content.GetID()
 		location.ContentType = content.ContentType()
 		location.UID = util.GenerateUID()
-		contentName := GenerateName(content)
-		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(contentName)
+		location.IdentifierPath = parent.IdentifierPath + "/" + util.NameToIdentifier(content.GetName())
 		location.Depth = parent.Depth + 1
 		location.Section = parent.Section
-		location.Name = contentName
 
 		err = location.Store(ctx, tx)
 
@@ -209,6 +207,9 @@ func Create(ctx context.Context, userID int, contentType string, inputs InputMap
 	now := int(time.Now().Unix())
 	//set metadata
 	metadata := content.GetMetadata()
+
+	contentName := GenerateName(content)
+	metadata.Name = contentName
 	metadata.Published = now
 	metadata.Modified = now
 	metadata.Author = userID
@@ -450,7 +451,9 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	}
 
 	now := int(time.Now().Unix())
-	content.GetMetadata().Modified = now
+	metadata := content.GetMetadata()
+	metadata.Modified = now
+	metadata.Name = GenerateName(content)
 
 	//Save update content.
 	log.Debug("Saving content", "contenthandler.update", ctx)
@@ -477,10 +480,9 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	if contentDef.HasLocation {
 		//todo: update all locations to this content.
 		location := content.GetLocation()
-		location.Name = GenerateName(content)
 
 		pathList := strings.Split(location.IdentifierPath, "/")
-		pathList[len(pathList)-1] = util.NameToIdentifier(location.Name)
+		pathList[len(pathList)-1] = util.NameToIdentifier(metadata.Name)
 		location.IdentifierPath = strings.Join(pathList, "/")
 
 		log.Debug("Updating location info", "contenthandler.update", ctx)
@@ -576,7 +578,7 @@ func Move(ctx context.Context, contentIds []int, targetId int, userId int) error
 		location.Hierarchy = newHiearachy
 
 		oldPath := location.IdentifierPath
-		newPath := targetLocation.IdentifierPath + "/" + util.NameToIdentifier(location.Name)
+		newPath := targetLocation.IdentifierPath + "/" + util.NameToIdentifier(content.GetName())
 		location.IdentifierPath = newPath
 
 		location.Depth = len(strings.Split(newHiearachy, "/"))

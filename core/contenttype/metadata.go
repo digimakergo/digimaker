@@ -4,6 +4,7 @@ import "github.com/digimakergo/digimaker/core/definition"
 
 type Metadata struct {
 	ContentType string `boil:"_contenttype" json:"contenttype" toml:"contenttype" yaml:"contenttype"`
+	Name        string `boil:"_name" json:"name" toml:"name" yaml:"name"`
 	Version     int    `boil:"_version" json:"version" toml:"version" yaml:"version"`
 	Published   int    `boil:"_published" json:"published" toml:"published" yaml:"published"`
 	Modified    int    `boil:"_modified" json:"modified" toml:"modified" yaml:"modified"`
@@ -16,13 +17,14 @@ type Metadata struct {
 
 //IdentifierList return list of all field names
 func (c Metadata) IdentifierList() []string {
-	return []string{"version", "published", "modified", "author", "author_name", "cuid"}
+	return []string{"version", "name", "published", "modified", "author", "author_name", "cuid"}
 }
 
 //Values return values for insert/update DB. todo: rename to ToDBValues()
 func (c Metadata) ToDBValues() map[string]interface{} {
 	result := map[string]interface{}{
 		"_version":   c.Version,
+		"_name":      c.Name,
 		"_published": c.Published,
 		"_modified":  c.Modified,
 		"_author":    c.Author,
@@ -41,6 +43,10 @@ func (c Metadata) ToDBValues() map[string]interface{} {
 	}
 
 	return result
+}
+
+func (c Metadata) GetName() string {
+	return c.Name
 }
 
 func (c Metadata) Definition(language ...string) definition.ContentType {
