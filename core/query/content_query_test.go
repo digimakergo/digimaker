@@ -33,9 +33,9 @@ func ExampleFetchByCID() {
 	//output: 1
 }
 
-func ExampleFetchByID() {
+func ExampleFetchByLID() {
 	//Fetch folder which has location id 1
-	content, err := FetchByID(context.Background(), 1)
+	content, err := FetchByLID(context.Background(), 1)
 	if err == nil && content != nil {
 		fmt.Println(content.(*entity.Folder).ContentID)
 	}

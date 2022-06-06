@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/digimakergo/digimaker/codegen/entity"
-	"github.com/digimakergo/digimaker/core/util"
+	"github.com/digimakergo/digimaker/core/config"
 	"github.com/spf13/cobra"
 )
 
@@ -22,7 +22,7 @@ var (
 			if len(args) > 0 {
 				folder = args[0]
 			}
-			fmt.Println("Generating content entities for " + util.AbsHomePath())
+			fmt.Println("Generating content entities for " + config.AbsHomePath())
 			return entity.Generate(folder)
 		},
 	}

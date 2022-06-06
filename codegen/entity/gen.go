@@ -8,6 +8,7 @@ import (
 	"os"
 	"text/template"
 
+	"github.com/digimakergo/digimaker/core/config"
 	_ "github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
@@ -56,7 +57,7 @@ func Generate(subFolder string) error {
 
 		vars["settings"] = settings
 
-		path := util.HomePath() + "/" + subFolder + "/" + name + ".go"
+		path := config.HomePath() + "/" + subFolder + "/" + name + ".go"
 		//todo: genereate to a template folder first and then copy&override target,
 		//and if there is error remove that folder
 		fmt.Println("Generating " + name)
