@@ -16,17 +16,15 @@ import (
 //CanLogin check if the username/email and password matches
 func CanLogin(ctx context.Context, usernameEmail string, password string) (error, contenttype.ContentTyper) {
 	//todo: use username instead of 'login'
-	cond := db.Cond("login=", usernameEmail)
+	cond := db.Cond("c.login=", usernameEmail)
 	if strings.Contains(usernameEmail, "@") {
-		cond = db.Cond("email=", usernameEmail)
+		cond = db.Cond("c.email=", usernameEmail)
 	}
 	user, err := query.Fetch(ctx, "user", cond)
 	if err != nil {
-		// return false, err
-		//todo: log it
+		return fmt.Errorf("Fetching user error: %v", err), nil
 	}
 	if user == nil {
-		//todo: user error code.
 		return errors.New("User not found"), nil
 	}
 
