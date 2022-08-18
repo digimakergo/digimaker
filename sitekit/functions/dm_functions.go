@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+<<<<<<< HEAD
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
@@ -14,6 +15,18 @@ import (
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/sitekit"
 	"github.com/digimakergo/digimaker/sitekit/niceurl"
+=======
+	"github.com/digimakeras/digimaker/core/contenttype"
+	"github.com/digimakeras/digimaker/core/db"
+	"github.com/digimakeras/digimaker/core/definition"
+	"github.com/digimakeras/digimaker/core/log"
+	"github.com/digimakeras/digimaker/core/query"
+	"github.com/digimakeras/digimaker/core/util"
+	"github.com/digimakeras/digimaker/core/util/image"
+	"github.com/digimakeras/digimaker/dcp/dcp_context"
+	"github.com/digimakeras/digimaker/sitekit"
+	"github.com/digimakeras/digimaker/sitekit/niceurl"
+>>>>>>> 69c5e1d... added: dm.image function
 )
 
 //default dm functions
@@ -179,6 +192,17 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 				return ""
 			}
 			return outputValue
+		}
+		
+		//convert image path to real
+		//params: size - "original", "default", "800", ...
+		"image": func(path string, size ...string) string {
+			sizeStr := "original"
+			if len(size) > 0 {
+				sizeStr = size[0]
+			}
+			result := image.ImagePath(dm.Context, path, sizeStr)
+			return result
 		},
 
 		"root": func(url string) string {
