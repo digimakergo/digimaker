@@ -87,6 +87,14 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			return content
 		},
 
+		"fetch_by_cid": func(ctype string, cid int) contenttype.ContentTyper {
+			content, err := query.FetchByCID(dm.Context, ctype, cid)
+			if err != nil {
+				log.Debug("Error when fetch ", "tempalte", dm.Context)
+			}
+			return content
+		},
+
 		"parent": func(content contenttype.ContentTyper) contenttype.ContentTyper {
 			parentID := content.Value("parent_id").(int)
 			parent, err := query.FetchByLID(dm.Context, parentID)
@@ -139,6 +147,23 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 				log.Debug("Error when fetch children on id "+strconv.Itoa(parent.GetID())+": "+err.Error(), "template", dm.Context)
 			}
 			return children
+		},
+
+		"children_count": func(parent contenttype.ContentTyper, contenttype string, params ...interface{}) int {
+			userID := util.CurrentUserID(dm.Context)
+
+			cond := db.EmptyCond()
+			if len(params) > 0 {
+				if param, ok := params[0].(db.Condition); ok {
+					cond = param
+				}
+			}
+
+			_, count, err := query.Children(dm.Context, userID, parent, contenttype, cond.Limit(0, 0).WithCount())
+			if err != nil {
+				log.Debug("Error when fetch children on id "+strconv.Itoa(parent.GetID())+": "+err.Error(), "template", dm.Context)
+			}
+			return count
 		},
 
 		"niceurl": func(content contenttype.ContentTyper) string {
