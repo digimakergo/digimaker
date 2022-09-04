@@ -103,7 +103,7 @@ func HandleContent(w http.ResponseWriter, r *http.Request) {
 	site := vars["site"]
 
 	ctx := r.Context()
-	err := OutputContentByID(w, id, site, sitePath, ctx)
+	err := OutputContentByID(w, id, site, sitePath, ctx, map[string]interface{}{"request_url": r.URL})
 	if err != nil {
 		log.Error(err.Error(), "template", r.Context())
 		requestID := log.GetContextInfo(ctx).RequestID
@@ -203,17 +203,17 @@ type RequestInfo struct {
 	SitePath string
 }
 
-func OutputContentByID(w io.Writer, id int, siteIdentifier string, sitePath string, ctx context.Context) error {
+func OutputContentByID(w io.Writer, id int, siteIdentifier string, sitePath string, ctx context.Context, templateVars map[string]interface{}) error {
 	content, err := query.FetchByLID(ctx, id)
 	if err != nil {
 		return fmt.Errorf("Error of outputing content while fetching content: %w", err)
 	}
-	err = OutputContent(w, content, siteIdentifier, sitePath, ctx)
+	err = OutputContent(w, content, siteIdentifier, sitePath, ctx, templateVars)
 	return err
 }
 
 //Output content using conent template
-func OutputContent(w io.Writer, content contenttype.ContentTyper, siteIdentifier string, sitePath string, ctx context.Context) error {
+func OutputContent(w io.Writer, content contenttype.ContentTyper, siteIdentifier string, sitePath string, ctx context.Context, templateVars map[string]interface{}) error {
 	siteSettings := GetSiteSettings(siteIdentifier)
 	variables := map[string]interface{}{
 		"root":     siteSettings.RootContent,
@@ -221,6 +221,10 @@ func OutputContent(w io.Writer, content contenttype.ContentTyper, siteIdentifier
 		"viewmode": "full",
 		"site":     siteIdentifier,
 		"sitepath": sitePath}
+
+	for key, value := range templateVars {
+		variables[key] = value
+	}
 
 	if content == nil {
 		variables["error"] = "Content not found" //todo: use error code and set variables(from template) so can we customize it in template
