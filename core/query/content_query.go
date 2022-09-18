@@ -201,8 +201,10 @@ func SubList(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 	}
 
 	//fetch
-	permissionCond := permission.GetListCondition(ctx, userID, contentType, rootContent)
-	condition = condition.And(permissionCond)
+	if def.HasLocation {
+		permissionCond := permission.GetListCondition(ctx, userID, contentType, rootContent)
+		condition = condition.And(permissionCond)
+	}
 	list, count, err := List(ctx, contentType, condition)
 	return list, count, err
 }
