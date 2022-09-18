@@ -105,9 +105,34 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			return parent
 		},
 
+		"sublist": func(parent contenttype.ContentTyper, contenttype string, depth int, params ...interface{}) []contenttype.ContentTyper {
+			userID := util.CurrentUserID(dm.Context)
+			def, _ := definition.GetDefinition(contenttype)
+			sortBy := []string{}
+			if def.HasLocation {
+				sortBy = []string{"l.priority desc", "id asc"}
+			} else {
+				sortBy = []string{"published desc"}
+			}
+			cond := paramsToCondition(db.EmptyCond().Sortby(sortBy...), params...)
+			list, _, err := query.SubList(dm.Context, userID, parent, contenttype, depth, cond)
+			if err != nil {
+				log.Debug("Error when fetch children on id "+strconv.Itoa(parent.GetID())+": "+err.Error(), "template", dm.Context)
+			}
+			return list
+		},
+
+		"sublist_count": func(parent contenttype.ContentTyper, contenttype string, depth int, cond db.Condition) int {
+			userID := util.CurrentUserID(dm.Context)
+			_, count, err := query.SubList(dm.Context, userID, parent, contenttype, depth, cond.Limit(0, 0))
+			if err != nil {
+				log.Debug("Error when fetch children on id "+strconv.Itoa(parent.GetID())+": "+err.Error(), "template", dm.Context)
+			}
+			return count
+		},
+
 		"children": func(parent contenttype.ContentTyper, contenttype string, params ...interface{}) []contenttype.ContentTyper {
 			userID := util.CurrentUserID(dm.Context)
-			limit := -1
 			var sortBy []string
 			def, _ := definition.GetDefinition(contenttype)
 			if def.HasLocation {
@@ -116,34 +141,10 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 				sortBy = []string{"published desc"}
 			}
 
-			cond := db.EmptyCond()
-			offset := 0
-			if len(params) > 0 {
-				//sort
-				if params[0] != "" {
-					sortBy = strings.Split(params[0].(string), ",")
-				}
+			cond := db.EmptyCond().Sortby(sortBy...)
+			cond = paramsToCondition(cond, params...)
 
-				if len(params) >= 2 {
-					//0 means no limit(default max limit)
-					paramLimit := params[1].(int)
-					if paramLimit > 0 {
-						limit = paramLimit
-					}
-				}
-
-				if len(params) >= 3 {
-					if param2, ok := params[2].(db.Condition); ok {
-						cond = param2
-					}
-				}
-
-				if len(params) >= 4 {
-					offset = params[3].(int)
-				}
-			}
-
-			children, _, err := query.Children(dm.Context, userID, parent, contenttype, cond.Sortby(sortBy...).Limit(offset, limit))
+			children, _, err := query.Children(dm.Context, userID, parent, contenttype, cond)
 			if err != nil {
 				log.Debug("Error when fetch children on id "+strconv.Itoa(parent.GetID())+": "+err.Error(), "template", dm.Context)
 			}
@@ -216,6 +217,48 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 		},
 	}
 
+	return result
+}
+
+/**
+Convert parameters to condition, with sort offset, etc
+0 - sortby string: priority desc, publish desc
+1 - limit, eg. 10
+2 - condition. eg db.Cond("author", 10)
+3 - offset
+*/
+func paramsToCondition(cond db.Condition, params ...interface{}) db.Condition {
+	sortBy := []string{}
+
+	if len(params) == 0 {
+		return cond
+	}
+
+	limit := -1
+	offset := 0
+	//sort
+	if params[0] != "" {
+		sortBy = strings.Split(params[0].(string), ",")
+	}
+
+	if len(params) >= 2 {
+		//0 means no limit(default max limit)
+		paramLimit := params[1].(int)
+		if paramLimit > 0 {
+			limit = paramLimit
+		}
+	}
+
+	if len(params) >= 3 {
+		if param2, ok := params[2].(db.Condition); ok {
+			cond = cond.And(param2)
+		}
+	}
+
+	if len(params) >= 4 {
+		offset = params[3].(int)
+	}
+	result := cond.Sortby(sortBy...).Limit(offset, limit)
 	return result
 }
 
