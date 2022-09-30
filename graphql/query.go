@@ -1,7 +1,9 @@
 package graphql
 
 import (
+	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/query"
@@ -25,8 +27,19 @@ var queryType = graphql.NewObject(
 		Fields: graphql.Fields{},
 	})
 
+var commonStruct = contenttype.ContentCommon{}
+
+var commomArgs = graphql.BindArg(commonStruct,commonStruct.IdentifierList()...)
+
 func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+
+	defer func() {
+		if err := recover();err != nil{
+			rest.HandleError(err.(error), w)
+			return
+		}
+	}()
 
 	queryParams := ""
 	if http.MethodGet == r.Method {
@@ -48,7 +61,7 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 		},
 	})
 	if err != nil {
-		rest.HandleError(errors.New("data error"), w)
+		rest.HandleError(err, w)
 		return
 	}
 
@@ -66,10 +79,32 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 						cType := sel.Name.Value
 						if cType != "" {
 							cTypeField := contenttype.NewInstance(cType)
-							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: graphql.BindFields(cTypeField)})
+							genTypeField := graphql.BindFields(cTypeField)
+							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: genTypeField})
+
+							//args := make(graphql.FieldConfigArgument)
+							//for s, i := range cTypeField.ToMap() {
+							//	switch i.(type) {
+							//	case int:
+							//		args[s] = &graphql.ArgumentConfig{Type: graphql.Int}
+							//	case string:
+							//		args[s] = &graphql.ArgumentConfig{Type: graphql.String}
+							//	}
+							//}
+							//fmt.Println("fields:" + marshalToString(cTypeField) + "\narray:" + marshalToString(cTypeField.IdentifierList()))
+							args := graphql.BindArg(cTypeField,cTypeField.IdentifierList()...)
+							if len(commomArgs)>0 {
+								for key, commonArg := range commomArgs {
+									args[key] = commonArg
+								}
+							}
+							fmt.Println("args:",args)
+
 							queryType.AddFieldConfig(cType, &graphql.Field{
 								Type: graphql.NewList(cFieldOfType),
+								Args: args,
 								Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+									fmt.Println(p.Args)
 									list, _, lrr := query.List(ctx, cType, db.EmptyCond())
 									return list, lrr
 								},
@@ -93,6 +128,14 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 	})
 
 	rest.WriteResponse(result, w)
+}
+
+func marshalToString(obj interface{}) string {
+	ret,err := json.Marshal(obj)
+	if err != nil{
+		return err.Error()
+	}
+	return string(ret)
 }
 
 func init() {
