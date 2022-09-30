@@ -79,19 +79,8 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 						cType := sel.Name.Value
 						if cType != "" {
 							cTypeField := contenttype.NewInstance(cType)
-							genTypeField := graphql.BindFields(cTypeField)
-							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: genTypeField})
+							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: graphql.BindFields(cTypeField)})
 
-							//args := make(graphql.FieldConfigArgument)
-							//for s, i := range cTypeField.ToMap() {
-							//	switch i.(type) {
-							//	case int:
-							//		args[s] = &graphql.ArgumentConfig{Type: graphql.Int}
-							//	case string:
-							//		args[s] = &graphql.ArgumentConfig{Type: graphql.String}
-							//	}
-							//}
-							//fmt.Println("fields:" + marshalToString(cTypeField) + "\narray:" + marshalToString(cTypeField.IdentifierList()))
 							args := graphql.BindArg(cTypeField,cTypeField.IdentifierList()...)
 							if len(commomArgs)>0 {
 								for key, commonArg := range commomArgs {
@@ -128,14 +117,6 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 	})
 
 	rest.WriteResponse(result, w)
-}
-
-func marshalToString(obj interface{}) string {
-	ret,err := json.Marshal(obj)
-	if err != nil{
-		return err.Error()
-	}
-	return string(ret)
 }
 
 func init() {
