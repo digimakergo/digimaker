@@ -2,78 +2,86 @@ package graphql
 
 import (
 	"errors"
-	"fmt"
-	"net/http"
-
 	"github.com/digimakergo/digimaker/core/contenttype"
-	"github.com/graphql-go/graphql"
-
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/rest"
-	"github.com/gorilla/mux"
+	"github.com/graphql-go/graphql"
+	"github.com/graphql-go/graphql/language/ast"
+	"github.com/graphql-go/graphql/language/parser"
+	"net/http"
 )
 
-func GraphqlList(w http.ResponseWriter, r *http.Request) {
+type postData struct {
+	Query     string                 `json:"query"`
+	Operation string                 `json:"operation"`
+	Variables map[string]interface{} `json:"variables"`
+}
+
+// todo dynamic settings,can set global param
+var queryType = graphql.NewObject(
+	graphql.ObjectConfig{
+		Name:   "Query",
+		Fields: graphql.Fields{},
+	})
+
+func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	cType := "article"
-	queryParams := r.URL.Query().Get("query")
-	if queryParams == "" {
-		rest.HandleError(errors.New("query is nil"), w)
-		return
+	queryParams := ""
+	if http.MethodGet == r.Method {
+		queryParams = r.URL.Query().Get("query")
+		if queryParams == "" {
+			rest.HandleError(errors.New("query is nil"), w)
+			return
+		}
+	} else {
+
 	}
 
-	fmt.Println("queryParams:", queryParams)
-
-	list, _, err := query.List(ctx, cType, db.EmptyCond().Limit(0, 10))
+	// parse querying
+	astDocument, err := parser.Parse(parser.ParseParams{
+		Source: queryParams,
+		Options: parser.ParseOptions{
+			NoSource:   true,
+			NoLocation: true,
+		},
+	})
 	if err != nil {
-		rest.HandleError(err, w)
+		rest.HandleError(errors.New("data error"), w)
 		return
 	}
-	var listMap []map[string]interface{}
-	for _, item := range list {
-		m, _ := contenttype.ContentToMap(item)
-		listMap = append(listMap, m)
+
+	if len(astDocument.Definitions) == 0 {
+		rest.HandleError(errors.New("definitions length is 0"), w)
+		return
 	}
 
-	// generate graphql type
-	typeModel := contenttype.NewInstance(cType)
-	retMaps, _ := contenttype.ContentToMap(typeModel)
-
-	fields := graphql.Fields{}
-	for key, value := range retMaps {
-		switch value.(type) {
-		case string:
-			fields[key] = &graphql.Field{Type: graphql.String}
-		case int:
-			fields[key] = &graphql.Field{Type: graphql.Int}
-		case interface{}:
-			fields[key] = &graphql.Field{Type: &graphql.Interface{}}
+	for _, definition := range astDocument.Definitions {
+		if def, ok := definition.(*ast.OperationDefinition); ok {
+			// todo verify def.Name.Value => "content"
+			if len(def.SelectionSet.Selections) > 0 {
+				for _, selection := range def.SelectionSet.Selections {
+					if sel, isOk := selection.(*ast.Field); isOk {
+						cType := sel.Name.Value
+						if cType != "" {
+							cTypeField := contenttype.NewInstance(cType)
+							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: graphql.BindFields(cTypeField)})
+							queryType.AddFieldConfig(cType, &graphql.Field{
+								Type: graphql.NewList(cFieldOfType),
+								Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+									list, _, lrr := query.List(ctx, cType, db.EmptyCond())
+									return list, lrr
+								},
+							})
+						}
+					}
+				}
+			}
 		}
 	}
 
-	var modelType = graphql.NewObject(
-		graphql.ObjectConfig{
-			Name:   cType,
-			Fields: fields,
-		})
-
-	var queryType = graphql.NewObject(
-		graphql.ObjectConfig{
-			Name: "Query",
-			Fields: graphql.Fields{
-				"list": &graphql.Field{
-					Type:        graphql.NewList(modelType),
-					Description: "get list by type",
-					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-						fmt.Println(p.Info.Schema)
-						return listMap, nil
-					},
-				},
-			},
-		})
-
+	// setting in the end
 	var schema, _ = graphql.NewSchema(
 		graphql.SchemaConfig{
 			Query: queryType,
@@ -83,13 +91,11 @@ func GraphqlList(w http.ResponseWriter, r *http.Request) {
 		Schema:        schema,
 		RequestString: queryParams,
 	})
-	if len(result.Errors) > 0 {
-		fmt.Printf("errors : %v", result.Errors)
-	}
 
 	rest.WriteResponse(result, w)
 }
 
 func init() {
-	rest.RegisterRoute("/graphql", GraphqlList, "POST")
+	// try to diff method
+	rest.RegisterRoute("/graphql", QueryGraphql)
 }
