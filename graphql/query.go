@@ -11,6 +11,7 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
 	"github.com/graphql-go/graphql/language/parser"
+	"io"
 	"net/http"
 )
 
@@ -29,13 +30,13 @@ var queryType = graphql.NewObject(
 
 var commonStruct = contenttype.ContentCommon{}
 
-var commomArgs = graphql.BindArg(commonStruct,commonStruct.IdentifierList()...)
+var commonArgs = graphql.BindArg(commonStruct, commonStruct.IdentifierList()...)
 
 func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
 	defer func() {
-		if err := recover();err != nil{
+		if err := recover(); err != nil {
 			rest.HandleError(err.(error), w)
 			return
 		}
@@ -49,7 +50,20 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	} else {
-
+		// todo : parse post request
+		postParams := postData{}
+		requestStr, err := io.ReadAll(r.Body)
+		if err != nil {
+			rest.HandleError(err, w)
+			return
+		}
+		err = json.Unmarshal(requestStr, &postParams)
+		if err != nil {
+			rest.HandleError(errors.New("post unmarshal is nil"), w)
+			return
+		}
+		// set params
+		queryParams = postParams.Query
 	}
 
 	// parse querying
@@ -81,21 +95,60 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 							cTypeField := contenttype.NewInstance(cType)
 							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: graphql.BindFields(cTypeField)})
 
-							args := graphql.BindArg(cTypeField,cTypeField.IdentifierList()...)
-							if len(commomArgs)>0 {
-								for key, commonArg := range commomArgs {
+							args := graphql.BindArg(cTypeField, cTypeField.IdentifierList()...)
+							if len(commonArgs) > 0 {
+								for key, commonArg := range commonArgs {
 									args[key] = commonArg
 								}
 							}
-							fmt.Println("args:",args)
 
 							queryType.AddFieldConfig(cType, &graphql.Field{
 								Type: graphql.NewList(cFieldOfType),
-								Args: args,
+								Args: genRootArgs(args), // return a config
 								Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-									fmt.Println(p.Args)
-									list, _, lrr := query.List(ctx, cType, db.EmptyCond())
-									return list, lrr
+									// todo : generate query params
+									var list interface{}
+									var lerr error
+									condition := db.Condition{}
+									// filters params
+									fmt.Println("args:", p.Args)
+									if filter, ok := p.Args["filter"]; ok {
+										fmt.Println("filter params:", buildJsonResult(filter))
+										if filterMap, mapOk := filter.(map[string]interface{}); mapOk {
+											if andMap, andOk := filterMap["and"].(map[string]interface{}); andOk {
+												fmt.Println("andMap params:", buildJsonResult(andMap))
+												if andMap != nil && len(andMap) > 0 {
+													for k, v := range andMap {
+														if k == "cid" {
+															k = "id"
+														}
+														condition = condition.And(k, v)
+													}
+												}
+											}
+											if orMap, orOk := filterMap["or"].(map[string]interface{}); orOk {
+												fmt.Println("orMap params:", buildJsonResult(orMap))
+												if orMap != nil && len(orMap) > 0 {
+													for k, v := range orMap {
+														condition = condition.Or(k, v)
+													}
+												}
+											}
+										}
+									}
+
+									// sort params
+									//if sorts, ok := p.Args["sort"].(string); ok {
+									//	condition = condition.Sortby(sorts)
+									//}
+
+									// page params
+									//condition = condition.Limit(p.Args["offset"].(int), p.Args["limit"].(int))
+
+									conditionRet, a := db.BuildCondition(condition)
+									fmt.Println("condition:", conditionRet, "|", a)
+									list, _, lerr = query.List(ctx, cType, condition)
+									return list, lerr
 								},
 							})
 						}
@@ -115,8 +168,79 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 		Schema:        schema,
 		RequestString: queryParams,
 	})
-
 	rest.WriteResponse(result, w)
+}
+
+func genRootArgs(content graphql.FieldConfigArgument) (ret graphql.FieldConfigArgument) {
+	inputArgs := make(graphql.InputObjectConfigFieldMap, 0)
+	sortArgs := make(graphql.InputObjectConfigFieldMap, 0)
+	if len(content) > 0 {
+		for key, config := range content {
+			inputArgs[key] = &graphql.InputObjectFieldConfig{
+				Type:        config.Type,
+				Description: "input" + key,
+			}
+			sortArgs[key] = &graphql.InputObjectFieldConfig{
+				Type:        graphql.String,
+				Description: "sort" + key,
+			}
+		}
+	}
+
+	// conditon args
+	conditionArgs := graphql.InputObjectConfigFieldMap{
+		"and": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "and args",
+				Fields:      inputArgs,
+				Description: "and args",
+			}),
+		},
+		"or": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "or args",
+				Fields:      inputArgs,
+				Description: "or args",
+			}),
+		},
+	}
+
+	// root args
+	rootArgs := graphql.FieldConfigArgument{
+		"filter": &graphql.ArgumentConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "filter args",
+				Fields:      conditionArgs,
+				Description: "filter args",
+			}),
+		},
+		"sort": &graphql.ArgumentConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "sort args",
+				Fields:      sortArgs,
+				Description: "sort args",
+			}),
+		},
+		"limit": &graphql.ArgumentConfig{
+			Type:         graphql.Int,
+			DefaultValue: 10,
+			Description:  "pageSize",
+		},
+		"offset": &graphql.ArgumentConfig{
+			Type:         graphql.Int,
+			DefaultValue: 1,
+			Description:  "page",
+		},
+	}
+	return rootArgs
+}
+
+func buildJsonResult(input interface{}) string {
+	ret, err := json.Marshal(input)
+	if err != nil {
+		return "{\"data\":" + err.Error() + "}"
+	}
+	return string(ret)
 }
 
 func init() {
