@@ -195,60 +195,6 @@ func buildRootArgs(content graphql.FieldConfigArgument) (ret graphql.FieldConfig
 	return rootArgs
 }
 
-// Deprecated
-func generateFilterArgsOld(filterMap map[string]interface{}, condition db.Condition) db.Condition {
-	if andMap, ok := filterMap["and"].(map[string]interface{}); ok {
-		if andMap != nil && len(andMap) > 0 {
-			for k, v := range andMap {
-				//condition = condition.And(k, v)
-				condition = condition.And(k, v)
-			}
-		}
-	}
-	if orMap, ok := filterMap["or"].(map[string]interface{}); ok {
-		if orMap != nil && len(orMap) > 0 {
-			for k, v := range orMap {
-				//condition = condition.Or(k, v)
-				condition = condition.Or(k, v)
-			}
-		}
-	}
-	if gtMap, ok := filterMap["gt"].(map[string]interface{}); ok {
-		if gtMap != nil && len(gtMap) > 0 {
-			for k, v := range gtMap {
-				condition = condition.Cond(k+" >", v)
-			}
-		}
-	}
-
-	if geMap, ok := filterMap["ge"].(map[string]interface{}); ok {
-		if geMap != nil && len(geMap) > 0 {
-			for k, v := range geMap {
-				condition = condition.Cond(k+" >=", v)
-			}
-		}
-	}
-
-	if ltMap, ok := filterMap["lt"].(map[string]interface{}); ok {
-		if ltMap != nil && len(ltMap) > 0 {
-			for k, v := range ltMap {
-				//condition = condition.Or(k, v)
-				condition = condition.Cond(k+" <", v)
-			}
-		}
-	}
-
-	if leMap, ok := filterMap["le"].(map[string]interface{}); ok {
-		if leMap != nil && len(leMap) > 0 {
-			for k, v := range leMap {
-				//condition = condition.Or(k, v)
-				condition = condition.Cond(k+" <=", v)
-			}
-		}
-	}
-	return condition
-}
-
 // replace generateFilterArgs
 func generateFilterArgs(filterMap map[string]interface{}, condition db.Condition) db.Condition {
 
@@ -305,62 +251,35 @@ func parseSolveParams(ctx context.Context, cType string, p graphql.ResolveParams
 		// verify key
 		if isSuitKey(k) {
 			// filter params
-			if filter, ok := p.Args["filter"]; ok {
-				if filterMap, ok := filter.(map[string]interface{}); ok {
+			if k == "filter" {
+				if filterMap, ok := v.(map[string]interface{}); ok {
 					condition = generateFilterArgs(filterMap, condition)
 				}
 			}
 
-			// sort params
-			if sorts, ok := p.Args["sort"].([]interface{}); ok {
+			if k == "sort" {
+				fmt.Println("do sort flag:", v)
 				sortPs := make([]string, 0)
-				for _, i := range sorts {
+				sortsArr := v.([]interface{})
+				for _, i := range sortsArr {
 					sortPs = append(sortPs, fmt.Sprint(i))
 				}
 				condition = condition.Sortby(sortPs...)
 			}
 
-			// page params (default value -> offset:0,limit:10)
-			condition = condition.Limit(p.Args["offset"].(int), p.Args["limit"].(int))
 		} else {
 			fmt.Println("is not condition key")
 			fmt.Println("kind:", reflect.ValueOf(v))
+
 			// valid slice
-			if reflect.TypeOf(v).Kind() == reflect.Slice {
-				arr := v.([]interface{})
-				childStringArr := make([]string, 0)
-				childIntArr := make([]int, 0)
-				for _, v1 := range arr {
-					switch c := v1.(type) {
-					case string:
-						//fmt.Println("string into:",k1,"|",v,"|",v1)
-						childStringArr = append(childStringArr, c)
-					case int:
-						//fmt.Println("int into:",k1,"|",v,"|",v1)
-						childIntArr = append(childIntArr, c)
-					}
-				}
-				if len(childStringArr) > 0 {
-					//fmt.Println("to string")
-					condition = condition.Cond(k, childStringArr)
-				}
-				if len(childIntArr) > 0 {
-					//fmt.Println("to int")
-					condition = condition.Cond(k, childIntArr)
-				}
-			} else {
-				condition = condition.Cond(k, v)
-			}
-			conRet, conParams := db.BuildCondition(condition)
-			log.Info(fmt.Sprintln("child build condition:", conRet, "|", conParams, "|", condition))
-			fmt.Println("child build condition:", conRet, "|", conParams, "|", condition)
-			list, _, err = query.List(ctx, cType, condition)
-			return list, err
+			condition = isSlice(k, v, condition)
 		}
 	}
 
+	// page params (default value -> offset:0,limit:10)
+	condition = condition.Limit(p.Args["offset"].(int), p.Args["limit"].(int))
+
 	conRet, conParams := db.BuildCondition(condition)
-	log.Info(fmt.Sprintln("root build condition:", conRet, "|", conParams, "|", condition))
 	fmt.Println("root build condition:", conRet, "|", conParams, "|", condition)
 	list, _, err = query.List(ctx, cType, condition)
 	return list, err
@@ -385,60 +304,6 @@ func operatorByKey(input string) string {
 		log.Info("operator by key : " + input)
 		return ""
 	}
-}
-
-// Deprecated
-func buildConditionArgs(inputArgs graphql.InputObjectConfigFieldMap, extra ...graphql.InputObjectConfigFieldMap) (conditionArgs graphql.InputObjectConfigFieldMap) {
-	conditionArgs = graphql.InputObjectConfigFieldMap{
-		"and": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "AND",
-				Fields:      inputArgs,
-				Description: "and args",
-			}),
-		},
-		"or": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "OR",
-				Fields:      inputArgs,
-				Description: "or args",
-			}),
-		},
-		"gt": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "GT",
-				Fields:      inputArgs,
-				Description: "gt args (>)",
-			}),
-		},
-		"ge": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "GE",
-				Fields:      inputArgs,
-				Description: "gt args (>=)",
-			}),
-		},
-		"lt": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "LT",
-				Fields:      inputArgs,
-				Description: "lt args (<)",
-			}),
-		},
-		"le": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "LE",
-				Fields:      inputArgs,
-				Description: "le args (<=)",
-			}),
-		},
-	}
-	if len(extra) > 0 {
-		for i, fieldMap := range extra[0] {
-			conditionArgs[i] = fieldMap
-		}
-	}
-	return conditionArgs
 }
 
 func buildGraphqlMap(params map[string]string, input graphql.InputObjectConfigFieldMap, extra ...graphql.InputObjectConfigFieldMap) graphql.InputObjectConfigFieldMap {
@@ -476,8 +341,8 @@ func isSuitKey(key string) bool {
 		"offset": true,
 		"filter": true,
 	}
-	if v, ok := params[key]; ok {
-		return v
+	if _, ok := params[key]; ok {
+		return true
 	}
 	return false
 }
@@ -489,6 +354,8 @@ func verifyKey(key string) bool {
 	case "gt", "ge", "lt", "le":
 		return true
 	case "filter":
+		return true
+	case "sort":
 		return true
 	case "limit", "offset":
 		return true
@@ -518,15 +385,43 @@ func buildJsonResult(input interface{}) string {
 	return string(ret)
 }
 
-func ifSlice(input interface{}, condition db.Condition) db.Condition {
-	if reflect.TypeOf(input).Kind() == reflect.Slice {
-
+func isSlice(key string, value interface{}, condition db.Condition) db.Condition {
+	if reflect.TypeOf(value).Kind() == reflect.Slice {
+		arr := value.([]interface{})
+		childStringArr := make([]string, 0)
+		childIntArr := make([]int, 0)
+		for _, v1 := range arr {
+			switch c := v1.(type) {
+			case string:
+				childStringArr = append(childStringArr, c)
+			case int:
+				childIntArr = append(childIntArr, c)
+			}
+		}
+		if len(childStringArr) > 0 {
+			condition = condition.Cond(key, childStringArr)
+		}
+		if len(childIntArr) > 0 {
+			condition = condition.Cond(key, childIntArr)
+		}
+	} else {
+		condition = condition.Cond(key, value)
 	}
 	return condition
 }
 
+func ifDoFetchQuery(key string) bool {
+	switch key {
+	case "cid":
+		return true
+	default:
+		return false
+	}
+}
+
 // func exec one time,you can run this func in init
 func settingOnce() {
+	// 1. common args need convert graphql type -> list(type)
 	for _, commonArg := range commonArgs {
 		commonArg.Type = graphql.NewList(commonArg.Type)
 	}
