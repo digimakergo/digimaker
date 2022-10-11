@@ -100,6 +100,11 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: graphql.BindFields(cTypeField)})
 
 							args := graphql.BindArg(cTypeField, cTypeField.IdentifierList()...)
+							for k, config := range args {
+								fmt.Println("config original:", k+"|"+config.Type.Name()+"|"+config.Type.String())
+								config.Type = graphql.NewList(config.Type)
+								fmt.Println("config now:", k+"|"+config.Type.Name()+"|"+config.Type.String())
+							}
 
 							if len(commonArgs) > 0 {
 								for key, commonArg := range commonArgs {
@@ -109,8 +114,7 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 
 							queryType.AddFieldConfig(cType, &graphql.Field{
 								Type: graphql.NewList(cFieldOfType),
-								//Args: buildRootArgs(args), // return a config
-								Args: args, // return a config
+								Args: buildRootArgs(args), // return a config
 								Resolve: func(p graphql.ResolveParams) (interface{}, error) {
 									log.Info(p)
 									return parseSolveParams(ctx, cType, p)
@@ -192,61 +196,7 @@ func buildRootArgs(content graphql.FieldConfigArgument) (ret graphql.FieldConfig
 }
 
 // Deprecated
-func buildConditionArgs(inputArgs graphql.InputObjectConfigFieldMap, extra ...graphql.InputObjectConfigFieldMap) (conditionArgs graphql.InputObjectConfigFieldMap) {
-	conditionArgs = graphql.InputObjectConfigFieldMap{
-		"and": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "AND",
-				Fields:      inputArgs,
-				Description: "and args",
-			}),
-		},
-		"or": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "OR",
-				Fields:      inputArgs,
-				Description: "or args",
-			}),
-		},
-		"gt": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "GT",
-				Fields:      inputArgs,
-				Description: "gt args (>)",
-			}),
-		},
-		"ge": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "GE",
-				Fields:      inputArgs,
-				Description: "gt args (>=)",
-			}),
-		},
-		"lt": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "LT",
-				Fields:      inputArgs,
-				Description: "lt args (<)",
-			}),
-		},
-		"le": &graphql.InputObjectFieldConfig{
-			Type: graphql.NewInputObject(graphql.InputObjectConfig{
-				Name:        "LE",
-				Fields:      inputArgs,
-				Description: "le args (<=)",
-			}),
-		},
-	}
-	if len(extra) > 0 {
-		for i, fieldMap := range extra[0] {
-			conditionArgs[i] = fieldMap
-		}
-	}
-	return conditionArgs
-}
-
-// Deprecated
-func generateFilterArgs(filterMap map[string]interface{}, condition db.Condition) db.Condition {
+func generateFilterArgsOld(filterMap map[string]interface{}, condition db.Condition) db.Condition {
 	if andMap, ok := filterMap["and"].(map[string]interface{}); ok {
 		if andMap != nil && len(andMap) > 0 {
 			for k, v := range andMap {
@@ -300,7 +250,7 @@ func generateFilterArgs(filterMap map[string]interface{}, condition db.Condition
 }
 
 // replace generateFilterArgs
-func generateFilterArgsV2(filterMap map[string]interface{}, condition db.Condition) db.Condition {
+func generateFilterArgs(filterMap map[string]interface{}, condition db.Condition) db.Condition {
 
 	if filterMap == nil || len(filterMap) == 0 {
 		return condition
@@ -349,20 +299,15 @@ func generateFilterArgsV2(filterMap map[string]interface{}, condition db.Conditi
 
 func parseSolveParams(ctx context.Context, cType string, p graphql.ResolveParams) (list interface{}, err error) {
 
-	//if p.Args == nil || len(p.Args) == 0 {
-	//	//return list, errors.New("args is nil")
-	//	list, _, err = query.List(ctx, cType, db.EmptyCond())
-	//	return list,err
-	//}
-
 	condition := db.Condition{}
 	// condition key query
 	for k, v := range p.Args {
 		// verify key
-		if isConditionKey(k) {
+		if isSuitKey(k) {
+			// filter params
 			if filter, ok := p.Args["filter"]; ok {
 				if filterMap, ok := filter.(map[string]interface{}); ok {
-					condition = generateFilterArgsV2(filterMap, condition)
+					condition = generateFilterArgs(filterMap, condition)
 				}
 			}
 
@@ -375,10 +320,37 @@ func parseSolveParams(ctx context.Context, cType string, p graphql.ResolveParams
 				condition = condition.Sortby(sortPs...)
 			}
 
-			// page params
+			// page params (default value -> offset:0,limit:10)
 			condition = condition.Limit(p.Args["offset"].(int), p.Args["limit"].(int))
 		} else {
-			condition = condition.Cond(k, v)
+			fmt.Println("is not condition key")
+			fmt.Println("kind:", reflect.ValueOf(v))
+			// valid slice
+			if reflect.TypeOf(v).Kind() == reflect.Slice {
+				arr := v.([]interface{})
+				childStringArr := make([]string, 0)
+				childIntArr := make([]int, 0)
+				for _, v1 := range arr {
+					switch c := v1.(type) {
+					case string:
+						//fmt.Println("string into:",k1,"|",v,"|",v1)
+						childStringArr = append(childStringArr, c)
+					case int:
+						//fmt.Println("int into:",k1,"|",v,"|",v1)
+						childIntArr = append(childIntArr, c)
+					}
+				}
+				if len(childStringArr) > 0 {
+					//fmt.Println("to string")
+					condition = condition.Cond(k, childStringArr)
+				}
+				if len(childIntArr) > 0 {
+					//fmt.Println("to int")
+					condition = condition.Cond(k, childIntArr)
+				}
+			} else {
+				condition = condition.Cond(k, v)
+			}
 			conRet, conParams := db.BuildCondition(condition)
 			log.Info(fmt.Sprintln("child build condition:", conRet, "|", conParams, "|", condition))
 			fmt.Println("child build condition:", conRet, "|", conParams, "|", condition)
@@ -415,6 +387,60 @@ func operatorByKey(input string) string {
 	}
 }
 
+// Deprecated
+func buildConditionArgs(inputArgs graphql.InputObjectConfigFieldMap, extra ...graphql.InputObjectConfigFieldMap) (conditionArgs graphql.InputObjectConfigFieldMap) {
+	conditionArgs = graphql.InputObjectConfigFieldMap{
+		"and": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "AND",
+				Fields:      inputArgs,
+				Description: "and args",
+			}),
+		},
+		"or": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "OR",
+				Fields:      inputArgs,
+				Description: "or args",
+			}),
+		},
+		"gt": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "GT",
+				Fields:      inputArgs,
+				Description: "gt args (>)",
+			}),
+		},
+		"ge": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "GE",
+				Fields:      inputArgs,
+				Description: "gt args (>=)",
+			}),
+		},
+		"lt": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "LT",
+				Fields:      inputArgs,
+				Description: "lt args (<)",
+			}),
+		},
+		"le": &graphql.InputObjectFieldConfig{
+			Type: graphql.NewInputObject(graphql.InputObjectConfig{
+				Name:        "LE",
+				Fields:      inputArgs,
+				Description: "le args (<=)",
+			}),
+		},
+	}
+	if len(extra) > 0 {
+		for i, fieldMap := range extra[0] {
+			conditionArgs[i] = fieldMap
+		}
+	}
+	return conditionArgs
+}
+
 func buildGraphqlMap(params map[string]string, input graphql.InputObjectConfigFieldMap, extra ...graphql.InputObjectConfigFieldMap) graphql.InputObjectConfigFieldMap {
 	result := make(graphql.InputObjectConfigFieldMap, 0)
 
@@ -437,7 +463,7 @@ func buildGraphqlMap(params map[string]string, input graphql.InputObjectConfigFi
 	return result
 }
 
-func isConditionKey(key string) bool {
+func isSuitKey(key string) bool {
 	params := map[string]bool{
 		"and":    true,
 		"or":     true,
@@ -492,7 +518,24 @@ func buildJsonResult(input interface{}) string {
 	return string(ret)
 }
 
+func ifSlice(input interface{}, condition db.Condition) db.Condition {
+	if reflect.TypeOf(input).Kind() == reflect.Slice {
+
+	}
+	return condition
+}
+
+// func exec one time,you can run this func in init
+func settingOnce() {
+	for _, commonArg := range commonArgs {
+		commonArg.Type = graphql.NewList(commonArg.Type)
+	}
+}
+
 func init() {
+
+	settingOnce()
+
 	// try to diff method
 	rest.RegisterRoute("/graphql", QueryGraphql)
 }
