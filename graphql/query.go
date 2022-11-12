@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/rest"
@@ -88,15 +89,21 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, definition := range astDocument.Definitions {
-		if def, ok := definition.(*ast.OperationDefinition); ok {
+	for _, adDefinition := range astDocument.Definitions {
+		if def, ok := adDefinition.(*ast.OperationDefinition); ok {
 			// todo verify def.Name.Value => "content"
 			if len(def.SelectionSet.Selections) > 0 {
 				for _, selection := range def.SelectionSet.Selections {
 					if sel, isOk := selection.(*ast.Field); isOk {
 						cType := sel.Name.Value
 						if cType != "" {
+							_, err = definition.GetDefinition(cType)
+							if err != nil {
+								rest.HandleError(err, w)
+								return
+							}
 							cTypeField := contenttype.NewInstance(cType)
+
 							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: graphql.BindFields(cTypeField)})
 
 							args := graphql.BindArg(cTypeField, cTypeField.IdentifierList()...)
@@ -432,5 +439,5 @@ func init() {
 	settingOnce()
 
 	// try to diff method
-	rest.RegisterRoute("/graphql", QueryGraphql)
+	rest.RegisterRoute("/graphql", QueryGraphql, "POST")
 }
