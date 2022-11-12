@@ -14,6 +14,7 @@ import (
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
 	"github.com/graphql-go/graphql/language/parser"
+	"github.com/spf13/viper"
 	"io"
 	"net/http"
 	"reflect"
@@ -37,8 +38,30 @@ var commonStruct = contenttype.ContentCommon{}
 
 var commonArgs = graphql.BindArg(commonStruct, commonStruct.IdentifierList()...)
 
+func AuthAPIKey(r *http.Request) error {
+	apiKey := viper.GetString("graphql.api_key")
+	if apiKey == "" {
+		log.Error("Not api key set up", "")
+		return errors.New("Set up issue")
+	}
+	rApiKey := r.Header.Get("apiKey")
+	if rApiKey == "" {
+		return errors.New("Need authorization")
+	}
+	if rApiKey == apiKey {
+		return nil
+	} else {
+		return errors.New("Wrong api key")
+	}
+}
+
 func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
+	authErr := AuthAPIKey(r)
+	if authErr != nil {
+		rest.HandleError(authErr, w)
+		return
+	}
 
 	defer func() {
 		if err := recover(); err != nil {
