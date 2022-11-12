@@ -37,8 +37,7 @@ func (tn *TreeNode) Iterate(operation func(node *TreeNode)) {
 //If no location found. it will return nil and error message.
 func FetchByLID(ctx context.Context, locationID int) (contenttype.ContentTyper, error) {
 	//get type first by location.
-	location := contenttype.Location{}
-	_, err := db.BindEntity(ctx, &location, "dm_location", db.Cond("id", locationID))
+	location, err := FetchLocationByID(ctx, locationID)
 	if err != nil {
 		return nil, fmt.Errorf("[contentquery.FetchByLID]Can not fetch location by locationID %v: %w", locationID, err)
 	}
@@ -54,10 +53,25 @@ func FetchByLID(ctx context.Context, locationID int) (contenttype.ContentTyper, 
 	return result, err
 }
 
+func FetchLocationByID(ctx context.Context, locationID int) (contenttype.Location, error) {
+	return FetchLocation(ctx, db.Cond("id", locationID))
+}
+
+func FetchLocation(ctx context.Context, cond db.Condition) (contenttype.Location, error) {
+	locations, _, err := LocationList(cond.Limit(0, 1))
+	if err != nil {
+		return contenttype.Location{}, err
+	}
+	if len(locations) > 0 {
+		return locations[0], nil
+	} else {
+		return contenttype.Location{}, nil
+	}
+}
+
 func FetchByPath(ctx context.Context, path string) (contenttype.ContentTyper, error) {
 	//get type first by location.
-	location := contenttype.Location{}
-	_, err := db.BindEntity(ctx, &location, "dm_location", db.Cond("identifier_path", path))
+	location, err := FetchLocation(ctx, db.Cond("identifier_path", path))
 	if err != nil {
 		return nil, fmt.Errorf("[contentquery.fetchbypath]Can not fetch location by location path %v: %w", path, err)
 	}
