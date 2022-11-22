@@ -38,6 +38,11 @@ var commonStruct = contenttype.ContentCommon{}
 
 var commonArgs = graphql.BindArg(commonStruct, commonStruct.IdentifierList()...)
 
+type ArrModel struct {
+	ArrInt    []int
+	ArrString []string
+}
+
 func AuthAPIKey(r *http.Request) error {
 	apiKey := viper.GetString("graphql.api_key")
 	if apiKey == "" {
@@ -53,6 +58,17 @@ func AuthAPIKey(r *http.Request) error {
 	} else {
 		return errors.New("Wrong api key")
 	}
+}
+
+var staticKeys = map[string]string{
+	"and": "&&",
+	"or":  "||",
+	"gt":  ">",
+	"ge":  ">=",
+	"lt":  "<",
+	"le":  "<=",
+	"eq":  "==",
+	"ne":  "!=",
 }
 
 func QueryGraphql(w http.ResponseWriter, r *http.Request) {
@@ -130,10 +146,10 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: graphql.BindFields(cTypeField)})
 
 							args := graphql.BindArg(cTypeField, cTypeField.IdentifierList()...)
-							for k, config := range args {
-								fmt.Println("config original:", k+"|"+config.Type.Name()+"|"+config.Type.String())
+							for _, config := range args {
+								//								fmt.Println("config original:", k+"|"+config.Type.Name()+"|"+config.Type.String())
 								config.Type = graphql.NewList(config.Type)
-								fmt.Println("config now:", k+"|"+config.Type.Name()+"|"+config.Type.String())
+								//								fmt.Println("config now:", k+"|"+config.Type.Name()+"|"+config.Type.String())
 							}
 
 							if len(commonArgs) > 0 {
@@ -179,11 +195,11 @@ func buildRootArgs(content graphql.FieldConfigArgument) (ret graphql.FieldConfig
 		for key, config := range content {
 			inputArgs[key] = &graphql.InputObjectFieldConfig{
 				Type:        graphql.NewList(config.Type),
-				Description: "input" + key,
+				Description: "input args " + key,
 			}
 			sortArgs[key] = &graphql.InputObjectFieldConfig{
 				Type:        graphql.String,
-				Description: "sort" + key,
+				Description: "sort args " + key,
 			}
 			// root query
 			rootArgs[key] = config
@@ -191,10 +207,9 @@ func buildRootArgs(content graphql.FieldConfigArgument) (ret graphql.FieldConfig
 	}
 
 	// build conditon args
-	childArgs := buildGraphqlMap(getKeysMap(), inputArgs, inputArgs)
+	childArgs := buildGraphqlMap(staticKeys, inputArgs, inputArgs)
 
-	parentArgs := buildGraphqlMap(getKeysMap(), childArgs, inputArgs)
-	fmt.Println(parentArgs)
+	parentArgs := buildGraphqlMap(staticKeys, childArgs, inputArgs)
 
 	// root args add children args
 	// filter query
@@ -237,35 +252,35 @@ func generateFilterArgs(filterMap map[string]interface{}, condition db.Condition
 			switch key {
 			case "and":
 				for k, v := range childMap {
-					fmt.Println("and :", reflect.TypeOf(v).Kind())
 					switch child := v.(type) {
 					case map[string]interface{}:
-						fmt.Println("and map[string]interface{}:")
 						for ck, cv := range child {
 							condition = condition.Cond(ck, cv)
 						}
 					default:
-						fmt.Println("and default")
-						condition = condition.Cond(k, v)
+						condition = isSlice(k, v, condition)
+						//condition = condition.Cond(k, v)
 					}
 				}
 			case "or":
 				for k, v := range childMap {
-					fmt.Println("or :", reflect.TypeOf(v).Kind())
 					switch child := v.(type) {
 					case map[string]interface{}:
-						fmt.Println("or map[string]interface{}:")
 						for ck, cv := range child {
 							condition = condition.Or(ck, cv)
 						}
 					default:
-						fmt.Println("or default")
 						condition = condition.Or(k, v)
+						//arrStr := make([]string,0)
+						//arrInt := make([]int,0)
+						//condition = isSliceV2(ifDoFetchQuery(k), v, condition,arrStr,arrInt)
 					}
 				}
 			case "gt", "ge", "lt", "le":
 				for k, v := range childMap {
-					condition = condition.Cond(k+operatorByKey(key), v)
+					arrStr := make([]string, 0)
+					arrInt := make([]int, 0)
+					condition = isSliceV2(ifDoFetchQuery(k)+operatorByKey(key), v, condition, arrStr, arrInt)
 				}
 			}
 		}
@@ -298,8 +313,8 @@ func parseSolveParams(ctx context.Context, cType string, p graphql.ResolveParams
 			}
 
 		} else {
-			fmt.Println("is not condition key")
-			fmt.Println("kind:", reflect.ValueOf(v))
+			fmt.Println("is not condition key:" + k)
+			fmt.Println("kind:", reflect.ValueOf(v), "|", reflect.TypeOf(v).Kind())
 
 			// valid slice
 			condition = isSlice(k, v, condition)
@@ -394,19 +409,6 @@ func verifyKey(key string) bool {
 	}
 }
 
-func getKeysMap() map[string]string {
-	return map[string]string{
-		"and": "&&",
-		"or":  "||",
-		"gt":  ">",
-		"ge":  ">=",
-		"lt":  "<",
-		"le":  "<=",
-		"eq":  "==",
-		"ne":  "!=",
-	}
-}
-
 func buildJsonResult(input interface{}) string {
 	ret, err := json.Marshal(input)
 	if err != nil {
@@ -421,7 +423,19 @@ func isSlice(key string, value interface{}, condition db.Condition) db.Condition
 		childStringArr := make([]string, 0)
 		childIntArr := make([]int, 0)
 		for _, v1 := range arr {
+			fmt.Println("v1:", v1)
 			switch c := v1.(type) {
+			case []interface{}:
+				for _, cv1 := range c {
+					switch cV := cv1.(type) {
+					case []interface{}:
+						fmt.Println("s")
+					case string:
+						childStringArr = append(childStringArr, cV)
+					case int:
+						childIntArr = append(childIntArr, cV)
+					}
+				}
 			case string:
 				childStringArr = append(childStringArr, c)
 			case int:
@@ -429,23 +443,68 @@ func isSlice(key string, value interface{}, condition db.Condition) db.Condition
 			}
 		}
 		if len(childStringArr) > 0 {
-			condition = condition.Cond(key, childStringArr)
+			condition = condition.Cond(ifDoFetchQuery(key), childStringArr)
 		}
 		if len(childIntArr) > 0 {
-			condition = condition.Cond(key, childIntArr)
+			condition = condition.Cond(ifDoFetchQuery(key), childIntArr)
 		}
 	} else {
-		condition = condition.Cond(key, value)
+		condition = condition.Cond(ifDoFetchQuery(key), value)
 	}
+
 	return condition
 }
 
-func ifDoFetchQuery(key string) bool {
+func isSliceV2(key string, value interface{}, condition db.Condition, arrStr []string, arrInt []int) db.Condition {
+	if reflect.TypeOf(value).Kind() == reflect.Slice {
+		arr := value.([]interface{})
+		for _, item := range arr {
+			switch info := item.(type) {
+			case []interface{}:
+				condition = isSliceV2(key, info, condition, arrStr, arrInt)
+			case string:
+				arrStr = append(arrStr, info)
+			case int:
+				arrInt = append(arrInt, info)
+			}
+		}
+		if len(arrStr) > 0 {
+			condition = condition.Cond(ifDoFetchQuery(key), arrStr)
+		}
+		if len(arrInt) > 0 {
+			condition = condition.Cond(ifDoFetchQuery(key), arrInt)
+		}
+	} else {
+		condition = condition.Cond(ifDoFetchQuery(key), value)
+	}
+
+	return condition
+}
+
+func isSliceV3() {
+
+}
+
+func ifDoFetchQuery(key string) string {
 	switch key {
-	case "cid":
-		return true
+	case "id":
+		return "l.id"
+	case "version":
+		return "l.name"
+	case "published":
+		return "l.published"
+	case "modified":
+		return "l.modified"
+	case "author":
+		return "l.author"
+	case "author_name":
+		return "l.author_name"
+	case "cuid":
+		return "l.cuid"
+	case "status":
+		return "l.status"
 	default:
-		return false
+		return key
 	}
 }
 
