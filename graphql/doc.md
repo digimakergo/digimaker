@@ -1,4 +1,5 @@
-### GraphQL Query
+GraphQL Query
+====
 
 `url:/api/graphql`
 
@@ -6,9 +7,9 @@
 
 `method:POST`
 
-Format
+Query Format
 ----
-Example: 
+Format: 
 ```json
 {
   "query": "{table(input){...ret}}",
@@ -29,6 +30,49 @@ input:
 ret:
     output fields
 ```
+
+Example:
+```json
+{
+    "query": "{article(cid:464){id,name,title,published}}",
+    "operation": "content"
+}
+```
+
+```json
+{
+    "query": "{article(cid:[464,467]){id,name,title,published}}",
+    "operation": "content"
+}
+
+```
+
+
+```json
+{
+    "query": "{article(filter:{and:{body:\"ff\"}}){id,name,title,published,body}}",
+    "operation": "content"
+}
+```
+
+
+```json
+{
+    "query": "{article(filter:{le:{cid:471}}){id,name,title,published,body}}",
+    "operation": "content"
+}
+```
+
+
+```json
+{
+    "query": "{article(filter:{cid:[471,464]}){id,name,title,published,body},role{id,name}}",
+    "operation": "content"
+}
+```
+
+Some content type fields(defined by yourself)
+---
 
 | commonItem | type |
 | :---:|:---:|
@@ -95,44 +139,3 @@ ret:
 | name | string |
 | summary | string |
 | under_folder | string |
-
-
-
-```text
-{
-    "query": "{article(cid:464){id,name,title,published}}",
-    "operation": "content"
-}
-```
-
-```json
-{
-    "query": "{article(cid:[464,467]){id,name,title,published}}",
-    "operation": "content"
-}
-
-```
-
-
-```json
-{
-    "query": "{article(filter:{and:{body:\"ff\"}}){id,name,title,published,body}}",
-    "operation": "content"
-}
-```
-
-
-```json
-{
-    "query": "{article(filter:{le:{cid:471}}){id,name,title,published,body}}",
-    "operation": "content"
-}
-```
-
-
-```json
-{
-    "query": "{article(filter:{cid:[471,464]}){id,name,title,published,body},role{id,name}}",
-    "operation": "content"
-}
-```
