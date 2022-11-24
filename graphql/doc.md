@@ -1,23 +1,33 @@
-### GraphQL查询文档
+### GraphQL Query
 
-`url:http://dmdemo.dev.digimaker.no/api/graphql`
+`url:/api/graphql`
 
 `header:{"api_key":"ddddxxxx7383423424sjfshfgfysifsik"}`
 
 `method:POST`
 
+Format
+----
+Example: 
+```json
+{
+  "query": "{table(input){...ret}}",
+  "operation":"content"
+}
+```
+
 ```
 table:
-    查询对象
+    contenttype
 
 input:
-    filter:{属性字段,gt(>),ge(>=),lt(<),le(<=),ne(!=)}
+    filter:{field,gt(>),ge(>=),lt(<),le(<=),ne(!=)}
     sort:[\"id desc\"]
     limit:10
     offset:0
     
 ret:
-    输出字段
+    output fields
 ```
 
 | commonItem | type |
@@ -87,12 +97,6 @@ ret:
 | under_folder | string |
 
 
-```json
-{
-  "query": "{table(input){...ret}}",
-  "operation":"content"
-}
-```
 
 ```text
 {
