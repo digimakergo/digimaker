@@ -279,7 +279,7 @@ func Output(ctx context.Context, content contenttype.ContentTyper) (contenttype.
 			if handler != nil {
 				if washer, ok := handler.(fieldtype.Outputer); ok {
 					value := content.Value(identifier)
-					washedValue := washer.Ouput(ctx, DefaultQuerier, value)
+					washedValue := washer.Output(ctx, DefaultQuerier, value)
 					contentMap[identifier] = washedValue
 				}
 			}
