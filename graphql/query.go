@@ -5,9 +5,15 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"reflect"
+	"strings"
+
 	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
+	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/rest"
@@ -15,10 +21,6 @@ import (
 	"github.com/graphql-go/graphql/language/ast"
 	"github.com/graphql-go/graphql/language/parser"
 	"github.com/spf13/viper"
-	"io"
-	"net/http"
-	"reflect"
-	"strings"
 )
 
 type postData struct {
@@ -70,6 +72,37 @@ var staticKeys = map[string]string{
 	"eq":  "==",
 	"ne":  "!=",
 }
+
+var DMScalarType = graphql.NewScalar(graphql.ScalarConfig{
+	Name:        "DMScalarType",
+	Description: "Digimaker scalar type.",
+	Serialize: func(value interface{}) interface{} {
+		switch value := value.(type) {
+		case fieldtypes.Json:
+			return value.String()
+		default:
+			return nil
+		}
+	},
+	ParseValue: func(value interface{}) interface{} {
+		switch value := value.(type) {
+		case string:
+			j := fieldtypes.Json{}
+			j.Content = []byte(value)
+			return j
+		default:
+			return nil
+		}
+	},
+	ParseLiteral: func(valueAST ast.Value) interface{} {
+		switch valueAST := valueAST.(type) {
+		case *ast.StringValue:
+			return fieldtypes.Json{Content: []byte(valueAST.Value)}
+		default:
+			return nil
+		}
+	},
+})
 
 func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -141,14 +174,29 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 								rest.HandleError(err, w)
 								return
 							}
-							cTypeField := contenttype.NewInstance(cType)
+							contentInstance := contenttype.NewInstance(cType)
+							def, _ := definition.GetDefinition(cType)
 
-							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: graphql.BindFields(cTypeField)})
+							// default build in types
+							contentFields := graphql.BindFields(contentInstance)
+							// customized field types
+							for _, identifier := range contentInstance.IdentifierList() {
+								fieldDef := def.FieldMap[identifier]
+								switch fieldDef.FieldType {
+								case "json":
+									gqlField := graphql.Field{}
+									gqlField.Type = DMScalarType
+									contentFields[identifier] = &gqlField
+								default:
+								}
+							}
 
-							args := graphql.BindArg(cTypeField, cTypeField.IdentifierList()...)
-							for _, config := range args {
+							cFieldOfType := graphql.NewObject(graphql.ObjectConfig{Name: cType, Fields: contentFields})
+
+							args := graphql.BindArg(contentInstance)
+							for _, arg := range args {
 								//								fmt.Println("config original:", k+"|"+config.Type.Name()+"|"+config.Type.String())
-								config.Type = graphql.NewList(config.Type)
+								arg.Type = graphql.NewList(arg.Type)
 								//								fmt.Println("config now:", k+"|"+config.Type.Name()+"|"+config.Type.String())
 							}
 
@@ -288,7 +336,7 @@ func generateFilterArgs(filterMap map[string]interface{}, condition db.Condition
 	return condition
 }
 
-func parseSolveParams(ctx context.Context, cType string, p graphql.ResolveParams) (list interface{}, err error) {
+func parseSolveParams(ctx context.Context, cType string, p graphql.ResolveParams) (interface{}, error) {
 
 	condition := db.Condition{}
 	// condition key query
@@ -326,7 +374,7 @@ func parseSolveParams(ctx context.Context, cType string, p graphql.ResolveParams
 
 	conRet, conParams := db.BuildCondition(condition)
 	fmt.Println("root build condition:", conRet, "|", conParams, "|", condition)
-	list, _, err = query.List(ctx, cType, condition)
+	list, _, err := query.List(ctx, cType, condition)
 	return list, err
 }
 
