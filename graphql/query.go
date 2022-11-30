@@ -79,7 +79,8 @@ var DMScalarType = graphql.NewScalar(graphql.ScalarConfig{
 	Serialize: func(value interface{}) interface{} {
 		switch value := value.(type) {
 		case fieldtypes.Json:
-			return value.String()
+			result := value.String()
+			return result
 		default:
 			return nil
 		}
@@ -231,7 +232,12 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 		Schema:        schema,
 		RequestString: queryParams,
 	})
-	rest.WriteResponse(result, w)
+
+	resultStr, err := json.Marshal(result)
+	if err != nil {
+		rest.HandleError(err, w)
+	}
+	w.Write(resultStr)
 }
 
 func buildRootArgs(content graphql.FieldConfigArgument) (ret graphql.FieldConfigArgument) {
@@ -375,6 +381,10 @@ func parseSolveParams(ctx context.Context, cType string, p graphql.ResolveParams
 	conRet, conParams := db.BuildCondition(condition)
 	fmt.Println("root build condition:", conRet, "|", conParams, "|", condition)
 	list, _, err := query.List(ctx, cType, condition)
+	// resultList, err := query.OutputList(ctx, list)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	return list, err
 }
 
