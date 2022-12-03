@@ -13,6 +13,7 @@ import (
 	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
+	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/dmeditor"
 	"github.com/digimakergo/digimaker/rest"
 	"github.com/graphql-go/graphql"
@@ -49,6 +50,66 @@ func AuthAPIKey(r *http.Request) error {
 }
 
 //Digimaker scalar type
+func getFilterType(cType string) *graphql.Scalar {
+	def, _ := definition.GetDefinition(cType)
+
+	filterInput := graphql.NewScalar(graphql.ScalarConfig{
+		Name:        "FilterInput",
+		Description: "Filter input type.",
+		Serialize: func(value interface{}) interface{} {
+			return value
+		},
+		ParseValue: func(value interface{}) interface{} {
+			return value
+		},
+		ParseLiteral: func(valueAST ast.Value) interface{} {
+			cond, err := generateCondition(valueAST, db.EmptyCond(), def.FieldMap)
+			if err != nil {
+				return err
+			}
+			return cond
+		},
+	})
+
+	return filterInput
+}
+
+func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[string]definition.FieldDef) (db.Condition, error) {
+	switch v := valueAST.(type) {
+	case *ast.ListValue:
+		for _, item := range v.Values {
+			objectCond, err := generateCondition(item, db.EmptyCond(), fieldMap)
+			if err != nil {
+				return db.FalseCond(), err
+			}
+			cond = cond.Or(objectCond)
+		}
+		return cond, nil
+	case *ast.ObjectValue:
+		for _, gqlField := range v.Fields {
+			key := gqlField.Name.Value
+			//todo: convert graphql value to our value or nested condition
+			value := gqlField.Value.GetValue()
+			//todo: use meta from definition here
+			common := []string{"id", "published", "modified"}
+			if util.Contains(common, key) {
+				if key == "id" {
+					key = "l.id"
+				}
+				cond = cond.And(key, value)
+			} else if _, ok := fieldMap[key]; ok {
+				cond = cond.And(key, value)
+			} else {
+				return db.FalseCond(), fmt.Errorf("Field %v not found", key)
+			}
+		}
+		return cond, nil
+	default:
+		return db.FalseCond(), errors.New("Unknown type in filter")
+	}
+}
+
+//Digimaker scalar type
 var DMScalarType = graphql.NewScalar(graphql.ScalarConfig{
 	Name:        "DMScalarType",
 	Description: "Digimaker scalar type.",
@@ -80,6 +141,12 @@ var DMScalarType = graphql.NewScalar(graphql.ScalarConfig{
 		}
 	},
 })
+
+// var typeMapping map[string]graphql.Type = map[string]graphql.Type{
+// 	"text":     graphql.String,
+// 	"richtext": graphql.String,
+// 	"int":      graphql.Int,
+// }
 
 func getContentGQLType(def definition.ContentType) *graphql.Object {
 	//fields on a content type
@@ -182,33 +249,13 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 
 //build arguments on a content type
 func buildContentArgs(cType string) graphql.FieldConfigArgument {
-	filterArgs := make(graphql.InputObjectConfigFieldMap, 0)
-	// sortArgs := make(graphql.InputObjectConfigFieldMap, 0)
 	result := make(graphql.FieldConfigArgument, 0)
 
-	def, _ := definition.GetDefinition(cType)
-
-	for fieldIdentifier, _ := range def.FieldMap {
-		//todo: customize this
-		filterArgs[fieldIdentifier] = &graphql.InputObjectFieldConfig{
-			Type:        graphql.String,
-			Description: "input args " + fieldIdentifier,
-		}
-		// sortArgs[fieldIdentifier] = &graphql.InputObjectFieldConfig{
-		// 	Type:        graphql.String,
-		// 	Description: "sort args " + fieldIdentifier,
-		// }
-	}
-
-	// root args add children args
-	// filter query
 	result["filter"] = &graphql.ArgumentConfig{
-		Type: graphql.NewInputObject(graphql.InputObjectConfig{
-			Name:        "FILTER",
-			Fields:      filterArgs,
-			Description: "filter args",
-		}),
+		Type: getFilterType(cType),
 	}
+
+	//todo: check key
 	// sort query : sort:{cid:"desc"}
 	result["sort"] = &graphql.ArgumentConfig{
 		Type:        graphql.NewList(graphql.String),
@@ -238,8 +285,13 @@ func executeQuery(ctx context.Context, p graphql.ResolveParams) (interface{}, er
 
 	// filter params
 	if filters, ok := args["filter"]; ok {
-		for identifier, value := range filters.(map[string]interface{}) {
-			condition = condition.Cond(identifier, value)
+		switch filters.(type) {
+		case error:
+			return nil, filters.(error)
+		case db.Condition:
+			condition = filters.(db.Condition)
+		default:
+			return nil, errors.New("Unknown filter")
 		}
 	}
 
