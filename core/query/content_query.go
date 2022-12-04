@@ -12,7 +12,6 @@ import (
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/permission"
-	"github.com/digimakergo/digimaker/core/query/querier"
 )
 
 //TreeNode is a query result when querying SubTree
@@ -324,24 +323,6 @@ func Output(ctx context.Context, content contenttype.ContentTyper) (contenttype.
 		return contentMap, nil
 	}
 	return nil, nil
-}
-
-func OutputField(ctx context.Context, content contenttype.ContentTyper, fieldIdentifier string) interface{} {
-	def := content.Definition()
-	if fieldDef, ok := def.FieldMap[fieldIdentifier]; ok {
-		handler := fieldtype.GethHandler(fieldDef)
-		value := content.Value(fieldIdentifier)
-		if handler != nil {
-			if washer, ok := handler.(querier.Outputer); ok {
-				washedValue := washer.Ouput(ctx, DefaultQuerier, value)
-				return washedValue
-			}
-		}
-		return value
-	} else {
-		//todo: log error - field doesn't exist
-		return ""
-	}
 }
 
 //OutputList converts contents into output format, see Output for single content.
