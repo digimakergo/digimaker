@@ -1,4 +1,4 @@
-0. problem
+0. What problems of metadata change solved?
 -----------
 1) To make sure there will be no name conflict between field and others(meta data like author, location field like parent_id)
 2) To make sure there will be no name conflict between content table table and system tables(eg.dm_location).
