@@ -32,6 +32,11 @@ All meta fields uses underline(eg. _author)
 
 dm_location.name will not be used since, it's in metadata.
 
+3. API change
+ - old query.FetchByID is replace by query.FetchByLID
+ - new query.FetchByID will need contentType parameter
+
+
 3. rest api change:
 article
 {

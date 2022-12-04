@@ -104,6 +104,11 @@ func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, erro
 	return result, err
 }
 
+// FetchByCID is duplicate of FetchByCID
+func FetchByID(ctx context.Context, contentType string, contentID int) (contenttype.ContentTyper, error) {
+	return FetchByID(ctx, contentType, contentID)
+}
+
 // FetchByCID fetches a content by content id.
 func FetchByCID(ctx context.Context, contentType string, contentID int) (contenttype.ContentTyper, error) {
 	return Fetch(ctx, contentType, db.Cond("c.id", contentID))
