@@ -17,6 +17,9 @@ A Content Management Framework focusing on simplicity, flexibility and performan
 - Online debug tool
 - Client components for content related ui
 
+### Installation
+See [dmdemo](https://github.com/digimakergo/dmdemo/) of sample use
+
 ### Documentation
 See https://digimaker.org/doc for documentation and references.
 
