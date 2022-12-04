@@ -144,8 +144,9 @@ func (j *Json) Scan(value interface{}) error {
 
 func (j *Json) MarshalJSON() ([]byte, error) {
 	if j.Content == nil {
-		return nil, nil
+		return json.Marshal(nil)
 	}
+
 	//slice
 	v := []*json.RawMessage{}
 	err := json.Unmarshal(j.Content, &v)
