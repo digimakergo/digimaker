@@ -13,7 +13,7 @@ After this change id is the real content id(cid before) while location's id is t
 All Entities will have this embed:
 
 contenttype.Metadata:
-    Contenttype string    `boil:"_contenttype"
+  Contenttype string    `boil:"_contenttype"
 	Name        string    `boil:"_name" 
 	Version     int       `boil:"_version"
 	Published   time.Time `boil:"_published" 

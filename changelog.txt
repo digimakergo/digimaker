@@ -1,6 +1,6 @@
 Change log
 ===============
-0.1.0
+0.1.1-beta.1
 
 - 2022-12-04 [BACKWARD COMPABILITY BREAK][query]FetchByID needs content type parameter, use FetchByLID for old FetchByID
 - 2022-11-30 [graphql]Support graphql query with simple filter(object{}/array[])
