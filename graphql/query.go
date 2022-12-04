@@ -14,7 +14,7 @@ import (
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
-	"github.com/digimakergo/digimaker/dmeditor"
+	// "github.com/digimakergo/digimaker/dmeditor"
 	"github.com/digimakergo/digimaker/rest"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
@@ -117,7 +117,7 @@ var DMScalarType = graphql.NewScalar(graphql.ScalarConfig{
 	Serialize: func(value interface{}) interface{} {
 		switch value := value.(type) {
 		case fieldtypes.Json:
-			result, _ := dmeditor.ProceedData(context.Background(), value)
+			// result, _ := dmeditor.ProceedData(context.Background(), value)
 			return result
 		default:
 			return value
