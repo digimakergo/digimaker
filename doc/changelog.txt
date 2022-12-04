@@ -3,8 +3,18 @@ Change log
 0.1.0
 
 - 2022-11-30 [graphql]Support graphql query with simple filter(object{}/array[])
+- 2022-11-12 [query]Add query.FetchLocationByID
 - 2022-09-08 [query]Support query.OutputField(ctx, content, fieldIdentifier)
-
+- 2022-11-12 [query]Add query.FetchLocationByID
+- 2022-06-06 [BACKWARD COMPABILITY BREAK]Add Metadata in entities, including entities, api, rest change. see doc/0.1.0-metadata-change.txt
+- 2022-06-03 [sitekit]function 'dm.now'
+- 2022-06-03 [template]support global function(without variable/namespace) 
+- 2022-06-02 [template]sort & limit in dm.children
+- 2022-05-30 [sitekit]fixed: nice url use depth instead of identifier path of root
+- 2022-03-01 [log] output debug for template-match
+- 2022-02-28 [sitekit]Updated: handle error/debug better in sitekit('error' variable in template variable)
+- 2022-02-28 [template] Added machanism to write customized template function 
+- 2022-02-28 [template] - support pongo2.v4 & better error handling
 
 0.1.0-beta.4
 

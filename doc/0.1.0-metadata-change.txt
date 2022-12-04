@@ -1,0 +1,46 @@
+0. problem
+-----------
+1) To make sure there will be no name conflict between field and others(meta data like author, location field like parent_id)
+2) To make sure there will be no name conflict between content table table and system tables(eg.dm_location).
+3) To make sure rest api has category(metadata, location)
+4) More natual to understand, since content is first, location/author is second. The old way was location first.
+
+Important:
+After this change id is the real content id(cid before) while location's id is the old 'id'. Then every content has id(in old way id was cid for non-location content).
+
+1. model 
+-------
+All Entities will have this embed:
+
+contenttype.Metadata:
+    Contenttype string    `boil:"_contenttype"
+	Name        string    `boil:"_name" 
+	Version     int       `boil:"_version"
+	Published   time.Time `boil:"_published" 
+	Modified    time.Time `boil:"_modified" 
+	CUID        string    `boil:"_cuid" 
+	Author      int       `boil:"_author"
+
+contenttype.Location
+
+2. database change
+table name:
+All content tables will be prefixed as dmc_, eg. dmc_article so there will be no conflict with dm_, which is system tables.
+
+field name:
+All meta fields uses underline(eg. _author)
+
+dm_location.name will not be used since, it's in metadata.
+
+3. rest api change:
+article
+{
+  "title":"test",
+  "id":3,
+  "metadata"
+  "location":{
+    id: 45,
+    parent_id: 4
+    ...
+  }
+}
