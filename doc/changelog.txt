@@ -1,5 +1,10 @@
 Change log
 ===============
+0.1.0
+
+- 2022-11-30 [graphql]Support graphql query with simple filter(object{}/array[])
+- 2022-09-08 [query]Support query.OutputField(ctx, content, fieldIdentifier)
+
 
 0.1.0-beta.4
 

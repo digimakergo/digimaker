@@ -1,6 +1,7 @@
 package functions
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -144,6 +145,15 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 			root := sitekit.GetSiteSettings(dm.Site).RootContent
 			url := niceurl.GenerateUrl(content, root, dm.SitePath)
 			return url
+		},
+
+		"output_field": func(field string, content contenttype.ContentTyper) interface{} {
+			outputValue, err := query.OutputField(dm.Context, content, field)
+			if err != nil {
+				log.Error(fmt.Errorf("Error when output_field %v: %v", field, err.Error()), "", dm.Context)
+				return ""
+			}
+			return outputValue
 		},
 
 		"root": func(url string) string {

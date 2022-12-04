@@ -101,7 +101,7 @@ func (handler RichTextHandler) DBField() string {
 	return "TEXT"
 }
 
-func (r RichTextHandler) Ouput(ctx context.Context, querier querier.Querier, value interface{}) interface{} {
+func (r RichTextHandler) Output(ctx context.Context, querier querier.Querier, value interface{}) interface{} {
 	//convert image to updated image path
 	re := regexp.MustCompile(`<img[^>]+data-dm-content="[^"]+"[^>]+>`)
 

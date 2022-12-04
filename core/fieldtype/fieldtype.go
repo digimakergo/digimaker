@@ -33,7 +33,7 @@ type Handler interface {
 }
 
 type Outputer interface {
-	Ouput(ctx context.Context, querier querier.Querier, value interface{}) interface{}
+	Output(ctx context.Context, querier querier.Querier, value interface{}) interface{}
 }
 
 type ValidationError struct {
