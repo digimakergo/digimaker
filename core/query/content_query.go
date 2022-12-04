@@ -266,6 +266,31 @@ func RelationOptions(ctx context.Context, ctype string, identifier string, limit
 	return List(ctx, params.Type, condition)
 }
 
+func OutputField(ctx context.Context, content contenttype.ContentTyper, field string) (interface{}, error) {
+	fieldMap := content.Definition().FieldMap
+	if fieldDef, ok := fieldMap[field]; ok {
+		//todo: handle error here
+		result := outputField(ctx, fieldDef, content.Value(field))
+		return result, nil
+	} else {
+		return nil, errors.New("Field not found")
+	}
+}
+
+func outputField(ctx context.Context, fieldDef definition.FieldDef, value interface{}) interface{} {
+	handler := fieldtype.GethHandler(fieldDef)
+	if handler != nil {
+		if washer, ok := handler.(fieldtype.Outputer); ok {
+			washedValue := washer.Output(ctx, DefaultQuerier, value)
+			return washedValue
+		} else {
+			return value
+		}
+	} else {
+		return value
+	}
+}
+
 //Output converts content into output format.(eg. add text to select, name in relation, etc)
 func Output(ctx context.Context, content contenttype.ContentTyper) (contenttype.ContentMap, error) {
 	if content != nil {
@@ -275,14 +300,9 @@ func Output(ctx context.Context, content contenttype.ContentTyper) (contenttype.
 			return nil, err
 		}
 		for identifier, fieldDef := range def.FieldMap {
-			handler := fieldtype.GethHandler(fieldDef)
-			if handler != nil {
-				if washer, ok := handler.(fieldtype.Outputer); ok {
-					value := content.Value(identifier)
-					washedValue := washer.Output(ctx, DefaultQuerier, value)
-					contentMap[identifier] = washedValue
-				}
-			}
+			value := content.Value(identifier)
+			washedValue := outputField(ctx, fieldDef, value)
+			contentMap[identifier] = washedValue
 		}
 		return contentMap, nil
 	}
