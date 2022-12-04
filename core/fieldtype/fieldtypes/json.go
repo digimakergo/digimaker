@@ -8,6 +8,8 @@ import (
 
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
+	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/query/querier"
 )
 
 //Map defines a key - value map
@@ -15,6 +17,12 @@ type Map map[string]interface{}
 
 //List defines an array Map
 type MapList []Map
+
+var jsonOutputerMap map[string]fieldtype.Outputer = map[string]fieldtype.Outputer{}
+
+func RegisterJSONOutputer(identifier string, outputer fieldtype.Outputer) {
+	jsonOutputerMap[identifier] = outputer
+}
 
 func (a *Map) Scan(value interface{}) error {
 	obj := Map{}
@@ -142,7 +150,8 @@ func (j *Json) Scan(value interface{}) error {
 	return nil
 }
 
-func (j *Json) MarshalJSON() ([]byte, error) {
+func (j Json) MarshalJSON() ([]byte, error) {
+
 	if j.Content == nil {
 		return json.Marshal(nil)
 	}
@@ -162,16 +171,25 @@ func (j *Json) MarshalJSON() ([]byte, error) {
 
 //insert as string
 func (j Json) Value() (driver.Value, error) {
+	if string(j.Content) == "" {
+		return nil, nil
+	}
 	return string(j.Content), nil
 }
 
-func (j Json) String() string {
+func (j *Json) String() string {
 	return string(j.Content)
+}
+
+type JSONParameters struct {
+	Format   string `mapstructure:"format"`
+	Settings string `mapstructure:"settings"`
 }
 
 //JSON Handler
 type JSONHandler struct {
 	definition.FieldDef
+	Params JSONParameters
 }
 
 //support string, []byte, object
@@ -206,6 +224,20 @@ func (handler JSONHandler) LoadInput(ctx context.Context, input interface{}, mod
 	return obj, nil
 }
 
+func (handler JSONHandler) Output(ctx context.Context, querier querier.Querier, value interface{}) interface{} {
+	jsonFormat := handler.Params.Format
+	if jsonFormat != "" {
+		outputer, exist := jsonOutputerMap[jsonFormat]
+		if exist {
+			return outputer.Output(ctx, querier, value)
+		} else {
+			log.Warning("Outputer for "+jsonFormat+" doesn't exist. Return raw", "")
+			return value
+		}
+	}
+	return value
+}
+
 func (handler JSONHandler) DBField() string {
 	return "JSON"
 }
@@ -228,6 +260,11 @@ func init() {
 		DataType: "fieldtypes.Json",
 		Package:  "github.com/digimakergo/digimaker/core/fieldtype/fieldtypes",
 		NewHandler: func(def definition.FieldDef) fieldtype.Handler {
-			return JSONHandler{FieldDef: def}
+			params := JSONParameters{}
+			err := ConvertParameters(def.Parameters, &params)
+			if err != nil {
+				log.Error("Definition error on json, parameters ignored: "+err.Error(), "")
+			}
+			return JSONHandler{FieldDef: def, Params: params}
 		}})
 }

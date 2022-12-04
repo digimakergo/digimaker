@@ -1,7 +1,8 @@
 Change log
 ===============
 0.1.1-beta.1
-
+- 2022-12-04 [json]add RegisterJSONOutputer(identifier, outputer) in json
+- 2022-12-04 [json]add "format" parameter in json
 - 2022-12-04 [BACKWARD COMPABILITY BREAK][query]FetchByID needs content type parameter, use FetchByLID for old FetchByID
 - 2022-11-30 [graphql]Support graphql query with simple filter(object{}/array[])
 - 2022-11-12 [query]Add query.FetchLocationByID
@@ -17,6 +18,7 @@ Change log
 - 2022-02-28 [sitekit]Updated: handle error/debug better in sitekit('error' variable in template variable)
 - 2022-02-28 [template] Added machanism to write customized template function 
 - 2022-02-28 [template] - support pongo2.v4 & better error handling
+- 2022-02-08 fixed: json's db binding issue
 
 0.1.0-beta.4
 
