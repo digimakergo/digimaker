@@ -9,6 +9,7 @@ Change log
 - 2022-11-12 [query]Add query.FetchLocationByID
 - 2022-06-06 [BACKWARD COMPABILITY BREAK]Add Metadata in entities, including entities, api, rest change. see doc/0.1.0-metadata-change.txt
 - 2022-06-03 [sitekit]function 'dm.now'
+- 2022-06-06 [model]use datetime not int for publish and modified
 - 2022-06-03 [template]support global function(without variable/namespace) 
 - 2022-06-02 [template]sort & limit in dm.children
 - 2022-05-30 [sitekit]fixed: nice url use depth instead of identifier path of root

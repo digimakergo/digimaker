@@ -31,6 +31,22 @@ field name:
 All meta fields uses underline(eg. _author)
 
 dm_location.name will not be used since, it's in metadata.
+Need to conver published/modified to datetime with default
+below are table for article(with location)
+| _cuid       | varchar(30)  | NO   |     |                     |
+| _status     | int(11)      | NO   |     | 0                   |
+| _author     | int(11)      | NO   |     | 0                   |
+| _version    | int(11)      | NO   |     | 0                   |
+| _name       | varchar(500) | NO   |     |                     |
+| _published  | datetime     | NO   |     | 0000-01-01 00:00:00 |
+| _modified   | datetime     | NO   |     | 0000-01-01 00:00:00 |
+
+below are table for image(without location)
+| _cuid       | varchar(30)  | NO   |     |                     |
+| _author     | int(11)      | NO   |     | 0                   |
+| _name       | varchar(255) | NO   |     |                     |
+| _published  | datetime     | NO   |     | 0000-01-01 00:00:00 |
+| _modified   | datetime     | NO   |     | 0000-01-01 00:00:00 |
 
 3. API change
  - old query.FetchByID is replace by query.FetchByLID
