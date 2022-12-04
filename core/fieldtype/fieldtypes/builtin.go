@@ -327,7 +327,7 @@ func (handler SelectHandler) LoadInput(ctx context.Context, input interface{}, m
 	return value, nil
 }
 
-func (handler SelectHandler) Ouput(ctx context.Context, querier querier.Querier, value interface{}) interface{} {
+func (handler SelectHandler) Output(ctx context.Context, querier querier.Querier, value interface{}) interface{} {
 	params := handler.Params
 	result := []map[string]string{}
 	values := util.Split(value.(string), ";")
@@ -343,7 +343,6 @@ func (handler SelectHandler) Ouput(ctx context.Context, querier querier.Querier,
 		for _, item := range params.List {
 			if util.Contains(values, item["value"]) {
 				return item
-
 			}
 		}
 		return nil
