@@ -177,11 +177,6 @@ func (dm DMFunctions) GetMap() map[string]interface{} {
 		"now": func() time.Time {
 			return time.Now()
 		},
-
-		"output_field": func(content contenttype.ContentTyper, fieldIdentifier string) interface{} {
-			value := query.OutputField(dm.Context, content, fieldIdentifier)
-			return value
-		},
 	}
 
 	return result
