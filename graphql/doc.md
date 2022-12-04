@@ -9,7 +9,7 @@ GraphQL Query
 
 Query Format
 ----
-Format: 
+### Format: 
 ```json
 {
   "query": "{table(input){...ret}}",
@@ -31,7 +31,7 @@ ret:
     output fields
 ```
 
-Example:
+### Example
 ```json
 {
     "query": "{article(cid:464){id,name,title,published}}",

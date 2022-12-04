@@ -32,6 +32,7 @@ type ArrModel struct {
 	ArrString []string
 }
 
+//set graphql/api_key in dm.yaml
 func AuthAPIKey(r *http.Request) error {
 	apiKey := viper.GetString("graphql.api_key")
 	if apiKey == "" {
