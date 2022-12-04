@@ -2,6 +2,7 @@ Change log
 ===============
 0.1.0
 
+- 2022-12-04 [BACKWARD COMPABILITY BREAK][query]FetchByID needs content type parameter, use FetchByLID for old FetchByID
 - 2022-11-30 [graphql]Support graphql query with simple filter(object{}/array[])
 - 2022-11-12 [query]Add query.FetchLocationByID
 - 2022-09-08 [query]Support query.OutputField(ctx, content, fieldIdentifier)
