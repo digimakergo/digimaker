@@ -34,6 +34,8 @@ var LocationColumns []string = []string{
 	"p",
 }
 
+var MetaColumns = []string{"version", "name", "published", "modified", "author", "cuid"}
+
 var (
 	ErrInvalidIdentifier = errors.New("Invalid identifier")
 )
