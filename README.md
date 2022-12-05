@@ -26,8 +26,6 @@ See https://digimaker.org/doc for documentation and references.
 ### Related repositories
 Client components:
 
-Editorial UI (Admin) see https://github.com/digimakergo/eui 
-
 Client UI components: https://github.com/digimakergo/ui
 
 
