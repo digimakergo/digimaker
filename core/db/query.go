@@ -130,9 +130,8 @@ func CreateQuery(targets string, condition Condition) (string, Query) {
 func BindContent(ctx context.Context, entity interface{}, targets string, condition Condition) (int, error) {
 	contentType, query := CreateQuery(targets, condition)
 	def, _ := definition.GetDefinition(contentType)
-	withAuthor := false
 	sortbyArr := condition.Option.Sortby
-	withAuthor = true
+	withAuthor := def.HasLocation
 	//add l. to location field
 	for i, sortbyStr := range sortbyArr {
 		itemArr := util.Split(sortbyStr, " ")
