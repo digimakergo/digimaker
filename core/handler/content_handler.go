@@ -438,7 +438,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 
 	//Save new version and set to content
 	if contentDef.HasVersion {
-		version := content.Value("version").(int) + 1
+		version := content.GetMetadata().Version + 1
 		log.Debug("Creating new version: "+strconv.Itoa(version), "contenthandler.update", ctx)
 		_, err := CreateVersion(ctx, content, version, tx)
 		if err != nil {
