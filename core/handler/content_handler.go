@@ -815,3 +815,49 @@ func SaveDraft(ctx context.Context, userId int, data string, contentType string,
 	)
 	return newVersion, nil
 }
+
+// copy data
+func CopyById(ctx context.Context, id, userId, parentInt int) (bool, error) {
+	content, err := query.FetchByID(ctx, id)
+	if err != nil {
+		return false, fmt.Errorf("Failed to get via id: %w", err)
+	}
+	if content.GetCID() == 0 {
+		return false, fmt.Errorf("Got empty content %w")
+	}
+	inputs := InputMap{}
+	for _, field := range content.Definition().FieldMap {
+		identifier := field.Identifier
+		inputs[identifier] = content.Value(identifier)
+	}
+	contentType := content.ContentType()
+
+	_, errors := Create(ctx, userId, contentType, inputs, parentInt)
+	if errors != nil {
+		return false, fmt.Errorf("Got error copy %w", errors)
+	}
+	return true, nil
+}
+
+// CopyBYContentId
+func CopyBYContentID(ctx context.Context, contentType string, contentID, userId, parentInt int) (bool, error) {
+	content, err := query.FetchByCID(ctx, contentType, contentID)
+	if err != nil {
+		return false, fmt.Errorf("Failed to get content via content id: %w", err)
+	}
+	if content.GetCID() == 0 {
+		return false, fmt.Errorf("Got empty content: %w", err)
+	}
+	//craete inputMap
+	inputs := InputMap{}
+	for _, field := range content.Definition().FieldMap {
+		identifier := field.Identifier
+		inputs[identifier] = content.Value(identifier)
+	}
+
+	_, errors := Create(ctx, userId, contentType, inputs, parentInt)
+	if errors != nil {
+		return false, fmt.Errorf("Got error copy content: %w", errors)
+	}
+	return true, nil
+}
