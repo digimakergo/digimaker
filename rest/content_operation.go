@@ -315,6 +315,6 @@ func init() {
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)
 	RegisterRoute("/content/savedraft/{id:[0-9]+}/{type}", SaveDraft, "POST")
-	RegisterRoute("/content/Copy/{id:[0-9]+}", Copy, "POST")
-	RegisterRoute("/content/Copy/{contenttype}/{id:[0-9]+}", Copy, "POST")
+	RegisterRoute("/content/Copy/{id:[0-9]+}/{parent:[0-9]+}", Copy, "POST")
+	RegisterRoute("/content/Copy/{contenttype}/{id:[0-9]+}/{parent:[0-9]+}", Copy, "POST")
 }
