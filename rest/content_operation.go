@@ -6,6 +6,7 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -269,6 +270,66 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(true, w)
 }
 
+//copy old data
+func Copy(w http.ResponseWriter, r *http.Request) {
+	userID := CheckUserID(r.Context(), w)
+	if userID == 0 {
+		return
+	}
+
+	params := mux.Vars(r)
+	id := params["id"]
+	parent := params["parent"]
+
+	parentInt, err := strconv.Atoi(parent)
+	if err != nil {
+		HandleError(errors.New("parent id should be integer."), w)
+		return
+	}
+
+	// To number
+	idInt, err := strconv.Atoi(id)
+	if err != nil {
+		HandleError(errors.New("id should be integer."), w)
+		return
+	}
+	ctype := params["contenttype"]
+
+	if ctype == "" {
+		content, err := query.FetchByID(r.Context(), idInt)
+		if err != nil {
+			HandleError(fmt.Errorf("Failed to get content via content id: %w", err), w)
+			return
+		}
+		if content.GetCID() == 0 {
+			HandleError(fmt.Errorf("Got empty : %w", err), w)
+			return
+		}
+		err = handler.Copy(r.Context(), content, ctype, userID, parentInt)
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
+	} else {
+		content, err := query.FetchByCID(r.Context(), ctype, idInt)
+		if err != nil {
+			HandleError(fmt.Errorf("Failed to get content via content id: %w", err), w)
+			return
+		}
+		if content.GetCID() == 0 {
+			HandleError(fmt.Errorf("Got empty content: %w", err), w)
+			return
+		}
+		err = handler.Copy(r.Context(), content, ctype, userID, parentInt)
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
+	}
+
+	WriteResponse(true, w)
+}
+
 func init() {
 	RegisterRoute("/content/create/{contenttype}/{parent:[0-9]+}", Create, "POST")
 	RegisterRoute("/content/create/{contenttype}", Create, "POST")
@@ -278,4 +339,6 @@ func init() {
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)
 	RegisterRoute("/content/savedraft/{id:[0-9]+}/{type}", SaveDraft, "POST")
+	RegisterRoute("/content/Copy/{id:[0-9]+}/{parent:[0-9]+}", Copy, "POST")
+	RegisterRoute("/content/Copy/{contenttype}/{id:[0-9]+}/{parent:[0-9]+}", Copy, "POST")
 }

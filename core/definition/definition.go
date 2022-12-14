@@ -416,6 +416,7 @@ func GetDefinition(contentType string, language ...string) (ContentType, error) 
 	if len(language) > 0 {
 		languageStr = language[0]
 	}
+
 	definition, ok := contentTypeDefinition[languageStr]
 	if !ok {
 		log.Println("Language " + languageStr + " doesn't exist. use default.")
