@@ -296,31 +296,31 @@ func Copy(w http.ResponseWriter, r *http.Request) {
 	ctype := params["contenttype"]
 
 	if ctype == "" {
-		contentData, err := query.FetchByID(r.Context(), idInt)
+		contenter, err := query.FetchByID(r.Context(), idInt)
 		if err != nil {
 			HandleError(fmt.Errorf("Failed to get content via content id: %w", err), w)
 			return
 		}
-		if contentData.GetCID() == 0 {
+		if contenter.GetCID() == 0 {
 			HandleError(fmt.Errorf("Got empty : %w", err), w)
 			return
 		}
-		_, err = handler.Copy(r.Context(), contentData, ctype, userID, parentInt)
+		_, err = handler.Copy(r.Context(), contenter, ctype, userID, parentInt)
 		if err != nil {
 			HandleError(err, w)
 			return
 		}
 	} else {
-		contentData, err := query.FetchByCID(r.Context(), ctype, idInt)
+		contenter, err := query.FetchByCID(r.Context(), ctype, idInt)
 		if err != nil {
 			HandleError(fmt.Errorf("Failed to get content via content id: %w", err), w)
 			return
 		}
-		if contentData.GetCID() == 0 {
+		if contenter.GetCID() == 0 {
 			HandleError(fmt.Errorf("Got empty content: %w", err), w)
 			return
 		}
-		_, err = handler.Copy(r.Context(), contentData, ctype, userID, parentInt)
+		_, err = handler.Copy(r.Context(), contenter, ctype, userID, parentInt)
 		if err != nil {
 			HandleError(err, w)
 			return
