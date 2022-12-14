@@ -6,6 +6,7 @@ package rest
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -292,15 +293,38 @@ func Copy(w http.ResponseWriter, r *http.Request) {
 		HandleError(errors.New("id should be integer."), w)
 		return
 	}
-	contenttype := params["contenttype"]
-	if contenttype == "" {
-		_, err = handler.CopyById(r.Context(), idInt, userID, parentInt)
+	ctype := params["contenttype"]
+
+	if ctype == "" {
+		contentData, err := query.FetchByID(r.Context(), idInt)
+		if err != nil {
+			HandleError(fmt.Errorf("Failed to get content via content id: %w", err), w)
+			return
+		}
+		if contentData.GetCID() == 0 {
+			HandleError(fmt.Errorf("Got empty : %w", err), w)
+			return
+		}
+		_, err = handler.Copy(r.Context(), contentData, ctype, userID, parentInt)
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
 	} else {
-		_, err = handler.CopyBYContentID(r.Context(), contenttype, idInt, userID, parentInt)
-	}
-	if err != nil {
-		HandleError(err, w)
-		return
+		contentData, err := query.FetchByCID(r.Context(), ctype, idInt)
+		if err != nil {
+			HandleError(fmt.Errorf("Failed to get content via content id: %w", err), w)
+			return
+		}
+		if contentData.GetCID() == 0 {
+			HandleError(fmt.Errorf("Got empty content: %w", err), w)
+			return
+		}
+		_, err = handler.Copy(r.Context(), contentData, ctype, userID, parentInt)
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
 	}
 
 	WriteResponse(true, w)

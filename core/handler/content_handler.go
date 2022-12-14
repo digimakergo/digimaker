@@ -861,3 +861,17 @@ func CopyBYContentID(ctx context.Context, contentType string, contentID, userId,
 	}
 	return true, nil
 }
+
+// CopyBYContentId
+func Copy(ctx context.Context, content contenttype.ContentTyper, ctype string, userId, parentInt int) (bool, error) {
+	inputs := InputMap{}
+	for _, field := range content.Definition().FieldMap {
+		identifier := field.Identifier
+		inputs[identifier] = content.Value(identifier)
+	}
+	_, errors := Create(ctx, userId, ctype, inputs, parentInt)
+	if errors != nil {
+		return false, fmt.Errorf("Got error copy content: %w", errors)
+	}
+	return true, nil
+}
