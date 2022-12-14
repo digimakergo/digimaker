@@ -216,6 +216,9 @@ func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) error {
 	identifierList := []string{}
 	for i, field := range c.Fields {
 		identifier := field.Identifier
+		if field.IsOutput {
+			continue
+		}
 		if len(fieldCallback) > 0 {
 			fieldCallback[0](&field)
 		}
