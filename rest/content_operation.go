@@ -296,16 +296,16 @@ func Copy(w http.ResponseWriter, r *http.Request) {
 	ctype := params["contenttype"]
 
 	if ctype == "" {
-		content, err := query.FetchByID(r.Context(), idInt)
+		content, err := query.FetchByLID(r.Context(), idInt)
 		if err != nil {
 			HandleError(fmt.Errorf("Failed to get content via content id: %w", err), w)
 			return
 		}
-		if content.GetCID() == 0 {
+		if content.GetID() == 0 {
 			HandleError(fmt.Errorf("Got empty : %w", err), w)
 			return
 		}
-		err = handler.Copy(r.Context(), content, ctype, userID, parentInt)
+		err = handler.Copy(r.Context(), content, userID, parentInt)
 		if err != nil {
 			HandleError(err, w)
 			return
@@ -316,11 +316,11 @@ func Copy(w http.ResponseWriter, r *http.Request) {
 			HandleError(fmt.Errorf("Failed to get content via content id: %w", err), w)
 			return
 		}
-		if content.GetCID() == 0 {
+		if content.GetID() == 0 {
 			HandleError(fmt.Errorf("Got empty content: %w", err), w)
 			return
 		}
-		err = handler.Copy(r.Context(), content, ctype, userID, parentInt)
+		err = handler.Copy(r.Context(), content, userID, parentInt)
 		if err != nil {
 			HandleError(err, w)
 			return
@@ -339,6 +339,6 @@ func init() {
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)
 	RegisterRoute("/content/savedraft/{id:[0-9]+}/{type}", SaveDraft, "POST")
-	RegisterRoute("/content/Copy/{id:[0-9]+}/{parent:[0-9]+}", Copy, "POST")
-	RegisterRoute("/content/Copy/{contenttype}/{id:[0-9]+}/{parent:[0-9]+}", Copy, "POST")
+	RegisterRoute("/content/copy/{id:[0-9]+}/{parent:[0-9]+}", Copy, "POST")
+	RegisterRoute("/content/copy/{contenttype}/{id:[0-9]+}/{parent:[0-9]+}", Copy, "POST")
 }

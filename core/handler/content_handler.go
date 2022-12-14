@@ -811,15 +811,15 @@ func SaveDraft(ctx context.Context, userId int, data string, contentType string,
 }
 
 // Copy data
-func Copy(ctx context.Context, content contenttype.ContentTyper, ctype string, userId, parentInt int) error {
+func Copy(ctx context.Context, content contenttype.ContentTyper, userId int, parentInt int) error {
 	inputs := InputMap{}
 	for _, field := range content.Definition().FieldMap {
 		identifier := field.Identifier
 		inputs[identifier] = content.Value(identifier)
 	}
-	_, errors := Create(ctx, userId, ctype, inputs, parentInt)
-	if errors != nil {
-		return fmt.Errorf("Got error copy content: %w", errors)
+	_, err := Create(ctx, userId, content.ContentType(), inputs, parentInt)
+	if err != nil {
+		return fmt.Errorf("Got error copy content: %w", err)
 	}
 	return nil
 }
