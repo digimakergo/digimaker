@@ -3,14 +3,14 @@ package image
 import (
 	"context"
 
-	"github.com/digimakeras/digimaker/core/util"
-	"github.com/digimakeras/digimaker/dcp/config"
+	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 )
 
 //Get full path from image's interal path
 //size: original/default/600
 func ImagePath(ctx context.Context, path string, size string) string {
-	imageUrl := config.DmViper(ctx).GetString("general.image_url")
+	imageUrl := viper.GetString("general.image_url")
 	sizeStr := ""
 	sizeWithSlash := ""
 	if size != "" && size != "original" {
