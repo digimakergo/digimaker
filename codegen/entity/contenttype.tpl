@@ -1,7 +1,7 @@
 //This file is generated automatically, DO NOT EDIT IT.
 //Generated time:
 
-package main
+package entity
 
 import (
     "context"
