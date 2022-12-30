@@ -118,7 +118,7 @@ func GetSitePath(r *http.Request) string {
 	if path, ok := vars["path"]; ok {
 		sitePath = path
 	}
-	result := "/" + strings.TrimSuffix(sitePath, "/")
+	result := strings.TrimSuffix(sitePath, "/")
 	return result
 }
 

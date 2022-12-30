@@ -31,6 +31,8 @@ func GenerateUrl(content contenttype.ContentTyper, root contenttype.ContentTyper
 	}
 	if prefix != "" {
 		result = "/" + prefix + result
+	} else {
+		result = "/" + result
 	}
 	return result
 }
