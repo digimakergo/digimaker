@@ -153,7 +153,10 @@ var DMScalarType = graphql.NewScalar(graphql.ScalarConfig{
 
 func getContentGQLType(def definition.ContentType) *graphql.Object {
 	//fields on a content type
-	gqlFields := graphql.Fields{}
+	gqlFields := graphql.Fields{"id": {
+		Type: DMScalarType,
+		Name: "ID",
+	}}
 	for fieldIdentifier, fieldDef := range def.FieldMap {
 		//set fields to gqlFields
 		gqlField := graphql.Field{}
