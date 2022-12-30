@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/config"
+	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/util"
 
 	"github.com/fsnotify/fsnotify"
@@ -69,20 +70,19 @@ type ContentTypeList map[string]ContentTypeMap
 //ValidationRule defines rule for a field's validation. eg. max length
 type VaidationRule map[string]interface{}
 
-type FieldParameters map[string]interface{}
-
 type ContentType struct {
-	Name         string      `json:"name"`
-	TableName    string      `json:"table_name"`
-	RelationData []string    `json:"relation_data"`
-	NamePattern  string      `json:"name_pattern"`
-	HasVersion   bool        `json:"has_version"`
-	HasLocation  bool        `json:"has_location"`
-	Fields       []FieldDef  `json:"fields"`
-	DataFields   []DataField `json:"data_fields"`
+	Name          string               `json:"name"`
+	TableName     string               `json:"table_name"`
+	RelationData  []string             `json:"relation_data"`
+	NamePattern   string               `json:"name_pattern"`
+	HasVersion    bool                 `json:"has_version"`
+	HasLocation   bool                 `json:"has_location"`
+	HasLocationID bool                 `json:"has_location_id"` //for non-location content
+	Fields        []fieldtype.FieldDef `json:"fields"`
+	DataFields    []DataField          `json:"data_fields"`
 	//All fields where identifier is the key.
-	FieldMap            map[string]FieldDef `json:"-"`
-	FieldIdentifierList []string            `json:"-"`
+	FieldMap            map[string]fieldtype.FieldDef `json:"-"`
+	FieldIdentifierList []string                      `json:"-"`
 
 	hasRelationlist int //cache of hasRelationlist, 1(yes), -1(no), 0(not set)
 }
@@ -199,20 +199,28 @@ func (c *ContentType) Validate() error {
 			return errors.New("Field identifier shouldn't be longer than 50")
 		}
 
-		//todo: check if the fieldtype exist
-		// fType := fieldtype.GetFieldtype(field.FieldType)
-		// if fType == nil {
-		// 	return fmt.Errorf("Fieldtype %v doesn't exist", fType)
-		// }
+		if !field.IsOutput {
+			fType := fieldtype.GetFieldtype(field.FieldType)
+			if fType.DataType == "" {
+				return fmt.Errorf("Fieldtype '%v' doesn't exist", field.FieldType)
+			}
 
-		//todo: check if parameters is valid or not
+			handler := fType.NewHandler(field)
+			handlerValidator, ok := handler.(fieldtype.ValidateDefinition)
+			if ok {
+				err := handlerValidator.ValidateDefinition()
+				if err != nil {
+					return fmt.Errorf("Fieldtype '%v' of '%v': %v", field.FieldType, identifier, err)
+				}
+			}
+		}
 	}
 	return nil
 }
 
-func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) error {
+func (c *ContentType) Init(fieldCallback ...func(*fieldtype.FieldDef)) error {
 	//set all fields into FieldMap
-	fieldMap := map[string]FieldDef{}
+	fieldMap := map[string]fieldtype.FieldDef{}
 	identifierList := []string{}
 	for i, field := range c.Fields {
 		identifier := field.Identifier
@@ -243,51 +251,10 @@ func (c *ContentType) Init(fieldCallback ...func(*FieldDef)) error {
 	return err
 }
 
-//Content field definition
-type FieldDef struct {
-	Identifier   string          `json:"identifier"`
-	Name         string          `json:"name"`
-	FieldType    string          `json:"type"`
-	DefaultValue interface{}     `json:"default_value"` //eg. checkbox 1 means checked
-	Required     bool            `json:"required"`
-	Description  string          `json:"description"`
-	IsOutput     bool            `json:"is_output"`
-	Parameters   FieldParameters `json:"parameters"`
-	Children     []FieldDef      `json:"children"`
-}
-
 type DataField struct {
 	Identifier string `json:"identifier"`
 	FieldType  string `json:"fieldtype"`
 	Name       string `json:"name"`
-}
-
-func (cf *FieldDef) GetSubFields(callback ...func(*FieldDef)) map[string]FieldDef {
-	return getSubFields(cf, callback...)
-}
-
-func getSubFields(cf *FieldDef, callback ...func(*FieldDef)) map[string]FieldDef {
-	if cf.Children == nil {
-		return nil
-	} else {
-		result := map[string]FieldDef{}
-		for i, field := range cf.Children {
-			identifier := field.Identifier
-			if len(callback) > 0 {
-				callback[0](&field)
-			}
-
-			//get children under child
-			children := getSubFields(&field, callback...)
-			cf.Children[i] = field
-			for _, item := range children {
-				identifier2 := item.Identifier
-				result[identifier2] = item
-			}
-			result[identifier] = field
-		}
-		return result
-	}
 }
 
 //ContentTypeDefinition Content types which defined in contenttype.json
@@ -358,7 +325,7 @@ func loadTranslation(def map[string]ContentType, translation map[string][]map[st
 			continue
 		}
 		origFields := contentTypeDefinition["default"][contenttype].FieldMap
-		contenttypeDef.Init(func(field *FieldDef) {
+		contenttypeDef.Init(func(field *fieldtype.FieldDef) {
 			//translate name
 			context := "field/" + field.Identifier + "/name"
 			value := getTranslation(context, translist)
@@ -436,7 +403,7 @@ func GetDefinition(contentType string, language ...string) (ContentType, error) 
 //Get fields based on path pattern including container,
 //separated by /
 //. eg. article/relations, report/step1
-func GetFields(typePath string) (map[string]FieldDef, error) {
+func GetFields(typePath string) (map[string]fieldtype.FieldDef, error) {
 	arr := strings.Split(typePath, "/")
 	def, err := GetDefinition(arr[0])
 	if err != nil {
@@ -447,7 +414,7 @@ func GetFields(typePath string) (map[string]FieldDef, error) {
 	} else {
 		//get first level field
 		name := arr[1]
-		var currentField FieldDef
+		var currentField fieldtype.FieldDef
 		for _, field := range def.Fields {
 			if field.Identifier == name {
 				currentField = field
@@ -482,7 +449,7 @@ func GetFields(typePath string) (map[string]FieldDef, error) {
 	}
 }
 
-func init() {
+func Load() {
 	err := LoadDefinition()
 	if err != nil {
 		log.Fatal(err.Error())

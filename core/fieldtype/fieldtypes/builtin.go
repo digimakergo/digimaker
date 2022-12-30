@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/digimakergo/digimaker/core/db"
-	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query/querier"
@@ -29,33 +28,13 @@ type TextParameters struct {
 }
 
 type TextHandler struct {
-	definition.FieldDef
-	params TextParameters
-}
-
-func (handler *TextHandler) getParams() (TextParameters, error) {
-	//cache it
-	emptyParams := TextParameters{}
-	if handler.params == emptyParams {
-		if handler.Parameters != nil {
-			rule := TextParameters{}
-			err := mapstructure.Decode(handler.Parameters, &rule)
-			if err != nil {
-				returnError := errors.New("Validation rule error:" + err.Error())
-				return emptyParams, returnError
-			}
-			handler.params = rule
-		}
-	}
-	return handler.params, nil
+	fieldtype.FieldDef
+	Params TextParameters
 }
 
 func (handler TextHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
-	params, err := handler.getParams()
-	if err != nil {
-		return params, err
-	}
+	params := handler.Params
 	strLength := len([]rune(str))
 
 	//min length
@@ -81,15 +60,23 @@ func (handler TextHandler) LoadInput(ctx context.Context, input interface{}, mod
 	return str, nil
 }
 
+func (handler TextHandler) ValidateDefinition() error {
+	params := handler.Params
+	if params.MinLength >= params.MaxLength {
+		return errors.New("Min length should be less than max length")
+	}
+	return nil
+}
+
 func (handler TextHandler) DBField() string {
-	rule, _ := handler.getParams()
+	rule := handler.Params
 	maxLength := rule.MaxLength
 	return fmt.Sprintf("VARCHAR (%v) NOT NULL DEFAULT ''", maxLength)
 }
 
 /***** RichTextHandler ******/
 type RichTextHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 func (handler RichTextHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
@@ -154,7 +141,7 @@ func (r RichTextHandler) Output(ctx context.Context, querier querier.Querier, va
 
 /** Password handler **/
 type PasswordHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 func (handler PasswordHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
@@ -168,7 +155,7 @@ func (handler PasswordHandler) DBField() string {
 
 /** Int handler **/
 type IntHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 func (handler IntHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
@@ -189,7 +176,7 @@ func (handler IntHandler) DBField() string {
 
 /** Checkbox handler ***/
 type CheckboxHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 //Only allow 1/0 or "1"/"0"
@@ -208,7 +195,7 @@ func (handler CheckboxHandler) DBField() string {
 
 /** Radio handler ***/
 type RadioHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 //max 30 length
@@ -232,7 +219,7 @@ type DatetimeParameters struct {
 }
 
 type DatetimeHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 //support 3 format: 2020-01-10, 2020-01-10 12:12:00(server side timezone), 2021-01-10T11:45:26+02:00, 1722145855(unix)
@@ -279,7 +266,7 @@ func (handler DatetimeHandler) DBField() string {
 }
 
 //convert parameters(definition.FieldParameters - map[string]interface{}) to struct using mapstructure
-func ConvertParameters(params definition.FieldParameters, paramStruct interface{}) error {
+func ConvertParameters(params fieldtype.FieldParameters, paramStruct interface{}) error {
 	if params != nil {
 		err := mapstructure.Decode(params, &paramStruct)
 		if err != nil {
@@ -300,7 +287,7 @@ type SelectParameters struct {
 }
 
 type SelectHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 	Params SelectParameters
 }
 
@@ -361,35 +348,44 @@ func init() {
 		fieldtype.Definition{
 			Name:     "text",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
-				return TextHandler{FieldDef: def}
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
+				params := TextParameters{}
+				err := ConvertParameters(def.Parameters, &params)
+				if err != nil {
+					log.Error("Definition error on text, parameters ignored: "+err.Error(), "")
+				}
+				if params.MaxLength == 0 {
+					params.MaxLength = 255 //default text max length
+				}
+
+				return TextHandler{FieldDef: def, Params: params}
 			}})
 
 	fieldtype.Register(
 		fieldtype.Definition{Name: "richtext",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return RichTextHandler{FieldDef: def}
 			}})
 
 	fieldtype.Register(
 		fieldtype.Definition{Name: "password",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return PasswordHandler{FieldDef: def}
 			}})
 
 	fieldtype.Register(
 		fieldtype.Definition{Name: "checkbox",
 			DataType: "int",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return CheckboxHandler{FieldDef: def}
 			}})
 
 	fieldtype.Register(
 		fieldtype.Definition{Name: "radio",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return RadioHandler{FieldDef: def}
 			}})
 
@@ -397,14 +393,14 @@ func init() {
 		fieldtype.Definition{Name: "datetime",
 			DataType: "time.Time",
 			Package:  "time",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return DatetimeHandler{FieldDef: def}
 			}})
 
 	fieldtype.Register(
 		fieldtype.Definition{Name: "select",
 			DataType: "string",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				params := SelectParameters{}
 				err := ConvertParameters(def.Parameters, &params)
 				if err != nil {
@@ -416,7 +412,7 @@ func init() {
 	fieldtype.Register(
 		fieldtype.Definition{Name: "int",
 			DataType: "int", //in practise it's for positive int
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return IntHandler{FieldDef: def}
 			}})
 

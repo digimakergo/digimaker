@@ -14,5 +14,5 @@ type Querier interface {
 }
 
 type Outputer interface {
-	Ouput(ctx context.Context, querier Querier, value interface{}) interface{}
+	Output(ctx context.Context, querier Querier, value interface{}) interface{}
 }

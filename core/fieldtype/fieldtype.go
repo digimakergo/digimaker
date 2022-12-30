@@ -8,20 +8,61 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/log"
-	"github.com/digimakergo/digimaker/core/query/querier"
 )
 
 //All the definition of fieldtypes
 
 //Definition includes a fieldtype basic information
 type Definition struct {
-	Name       string                            //eg. text
-	DataType   string                            //eg. string or eg "fieldtype.CustomString"
-	Package    string                            //empty if there is no additional package, otherwise it's like 'mycompany.fieldtype'. Used for generating entity's import.
-	NewHandler func(definition.FieldDef) Handler //callback to create new handler for this fieldtype
+	Name       string                 //eg. text
+	DataType   string                 //eg. string or eg "fieldtype.CustomString"
+	Package    string                 //empty if there is no additional package, otherwise it's like 'mycompany.fieldtype'. Used for generating entity's import.
+	NewHandler func(FieldDef) Handler //callback to create new handler for this fieldtype
 }
+
+//Content field definition
+type FieldDef struct {
+	Identifier   string          `json:"identifier"`
+	Name         string          `json:"name"`
+	FieldType    string          `json:"type"`
+	DefaultValue interface{}     `json:"default_value"` //eg. checkbox 1 means checked
+	Required     bool            `json:"required"`
+	Description  string          `json:"description"`
+	IsOutput     bool            `json:"is_output"`
+	Parameters   FieldParameters `json:"parameters"`
+	Children     []FieldDef      `json:"children"`
+}
+
+func (cf *FieldDef) GetSubFields(callback ...func(*FieldDef)) map[string]FieldDef {
+	return getSubFields(cf, callback...)
+}
+
+func getSubFields(cf *FieldDef, callback ...func(*FieldDef)) map[string]FieldDef {
+	if cf.Children == nil {
+		return nil
+	} else {
+		result := map[string]FieldDef{}
+		for i, field := range cf.Children {
+			identifier := field.Identifier
+			if len(callback) > 0 {
+				callback[0](&field)
+			}
+
+			//get children under child
+			children := getSubFields(&field, callback...)
+			cf.Children[i] = field
+			for _, item := range children {
+				identifier2 := item.Identifier
+				result[identifier2] = item
+			}
+			result[identifier] = field
+		}
+		return result
+	}
+}
+
+type FieldParameters map[string]interface{}
 
 //Fieldtyper is a implementation of a fieldtype, including main logic
 type Handler interface {
@@ -30,10 +71,6 @@ type Handler interface {
 
 	//output database field. todo: can support this to generate database field automatically
 	DBField() string
-}
-
-type Outputer interface {
-	Output(ctx context.Context, querier querier.Querier, value interface{}) interface{}
 }
 
 type ValidationError struct {
@@ -68,6 +105,10 @@ type StoreHandler interface {
 	Store(ctx context.Context, value interface{}, contentType string, cid int, transaction *sql.Tx) error
 }
 
+type ValidateDefinition interface {
+	ValidateDefinition() error
+}
+
 var fieldtypeMap map[string]Definition = map[string]Definition{}
 
 //Register registers a fieldtype
@@ -96,7 +137,7 @@ func GetAllFieldtype() map[string]Definition {
 	return fieldtypeMap
 }
 
-func GethHandler(def definition.FieldDef) Handler {
+func GethHandler(def FieldDef) Handler {
 	fieldtypeStr := def.FieldType
 	fieldtypeDef := GetFieldtype(fieldtypeStr)
 	if fieldtypeDef.NewHandler == nil {
@@ -124,7 +165,7 @@ type RelationParameters struct {
 }
 
 //Convert to parameters obj
-func ConvertRelationParams(params definition.FieldParameters) (RelationParameters, error) {
+func ConvertRelationParams(params FieldParameters) (RelationParameters, error) {
 	paramsData, _ := json.Marshal(params)
 	rParams := RelationParameters{}
 	err := json.Unmarshal(paramsData, &rParams)

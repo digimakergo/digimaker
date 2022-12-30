@@ -80,6 +80,11 @@ func (c *{{$struct_name}}) IdentifierList() []string {
 	return []string{ {{range $identifier, $fieldtype := .fields}}{{if not $fieldtype.IsOutput}}"{{$identifier}}",{{end}}{{end}}}
 }
 
+func (c *{{$struct_name}}) Definition( language ...string) definition.ContentType {
+	def, _ := definition.GetDefinition( c.ContentType(), language... )
+    return def
+}
+
 //Get field value
 func (c *{{$struct_name}}) Value(identifier string) interface{} {
     {{if .settings.HasLocation}}
@@ -173,7 +178,7 @@ func init() {
         return list
     }
 
-	contenttype.Register("{{.name}}",
+	contenttype.Register( "{{.customer_identifier}}", "{{.name}}",
 		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,

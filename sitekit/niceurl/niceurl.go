@@ -37,7 +37,7 @@ func GenerateUrl(content contenttype.ContentTyper, root contenttype.ContentTyper
 
 //Matches pattern *-1231 and set mux Vars["id"] as 1231 if matches
 func ViewContentMatcher(r *http.Request, rm *mux.RouteMatch) bool {
-	uri := r.RequestURI
+	uri := r.URL.Path
 	result := false
 	if strings.HasPrefix(uri, "/") {
 		index := strings.LastIndex(uri, "-") //todo: read pattern from config file related to GenerateUrl

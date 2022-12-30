@@ -24,13 +24,13 @@ func (uh UserHandler) ValidateCreate(ctx context.Context, inputs handler.InputMa
 
 	result := handler.ValidationResult{Fields: map[string]string{}}
 
-	existing, _ := query.Fetch(context.Background(), "user", db.Cond("login", login))
+	existing, _ := query.Fetch(ctx, "user", db.Cond("login", login))
 	if existing != nil {
 		result.Fields["login"] = "Username is used already"
 	}
 
 	if viper.GetBool("user.unique_email") {
-		existing, _ = query.Fetch(context.Background(), "user", db.Cond("email", email))
+		existing, _ = query.Fetch(ctx, "user", db.Cond("email", email))
 		if existing != nil {
 			result.Fields["email"] = "Email is used already"
 		}
@@ -47,7 +47,7 @@ func (uh UserHandler) ValidateUpdate(ctx context.Context, inputs handler.InputMa
 
 	loginField := content.Value("login").(string)
 	if loginField != login {
-		existing, _ := query.Fetch(context.Background(), "user", db.Cond("login", login))
+		existing, _ := query.Fetch(ctx, "user", db.Cond("login", login))
 		if existing != nil && existing.GetID() != content.GetID() { //NB. uppcase change is allowed
 			result.Fields["login"] = "Username is used already"
 		}
@@ -56,7 +56,7 @@ func (uh UserHandler) ValidateUpdate(ctx context.Context, inputs handler.InputMa
 	emailField := content.Value("email").(string)
 	if emailField != email {
 		if viper.GetBool("user.unique_email") {
-			existing, _ := query.Fetch(context.Background(), "user", db.Cond("email", email))
+			existing, _ := query.Fetch(ctx, "user", db.Cond("email", email))
 			if existing != nil && existing.GetID() != content.GetID() { //NB. uppcase change is allowed
 				result.Fields["email"] = "Email is used already"
 			}

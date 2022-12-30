@@ -6,12 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 )
 
 type RelationHandler struct {
-	definition.FieldDef
+	fieldtype.FieldDef
 }
 
 //max 30 length
@@ -37,7 +36,7 @@ func init() {
 	fieldtype.Register(
 		fieldtype.Definition{Name: "relation",
 			DataType: "int",
-			NewHandler: func(def definition.FieldDef) fieldtype.Handler {
+			NewHandler: func(def fieldtype.FieldDef) fieldtype.Handler {
 				return RelationHandler{FieldDef: def}
 			}})
 }
