@@ -24,6 +24,7 @@ func TemplateFolder() string {
 }
 
 //Get content view template, with site setting's template folder
+//todo: support page content(render content) in matchData, eg. "render_field/display_type": "news", "render_contentype": "frontpage" - used like 'section' isolation based on visit page.
 func GetContentTemplate(ctx context.Context, content contenttype.ContentTyper, viewmode string, siteIdentifier string) string {
 
 	matchData := map[string]interface{}{}
@@ -39,7 +40,7 @@ func GetContentTemplate(ctx context.Context, content contenttype.ContentTyper, v
 	}
 	for field, fieldDef := range content.Definition().FieldMap {
 		if util.Contains(overrideFieldtypes, fieldDef.FieldType) {
-			matchData["field_"+field] = content.Value(field)
+			matchData["field/"+field] = content.Value(field)
 		}
 	}
 
