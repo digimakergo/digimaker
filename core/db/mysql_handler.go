@@ -98,7 +98,7 @@ func (handler MysqlHandler) WithContent(query Query, contentType string, option 
 
 	//Add relation join if there is
 	if def.HasRelationlist() {
-		relationColumns := []string{"JSON_ARRAYAGG( JSON_OBJECT( 'id', relation.id, 'identifier', relation.identifier, 'to_content_id', relation.to_content_id,'to_type', relation.to_type,'from_content_id', relation.from_content_id,'from_type', relation.from_type,'from_location', relation.from_location,'priority', relation.priority, 'uid', relation.uid, 'description',relation.description, 'data' ,relation.data ) ) AS relations"}
+		relationColumns := []string{"JSON_ARRAYAGG( JSON_OBJECT( 'id', relation.id, 'identifier', relation.identifier, 'to_content_id', relation.to_content_id,'to_type', relation.to_type,'from_content_id', relation.from_content_id,'from_type', relation.from_type,'from_location', relation.from_location,'priority', relation.priority, 'uid', relation.uid, 'description',relation.description, 'data' ,relation.data ) ) AS _relations"}
 		relationQuery := SingleQuery{
 			Table:     "dm_relation",
 			Alias:     "relation",
