@@ -14,7 +14,6 @@ import (
 	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
-	"github.com/digimakergo/digimaker/core/util"
 
 	// "github.com/digimakergo/digimaker/dmeditor"
 	"github.com/digimakergo/digimaker/rest"
@@ -94,12 +93,8 @@ func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[strin
 			//todo: convert graphql value to our value or nested condition
 			value := gqlField.Value.GetValue()
 			//todo: use meta from definition here
-			common := []string{"id", "published", "modified"}
-			if util.Contains(common, key) {
-				if key == "id" {
-					key = "l.id"
-				}
-				cond = cond.And(key, value)
+			if key == "id" {
+				cond = cond.And("c.id", value)
 			} else if _, ok := fieldMap[key]; ok {
 				cond = cond.And(key, value)
 			} else {
