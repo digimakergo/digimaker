@@ -317,7 +317,7 @@ func executeQuery(ctx context.Context, p graphql.ResolveParams) (interface{}, er
 	return list, err
 }
 
-func init() {
+func Load() {
 	initQuerySchema()
 
 	// try to diff method
