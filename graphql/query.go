@@ -14,6 +14,7 @@ import (
 	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
+	"github.com/digimakergo/digimaker/core/util"
 
 	// "github.com/digimakergo/digimaker/dmeditor"
 	"github.com/digimakergo/digimaker/rest"
@@ -33,7 +34,7 @@ type ArrModel struct {
 	ArrString []string
 }
 
-//set graphql/api_key in dm.yaml
+// set graphql/api_key in dm.yaml
 func AuthAPIKey(r *http.Request) error {
 	apiKey := viper.GetString("graphql.api_key")
 	if apiKey == "" {
@@ -51,7 +52,7 @@ func AuthAPIKey(r *http.Request) error {
 	}
 }
 
-//Digimaker scalar type
+// Digimaker scalar type
 func getFilterType(cType string) *graphql.Scalar {
 	def, _ := definition.GetDefinition(cType)
 
@@ -97,6 +98,24 @@ func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[strin
 				cond = cond.And("c.id", value)
 			} else if _, ok := fieldMap[key]; ok {
 				cond = cond.And(key, value)
+			} else if key == "location" {
+				locationObj := value.([]*ast.ObjectField)[0]
+				name := locationObj.Name.Value
+				value := locationObj.Value.GetValue()
+				if util.Contains(definition.LocationColumns, name) {
+					return cond.And("l."+name, value), nil
+				} else {
+					return db.FalseCond(), fmt.Errorf("%v not found in location", name)
+				}
+			} else if key == "metadata" {
+				metadataObj := value.([]*ast.ObjectField)[0]
+				name := metadataObj.Name.Value
+				value := metadataObj.Value.GetValue()
+				if util.Contains(definition.MetaColumns, name) {
+					return cond.And("c._"+name, value), nil
+				} else {
+					return db.FalseCond(), fmt.Errorf("%v not found in metadata", name)
+				}
 			} else {
 				return db.FalseCond(), fmt.Errorf("Field %v not found", key)
 			}
@@ -107,7 +126,7 @@ func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[strin
 	}
 }
 
-//Digimaker scalar type
+// Digimaker scalar type
 var DMScalarType = graphql.NewScalar(graphql.ScalarConfig{
 	Name:        "DMScalarType",
 	Description: "Digimaker scalar type.",
@@ -248,7 +267,7 @@ func QueryGraphql(w http.ResponseWriter, r *http.Request) {
 	w.Write(resultStr)
 }
 
-//build arguments on a content type
+// build arguments on a content type
 func buildContentArgs(cType string) graphql.FieldConfigArgument {
 	result := make(graphql.FieldConfigArgument, 0)
 
@@ -277,7 +296,7 @@ func buildContentArgs(cType string) graphql.FieldConfigArgument {
 	return result
 }
 
-//execute quer
+// execute quer
 func executeQuery(ctx context.Context, p graphql.ResolveParams) (interface{}, error) {
 	cType := p.Info.FieldName
 	condition := db.EmptyCond()
