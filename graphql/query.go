@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
@@ -153,11 +154,51 @@ func getContentGQLType(def definition.ContentType) *graphql.Object {
 		Name: "ID",
 	}}
 	for fieldIdentifier, fieldDef := range def.FieldMap {
-		//set fields to gqlFields
-		gqlField := graphql.Field{}
-		gqlField.Type = DMScalarType
-		gqlField.Name = fieldDef.Name
-		gqlFields[fieldIdentifier] = &gqlField
+		//relationlist
+		if fieldDef.FieldType == "relationlist" {
+			if fieldDef.Parameters != nil {
+				relationlistType := fieldDef.Parameters["type"].(string)
+				contenttypeDef, _ := definition.GetDefinition(relationlistType)
+				gqlRelationlistObject := getContentGQLType(contenttypeDef)
+
+				gqlFields[fieldIdentifier] = &graphql.Field{
+					Type: graphql.NewList(gqlRelationlistObject),
+					Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+						result := []contenttype.ContentTyper{}
+						content := p.Source.(contenttype.ContentTyper)
+						relationlistV := content.Value(p.Info.FieldName)
+						if relationlistV != nil {
+							relationlist := relationlistV.(contenttype.RelationList)
+							ids := []int{}
+							fromType := ""
+							for _, item := range relationlist {
+								ids = append(ids, item.FromContentID)
+								if fromType == "" {
+									fromType = item.FromType
+								}
+							}
+
+							if len(ids) > 0 {
+								var err error
+								result, _, err = query.List(p.Context, fromType, db.Cond("c.id", ids))
+								//todo: sort by relation list priority
+								if err != nil {
+									return nil, err
+								}
+							}
+						}
+						return result, nil
+					},
+					Name: "Relationlist"}
+
+			}
+		} else {
+			//set fields to gqlFields
+			gqlField := graphql.Field{}
+			gqlField.Type = DMScalarType
+			gqlField.Name = fieldDef.Name
+			gqlFields[fieldIdentifier] = &gqlField
+		}
 	}
 
 	//customized type
