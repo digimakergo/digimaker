@@ -179,6 +179,34 @@ func getContentGQLType(def definition.ContentType) *graphql.Object {
 		gqlFields[fieldIdentifier] = &gqlField
 	}
 
+	// Metadata.
+	metadataFields := graphql.Fields{}
+	for _, metaField := range definition.MetaColumns {
+		metadataFields[metaField] = &graphql.Field{
+			Type: DMScalarType,
+		}
+	}
+	gqlFields["metadata"] = &graphql.Field{
+		Type: graphql.NewObject(graphql.ObjectConfig{
+			Name:   "MetadataFields",
+			Fields: metadataFields,
+		}),
+	}
+
+	// Location.
+	locationFields := graphql.Fields{}
+	for _, locationField := range definition.LocationColumns {
+		locationFields[locationField] = &graphql.Field{
+			Type: DMScalarType,
+		}
+	}
+	gqlFields["location"] = &graphql.Field{
+		Type: graphql.NewObject(graphql.ObjectConfig{
+			Name:   "LocationFields",
+			Fields: locationFields,
+		}),
+	}
+
 	//customized type
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name:   def.Name,
