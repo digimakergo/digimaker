@@ -24,5 +24,4 @@ require (
 	github.com/volatiletech/sqlboiler v3.7.1+incompatible
 	golang.org/x/crypto v0.0.0-20210322153248-0c34fe9e7dc2
 	golang.org/x/text v0.3.6
-	gopkg.in/flosch/pongo2.v2 v2.0.0-20141028005603-ca73590a271e
 )
