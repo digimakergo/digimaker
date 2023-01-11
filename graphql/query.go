@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
@@ -98,19 +99,15 @@ func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[strin
 				cond = cond.And("c.id", value)
 			} else if _, ok := fieldMap[key]; ok {
 				cond = cond.And(key, value)
-			} else if key == "location" {
-				locationObj := value.([]*ast.ObjectField)[0]
-				name := locationObj.Name.Value
-				value := locationObj.Value.GetValue()
+			} else if strings.HasPrefix(key, "_location_") {
+				name := strings.TrimPrefix(key, "_location_")
 				if util.Contains(definition.LocationColumns, name) {
 					return cond.And("l."+name, value), nil
 				} else {
 					return db.FalseCond(), fmt.Errorf("%v not found in location", name)
 				}
-			} else if key == "metadata" {
-				metadataObj := value.([]*ast.ObjectField)[0]
-				name := metadataObj.Name.Value
-				value := metadataObj.Value.GetValue()
+			} else if strings.HasPrefix(key, "_metadata_") {
+				name := strings.TrimPrefix(key, "_metadata_")
 				if util.Contains(definition.MetaColumns, name) {
 					return cond.And("c._"+name, value), nil
 				} else {
