@@ -2,56 +2,20 @@ package graphql
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/db"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
-	"github.com/digimakergo/digimaker/core/fieldtype/fieldtypes"
-	"github.com/digimakergo/digimaker/core/log"
 	"github.com/digimakergo/digimaker/core/query"
 	"github.com/digimakergo/digimaker/core/util"
 
 	// "github.com/digimakergo/digimaker/dmeditor"
-	"github.com/digimakergo/digimaker/rest"
 	"github.com/graphql-go/graphql"
 	"github.com/graphql-go/graphql/language/ast"
-	"github.com/spf13/viper"
 )
-
-type postData struct {
-	Query     string                 `json:"query"`
-	Operation string                 `json:"operation"`
-	Variables map[string]interface{} `json:"variables"`
-}
-
-type ArrModel struct {
-	ArrInt    []int
-	ArrString []string
-}
-
-// set graphql/api_key in dm.yaml
-func AuthAPIKey(r *http.Request) error {
-	apiKey := viper.GetString("graphql.api_key")
-	if apiKey == "" {
-		log.Error("Not api key set up", "")
-		return errors.New("Set up issue")
-	}
-	rApiKey := r.Header.Get("apiKey")
-	if rApiKey == "" {
-		return errors.New("Need authorization")
-	}
-	if rApiKey == apiKey {
-		return nil
-	} else {
-		return errors.New("Wrong api key")
-	}
-}
 
 // Digimaker scalar type
 func getFilterType(cType string) *graphql.Scalar {
@@ -67,7 +31,7 @@ func getFilterType(cType string) *graphql.Scalar {
 			return value
 		},
 		ParseLiteral: func(valueAST ast.Value) interface{} {
-			cond, err := generateCondition(valueAST, db.EmptyCond(), def.FieldMap)
+			cond, err := generateQueryCondition(valueAST, db.EmptyCond(), def.FieldMap)
 			if err != nil {
 				return err
 			}
@@ -78,11 +42,11 @@ func getFilterType(cType string) *graphql.Scalar {
 	return filterInput
 }
 
-func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[string]fieldtype.FieldDef) (db.Condition, error) {
+func generateQueryCondition(valueAST ast.Value, cond db.Condition, fieldMap map[string]fieldtype.FieldDef) (db.Condition, error) {
 	switch v := valueAST.(type) {
 	case *ast.ListValue:
 		for _, item := range v.Values {
-			objectCond, err := generateCondition(item, db.EmptyCond(), fieldMap)
+			objectCond, err := generateQueryCondition(item, db.EmptyCond(), fieldMap)
 			if err != nil {
 				return db.FalseCond(), err
 			}
@@ -123,97 +87,7 @@ func generateCondition(valueAST ast.Value, cond db.Condition, fieldMap map[strin
 	}
 }
 
-// Digimaker scalar type
-var DMScalarType = graphql.NewScalar(graphql.ScalarConfig{
-	Name:        "DMScalarType",
-	Description: "Digimaker scalar type.",
-	Serialize: func(value interface{}) interface{} {
-		switch value := value.(type) {
-		case fieldtypes.Json:
-			// result, _ := dmeditor.ProceedData(context.Background(), value)
-			return value
-		default:
-			return value
-		}
-	},
-	ParseValue: func(value interface{}) interface{} {
-		switch value := value.(type) {
-		case string:
-			j := fieldtypes.Json{}
-			j.Content = []byte(value)
-			return j
-		default:
-			return nil
-		}
-	},
-	ParseLiteral: func(valueAST ast.Value) interface{} {
-		switch valueAST := valueAST.(type) {
-		case *ast.StringValue:
-			return fieldtypes.Json{Content: []byte(valueAST.Value)}
-		default:
-			return nil
-		}
-	},
-})
-
-// var typeMapping map[string]graphql.Type = map[string]graphql.Type{
-// 	"text":     graphql.String,
-// 	"richtext": graphql.String,
-// 	"int":      graphql.Int,
-// }
-
-func getContentGQLType(def definition.ContentType) *graphql.Object {
-	//fields on a content type
-	gqlFields := graphql.Fields{"id": {
-		Type: DMScalarType,
-		Name: "ID",
-	}}
-	for fieldIdentifier, fieldDef := range def.FieldMap {
-		//set fields to gqlFields
-		gqlField := graphql.Field{}
-		gqlField.Type = DMScalarType
-		gqlField.Name = fieldDef.Name
-		gqlFields[fieldIdentifier] = &gqlField
-	}
-
-	// Metadata.
-	metadataFields := graphql.Fields{}
-	for _, metaField := range definition.MetaColumns {
-		metadataFields[metaField] = &graphql.Field{
-			Type: DMScalarType,
-		}
-	}
-	gqlFields["metadata"] = &graphql.Field{
-		Type: graphql.NewObject(graphql.ObjectConfig{
-			Name:   "MetadataFields",
-			Fields: metadataFields,
-		}),
-	}
-
-	// Location.
-	locationFields := graphql.Fields{}
-	for _, locationField := range definition.LocationColumns {
-		locationFields[locationField] = &graphql.Field{
-			Type: DMScalarType,
-		}
-	}
-	gqlFields["location"] = &graphql.Field{
-		Type: graphql.NewObject(graphql.ObjectConfig{
-			Name:   "LocationFields",
-			Fields: locationFields,
-		}),
-	}
-
-	//customized type
-	return graphql.NewObject(graphql.ObjectConfig{
-		Name:   def.Name,
-		Fields: gqlFields,
-	})
-}
-
-var querySchema graphql.Schema
-
-func initQuerySchema() {
+func queryType() *graphql.Object {
 	//content types
 	gqlContentTypes := graphql.Fields{}
 	for cType, def := range definition.GetDefinitionList()["default"] {
@@ -221,79 +95,20 @@ func initQuerySchema() {
 		gqlContentTypes[cType] = &graphql.Field{
 			Name: def.Name,
 			Type: graphql.NewList(contentGQLType),
-			Args: buildContentArgs(cType),
+			Args: buildQueryArgs(cType),
 			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return executeQuery(p.Context, p)
+				return resolveQuery(p.Context, p)
 			},
 		}
 	}
-
-	//query
-	var gqlQuery = graphql.NewObject(graphql.ObjectConfig{
+	return graphql.NewObject(graphql.ObjectConfig{
 		Name:   "Query",
 		Fields: gqlContentTypes,
 	})
-
-	querySchema, _ = graphql.NewSchema(
-		graphql.SchemaConfig{
-			Query: gqlQuery,
-		})
-}
-
-func QueryGraphql(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	authErr := AuthAPIKey(r)
-	if authErr != nil {
-		rest.HandleError(authErr, w)
-		return
-	}
-
-	defer func() {
-		if err := recover(); err != nil {
-			rest.HandleError(err.(error), w)
-			return
-		}
-	}()
-
-	queryParams := ""
-	if http.MethodGet == r.Method {
-		queryParams = r.URL.Query().Get("query")
-		if queryParams == "" {
-			rest.HandleError(errors.New("query is nil"), w)
-			return
-		}
-	} else {
-		// todo : parse post request
-		postParams := postData{}
-		requestStr, err := io.ReadAll(r.Body)
-		if err != nil {
-			rest.HandleError(err, w)
-			return
-		}
-		err = json.Unmarshal(requestStr, &postParams)
-		if err != nil {
-			rest.HandleError(errors.New("post unmarshal is nil"), w)
-			return
-		}
-		// set params
-		queryParams = postParams.Query
-	}
-
-	result := graphql.Do(graphql.Params{
-		Context:       ctx,
-		Schema:        querySchema,
-		RequestString: queryParams,
-	})
-
-	resultStr, err := json.Marshal(result)
-	if err != nil {
-		rest.HandleError(err, w)
-	}
-	w.Write(resultStr)
 }
 
 // build arguments on a content type
-func buildContentArgs(cType string) graphql.FieldConfigArgument {
+func buildQueryArgs(cType string) graphql.FieldConfigArgument {
 	result := make(graphql.FieldConfigArgument, 0)
 
 	result["filter"] = &graphql.ArgumentConfig{
@@ -322,7 +137,7 @@ func buildContentArgs(cType string) graphql.FieldConfigArgument {
 }
 
 // execute quer
-func executeQuery(ctx context.Context, p graphql.ResolveParams) (interface{}, error) {
+func resolveQuery(ctx context.Context, p graphql.ResolveParams) (interface{}, error) {
 	cType := p.Info.FieldName
 	condition := db.EmptyCond()
 	// condition key query
@@ -354,11 +169,4 @@ func executeQuery(ctx context.Context, p graphql.ResolveParams) (interface{}, er
 
 	list, _, err := query.List(ctx, cType, condition)
 	return list, err
-}
-
-func Load() {
-	initQuerySchema()
-
-	// try to diff method
-	rest.RegisterRoute("/graphql", QueryGraphql, "POST")
 }
