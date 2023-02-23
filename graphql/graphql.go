@@ -1,11 +1,13 @@
 package graphql
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 
 	"github.com/digimakergo/digimaker/core/log"
+	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/rest"
 	"github.com/graphql-go/graphql"
 	"github.com/spf13/viper"
@@ -41,7 +43,8 @@ func Load() {
 
 // handleGraphql handles graphQL requests including queries and mutations.
 func handleGraphql(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
+	// TODO: Value should not be one.
+	ctx := context.WithValue(r.Context(), util.CtxKeyUserID, 1)
 	authErr := AuthAPIKey(r)
 	if authErr != nil {
 		rest.HandleError(authErr, w)
