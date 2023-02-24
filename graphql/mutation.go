@@ -58,13 +58,11 @@ func buildMutationArgs(cType string) graphql.FieldConfigArgument {
 				switch v := valueAST.(type) {
 				case *ast.ListValue:
 					def, _ := definition.GetDefinition(cType)
-					result := []map[string]interface{}{}
+					result := make([]inputData, len(v.Values))
 					for _, v := range v.Values {
 						if object, ok := v.(*ast.ObjectValue); ok {
-							updateData := map[string]interface{}{
-								"data": make(handler.InputMap),
-							}
-							if err := parseInput(object.Fields, updateData, def.FieldMap); err != nil {
+							updateData := inputData{data: make(handler.InputMap)}
+							if err := parseInput(object.Fields, &updateData, def.FieldMap); err != nil {
 								return fmt.Errorf("failed to parse input data: %w", err)
 							}
 							result = append(result, updateData)
@@ -85,18 +83,13 @@ func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{},
 	result := []contenttype.ContentTyper{}
 	if inputs, ok := p.Args["updateData"]; ok {
 		switch v := inputs.(type) {
-		case []map[string]interface{}:
+		case []inputData:
 			for _, item := range v {
 				userId := util.CurrentUserID(ctx)
 				if userId == 0 {
 					return nil, errors.New("need to login")
 				}
-				idInt, err := strconv.Atoi(item["id"].(string))
-				if err != nil {
-					return nil, fmt.Errorf("could not convert id string to int: %w", err)
-				}
-				data := item["data"].(handler.InputMap)
-				content, err := handler.UpdateByContentID(ctx, p.Info.FieldName, idInt, data, userId)
+				content, err := handler.UpdateByContentID(ctx, p.Info.FieldName, item.id, item.data, userId)
 				if err != nil {
 					return nil, fmt.Errorf("could not update content by id: %w", err)
 				}
@@ -111,46 +104,37 @@ func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{},
 	return result, nil
 }
 
-func parseInput(fields []*ast.ObjectField, inputData map[string]interface{}, fieldMap map[string]fieldtype.FieldDef) error {
+func parseInput(fields []*ast.ObjectField, input *inputData, fieldMap map[string]fieldtype.FieldDef) error {
 	for _, field := range fields {
 		key := field.Name.Value
 		value := field.Value.GetValue()
 		if key == "id" {
-			if v, ok := value.(string); ok {
-				inputData["id"] = v
-			} else {
-				return errors.New("id field should be string")
+			id, err := strconv.Atoi(value.(string))
+			if err != nil {
+				return fmt.Errorf("could not convert id string to int: %w", err)
 			}
+			input.id = id
 		}
 		if key == "data" {
-			if v, ok := value.([]*ast.ObjectField); ok {
-				if err := parseInput(v, inputData, fieldMap); err != nil {
-					return err
+			if fields, ok := value.([]*ast.ObjectField); ok {
+				for _, field := range fields {
+					key := field.Name.Value
+					value := field.Value.GetValue()
+					if _, ok := fieldMap[key]; !ok {
+						return fmt.Errorf("invalid query field: %s", key)
+					}
+					input.data[key] = value
 				}
 			} else {
 				return fmt.Errorf("data field should be an object: %#v", value)
 			}
 		}
-		if key == "title" {
-			if _, ok := fieldMap[key]; !ok {
-				return fmt.Errorf("invalid query field: %s", key)
-			}
-			if v, ok := value.(string); ok {
-				inputData["data"].(handler.InputMap)["title"] = v
-			} else {
-				return errors.New("title field should be string")
-			}
-		}
-		if key == "summary" {
-			if _, ok := fieldMap[key]; !ok {
-				return fmt.Errorf("invalid query field: %s", key)
-			}
-			if v, ok := value.(string); ok {
-				inputData["data"].(handler.InputMap)["summary"] = v
-			} else {
-				return errors.New("summary field should be string")
-			}
-		}
 	}
 	return nil
+}
+
+// inputData is user input data.
+type inputData struct {
+	id   int
+	data handler.InputMap
 }
