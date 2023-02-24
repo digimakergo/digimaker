@@ -80,11 +80,12 @@ func buildMutationArgs(cType string) graphql.FieldConfigArgument {
 }
 
 func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{}, error) {
-	result := []contenttype.ContentTyper{}
+	var result []contenttype.ContentTyper
 	if inputs, ok := p.Args["updateData"]; ok {
 		switch v := inputs.(type) {
 		case []inputData:
-			for _, item := range v {
+			result = make([]contenttype.ContentTyper, len(v))
+			for i, item := range v {
 				userId := util.CurrentUserID(ctx)
 				if userId == 0 {
 					return nil, errors.New("need to login")
@@ -93,7 +94,7 @@ func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{},
 				if err != nil {
 					return nil, fmt.Errorf("could not update content by id: %w", err)
 				}
-				result = append(result, content)
+				result[i] = content
 			}
 		case error:
 			return nil, v
