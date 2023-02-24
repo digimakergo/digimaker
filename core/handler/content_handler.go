@@ -347,8 +347,9 @@ func UpdateByContentID(ctx context.Context, contentType string, contentID int, i
 	if err != nil {
 		return false, fmt.Errorf("Failed to get content via content id: %w", err)
 	}
-	if content.GetID() == 0 {
-		return false, fmt.Errorf("Got empty content: %w", err)
+
+	if content == nil {
+		return false, fmt.Errorf("Got empty content")
 	}
 
 	return Update(ctx, content, inputs, userId)
@@ -359,7 +360,7 @@ func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (bool,
 	if err != nil {
 		return false, fmt.Errorf("Failed to get content via id: %w", err)
 	}
-	if content.GetID() == 0 {
+	if content == nil {
 		return false, errors.New("Got empty content")
 	}
 
