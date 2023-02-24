@@ -342,26 +342,26 @@ func CreateVersion(ctx context.Context, content contenttype.ContentTyper, versio
 	return version.ID, nil
 }
 
-func UpdateByContentID(ctx context.Context, contentType string, contentID int, inputs InputMap, userId int) (bool, error) {
+func UpdateByContentID(ctx context.Context, contentType string, contentID int, inputs InputMap, userId int) (contenttype.ContentTyper, error) {
 	content, err := query.FetchByCID(ctx, contentType, contentID)
 	if err != nil {
-		return false, fmt.Errorf("Failed to get content via content id: %w", err)
+		return nil, fmt.Errorf("Failed to get content via content id: %w", err)
 	}
 
 	if content == nil {
-		return false, fmt.Errorf("Got empty content")
+		return nil, fmt.Errorf("Got empty content")
 	}
 
 	return Update(ctx, content, inputs, userId)
 }
 
-func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (bool, error) {
+func UpdateByID(ctx context.Context, id int, inputs InputMap, userId int) (contenttype.ContentTyper, error) {
 	content, err := query.FetchByLID(ctx, id)
 	if err != nil {
-		return false, fmt.Errorf("Failed to get content via id: %w", err)
+		return nil, fmt.Errorf("Failed to get content via id: %w", err)
 	}
 	if content == nil {
-		return false, errors.New("Got empty content")
+		return nil, errors.New("Got empty content")
 	}
 
 	return Update(ctx, content, inputs, userId)
@@ -383,7 +383,7 @@ func getInputFields(inputs InputMap, def definition.ContentType) []string {
 //Update content.
 //The inputs doesn't need to include all required fields. However if it's there,
 // it will check if it's required&empty
-func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputMap, userId int) (bool, error) {
+func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputMap, userId int) (contenttype.ContentTyper, error) {
 	contentType := content.ContentType()
 	contentDef, _ := definition.GetDefinition(contentType)
 	fieldsDefinition := contentDef.FieldMap
@@ -391,14 +391,14 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	//permission check
 	updatedFields := getInputFields(inputs, contentDef)
 	if !permission.CanUpdate(ctx, content, updatedFields, userId) {
-		return false, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
+		return nil, errors.New("User " + strconv.Itoa(userId) + " doesn't have access to update")
 	}
 
 	//Validate
 	log.Debug("Validating", "contenthandler.update", ctx)
 	valid, validationResult := Validate(ctx, contentType, fieldsDefinition, inputs, false)
 	if !valid {
-		return false, validationResult
+		return nil, validationResult
 	}
 
 	//validate from contenttype handler
@@ -407,7 +407,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		log.Debug("Validating from update handler", "contenthandler.validate", ctx)
 		valid, validationResult = validator.ValidateUpdate(ctx, inputs, content)
 		if !valid {
-			return false, validationResult
+			return nil, validationResult
 		}
 	}
 
@@ -424,7 +424,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 				var err error
 				value, err = fieldWithEvent.BeforeStore(ctx, value, existing, "")
 				if err != nil {
-					return false, err
+					return nil, err
 				}
 			}
 			content.SetValue(identifier, value)
@@ -434,7 +434,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	//Save to new version
 	tx, err := db.CreateTx()
 	if err != nil {
-		return false, fmt.Errorf("Create transaction error: %w", err)
+		return nil, fmt.Errorf("Create transaction error: %w", err)
 	}
 
 	//Save new version and set to content
@@ -445,7 +445,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if err != nil {
 			//todo: rollback here not inside.
 			log.Debug("Create new version failed: "+err.Error(), "contenthandler.update", ctx)
-			return false, fmt.Errorf("Can not save version: %w", err)
+			return nil, fmt.Errorf("Can not save version: %w", err)
 		}
 		log.Debug("New version created", "contenthandler.update", ctx)
 		content.GetMetadata().Version = version
@@ -465,7 +465,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 			err := storeHandler.Store(ctx, content.Value(identifier), content.ContentType(), content.GetID(), tx)
 			if err != nil {
 				tx.Rollback()
-				return false, err
+				return nil, err
 			}
 		}
 	}
@@ -474,7 +474,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	if err != nil {
 		tx.Rollback()
 		log.Debug("Saving content failed: "+err.Error(), "contenthandler.update", ctx)
-		return false, fmt.Errorf("Saving content error: %w", err)
+		return nil, fmt.Errorf("Saving content error: %w", err)
 	}
 
 	//Updated location related
@@ -491,7 +491,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if err != nil {
 			tx.Rollback()
 			log.Debug("Updating location failed: "+err.Error(), "contenthandler.update", ctx)
-			return false, fmt.Errorf("Updating location info error: %w", err)
+			return nil, fmt.Errorf("Updating location info error: %w", err)
 		}
 		log.Debug("Location updated", "contenthandler.update", ctx)
 	}
@@ -503,7 +503,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 		if err != nil {
 			tx.Rollback()
 			log.Error("Error from callback: "+err.Error(), "contenthandler.update", ctx)
-			return false, err
+			return nil, err
 		}
 	}
 
@@ -518,7 +518,7 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	err = InvokeCallback(ctx, "update", true, matchData, content, tx, inputs)
 	if err != nil {
 		tx.Rollback()
-		return false, fmt.Errorf("Invoking callback error: %w", err)
+		return nil, fmt.Errorf("Invoking callback error: %w", err)
 	}
 
 	log.Debug("All done. Commitinng.", "contenthandler.update", ctx)
@@ -526,10 +526,10 @@ func Update(ctx context.Context, content contenttype.ContentTyper, inputs InputM
 	if err != nil {
 		tx.Rollback()
 		log.Error("Commit error: "+err.Error(), "contenthandler.update", ctx)
-		return false, fmt.Errorf("Commit error: %w", err)
+		return nil, fmt.Errorf("Commit error: %w", err)
 	}
 
-	return true, nil
+	return content, nil
 }
 
 //Move moves contents to target

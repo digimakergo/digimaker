@@ -57,12 +57,8 @@ func Enable(ctx context.Context, user contenttype.ContentTyper, enable bool, use
 		if enable {
 			disableInt = 0
 		}
-		result, err := Update(ctx, user, map[string]interface{}{"disabled": disableInt}, userId)
-		if result {
-			return nil
-		} else if err != nil {
-			return err
-		}
+		_, err := Update(ctx, user, map[string]interface{}{"disabled": disableInt}, userId)
+		return err
 	}
 	return nil
 }
