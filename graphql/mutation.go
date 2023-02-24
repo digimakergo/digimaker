@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 
+	"github.com/digimakergo/digimaker/core/contenttype"
 	"github.com/digimakergo/digimaker/core/definition"
 	"github.com/digimakergo/digimaker/core/fieldtype"
 	"github.com/digimakergo/digimaker/core/handler"
@@ -81,6 +82,7 @@ func buildMutationArgs(cType string) graphql.FieldConfigArgument {
 }
 
 func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{}, error) {
+	result := []contenttype.ContentTyper{}
 	if inputs, ok := p.Args["updateData"]; ok {
 		switch v := inputs.(type) {
 		case []map[string]interface{}:
@@ -94,10 +96,11 @@ func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{},
 					return nil, fmt.Errorf("could not convert id string to int: %w", err)
 				}
 				data := item["data"].(handler.InputMap)
-				_, err = handler.UpdateByContentID(ctx, p.Info.FieldName, idInt, data, userId)
+				content, err := handler.UpdateByContentID(ctx, p.Info.FieldName, idInt, data, userId)
 				if err != nil {
 					return nil, fmt.Errorf("could not update content by id: %w", err)
 				}
+				result = append(result, content)
 			}
 		case error:
 			return nil, v
@@ -105,7 +108,7 @@ func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{},
 			return nil, errors.New("could not resolve, unknown updateData")
 		}
 	}
-	return nil, nil
+	return result, nil
 }
 
 func parseInput(fields []*ast.ObjectField, inputData map[string]interface{}, fieldMap map[string]fieldtype.FieldDef) error {
