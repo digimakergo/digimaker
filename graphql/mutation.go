@@ -59,13 +59,13 @@ func buildMutationArgs(cType string) graphql.FieldConfigArgument {
 				case *ast.ListValue:
 					def, _ := definition.GetDefinition(cType)
 					result := make([]inputData, len(v.Values))
-					for _, v := range v.Values {
+					for i, v := range v.Values {
 						if object, ok := v.(*ast.ObjectValue); ok {
 							updateData := inputData{data: make(handler.InputMap)}
 							if err := parseInput(object.Fields, &updateData, def.FieldMap); err != nil {
 								return fmt.Errorf("failed to parse input data: %w", err)
 							}
-							result = append(result, updateData)
+							result[i] = updateData
 						}
 					}
 					return result
