@@ -18,7 +18,7 @@ import (
 // Returns the following schema:
 //
 //	mutation update {
-//	  article(updateData: [{data: {title: "", summary: ""}, id: 1}]) {
+//	  updateArticle(updateData: [{data: {title: "", summary: ""}, id: 1}]) {
 //	    id
 //	    title
 //	  }
@@ -26,6 +26,7 @@ import (
 func mutationType() *graphql.Object {
 	gqlContentTypes := graphql.Fields{}
 	for cType, def := range definition.GetDefinitionList()["default"] {
+		cType = "update" + util.UpperName(cType)
 		contentGQLType := getContentGQLType(def)
 		gqlContentTypes[cType] = &graphql.Field{
 			Name: def.Name,
