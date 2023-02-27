@@ -26,7 +26,7 @@ import (
 func mutationType() *graphql.Object {
 	gqlContentTypes := graphql.Fields{}
 	for cType, def := range definition.GetDefinitionList()["default"] {
-		cType = "update" + cType
+		cType = "update" + util.UpperName(cType)
 		contentGQLType := getContentGQLType(def)
 		gqlContentTypes[cType] = &graphql.Field{
 			Name: def.Name,
