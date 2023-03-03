@@ -6,10 +6,15 @@ package niceurl
 
 import (
 	"net/http"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/digimakergo/digimaker/core/contenttype"
+	"github.com/digimakergo/digimaker/core/db"
+	"github.com/digimakergo/digimaker/core/query"
+	"github.com/digimakergo/digimaker/core/util"
+	"github.com/spf13/viper"
 
 	"github.com/gorilla/mux"
 )
@@ -20,12 +25,12 @@ func GenerateUrl(content contenttype.ContentTyper, root contenttype.ContentTyper
 	if location != nil {
 		rootDepth := root.GetLocation().Depth
 		path := strings.Join(strings.Split(location.IdentifierPath, "/")[rootDepth:], "/")
-		pattern := "digit" //todo: read from config file.
-		switch pattern {
-		case "digit":
+		if util.Contains(getPathContenttypes(), content.ContentType()) {
+			result = path
+		} else {
 			result = path + "-" + strconv.Itoa(location.ID)
-		default:
 		}
+
 	} else {
 		//todo: give a warning.
 	}
@@ -35,6 +40,10 @@ func GenerateUrl(content contenttype.ContentTyper, root contenttype.ContentTyper
 		result = "/" + result
 	}
 	return result
+}
+
+func getPathContenttypes() []string {
+	return viper.GetStringSlice("site_settings.niceurl_contenttype")
 }
 
 //Matches pattern *-1231 and set mux Vars["id"] as 1231 if matches
@@ -49,8 +58,28 @@ func ViewContentMatcher(r *http.Request, rm *mux.RouteMatch) bool {
 			if err == nil {
 				rm.Vars = map[string]string{"id": str}
 				result = true
+			} else {
+				result = MatchPath(r, rm)
 			}
+		} else {
+			result = MatchPath(r, rm)
 		}
 	}
 	return result
+}
+
+func MatchPath(r *http.Request, rm *mux.RouteMatch) bool {
+	uri := r.RequestURI
+	if ok, _ := regexp.Match("[a-zA-Z0-9_\\-\\/+]$", []byte(uri)); ok {
+		for _, cType := range getPathContenttypes() {
+			root, _ := query.FetchLocationByID(r.Context(), 3) //todo:
+			path := root.IdentifierPath + uri
+			location, _ := query.FetchLocation(r.Context(), db.Cond("content_type", cType).Cond("identifier_path", path))
+			if location.ID > 0 {
+				rm.Vars = map[string]string{"id": strconv.Itoa(location.ID)}
+				return true
+			}
+		}
+	}
+	return false
 }
