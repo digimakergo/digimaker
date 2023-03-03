@@ -1,6 +1,7 @@
 package rest
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"strconv"
@@ -12,13 +13,22 @@ import (
 	"github.com/digimakergo/digimaker/core/util"
 	"github.com/digimakergo/digimaker/rest"
 	"github.com/digimakergo/digimaker/sitekit"
+	"github.com/spf13/viper"
 )
 
 func GetView(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	userID := rest.CheckUserID(ctx, w)
+	userID := util.CurrentUserID(ctx)
 	if userID == 0 {
-		return
+		//api key auth
+		apiKey := viper.GetString("graphql.api_key") //todo: congfig api_key separate
+		rApiKey := r.Header.Get("apiKey")
+		if rApiKey != "" && apiKey == rApiKey {
+			ctx = context.WithValue(r.Context(), util.CtxKeyUserID, 1)
+		} else {
+			rest.HandleError(errors.New("Invalid api key"), w)
+			return
+		}
 	}
 
 	idStr := r.URL.Query().Get("id")
