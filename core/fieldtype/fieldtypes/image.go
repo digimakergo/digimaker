@@ -140,9 +140,10 @@ func (handler ImageHandler) DBField() string {
 func GenerateThumbnail(imagePath string) error {
 	size := viper.GetString("general.image_thumbnail_size")
 	thumbCacheFolder := ThumbnailFolder()
-	return util.ResizeImage(config.PathWithVar(imagePath), config.PathWithVar(thumbCacheFolder+"/"+imagePath), size)
+	return util.ResizeImage(config.PathWithVar(imagePath), thumbCacheFolder+"/"+imagePath, size)
 }
 
+//thumbnail folder with absolute path
 func ThumbnailFolder() string {
 	thumbFolder := config.PathWithVar(viper.GetString("general.image_thumbnail_folder"))
 	return thumbFolder
