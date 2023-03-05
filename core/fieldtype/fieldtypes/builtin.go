@@ -111,7 +111,7 @@ func (r RichTextHandler) Output(ctx context.Context, querier querier.Querier, va
 			return currentStr
 		}
 
-		condition := db.Cond("c.cuid", contentInfo[1])
+		condition := db.Cond("c._cuid", contentInfo[1])
 		content, _ := querier.Fetch(ctx, contentInfo[0], condition)
 		widthStr := ""
 		if width, ok := attributeMap["width"]; ok {
