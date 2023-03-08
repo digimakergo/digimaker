@@ -37,8 +37,8 @@ func mutationType() *graphql.Object {
 //	  }
 //	}
 func buildUpdateType(gqlContentTypes graphql.Fields, cType string, def definition.ContentType, contentGQLType *graphql.Object) {
-	cType = "update" + util.UpperName(cType)
-	gqlContentTypes[cType] = &graphql.Field{
+	updateName := "update" + util.UpperName(cType)
+	gqlContentTypes[updateName] = &graphql.Field{
 		Name: def.Name,
 		Type: graphql.NewList(contentGQLType),
 		Args: buildUpdateArgs(cType),
@@ -67,7 +67,7 @@ func buildUpdateArgs(cType string) graphql.FieldConfigArgument {
 					result := make([]updateInputData, len(v.Values))
 					for i, v := range v.Values {
 						if object, ok := v.(*ast.ObjectValue); ok {
-							updateData := updateInputData{data: make(handler.InputMap)}
+							updateData := updateInputData{data: make(handler.InputMap), contentType: cType}
 							if err := parseUpdateInput(object.Fields, &updateData, def.FieldMap); err != nil {
 								return fmt.Errorf("failed to parse input data: %w", err)
 							}
@@ -96,7 +96,7 @@ func resolveUpdateMutation(ctx context.Context, p graphql.ResolveParams) (interf
 				if userId == 0 {
 					return nil, errors.New("need to login")
 				}
-				content, err := handler.UpdateByContentID(ctx, p.Info.FieldName, item.id, item.data, userId)
+				content, err := handler.UpdateByContentID(ctx, item.contentType, item.id, item.data, userId)
 				if err != nil {
 					return nil, fmt.Errorf("could not update content by id: %w", err)
 				}
@@ -142,6 +142,7 @@ func parseUpdateInput(fields []*ast.ObjectField, input *updateInputData, fieldMa
 
 // updateInputData is user input data.
 type updateInputData struct {
-	id   int
-	data handler.InputMap
+	id          int
+	contentType string
+	data        handler.InputMap
 }
