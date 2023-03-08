@@ -24,8 +24,8 @@ import (
 //		}
 //	}
 func buildCreateType(gqlContentTypes graphql.Fields, cType string, def definition.ContentType, contentGQLType *graphql.Object) {
-	cType = "create" + util.UpperName(cType)
-	gqlContentTypes[cType] = &graphql.Field{
+	createName := "create" + util.UpperName(cType)
+	gqlContentTypes[createName] = &graphql.Field{
 		Name: def.Name,
 		Type: graphql.NewList(contentGQLType),
 		Args: buildCreateArgs(cType),
@@ -54,7 +54,7 @@ func buildCreateArgs(cType string) graphql.FieldConfigArgument {
 					result := make([]createInputData, len(v.Values))
 					for i, v := range v.Values {
 						if object, ok := v.(*ast.ObjectValue); ok {
-							createData := createInputData{data: make(handler.InputMap)}
+							createData := createInputData{data: make(handler.InputMap), contentType: cType}
 							if err := parseCreateInput(object.Fields, &createData, def.FieldMap); err != nil {
 								return fmt.Errorf("failed to parse input data: %w", err)
 							}
@@ -83,7 +83,7 @@ func resolveCreateMutation(ctx context.Context, p graphql.ResolveParams) (interf
 				if userId == 0 {
 					return nil, errors.New("need to login")
 				}
-				content, err := handler.Create(ctx, userId, p.Info.FieldName, item.data, item.parentID)
+				content, err := handler.Create(ctx, userId, item.contentType, item.data, item.parentID)
 				if err != nil {
 					return nil, fmt.Errorf("could not update content by id: %w", err)
 				}
@@ -128,6 +128,7 @@ func parseCreateInput(fields []*ast.ObjectField, input *createInputData, fieldMa
 }
 
 type createInputData struct {
-	parentID int
-	data     handler.InputMap
+	parentID    int
+	contentType string
+	data        handler.InputMap
 }
