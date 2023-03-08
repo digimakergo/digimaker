@@ -15,27 +15,12 @@ import (
 	"github.com/graphql-go/graphql/language/ast"
 )
 
-// Returns the following schema:
-//
-//	mutation update {
-//	  updateArticle(updateData: [{data: {title: "", summary: ""}, id: 1}]) {
-//	    id
-//	    title
-//	  }
-//	}
 func mutationType() *graphql.Object {
 	gqlContentTypes := graphql.Fields{}
 	for cType, def := range definition.GetDefinitionList()["default"] {
-		cType = "update" + util.UpperName(cType)
 		contentGQLType := getContentGQLType(def)
-		gqlContentTypes[cType] = &graphql.Field{
-			Name: def.Name,
-			Type: graphql.NewList(contentGQLType),
-			Args: buildMutationArgs(cType),
-			Resolve: func(p graphql.ResolveParams) (interface{}, error) {
-				return resolveMutation(p.Context, p)
-			},
-		}
+		buildUpdateType(gqlContentTypes, cType, def, contentGQLType)
+		buildCreateType(gqlContentTypes, cType, def, contentGQLType)
 	}
 	return graphql.NewObject(graphql.ObjectConfig{
 		Name:   "Mutation",
@@ -43,7 +28,27 @@ func mutationType() *graphql.Object {
 	})
 }
 
-func buildMutationArgs(cType string) graphql.FieldConfigArgument {
+// For the following schema:
+//
+//	mutation update {
+//	  updateArticle(updateData: [{data: {title: "", summary: ""}, id: 1}]) {
+//	    id
+//	    title
+//	  }
+//	}
+func buildUpdateType(gqlContentTypes graphql.Fields, cType string, def definition.ContentType, contentGQLType *graphql.Object) {
+	updateName := "update" + util.UpperName(cType)
+	gqlContentTypes[updateName] = &graphql.Field{
+		Name: def.Name,
+		Type: graphql.NewList(contentGQLType),
+		Args: buildUpdateArgs(cType),
+		Resolve: func(p graphql.ResolveParams) (interface{}, error) {
+			return resolveUpdateMutation(p.Context, p)
+		},
+	}
+}
+
+func buildUpdateArgs(cType string) graphql.FieldConfigArgument {
 	result := make(graphql.FieldConfigArgument)
 	result["updateData"] = &graphql.ArgumentConfig{
 		Type: graphql.NewScalar(graphql.ScalarConfig{
@@ -59,11 +64,11 @@ func buildMutationArgs(cType string) graphql.FieldConfigArgument {
 				switch v := valueAST.(type) {
 				case *ast.ListValue:
 					def, _ := definition.GetDefinition(cType)
-					result := make([]inputData, len(v.Values))
+					result := make([]updateInputData, len(v.Values))
 					for i, v := range v.Values {
 						if object, ok := v.(*ast.ObjectValue); ok {
-							updateData := inputData{data: make(handler.InputMap)}
-							if err := parseInput(object.Fields, &updateData, def.FieldMap); err != nil {
+							updateData := updateInputData{data: make(handler.InputMap), contentType: cType}
+							if err := parseUpdateInput(object.Fields, &updateData, def.FieldMap); err != nil {
 								return fmt.Errorf("failed to parse input data: %w", err)
 							}
 							result[i] = updateData
@@ -80,18 +85,18 @@ func buildMutationArgs(cType string) graphql.FieldConfigArgument {
 	return result
 }
 
-func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{}, error) {
+func resolveUpdateMutation(ctx context.Context, p graphql.ResolveParams) (interface{}, error) {
 	var result []contenttype.ContentTyper
 	if inputs, ok := p.Args["updateData"]; ok {
 		switch v := inputs.(type) {
-		case []inputData:
+		case []updateInputData:
 			result = make([]contenttype.ContentTyper, len(v))
 			for i, item := range v {
 				userId := util.CurrentUserID(ctx)
 				if userId == 0 {
 					return nil, errors.New("need to login")
 				}
-				content, err := handler.UpdateByContentID(ctx, p.Info.FieldName, item.id, item.data, userId)
+				content, err := handler.UpdateByContentID(ctx, item.contentType, item.id, item.data, userId)
 				if err != nil {
 					return nil, fmt.Errorf("could not update content by id: %w", err)
 				}
@@ -106,7 +111,7 @@ func resolveMutation(ctx context.Context, p graphql.ResolveParams) (interface{},
 	return result, nil
 }
 
-func parseInput(fields []*ast.ObjectField, input *inputData, fieldMap map[string]fieldtype.FieldDef) error {
+func parseUpdateInput(fields []*ast.ObjectField, input *updateInputData, fieldMap map[string]fieldtype.FieldDef) error {
 	for _, field := range fields {
 		key := field.Name.Value
 		value := field.Value.GetValue()
@@ -135,8 +140,9 @@ func parseInput(fields []*ast.ObjectField, input *inputData, fieldMap map[string
 	return nil
 }
 
-// inputData is user input data.
-type inputData struct {
-	id   int
-	data handler.InputMap
+// updateInputData is user input data.
+type updateInputData struct {
+	id          int
+	contentType string
+	data        handler.InputMap
 }
