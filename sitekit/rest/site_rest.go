@@ -3,6 +3,7 @@ package rest
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -42,8 +43,9 @@ func GetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var contentList []contenttype.ContentTyper
+	ids := []int{}
 	if idStr != "" {
-		ids, _ := util.ArrayStrToInt(strings.Split(idStr, ","))
+		ids, _ = util.ArrayStrToInt(strings.Split(idStr, ","))
 		contentList, _, _ = query.List(ctx, cType, db.Cond("c.id", ids))
 	} else {
 		parent, _ := strconv.Atoi(r.URL.Query().Get("parent"))
@@ -52,10 +54,13 @@ func GetView(w http.ResponseWriter, r *http.Request) {
 			limit = 10
 		}
 		if parent > 0 {
-			contentList, _, _ = query.List(ctx, cType, db.Cond("l.parent_id", parent).Limit(0, limit))
+			contentList, _, _ = query.List(ctx, cType, db.Cond("l.parent_id", parent).Limit(0, limit).Sortby("priority desc", "c.id desc"))
 		} else {
 			rest.HandleError(errors.New("Invalid parameters"), w)
 			return
+		}
+		for _, content := range contentList {
+			ids = append(ids, content.GetID())
 		}
 	}
 
@@ -63,8 +68,20 @@ func GetView(w http.ResponseWriter, r *http.Request) {
 		rest.HandleError(errors.New("No content found or no access"), w)
 		return
 	}
-	result := map[int]string{}
-	for _, content := range contentList {
+	result := []string{}
+	for _, id := range ids {
+		var content contenttype.ContentTyper
+		for _, item := range contentList {
+			if item.GetID() == id {
+				content = item
+				break
+			}
+		}
+		if content == nil {
+			rest.HandleError(fmt.Errorf("Content %v not found", id), w)
+			return
+		}
+
 		vars := map[string]interface{}{}
 		vars["content"] = content
 		vars["viewmode"] = viewmode //params.Mode
@@ -73,7 +90,7 @@ func GetView(w http.ResponseWriter, r *http.Request) {
 			rest.HandleError(err, w)
 			return
 		}
-		result[content.GetID()] = output
+		result = append(result, output)
 	}
 	rest.WriteResponse(result, w)
 }
