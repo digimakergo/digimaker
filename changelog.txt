@@ -1,5 +1,26 @@
 Change log
 ===============
+0.1.1-beta.2
+- 2023-04-07  fixed: cli not working 
+- 2023-04-07 updated: content site view preserves id order 
+- 2023-04-05 fixed: image in richtext issue 
+- 2023-03-03 added: site/content/view in sitekit 
+- 2023-03-03 added: site_settings/niceurl_contenttype: ["folder"] for nice url 
+- 2023-02-24 updated: handler.Update... returns contenttype.ContentTyper instead of bool
+- 2023-02-14 Add graphql mutation(update) 
+- 2023-01-11 [graphql]Add location and metatata condition & query support
+- 2023-01-03 [graphql] upated: use c.id instead of l.id 
+- 2022-12-31 fixed: _relations issue when query 
+- 2022-12-30 updated: [sitekit] add / before sitepath 
+- 2022-12-30 updated: use field/<identifier> instead of field_<identifier> in template override
+- 2022-12-30 fixed: nice url / issue 
+- 2022-12-29 added: generic panic to error 
+- 2022-12-29 fixed: permission for non-locaton content 
+- 2022-12-29 added: sublist & sublist_count 
+- 2022-12-29 added: request_url in template 
+- 2022-12-29 added: dm.image function 
+- 2022-12-06 fixed: update issue in metadata way 
+
 0.1.1-beta.1
 - 2022-12-04 [select field]fixed: Output interface/function typo
 - 2022-12-04 [json]add RegisterJSONOutputer(identifier, outputer) in json
