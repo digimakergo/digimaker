@@ -8,6 +8,7 @@ import (
     "database/sql"
     "github.com/digimakergo/digimaker/core/db"
     "github.com/digimakergo/digimaker/core/contenttype"
+    "github.com/digimakergo/digimaker/core/definition" 
     {{if .settings.HasLocation}}
     "github.com/digimakergo/digimaker/core/util"
     {{end}}
@@ -178,7 +179,7 @@ func init() {
         return list
     }
 
-	contenttype.Register( "{{.customer_identifier}}", "{{.name}}",
+	contenttype.Register( "{{.name}}",
 		contenttype.ContentTypeRegister{
 			New:            new,
 			NewList:        newList,
