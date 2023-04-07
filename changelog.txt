@@ -1,7 +1,8 @@
 Change log
 ===============
 0.1.1-beta.2
-- 2023-04-07  fixed: cli not working 
+- 2023-04-07 fixed: missing package when generating entity
+- 2023-04-07 fixed: cli not working 
 - 2023-04-07 updated: content site view preserves id order 
 - 2023-04-05 fixed: image in richtext issue 
 - 2023-03-03 added: site/content/view in sitekit 
