@@ -41,7 +41,7 @@ var (
 	ErrInvalidIdentifier = errors.New("Invalid identifier")
 )
 
-var DataFieldTypes = []string{"int", "string", "datetime"}
+var DataFieldTypes = []string{"int", "string", "datetime", "bool", "time.Time"}
 
 type ContentTypeMap map[string]ContentType
 
