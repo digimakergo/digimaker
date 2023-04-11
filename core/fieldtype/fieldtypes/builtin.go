@@ -231,7 +231,7 @@ func (handler DatetimeHandler) LoadInput(ctx context.Context, input interface{},
 	}
 
 	//unix format
-	if ok, _ := regexp.Match(`ˆ\d+$`, []byte(str)); ok {
+	if ok, _ := regexp.Match(`^\d+$`, []byte(str)); ok {
 		unixInt, _ := strconv.Atoi(str)
 		value := time.Unix(int64(unixInt), 0)
 		return value, nil
