@@ -68,7 +68,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	email := params["email"]
 	//todo: valid if it's a email
-	user, _ := query.Fetch(r.Context(), "user", db.Cond("email", email))
+	user, _ := query.Fetch(r.Context(), "user", db.Cond("c.email", email))
 	if user == nil {
 		HandleError(errors.New("User not found."), w)
 		return
