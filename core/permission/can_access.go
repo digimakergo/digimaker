@@ -174,22 +174,25 @@ func GetUpdateFields(ctx context.Context, content contenttype.ContentTyper, user
 }
 
 func getCreateMatchData(parent contenttype.ContentTyper, contenttype string, fields []string, userId int) MatchData {
-	def := parent.Definition()
 	data := MatchData{}
-	data["parent_contenttype"] = parent.ContentType()
-	for key, v := range def.FieldMap {
-		if util.Contains(allowedFieldtypes, v.FieldType) {
-			data["parent/"+key] = parent.Value(key)
+	if parent != nil {
+		def := parent.Definition()
+
+		data["parent_contenttype"] = parent.ContentType()
+		for key, v := range def.FieldMap {
+			if util.Contains(allowedFieldtypes, v.FieldType) {
+				data["parent/"+key] = parent.Value(key)
+			}
+		}
+		data["parent_author"] = getAuthorMatchData(parent, userId)
+		if def.HasLocation {
+			location := parent.GetLocation()
+			data["parent_id"] = location.ID
+			data["under"] = location.Path()
 		}
 	}
-	data["parent_author"] = getAuthorMatchData(parent, userId)
 
 	data["contenttype"] = contenttype
-	if def.HasLocation {
-		location := parent.GetLocation()
-		data["parent_id"] = location.ID
-		data["under"] = location.Path()
-	}
 	data["fields"] = getFieldMatch(fields)
 	return data
 }
