@@ -15,7 +15,7 @@ import (
 	"github.com/digimakergo/digimaker/core/query/querier"
 )
 
-//TreeNode is a query result when querying SubTree
+// TreeNode is a query result when querying SubTree
 type TreeNode struct {
 	*contenttype.Location
 	Name     string                   `json:"name"`
@@ -24,7 +24,7 @@ type TreeNode struct {
 	Children []TreeNode               `json:"children"`
 }
 
-//Iterate loops all nodes in the tree
+// Iterate loops all nodes in the tree
 func (tn *TreeNode) Iterate(operation func(node *TreeNode)) {
 	operation(tn)
 	for i, child := range tn.Children {
@@ -34,7 +34,7 @@ func (tn *TreeNode) Iterate(operation func(node *TreeNode)) {
 }
 
 // FetchByLID fetches content by location id.
-//If no location found. it will return nil and error message.
+// If no location found. it will return nil and error message.
 func FetchByLID(ctx context.Context, locationID int) (contenttype.ContentTyper, error) {
 	//get type first by location.
 	location, err := FetchLocationByID(ctx, locationID)
@@ -86,7 +86,7 @@ func FetchByPath(ctx context.Context, path string) (contenttype.ContentTyper, er
 	return result, err
 }
 
-//FetchByUID fetches content by unique id
+// FetchByUID fetches content by unique id
 func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, error) {
 	//get type first by location.
 	location := contenttype.Location{}
@@ -107,7 +107,7 @@ func FetchByUID(ctx context.Context, uid string) (contenttype.ContentTyper, erro
 
 // FetchByCID is duplicate of FetchByCID
 func FetchByID(ctx context.Context, contentType string, contentID int) (contenttype.ContentTyper, error) {
-	return FetchByID(ctx, contentType, contentID)
+	return FetchByCID(ctx, contentType, contentID)
 }
 
 // FetchByCID fetches a content by content id.
@@ -160,8 +160,8 @@ func SubTree(ctx context.Context, userID int, rootContent contenttype.ContentTyp
 	return treenode, nil
 }
 
-//build tree from list. Internal use.
-//If there are items not in the tree(parent id is NOT equal to anyone in the list), they will not be attached to the tree.
+// build tree from list. Internal use.
+// If there are items not in the tree(parent id is NOT equal to anyone in the list), they will not be attached to the tree.
 func buildTree(treenode *TreeNode, list []contenttype.ContentTyper) {
 	//Add current level contents
 	parentLocation := treenode.Content.GetLocation()
@@ -221,12 +221,12 @@ func ListWithUser(ctx context.Context, userID int, contentType string, condition
 	return list, count, err
 }
 
-//List without considering permission
+// List without considering permission
 func List(ctx context.Context, contentType string, condition db.Condition) ([]contenttype.ContentTyper, int, error) {
 	return DefaultQuerier.List(ctx, contentType, condition)
 }
 
-//return a version content
+// return a version content
 func Version(ctx context.Context, contentType string, condition db.Condition) (contenttype.Version, contenttype.ContentTyper, error) {
 	_, err := definition.GetDefinition(contentType)
 	if err != nil {
@@ -266,7 +266,7 @@ func GetContentAuthor(content contenttype.ContentTyper) (contenttype.ContentType
 	return user, err
 }
 
-//GetRelationOptions get content list based on relation parameters
+// GetRelationOptions get content list based on relation parameters
 func RelationOptions(ctx context.Context, ctype string, identifier string, limit []int, sortby []string, hasCount bool) ([]contenttype.ContentTyper, int, error) {
 	contentDef, err := definition.GetDefinition(ctype)
 	if err != nil {
@@ -315,7 +315,7 @@ func outputField(ctx context.Context, fieldDef fieldtype.FieldDef, value interfa
 	}
 }
 
-//Output converts content into output format.(eg. add text to select, name in relation, etc)
+// Output converts content into output format.(eg. add text to select, name in relation, etc)
 func Output(ctx context.Context, content contenttype.ContentTyper) (contenttype.ContentMap, error) {
 	if content != nil {
 		def, _ := definition.GetDefinition(content.ContentType())
@@ -333,7 +333,7 @@ func Output(ctx context.Context, content contenttype.ContentTyper) (contenttype.
 	return nil, nil
 }
 
-//OutputList converts contents into output format, see Output for single content.
+// OutputList converts contents into output format, see Output for single content.
 func OutputList(ctx context.Context, contentList []contenttype.ContentTyper) ([]contenttype.ContentMap, error) {
 	result := []contenttype.ContentMap{}
 	for _, content := range contentList {
