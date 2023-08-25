@@ -159,13 +159,24 @@ type IntHandler struct {
 }
 
 func (handler IntHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
-	s := fmt.Sprint(input)
-	if s == "" {
-		return -1, nil
-	}
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		return -1, fieldtype.NewValidationError(err.Error())
+	var i int
+	switch input.(type) {
+	case int:
+		i = input.(int)
+	case float64:
+		i = int(input.(float64))
+	case string:
+		s := input.(string)
+		if s == "" {
+			return -1, nil
+		}
+		j, err := strconv.Atoi(s)
+		if err != nil {
+			return -1, fieldtype.NewValidationError(err.Error())
+		}
+		i = j
+	default:
+		return -1, fieldtype.NewValidationError("Not supported type as int")
 	}
 	return i, nil
 }
@@ -179,7 +190,7 @@ type CheckboxHandler struct {
 	fieldtype.FieldDef
 }
 
-//Only allow 1/0 or "1"/"0"
+// Only allow 1/0 or "1"/"0"
 func (handler CheckboxHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
 	valueInt, err := strconv.Atoi(str)
@@ -198,7 +209,7 @@ type RadioHandler struct {
 	fieldtype.FieldDef
 }
 
-//max 30 length
+// max 30 length
 func (handler RadioHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := fmt.Sprint(input)
 	length := len(str)
@@ -222,7 +233,7 @@ type DatetimeHandler struct {
 	fieldtype.FieldDef
 }
 
-//support 3 format: 2020-01-10, 2020-01-10 12:12:00(server side timezone), 2021-01-10T11:45:26+02:00, 1722145855(unix)
+// support 3 format: 2020-01-10, 2020-01-10 12:12:00(server side timezone), 2021-01-10T11:45:26+02:00, 1722145855(unix)
 func (handler DatetimeHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	str := strings.TrimSpace(fmt.Sprint(input))
 
@@ -265,7 +276,7 @@ func (handler DatetimeHandler) DBField() string {
 	return "DATETIME"
 }
 
-//convert parameters(definition.FieldParameters - map[string]interface{}) to struct using mapstructure
+// convert parameters(definition.FieldParameters - map[string]interface{}) to struct using mapstructure
 func ConvertParameters(params fieldtype.FieldParameters, paramStruct interface{}) error {
 	if params != nil {
 		err := mapstructure.Decode(params, &paramStruct)
@@ -291,7 +302,7 @@ type SelectHandler struct {
 	Params SelectParameters
 }
 
-//Only allow 1/0 or "1"/"0"
+// Only allow 1/0 or "1"/"0"
 func (handler SelectHandler) LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error) {
 	value := fmt.Sprint(input)
 	params := handler.Params
