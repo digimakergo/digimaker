@@ -66,7 +66,7 @@ func generateQueryCondition(valueAST ast.Value, cond db.Condition, fieldMap map[
 			} else if strings.HasPrefix(key, "_location_") {
 				name := strings.TrimPrefix(key, "_location_")
 				if util.Contains(definition.LocationColumns, name) {
-					return cond.And("l."+name, value), nil
+					cond = cond.And("l."+name, value)
 				} else {
 					return db.FalseCond(), fmt.Errorf("%v not found in location", name)
 				}
