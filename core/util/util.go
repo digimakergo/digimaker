@@ -62,7 +62,7 @@ func GenerateGUID() string {
 
 //Convert a string array to int array
 func ArrayStrToInt(strArray []string) ([]int, error) {
-	size := len(strArray)
+       size := len(strArray)
 	var result = make([]int, size)
 	for i, str := range strArray {
 		value, err := strconv.Atoi(str)
@@ -338,7 +338,7 @@ func ResizeImage(from string, to string, size string) error {
 	}
 
 	var args = []string{
-		"--size", size,
+               "--size", "\"" + size + ">\"",
 		"--output", to,
 		from,
 	}

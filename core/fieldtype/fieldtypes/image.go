@@ -137,10 +137,34 @@ func (handler ImageHandler) DBField() string {
 	return "VARCHAR (500) NOT NULL DEFAULT ''"
 }
 
+<<<<<<< HEAD
 func GenerateThumbnail(imagePath string) error {
 	size := viper.GetString("general.image_thumbnail_size")
 	thumbCacheFolder := ThumbnailFolder()
-	return util.ResizeImage(config.PathWithVar(imagePath), thumbCacheFolder+"/"+imagePath, size)
+	err := util.ResizeImage(config.PathWithVar(imagePath), thumbCacheFolder+"/"+imagePath, size)
+	if err != nil {
+		return err
+	}
+
+	//generate full size
+	aliasList := config.DmViper(ctx).GetStringSlice("general.image_alias")
+	if aliasList != nil {
+		for _, alias := range aliasList {
+			aliasConfig := strings.Split(alias, ":")
+			if len(aliasConfig) != 2 {
+				log.Warning("Alias config should be 2 strings seaprate by :", "system")
+				continue
+			}
+			aliasFolder := aliasConfig[0]
+			aliasSize := aliasConfig[1]
+			fullFolder := config.PathWithVar(ctx, aliasFolder)
+			err := util.ResizeImage(config.PathWithVar(ctx, imagePath), fullFolder+"/"+imagePath, aliasSize)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 //thumbnail folder with absolute path
