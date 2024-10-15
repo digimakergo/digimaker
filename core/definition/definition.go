@@ -145,8 +145,8 @@ func (c *ContentType) Validate() error {
 
 	fieldIdentifierList := c.FieldIdentifierList
 
-	if len(fieldIdentifierList)+len(c.DataFields) > 200 {
-		return errors.New("Data field and fields together shouldn't be more than 200")
+	if len(fieldIdentifierList)+len(c.DataFields) > 400 {
+		return errors.New("Data field and fields together shouldn't be more than 400")
 	}
 
 	for _, dataField := range c.DataFields {
@@ -224,9 +224,6 @@ func (c *ContentType) Init(fieldCallback ...func(*fieldtype.FieldDef)) error {
 	identifierList := []string{}
 	for i, field := range c.Fields {
 		identifier := field.Identifier
-		if field.IsOutput {
-			continue
-		}
 		if len(fieldCallback) > 0 {
 			fieldCallback[0](&field)
 		}
@@ -238,7 +235,9 @@ func (c *ContentType) Init(fieldCallback ...func(*fieldtype.FieldDef)) error {
 		identifierList = append(identifierList, identifier)
 		//get sub fields
 		subFields := field.GetSubFields(fieldCallback...)
-		c.Fields[i] = field
+		if !field.IsOutput {
+			c.Fields[i] = field
+		}
 		for subIdentifier, subField := range subFields {
 			fieldMap[subIdentifier] = subField
 			identifierList = append(identifierList, subIdentifier)
