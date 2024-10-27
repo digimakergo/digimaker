@@ -7,6 +7,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 
@@ -28,35 +29,68 @@ func UploadFile(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	filename, err := HandleUploadFile(r, "*")
+	service := r.URL.Query().Get("service")
 	result := ""
-	if err != nil {
-		HandleError(err, w)
-		return
-	}
 
-	result = filename
+	if service == "image" {
+		imageResult, err := HandleUploadImage(r)
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
+		result = imageResult
+	} else {
+		filename, err := HandleUploadFile(r, "*")
+		if err != nil {
+			HandleError(err, w)
+			return
+		}
+
+		result = filename
+	}
 	WriteResponse(result, w)
 }
 
-//Upload image, return path or error
+// Upload image, return path or error
 func UploadImage(w http.ResponseWriter, r *http.Request) {
 	userId := CheckUserID(r.Context(), w)
 	if userId == 0 {
+		HandleError(errors.New("Need login"), w)
 		return
 	}
-	filename, err := HandleUploadFile(r, ".gif,.jpg,.jpeg,.png")
-	result := ""
+
+	result, err := HandleUploadImage(r)
 	if err != nil {
 		HandleError(err, w)
 		return
 	}
 
-	result = filename
 	WriteResponse(result, w)
 }
 
-//Handler uploaded file, return filename & error
+func HandleUploadImage(r *http.Request) (string, error) {
+	filename, err := HandleUploadFile(r, ".gif,.jpg,.jpeg,.png,.pdf")
+	result := ""
+	if err != nil {
+		return "", err
+	}
+	if strings.HasSuffix(filename, ".pdf") {
+		newImage, _ := strings.CutSuffix(filename, ".pdf")
+		newImage = newImage + ".jpg"
+		pdfPath := config.PathWithVar(filename)
+		err := util.ResizeImage(pdfPath, config.PathWithVar(newImage), "1000x>")
+		if err != nil {
+			return "", err
+		}
+		os.Remove(pdfPath)
+		result = newImage
+	} else {
+		result = filename
+	}
+	return result, nil
+}
+
+// Handler uploaded file, return filename & error
 func HandleUploadFile(r *http.Request, filetype string) (string, error) {
 	file, handler, err := r.FormFile("file")
 	if err != nil {
