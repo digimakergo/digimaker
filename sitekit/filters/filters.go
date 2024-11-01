@@ -120,9 +120,17 @@ func dmValue(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Erro
 }
 
 func dmJson(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
-	input := in.String()
+	var input []byte
+	if in.IsString() {
+		input = []byte(in.String())
+	} else if in.CanSlice() {
+		input = in.Interface().([]byte)
+	} else {
+		return pongo2.AsValue(nil), nil
+	}
+
 	var result interface{}
-	err := json.Unmarshal([]byte(input), &result)
+	err := json.Unmarshal(input, &result)
 	if err != nil {
 		result = nil
 	}
