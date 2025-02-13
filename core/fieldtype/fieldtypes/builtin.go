@@ -44,7 +44,7 @@ func (handler TextHandler) LoadInput(ctx context.Context, input interface{}, mod
 
 	//max length
 	if params.MaxLength > 0 && strLength > params.MaxLength {
-		return nil, fieldtype.NewValidationError(fmt.Sprintf("Input can not have more than %v characters", params.MinLength))
+		return nil, fieldtype.NewValidationError(fmt.Sprintf("Input can not have more than %v characters", params.MaxLength))
 	}
 
 	//regular expression match
