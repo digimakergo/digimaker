@@ -22,6 +22,7 @@ import (
 
 	"github.com/digimakergo/digimaker/core/log"
 	"github.com/google/uuid"
+	"github.com/spf13/viper"
 
 	"github.com/rs/xid"
 	"golang.org/x/crypto/bcrypt"
@@ -341,12 +342,12 @@ func ResizeImage(from string, to string, size string) error {
 		"--output", to,
 		from,
 	}
-	path, err := exec.LookPath("vipsthumbnail")
-	if err != nil {
-		return err
+	path := viper.GetString("general.vipsthumbnail")
+	if path == "" {
+		log.Error("vipsthumbnail not found on path: "+path, "")
+		return errors.New("vipsthumbnail not found")
 	}
-	cmd := exec.Command(path, args...)
-	err = cmd.Run()
+	_, err := exec.Command(path, args...).CombinedOutput()
 
 	if err != nil {
 		log.Error("Can not resize image. args:"+fmt.Sprint(args), "")
@@ -368,13 +369,4 @@ func GetIP(r *http.Request) string {
 func SecurePath(path string) string {
 	reg := regexp.MustCompile(`\.\.+`)
 	return reg.ReplaceAllString(path, "")
-}
-
-func init() {
-	path, err := exec.LookPath("vipsthumbnail")
-	if err != nil {
-		log.Warning("vipsthumbnail not found for image proceeding.", "")
-	} else {
-		log.Info("Vipsthumbnail found in " + path)
-	}
 }
