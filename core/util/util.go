@@ -1,7 +1,7 @@
 //Author xc, Created on 2019-03-27 20:00
 //{COPYRIGHTS}
 
-//Package utils provides general utils for the project.
+// Package utils provides general utils for the project.
 package util
 
 import (
@@ -28,7 +28,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-//UnmarshalData Load json and unmall into variable
+// UnmarshalData Load json and unmall into variable
 func UnmarshalData(filepath string, v interface{}) error {
 	file, err := os.Open(filepath)
 	if err != nil {
@@ -47,22 +47,22 @@ func UnmarshalData(filepath string, v interface{}) error {
 	return nil
 }
 
-//Generate unique id with order. It should be cluster safe.
+// Generate unique id with order. It should be cluster safe.
 func GenerateUID() string {
 	guid := xid.New()
 	guidStr := guid.String()
 	return guidStr
 }
 
-//Generate a guid which is completely random without order
+// Generate a guid which is completely random without order
 func GenerateGUID() string {
 	uuid := uuid.New()
 	return uuid.String()
 }
 
-//Convert a string array to int array
+// Convert a string array to int array
 func ArrayStrToInt(strArray []string) ([]int, error) {
-       size := len(strArray)
+	size := len(strArray)
 	var result = make([]int, size)
 	for i, str := range strArray {
 		value, err := strconv.Atoi(str)
@@ -76,7 +76,7 @@ func ArrayStrToInt(strArray []string) ([]int, error) {
 
 var varBrakets = []string{"{", "}"}
 
-//Get variable from defined brakets. eg "{name} is {realname}" will get ["name", "realname"]
+// Get variable from defined brakets. eg "{name} is {realname}" will get ["name", "realname"]
 func GetStrVar(str string) []string {
 	left := varBrakets[0]
 	right := varBrakets[1]
@@ -89,7 +89,7 @@ func GetStrVar(str string) []string {
 	return result
 }
 
-//Replace variable with values in string
+// Replace variable with values in string
 func ReplaceStrVar(str string, values map[string]string) string {
 	result := str
 	for key := range values {
@@ -100,7 +100,7 @@ func ReplaceStrVar(str string, values map[string]string) string {
 	return result
 }
 
-//Convert like "hello_world" to "HelloWorld"
+// Convert like "hello_world" to "HelloWorld"
 func UpperName(input string) string {
 	arr := strings.Split(input, "_")
 	for i := range arr {
@@ -123,7 +123,7 @@ func IsIdentifier(input string) bool {
 	return valid
 }
 
-//convert name lie "Hello world.?" to "hello-world"
+// convert name lie "Hello world.?" to "hello-world"
 func NameToIdentifier(input string) string {
 	lowerStr := strings.ToLower(strings.TrimSpace(input))
 	reg, _ := regexp.Compile("[^a-z0-9]+")
@@ -131,17 +131,17 @@ func NameToIdentifier(input string) string {
 	return result
 }
 
-//Strip unregular string to avoid sql injection.
-//Note this is not used to strip whole sql, but phrase of sql.(eg. ORDER BY ...), not applicable for values.
+// Strip unregular string to avoid sql injection.
+// Note this is not used to strip whole sql, but phrase of sql.(eg. ORDER BY ...), not applicable for values.
 func StripSQLPhrase(str string) string {
 	reg, _ := regexp.Compile("[^a-z0-9A-Z., _]+")
 	result := reg.ReplaceAllString(str, "")
 	return result
 }
 
-//Iternate condition rules to see if all are matching.
-//If there are keys in condition rules but not in realValues, match fails. * mean always all
-//eg.1) conditions: {id: 12, type:"image"} or {id:[11,12], type:["image", "article"]} target: {id:12,type:"article"}
+// Iternate condition rules to see if all are matching.
+// If there are keys in condition rules but not in realValues, match fails. * mean always all
+// eg.1) conditions: {id: 12, type:"image"} or {id:[11,12], type:["image", "article"]} target: {id:12,type:"article"}
 // 2) conditions: {id: [11,12], type:"image" } target: {id:[12, 13], type: ["image", "article"]}
 // 3) conditions: {id:11, type: "*"} target: {id:[11, 12], type:"image"}
 // 4) conditions: {id:11, type: "image"} target: {id:[11, 12], type:nil} //nil will be treated as pass
@@ -220,8 +220,8 @@ func MatchCondition(conditions map[string]interface{}, target map[string]interfa
 	return true, matchLog
 }
 
-//condition value: int|string
-//target value: int|[]int|string|[]string
+// condition value: int|string
+// target value: int|[]int|string|[]string
 func matchItem(current interface{}, targetValue interface{}) (bool, string) {
 	result := false
 	if _, ok := current.(float64); ok {
@@ -253,7 +253,7 @@ func matchItem(current interface{}, targetValue interface{}) (bool, string) {
 	return result, ""
 }
 
-//Split with triming space. "," is the default separator if no seperator is provided.
+// Split with triming space. "," is the default separator if no seperator is provided.
 func Split(str string, seperator ...string) []string {
 	sep := ""
 	str = strings.TrimSpace(str)
@@ -309,13 +309,13 @@ func SendFullMail(mailMessage MailMessage) error {
 	return sendMailHandler(mailMessage)
 }
 
-//Simple sending mail without attachment
+// Simple sending mail without attachment
 func SendMail(to []string, subject, body string, bcc ...string) error {
 	mailMessage := MailMessage{To: to, Subject: subject, Body: body, Bcc: bcc}
 	return SendFullMail(mailMessage)
 }
 
-//RandomStr generate a random string. no number only small letters.
+// RandomStr generate a random string. no number only small letters.
 func RandomStr(n int) []byte {
 	rand.Seed(time.Now().UTC().UnixNano())
 	characters := "abcdefghijklmnopqrstuvwxyz"
@@ -327,7 +327,7 @@ func RandomStr(n int) []byte {
 	return str
 }
 
-//Generate a resized image
+// Generate a resized image
 func ResizeImage(from string, to string, size string) error {
 	folder := filepath.Dir(to)
 	if _, err := os.Stat(folder); os.IsNotExist(err) {
@@ -338,7 +338,7 @@ func ResizeImage(from string, to string, size string) error {
 	}
 
 	var args = []string{
-               "--size", "\"" + size + ">\"",
+		"--size", size + ">",
 		"--output", to,
 		from,
 	}
@@ -365,7 +365,7 @@ func GetIP(r *http.Request) string {
 	return ip
 }
 
-//WashPath remove .. make sure it can only go under, not upp
+// WashPath remove .. make sure it can only go under, not upp
 func SecurePath(path string) string {
 	reg := regexp.MustCompile(`\.\.+`)
 	return reg.ReplaceAllString(path, "")
