@@ -28,7 +28,7 @@ func (handler ImageHandler) LoadInput(ctx context.Context, input interface{}, mo
 	return str, nil
 }
 
-//Image can be loaded from rest, or local api
+// Image can be loaded from rest, or local api
 func (handler ImageHandler) BeforeStore(ctx context.Context, value interface{}, existing interface{}, mode string) (interface{}, error) {
 	imagePath := value.(string)
 
@@ -115,7 +115,7 @@ func (handler ImageHandler) BeforeStore(ctx context.Context, value interface{}, 
 	}
 }
 
-//After delete content, delete image&thumbnail, skip error if there is any wrong(eg. image not existing).
+// After delete content, delete image&thumbnail, skip error if there is any wrong(eg. image not existing).
 func (handler ImageHandler) AfterDelete(ctx context.Context, value interface{}) error {
 	path := config.PathWithVar(value.(string))
 	err := os.Remove(path)
@@ -137,7 +137,6 @@ func (handler ImageHandler) DBField() string {
 	return "VARCHAR (500) NOT NULL DEFAULT ''"
 }
 
-<<<<<<< HEAD
 func GenerateThumbnail(imagePath string) error {
 	size := viper.GetString("general.image_thumbnail_size")
 	thumbCacheFolder := ThumbnailFolder()
@@ -147,7 +146,7 @@ func GenerateThumbnail(imagePath string) error {
 	}
 
 	//generate full size
-	aliasList := config.DmViper(ctx).GetStringSlice("general.image_alias")
+	aliasList := viper.GetStringSlice("general.image_alias")
 	if aliasList != nil {
 		for _, alias := range aliasList {
 			aliasConfig := strings.Split(alias, ":")
@@ -157,8 +156,8 @@ func GenerateThumbnail(imagePath string) error {
 			}
 			aliasFolder := aliasConfig[0]
 			aliasSize := aliasConfig[1]
-			fullFolder := config.PathWithVar(ctx, aliasFolder)
-			err := util.ResizeImage(config.PathWithVar(ctx, imagePath), fullFolder+"/"+imagePath, aliasSize)
+			fullFolder := config.PathWithVar(aliasFolder)
+			err := util.ResizeImage(config.PathWithVar(imagePath), fullFolder+"/"+imagePath, aliasSize)
 			if err != nil {
 				return err
 			}
@@ -167,7 +166,7 @@ func GenerateThumbnail(imagePath string) error {
 	return nil
 }
 
-//thumbnail folder with absolute path
+// thumbnail folder with absolute path
 func ThumbnailFolder() string {
 	thumbFolder := config.PathWithVar(viper.GetString("general.image_thumbnail_folder"))
 	return thumbFolder
