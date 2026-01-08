@@ -22,10 +22,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//Result item in the list
+// Result item in the list
 type ResultItem map[string]interface{}
 
-//Result list
+// Result list
 type ResultList []ResultItem
 
 func GetContent(w http.ResponseWriter, r *http.Request) {
@@ -180,6 +180,17 @@ func buildCondition(userid int, cType string, def definition.ContentType, query 
 					condition = condition.And("c."+key+" like", fieldValue)
 				}
 			}
+		} else if strings.HasPrefix(key, "field.") {
+			field, _ := strings.CutPrefix(key, "field.")
+			if util.Contains(def.FieldIdentifierList, field) || def.HasDataField(field) {
+				operation, val := extraOperation(value)
+				condition = condition.And("c."+field+" "+operation, val)
+			}
+		} else if strings.HasPrefix(key, "location.") {
+			locationField, _ := strings.CutPrefix(key, "location.")
+			if util.Contains(definition.LocationColumns, locationField) {
+				condition = condition.And("l."+locationField, value)
+			}
 		}
 	}
 
@@ -195,7 +206,7 @@ func buildCondition(userid int, cType string, def definition.ContentType, query 
 	return condition, nil
 }
 
-//extract operation and return operation+value
+// extract operation and return operation+value
 func extraOperation(param string) (string, interface{}) {
 	//todo: support operator //todo: support more value type(eg. array)
 	if strings.HasPrefix(param, "contain:") {
@@ -240,7 +251,7 @@ func BuildLimit(r *http.Request) ([]int, error) {
 	return []int{offset, limit}, nil
 }
 
-//List
+// List
 func List(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	getParams := r.URL.Query()
@@ -338,7 +349,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(result, w)
 }
 
-//Get content list from relation definition
+// Get content list from relation definition
 func RelationOptionList(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	contenttype := params["contenttype"]
@@ -370,7 +381,7 @@ func RelationOptionList(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(result, w)
 }
 
-//Get tree menu under a node
+// Get tree menu under a node
 func TreeMenu(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, _ := strconv.Atoi(params["id"])
