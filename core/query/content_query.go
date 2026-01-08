@@ -261,7 +261,7 @@ func GetUser(id int) (contenttype.ContentTyper, error) {
 }
 
 func GetContentAuthor(content contenttype.ContentTyper) (contenttype.ContentTyper, error) {
-	authorID := content.Value("author").(int)
+	authorID := content.GetMetadata().Author
 	user, err := GetUser(authorID)
 	return user, err
 }
