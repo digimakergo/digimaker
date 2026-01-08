@@ -24,6 +24,7 @@ type ConditionOption struct {
 	Sortby      []string
 	LimitArr    []int
 	AlwaysCount bool
+	Relation    bool //by default true
 }
 
 //Condition is a self contained query condition
