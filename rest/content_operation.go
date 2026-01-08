@@ -60,9 +60,9 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(content, w)
 }
 
-//Save draft. url: /<id>/<ctype> where id can be 0 or parent location id
-//request json: data: string(mostly json string)
-//return new created time
+// Save draft. url: /<id>/<ctype> where id can be 0 or parent location id
+// request json: data: string(mostly json string)
+// return new created time
 func SaveDraft(w http.ResponseWriter, r *http.Request) {
 	userId := CheckUserID(r.Context(), w)
 	if userId == 0 {
@@ -118,7 +118,7 @@ func HideUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	content, err := query.FetchByID(r.Context(), idInt)
+	content, err := query.FetchByLID(r.Context(), idInt)
 
 	if err != nil {
 		log.Error(err.Error(), "")
@@ -317,7 +317,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	WriteResponse(true, w)
 }
 
-//copy old data
+// copy old data
 func Copy(w http.ResponseWriter, r *http.Request) {
 	userID := CheckUserID(r.Context(), w)
 	if userID == 0 {
@@ -382,7 +382,7 @@ func init() {
 	RegisterRoute("/content/create/{contenttype}", Create, "POST")
 	RegisterRoute("/content/move/{contents}/{target}", Move)
 	RegisterRoute("/content/update/{id:[0-9]+}", Update, "POST")
-	RegisterRoute("/content/hide/{id:[0-9]+}/{isHidden:[0-1]?}", HideUpdate, "POST")
+	RegisterRoute("/content/hide/{id:[0-9]+}/{isHidden:[0-1]?}", HideUpdate, "GET")
 	RegisterRoute("/content/update/{contenttype}/{id:[0-9]+}", Update, "POST")
 	RegisterRoute("/content/delete", Delete)
 	RegisterRoute("/content/setpriority", SetPriority)
