@@ -67,7 +67,7 @@ func (c *ContentTypeMap) Init() error {
 
 type ContentTypeList map[string]ContentTypeMap
 
-//ValidationRule defines rule for a field's validation. eg. max length
+// ValidationRule defines rule for a field's validation. eg. max length
 type VaidationRule map[string]interface{}
 
 type ContentType struct {
@@ -222,22 +222,20 @@ func (c *ContentType) Init(fieldCallback ...func(*fieldtype.FieldDef)) error {
 	//set all fields into FieldMap
 	fieldMap := map[string]fieldtype.FieldDef{}
 	identifierList := []string{}
-	for i, field := range c.Fields {
+	for i := range c.Fields {
+		field := &c.Fields[i]
 		identifier := field.Identifier
 		if len(fieldCallback) > 0 {
-			fieldCallback[0](&field)
+			fieldCallback[0](field)
 		}
 
 		if _, ok := fieldMap[field.Identifier]; ok {
 			return errors.New("Field '" + field.Identifier + "' already exists")
 		}
-		fieldMap[identifier] = field
+		fieldMap[identifier] = *field
 		identifierList = append(identifierList, identifier)
 		//get sub fields
 		subFields := field.GetSubFields(fieldCallback...)
-		if !field.IsOutput {
-			c.Fields[i] = field
-		}
 		for subIdentifier, subField := range subFields {
 			fieldMap[subIdentifier] = subField
 			identifierList = append(identifierList, subIdentifier)
@@ -256,10 +254,10 @@ type DataField struct {
 	Name       string `json:"name"`
 }
 
-//ContentTypeDefinition Content types which defined in contenttype.json
+// ContentTypeDefinition Content types which defined in contenttype.json
 var contentTypeDefinition ContentTypeList
 
-//LoadDefinition Load all setting in file into memory.
+// LoadDefinition Load all setting in file into memory.
 func LoadDefinition() error {
 	//Load contenttype.json into ContentTypeDefinition
 	var def ContentTypeMap
@@ -281,8 +279,8 @@ func LoadDefinition() error {
 	return nil
 }
 
-//load translation based on existing definition
-//todo: use locale folder
+// load translation based on existing definition
+// todo: use locale folder
 func loadTranslations(languages []string) {
 	for _, language := range languages {
 		var def map[string]ContentType
@@ -359,6 +357,15 @@ func loadTranslation(def map[string]ContentType, translation map[string][]map[st
 				}
 			}
 
+			for key, _ := range field.Info {
+				value = getTranslation("field/"+field.Identifier+"/info/"+key, translist)
+				if value != "" {
+					field.Info[key] = value
+				} else {
+					field.Info[key] = origField.Info[key]
+				}
+			}
+
 		})
 		def[contenttype] = contenttypeDef
 	}
@@ -379,7 +386,7 @@ func GetDefinitionList() ContentTypeList {
 	return contentTypeDefinition
 }
 
-//Get a definition of a contenttype
+// Get a definition of a contenttype
 func GetDefinition(contentType string, language ...string) (ContentType, error) {
 	languageStr := "default"
 	if len(language) > 0 {
@@ -399,9 +406,9 @@ func GetDefinition(contentType string, language ...string) (ContentType, error) 
 	}
 }
 
-//Get fields based on path pattern including container,
-//separated by /
-//. eg. article/relations, report/step1
+// Get fields based on path pattern including container,
+// separated by /
+// . eg. article/relations, report/step1
 func GetFields(typePath string) (map[string]fieldtype.FieldDef, error) {
 	arr := strings.Split(typePath, "/")
 	def, err := GetDefinition(arr[0])
