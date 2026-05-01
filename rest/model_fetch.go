@@ -1,5 +1,5 @@
-//Author xc, Created on 2019-08-13 17:25
-//{COPYRIGHTS}
+// Author xc, Created on 2019-08-13 17:25
+// {COPYRIGHTS}
 package rest
 
 import (
@@ -12,8 +12,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//todo: check permission
+// todo: check permission
 func GetDefinition(w http.ResponseWriter, r *http.Request) {
+	// userID := CheckUserID(r.Context(), w)
+	// if userID == 0 {
+	// 	return
+	// }
+
 	params := mux.Vars(r)
 	typeStr := strings.TrimSpace(params["contentype"])
 	language := r.URL.Query().Get("language")
@@ -52,7 +57,7 @@ type columnDef = struct {
 	Name       string `json:"name"`
 }
 
-//fetch columns of a contenttype. assuming contentType is checked
+// fetch columns of a contenttype. assuming contentType is checked
 func getColumns(contentType string) map[string]columnDef {
 	def, _ := definition.GetDefinition(contentType)
 

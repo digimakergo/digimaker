@@ -13,7 +13,7 @@ import (
 
 //All the definition of fieldtypes
 
-//Definition includes a fieldtype basic information
+// Definition includes a fieldtype basic information
 type Definition struct {
 	Name       string                 //eg. text
 	DataType   string                 //eg. string or eg "fieldtype.CustomString"
@@ -21,17 +21,18 @@ type Definition struct {
 	NewHandler func(FieldDef) Handler //callback to create new handler for this fieldtype
 }
 
-//Content field definition
+// Content field definition
 type FieldDef struct {
-	Identifier   string          `json:"identifier"`
-	Name         string          `json:"name"`
-	FieldType    string          `json:"type"`
-	DefaultValue interface{}     `json:"default_value"` //eg. checkbox 1 means checked
-	Required     bool            `json:"required"`
-	Description  string          `json:"description"`
-	IsOutput     bool            `json:"is_output"`
-	Parameters   FieldParameters `json:"parameters"`
-	Children     []FieldDef      `json:"children"`
+	Identifier   string            `json:"identifier"`
+	Name         string            `json:"name"`
+	FieldType    string            `json:"type"`
+	DefaultValue interface{}       `json:"default_value"` //eg. checkbox 1 means checked
+	Required     bool              `json:"required"`
+	Description  string            `json:"description"`
+	Info         map[string]string `json:"info"`
+	IsOutput     bool              `json:"is_output"`
+	Parameters   FieldParameters   `json:"parameters"`
+	Children     []FieldDef        `json:"children"`
 }
 
 func (cf *FieldDef) GetSubFields(callback ...func(*FieldDef)) map[string]FieldDef {
@@ -64,7 +65,7 @@ func getSubFields(cf *FieldDef, callback ...func(*FieldDef)) map[string]FieldDef
 
 type FieldParameters map[string]interface{}
 
-//Fieldtyper is a implementation of a fieldtype, including main logic
+// Fieldtyper is a implementation of a fieldtype, including main logic
 type Handler interface {
 	//Load from input, should return the value of BaseType, (eg. int), return error or validation error or empty error
 	LoadInput(ctx context.Context, input interface{}, mode string) (interface{}, error)
@@ -77,7 +78,7 @@ type ValidationError struct {
 	Message string
 }
 
-//Validation error
+// Validation error
 func (err ValidationError) Error() string {
 	return err.Message
 }
@@ -86,7 +87,7 @@ func NewValidationError(message string) ValidationError {
 	return ValidationError{Message: message}
 }
 
-//Empty Error
+// Empty Error
 type EmptyError struct {
 }
 
@@ -94,7 +95,7 @@ func (err EmptyError) Error() string {
 	return "Field is empty"
 }
 
-//BeforeSaving is implemented when fieldtype has event before saving and transaction starts.
+// BeforeSaving is implemented when fieldtype has event before saving and transaction starts.
 type Event interface {
 	BeforeStore(ctx context.Context, value interface{}, existing interface{}, mode string) (interface{}, error)
 
@@ -111,7 +112,7 @@ type ValidateDefinition interface {
 
 var fieldtypeMap map[string]Definition = map[string]Definition{}
 
-//Register registers a fieldtype
+// Register registers a fieldtype
 func Register(definition Definition) {
 	name := definition.Name
 	if _, ok := fieldtypeMap[name]; ok {
@@ -121,7 +122,7 @@ func Register(definition Definition) {
 	fieldtypeMap[definition.Name] = definition
 }
 
-//GetFieldtype return a fieldtype
+// GetFieldtype return a fieldtype
 func GetFieldtype(fieldtype string) Definition {
 	result, ok := fieldtypeMap[fieldtype]
 	if ok {
@@ -132,7 +133,7 @@ func GetFieldtype(fieldtype string) Definition {
 	}
 }
 
-//GetAllFieldtype get all fieldtype
+// GetAllFieldtype get all fieldtype
 func GetAllFieldtype() map[string]Definition {
 	return fieldtypeMap
 }
@@ -164,7 +165,7 @@ type RelationParameters struct {
 	Condition map[string]interface{} `json:"condition"`
 }
 
-//Convert to parameters obj
+// Convert to parameters obj
 func ConvertRelationParams(params FieldParameters) (RelationParameters, error) {
 	paramsData, _ := json.Marshal(params)
 	rParams := RelationParameters{}
